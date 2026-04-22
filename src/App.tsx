@@ -1,18 +1,25 @@
-import { useState } from "react";
+import {useState} from "react";
 // import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
+import pageStore from "./stores/page_store.ts";
+import {Window} from "./stores/page_store.ts";
+import MainPage from "./components/pages/main-page/MainPage.tsx";
 
 function App() {
-  // const [greetMsg, setGreetMsg] = useState("");
-  // const [name, setName] = useState("");
-
-  return (
-      <>
-        <TitleBar/>
-      </>
-  );
+    const current = pageStore(state => state.current);
+    return (
+        <>
+            <TitleBar/>
+            <div id={"main"}>
+                {
+                    current == Window.Main &&
+                    <MainPage />
+                }
+            </div>
+        </>
+    );
 }
 
 export default App;

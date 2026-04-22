@@ -1,0 +1,12 @@
+.button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--subtitle);
+    &:hover{
+        color: vaR(--title);
+    }
+    width: 245px;
+    height: 62px;
+}
