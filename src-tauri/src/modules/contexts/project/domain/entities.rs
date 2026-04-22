@@ -1,31 +1,65 @@
+use serde::{Deserialize, Serialize};
 use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta};
 use crate::modules::shared::kernel::entities::Package;
 use crate::modules::shared::kernel::values::{IfStatement, Path, Schema, Val};
 
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Project {
-    name: String,
-    path: Path,
-    template: ProjectTemplate,
-    meta: ProjectMeta,
-    schema: Schema,
-    workspace: WorkSpace,
-    vars: Vec<Var>,
-    tasks: Vec<Task>,
-    packages: Vec<Package>,
+    pub name: String,
+    pub(crate) path: Path,
+    pub template: ProjectTemplate,
+    pub meta: ProjectMeta,
+    pub schema: Schema,
+    pub workspace: WorkSpace,
+    pub vars: Vec<Var>,
+    pub tasks: Vec<Task>,
+    pub packages: Vec<Package>,
 }
 
 
+impl Project {
+    pub fn new()->Project {
+        Self {
+            name: String::new(),
+            path: Path(String::new()),
+            template: ProjectTemplate::new(),
+            meta: ProjectMeta::new(),
+            schema: Schema(1),
+            workspace: WorkSpace::new(),
+            vars: Vec::new(),
+            tasks: Vec::new(),
+            packages: Vec::new()
+        }
+    }
+}
 
+#[derive(Serialize, Deserialize, Clone)]
 pub struct WorkSpace {
     widgets: Vec<Widget>,
     buttons: Vec<Button>,
     opened_files: Vec<OpenedFile>
 }
+
+impl WorkSpace{
+    pub fn new() -> Self {
+        Self{
+            widgets: Vec::new(),
+            buttons: Vec::new(),
+            opened_files: Vec::new()
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Widget {}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct OpenedFile {
     path: Path,
     cursor: (u32, u32),
 }
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Button{
     pos: ButtonPos,
     widget: String,
@@ -33,10 +67,10 @@ pub struct Button{
 }
 
 
-
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Task {}
 
-
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Var {
     name: String,
     value: Val
@@ -57,7 +91,7 @@ impl Var {
 }
 
 
-
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ProjectTemplate {
     id: String,
     name: String,
@@ -68,36 +102,95 @@ pub struct ProjectTemplate {
 
 }
 
+impl ProjectTemplate {
+    pub fn new()->Self{
+        Self{
+            id: String::new(),
+            name: String::new(),
+            schema: Schema(1),
+            meta: None,
+            startup: TemplateStartup::new(),
+            packages_id: Vec::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct TemplateStartup {
     sections: Vec<Section>,
     actions: Vec<Action>,
     var: Vec<Var>,
 }
 
+impl TemplateStartup {
+    pub fn new() -> Self {
+        Self {
+            sections: Vec::new(),
+            actions: Vec::new(),
+            var: Vec::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Section {
     id: i32,
     label: String,
-    list: Option<(bool, bool)>
-
+    list: Option<(bool, bool)>,
+    params: Vec<Parameter>
 }
 
+impl Section{
+    pub fn new(id: i32, label: String, list: Option<(bool, bool)>) -> Section {
+        Self {
+            id: 0,
+            label: String::new(),
+            list: None,
+            params: Vec::new()
+        }
+    }
+}
 
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Action {
     id: u32,
     callable: bool,
     if_: Vec<IfStatement>,
     on_error: String,
-    next: u32,
+    next: Option<u32>,
     commands: ActionCommand
 
 }
+impl Action {
+    pub fn new()->Action {
+        Self{
+            id: 0,
+            callable: true,
+            if_: Vec::new(),
+            on_error: String::new(),
+            next: None,
+            commands: ActionCommand::new()
+        }
+    }
+}
 
-
-
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Parameter {
     out: String,
     label: ParameterLabel,
     val: Val,
     def: Val,
     while_: String
+}
+
+impl Parameter {
+    pub fn new() -> Parameter {
+        Self {
+            out: String::new(),
+            label: ParameterLabel::STR(String::new()),
+            val: Val::NUMBER(0.0),
+            def: Val::NUMBER(0.0),
+            while_: String::new()
+        }
+    }
 }

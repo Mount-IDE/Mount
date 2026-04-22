@@ -14,6 +14,7 @@ pub struct PDirectory {
     pub name: String,
     pub path: Path,
     pub files: Vec<PFile>,
+    pub directories: Vec<PDirectory>,
 }
 
 
