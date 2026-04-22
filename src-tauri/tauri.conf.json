@@ -13,7 +13,8 @@
     "windows": [
       {
         "title": "mount",
-        "maximized": true
+        "maximized": true,
+        "decorations":false
       }
     ],
     "security": {
