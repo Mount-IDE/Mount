@@ -14,7 +14,8 @@
       {
         "title": "mount",
         "maximized": true,
-        "decorations":false
+        "decorations":false,
+        "visible": false
       }
     ],
     "security": {

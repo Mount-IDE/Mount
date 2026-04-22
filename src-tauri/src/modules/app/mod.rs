@@ -1,3 +1,5 @@
+pub mod commands;
+
 use super::contexts::filesystem::app::services::{FileSystemReadService, FileSystemWriteService};
 
 pub const FS_READ_SERVICE: FileSystemReadService= FileSystemReadService {};
