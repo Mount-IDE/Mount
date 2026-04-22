@@ -1,13 +1,15 @@
 import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
-
+import Filters from "./Filters.tsx";
+import logo from "../../../assets/logo.svg"
 
 export default function MainPage() {
 
     const buttons = [
         {
             title: "New Project",
-            cb: () => {}
+            cb: () => {},
+            is_main:true
         }, {
             title: "Open Project",
             cb: () => {}
@@ -25,9 +27,9 @@ export default function MainPage() {
             <div id={"main-page-left"}>
                 <div id={"main-page-logo"}>
                     <div id={"main-page-logo-logo"}>
-                        <img/>
+                        <img src={logo}/>
                     </div>
-                    <p>Welcome to Mount!</p>
+                    <p>Welcome to<br/>Mount!</p>
                 </div>
                 <div id={"main-page-left-buttons"}>
                     {buttons.map((el, i)=>
@@ -36,7 +38,9 @@ export default function MainPage() {
                 </div>
             </div>
             <div id={"main-page-right"}>
-
+                <div id={"main-page-right-dec"}>
+                    <Filters/>
+                </div>
             </div>
         </div>
     )

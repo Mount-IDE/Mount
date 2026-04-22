@@ -6,6 +6,7 @@
     position: relative;
     left: 0;
     top: 0;
+    border-bottom: 1px solid #464646;
 }
 #title-bar-buttons{
     position: absolute;

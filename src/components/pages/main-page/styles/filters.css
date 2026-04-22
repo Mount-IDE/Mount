@@ -1,0 +1,51 @@
+#filters {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+
+}
+
+#search-filter {
+    display: flex;
+    position: relative;
+    left: 0;
+    top: 0;
+    width: 90%;
+    height: 100%;
+    gap: 2%;
+}
+
+#search-filter > div {
+    width: 2%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    &>img{
+        height: 35%;
+    }
+}
+
+#search-filter > input {
+    background: transparent;
+    color: var(--title);
+    height: 100%;
+    width: 95%;
+    border: none;
+    outline: none;
+    font: 10pt "JetBrains Mono";
+}
+
+#filters-filters {
+    height: 100%;
+
+    & > img {
+        height: 50%;
+    }
+}
+
+
+

@@ -1,4 +1,4 @@
-use tauri::Manager;
+use tauri::{generate_handler, Manager};
 use crate::modules::app::commands::{get_projects, show_win};
 mod modules;
 
@@ -8,7 +8,7 @@ mod modules;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![show_win, get_projects])
+        .invoke_handler(generate_handler![show_win, get_projects])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

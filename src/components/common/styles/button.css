@@ -5,8 +5,22 @@
     background: transparent;
     color: var(--subtitle);
     &:hover{
-        color: vaR(--title);
+        color: var(--title);
     }
-    width: 245px;
-    height: 62px;
+    font: 11pt "JetBrains Mono";
+    width: 190px;
+    height: 45px;
+    border-radius: 10px;
+    transition: color 0.1s;
+}
+
+
+.button-main{
+    background: var(--grad);
+    color: black;
+    transition: color 0.1s, filter 0.1s;
+    &:hover{
+        color: black;
+        filter: brightness(1.2);
+    }
 }

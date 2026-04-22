@@ -14,15 +14,18 @@
   /*-webkit-text-size-adjust: 100%;*/
 
 
-
+  --grad: linear-gradient(90deg, #73FFB4, #5AFFDE);
   --bg: #131313;
+  /*--bg: #171717;*/
   --title: #FFFFFF;
   --subtitle: #A4A4A4;
+  --border: #A9A9A9;
 }
 
 *{
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 html,body{
@@ -39,4 +42,14 @@ html,body{
 
 button{
   border: none;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+}
+
+#main{
+  width: 100%;
+  height: calc(100% - 30px)
 }

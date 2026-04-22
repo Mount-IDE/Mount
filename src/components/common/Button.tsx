@@ -6,6 +6,7 @@ type Props={
     cb: ()=>void;
     width?:number;
     height?:number;
+    is_main?:boolean;
 }
 export default function Button(props: Props){
 
@@ -17,7 +18,7 @@ export default function Button(props: Props){
                 height: props.height
             }}
             onClick={props.cb}
-            className={"button"}>
+            className={props.is_main?"button-main button":"button"}>
             {props.title}
         </button>
     )
