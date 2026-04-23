@@ -1,5 +1,6 @@
 #main-page{
     display: flex;
+    position: absolute;
 }
 #main-page-left{
     width: 40%;

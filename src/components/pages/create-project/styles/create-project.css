@@ -1,0 +1,10 @@
+#create-project {
+    transition: all 0.2s;
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    z-index: 100;
+    left: 25%;
+    top: 25%;
+    background: var(--bg);
+}

@@ -7,9 +7,9 @@
     &:hover{
         color: var(--title);
     }
-    font: 11pt "JetBrains Mono";
-    width: 190px;
-    height: 45px;
+    font: 10pt "JetBrains Mono";
+    width: 170px;
+    height: 40px;
     border-radius: 10px;
     transition: color 0.1s;
 }
