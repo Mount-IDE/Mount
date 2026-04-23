@@ -6,6 +6,8 @@ use crate::modules::shared::kernel::values::{Path};
 pub trait TFSReadService{
     fn read_file(&self, file: &PFile) -> Result<String, FileSystemError>;
     fn read_dir(&self, dir: &PDirectory) -> Result<PDirectory, FileSystemError>;
+    fn exist_file(&self, file: &PFile) -> bool;
+    fn exist_dir(&self, file: &PDirectory) -> bool;
 }
 
 pub trait TFSWriteService {
@@ -21,6 +23,7 @@ pub trait TFSManageService {
     fn copy_dir(&self, directory: &PDirectory) -> PDirectory;
     fn move_file(&self, file: &PFile, from: Path, to: Path) -> Result<PFile,FileSystemError>;
     fn move_dir(&self, directory: &PDirectory, from: Path, to: Path) -> Result<PDirectory, FileSystemError>;
+
 
 
 }

@@ -1,14 +1,9 @@
-use crate::modules::shared::kernel;
 use crate::modules::shared::kernel::traits::TError;
-use crate::modules::shared::kernel::values::FileSystemErrorType;
+use crate::modules::shared::kernel::values::{FileSystemErrorType, Path, ProjectErrorType};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use tauri::ipc::InvokeError;
 
-pub struct Settings {
-    doctype: String,
-    version: String,
-}
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Package {}
@@ -21,7 +16,7 @@ pub enum LogLevel {
     CRITICAL,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Error<T: Default + Debug + Clone> {
     message: T,
     level: LogLevel,
@@ -41,6 +36,10 @@ impl<T: Default + Debug + Clone> Error<T> {
         Self { message, level }
     }
 
+    pub fn error(message: T) -> Error<T> {
+        Self::new(message, LogLevel::ERROR)
+    }
+
     pub fn empty() -> Error<T> {
         Self::new(T::default(), LogLevel::CRITICAL)
     }
@@ -56,5 +55,6 @@ impl<T: Default + Debug + Clone> TError<T> for Error<T> {
     }
 }
 
-pub type ProjectError = Error<i32>;
+pub type ProjectError = Error<ProjectErrorType>;
+pub type ConfigError = Error<i32>;
 pub type FileSystemError = Error<FileSystemErrorType>;

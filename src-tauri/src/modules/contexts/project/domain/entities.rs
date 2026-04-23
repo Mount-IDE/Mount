@@ -13,7 +13,7 @@ pub struct Project {
     pub workspace: WorkSpace,
     pub vars: Vec<Var>,
     pub tasks: Vec<Task>,
-    pub packages: Vec<Package>,
+    pub packages: Vec<String>,
 }
 
 

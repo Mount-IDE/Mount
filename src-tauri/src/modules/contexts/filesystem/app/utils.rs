@@ -23,10 +23,11 @@ pub fn make_path(paths: Vec<&str>)->String{
     }
     let mut res = String::new();
     for i in 0..paths.len()-1 {
+        println!("path element {i}");
         if cfg!(target_os = "windows") {
-            res = format!("{i}\\");
+            res = format!("{}\\", paths[i]);
         }else{
-            res=format!("{i}/")     
+            res=format!("{}/", paths[i])     
         }
     }
     res+=paths[paths.len()-1];

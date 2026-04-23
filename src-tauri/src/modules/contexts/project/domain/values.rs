@@ -1,5 +1,7 @@
+use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
-
+use tauri::ipc::InvokeError;
+use crate::modules::shared::kernel::entities::{Error, FileSystemError, ProjectError};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ProjectMeta{
@@ -68,4 +70,19 @@ pub enum ButtonPos{
     LeftTop,
     LeftBottom,
     RightTop,
+}
+
+#[derive(Clone, Debug)]
+pub enum ProjectToFS{
+    Project(ProjectError),
+    FS(FileSystemError)
+}
+
+impl From<ProjectToFS> for InvokeError {
+    fn from(value: ProjectToFS) -> Self {
+        match value{
+            ProjectToFS::Project(error) => error.into(),
+            ProjectToFS::FS(error) => error.into()
+        }
+    }
 }

@@ -2,6 +2,9 @@ import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
 import logo from "../../../assets/logo.svg"
+import {useEffect, useState} from "react";
+import {invoke} from "@tauri-apps/api/core";
+import Project from "./Project.tsx";
 
 export default function MainPage() {
 
@@ -22,6 +25,25 @@ export default function MainPage() {
         }
     ]
 
+    const [recent, setRecent] = useState<IProject[]>([]);
+
+
+    async function loadRecents(){
+        try {
+            let recent = await invoke<RecentProject[]>("get_recent_projects");
+            let res = await invoke<IProject[]>("read_recent_projects", {
+                recent: recent
+            });
+            console.log("recent loaded")
+            setRecent(res);
+        } catch (e){
+            console.log("not loaded", e)
+        }
+    }
+    useEffect(()=>{
+      loadRecents().then()
+    },[])
+
     return (
         <div className={"page"} id={"main-page"}>
             <div id={"main-page-left"}>
@@ -40,6 +62,17 @@ export default function MainPage() {
             <div id={"main-page-right"}>
                 <div id={"main-page-right-dec"}>
                     <Filters/>
+                    <div id={"main-page-groups"}>
+
+                    </div>
+                    <div id={"main-page-projects"}>
+                        {recent.length>0&&
+                            recent.map((el, i)=>
+                                <Project project={el} key={i} />
+                            )
+                        }
+                        {recent.length==0 && <p>Not any recent projects</p>}
+                    </div>
                 </div>
             </div>
         </div>

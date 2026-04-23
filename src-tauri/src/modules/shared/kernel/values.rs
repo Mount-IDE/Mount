@@ -72,7 +72,7 @@ pub struct IfStatementPart{
     value: Val
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum FileSystemErrorType {
     FileCreationError,
     DirectoryCreationError,
@@ -88,13 +88,28 @@ pub enum FileSystemErrorType {
     DEFAULT
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub enum ProjectErrorType{
+    Default,
+    ProjectCreationDirError,
+    ProjectCreationMountDirError,
+    ProjectJsonParseError,
+    ProjectWriteMetaError,
+    ProjectReadMetaError,
+    ProjectReadError
+}
+
+impl Default for ProjectErrorType{
+    fn default() -> Self {
+        ProjectErrorType::Default
+    }
+}
+
 impl Default for FileSystemErrorType{
     fn default() -> Self {
         Self::DEFAULT
     }
 }
-
-
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Dependency{
@@ -108,3 +123,7 @@ pub enum DependencyLevel{
     CONFLICTS,
     OPTIONAL
 }
+
+
+
+

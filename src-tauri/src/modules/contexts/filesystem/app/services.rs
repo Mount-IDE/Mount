@@ -16,8 +16,7 @@ impl TFSReadService for FileSystemReadService {
     fn read_file(&self, file: &PFile) -> Result<String, FileSystemError> {
         let file = fs::File::open(file.path.get());
         if file.is_err() {
-            let err = FileSystemError::new(FileSystemErrorType::FileNotExists, LogLevel::ERROR);
-            return Err(err);
+           return Err(FileSystemError::new(FileSystemErrorType::FileNotExists, LogLevel::ERROR));
         }
         let mut file = file.unwrap();
         let mut text = String::new();
@@ -33,11 +32,10 @@ impl TFSReadService for FileSystemReadService {
     fn read_dir(&self, dir_: &PDirectory) -> Result<PDirectory, FileSystemError> {
         let dir = fs::read_dir(dir_.path.get());
         if dir.is_err() {
-            let err =
-                FileSystemError::new(FileSystemErrorType::DirectoryNotExists, LogLevel::ERROR);
-            return Err(err);
+            return Err(FileSystemError::new(
+                FileSystemErrorType::DirectoryNotExists, LogLevel::ERROR));
         }
-        let mut dir = dir.unwrap();
+        let dir = dir.unwrap();
         let mut files = Vec::<PFile>::new();
         let mut dirs = Vec::<PDirectory>::new();
         for i in dir {
@@ -84,22 +82,45 @@ impl TFSReadService for FileSystemReadService {
         };
         Ok(directory)
     }
+
+    fn exist_file(&self, file: &PFile) -> bool {
+        let path = file.path.get();
+        let ext = fs::exists(path);
+        if ext.is_err(){
+            return false;
+        }
+        let ext = ext.unwrap();
+        ext
+    }
+
+    fn exist_dir(&self, file: &PDirectory) -> bool {
+        let path = file.path.get();
+        let ext = fs::exists(path);
+        if ext.is_err(){
+            return false;
+        }
+        let ext = ext.unwrap();
+        ext
+    }
 }
+
 
 pub struct FileSystemWriteService();
 
 impl TFSWriteService for FileSystemWriteService {
     fn create_file(&self, path: &Path) -> Result<PFile, FileSystemError> {
         let file = fs::File::create(path.get());
-
+        println!("file {}", path.get());
         if file.is_err() {
-            let err = FileSystemError::new(FileSystemErrorType::FileAlreadyExists, LogLevel::ERROR);
-            return Err(err);
+            println!("error file create");
+           return Err(
+               FileSystemError::new(FileSystemErrorType::FileAlreadyExists, LogLevel::ERROR));
         }
         let _ = file.unwrap();
         let splited = split_path(&path);
         let name = splited.get(splited.len() - 1);
         if name.is_none() {
+            println!("error split name");
             return Err(FileSystemError::new(
                 FileSystemErrorType::FilePathParsing,
                 LogLevel::ERROR,
