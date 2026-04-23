@@ -1,5 +1,5 @@
 use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::shared::kernel::entities::ConfigError;
+use crate::modules::shared::kernel::errors::ConfigError;
 use crate::modules::shared::kernel::values::Path;
 pub trait TConfigService {
     fn read_settings(&self)->Result<Settings, ConfigError>;

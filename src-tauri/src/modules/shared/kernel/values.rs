@@ -1,6 +1,7 @@
+use std::fmt::Display;
 use serde::{Deserialize, Serialize, Serializer};
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Path(pub String);
 impl Path{
     pub fn new(name: &str) -> Self{
@@ -15,6 +16,12 @@ impl Path{
     }
 }
 
+impl Display for Path {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get())
+    }
+}
+
 
 impl Serialize for Path {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -25,7 +32,7 @@ impl Serialize for Path {
     }
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Schema(pub u8);
 impl Serialize for Schema {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -36,7 +43,7 @@ impl Serialize for Schema {
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
 pub enum Val {
     NUMBER(f64),
     STRING(String),
@@ -59,57 +66,57 @@ impl Serialize for Val {
 }
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct IfStatement{
     or: Vec<IfStatementPart>,
     all: Vec<IfStatementPart>
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct IfStatementPart{
     from: String,
     oper: String,
     value: Val
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub enum FileSystemErrorType {
-    FileCreationError,
-    DirectoryCreationError,
-    FileRemovingError,
-    DirectoryRemovingError,
-    FileWritingError,
-    FileNotExists,
-    DirectoryNotExists,
-    DirectoryAlreadyExists,
-    FileAlreadyExists,
-    FilePathParsing,
-    DirectoryPathParsing,
-    DEFAULT
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub enum ProjectErrorType{
-    Default,
-    ProjectCreationDirError,
-    ProjectCreationMountDirError,
-    ProjectJsonParseError,
-    ProjectWriteMetaError,
-    ProjectReadMetaError,
-    ProjectReadError
-}
-
-impl Default for ProjectErrorType{
-    fn default() -> Self {
-        ProjectErrorType::Default
-    }
-}
-
-impl Default for FileSystemErrorType{
-    fn default() -> Self {
-        Self::DEFAULT
-    }
-}
+// #[derive(Debug, Clone, Serialize)]
+// pub enum FileSystemErrorType {
+//     FileCreationError,
+//     DirectoryCreationError,
+//     FileRemovingError,
+//     DirectoryRemovingError,
+//     FileWritingError,
+//     FileNotExists,
+//     DirectoryNotExists,
+//     DirectoryAlreadyExists,
+//     FileAlreadyExists,
+//     FilePathParsing,
+//     DirectoryPathParsing,
+//     DEFAULT
+// }
+// 
+// #[derive(Debug, Clone, Serialize)]
+// pub enum ProjectErrorType{
+//     Default,
+//     ProjectCreationDirError,
+//     ProjectCreationMountDirError,
+//     ProjectJsonParseError,
+//     ProjectWriteMetaError,
+//     ProjectReadMetaError,
+//     ProjectReadError
+// }
+// 
+// impl Default for ProjectErrorType{
+//     fn default() -> Self {
+//         ProjectErrorType::Default
+//     }
+// }
+// 
+// impl Default for FileSystemErrorType{
+//     fn default() -> Self {
+//         Self::DEFAULT
+//     }
+// }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Dependency{

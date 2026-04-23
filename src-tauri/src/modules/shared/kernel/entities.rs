@@ -1,14 +1,10 @@
-use crate::modules::shared::kernel::traits::TError;
-use crate::modules::shared::kernel::values::{FileSystemErrorType, Path, ProjectErrorType};
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
-use tauri::ipc::InvokeError;
 
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Package {}
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/*#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LogLevel {
     INFO,
     WARN,
@@ -54,7 +50,15 @@ impl<T: Default + Debug + Clone> TError<T> for Error<T> {
         self.level.clone()
     }
 }
-
 pub type ProjectError = Error<ProjectErrorType>;
 pub type ConfigError = Error<i32>;
 pub type FileSystemError = Error<FileSystemErrorType>;
+*/
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ErrorDto{
+    pub(crate) message: String
+}
+
+
+

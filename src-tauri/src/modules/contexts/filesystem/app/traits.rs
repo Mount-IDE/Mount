@@ -1,6 +1,6 @@
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
-use crate::modules::shared::kernel::entities::{FileSystemError};
+use crate::modules::shared::kernel::errors::FileSystemError;
 use crate::modules::shared::kernel::values::{Path};
 
 pub trait TFSReadService{

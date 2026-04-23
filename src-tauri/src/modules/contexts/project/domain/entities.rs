@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta};
-use crate::modules::shared::kernel::entities::Package;
 use crate::modules::shared::kernel::values::{IfStatement, Path, Schema, Val};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Project {
     pub name: String,
     pub(crate) path: Path,
@@ -33,7 +32,7 @@ impl Project {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WorkSpace {
     widgets: Vec<Widget>,
     buttons: Vec<Button>,
@@ -50,16 +49,16 @@ impl WorkSpace{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Widget {}
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct OpenedFile {
     path: Path,
     cursor: (u32, u32),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Button{
     pos: ButtonPos,
     widget: String,
@@ -67,10 +66,10 @@ pub struct Button{
 }
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Task {}
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Var {
     name: String,
     value: Val
@@ -82,7 +81,7 @@ impl Var {
             value,
         }
     }
-    pub fn from(json: String) {
+    pub fn from(_json: String) {
         todo!()
     }
     pub fn to_json(&self) -> String{
@@ -91,7 +90,7 @@ impl Var {
 }
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectTemplate {
     id: String,
     name: String,
@@ -115,7 +114,7 @@ impl ProjectTemplate {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TemplateStartup {
     sections: Vec<Section>,
     actions: Vec<Action>,
@@ -132,7 +131,7 @@ impl TemplateStartup {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Section {
     id: i32,
     label: String,
@@ -151,7 +150,7 @@ impl Section{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Action {
     id: u32,
     callable: bool,
@@ -174,7 +173,7 @@ impl Action {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Parameter {
     out: String,
     label: ParameterLabel,

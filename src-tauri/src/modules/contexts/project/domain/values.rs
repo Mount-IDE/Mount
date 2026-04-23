@@ -1,9 +1,7 @@
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
-use tauri::ipc::InvokeError;
-use crate::modules::shared::kernel::entities::{Error, FileSystemError, ProjectError};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectMeta{
     authors: Vec<String>,
     description: String,
@@ -26,21 +24,21 @@ impl ProjectMeta{
 }
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TemplateMeta {
     authors: Vec<String>,
     description: String,
     icon: String
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ParameterLabel{
     STR(String),
     COUPLE((String, String)),
 }
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ActionCommand{
     shell: String,
     env: Option<Vec<(String, String)>>,
@@ -57,7 +55,7 @@ impl ActionCommand{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ActionCommandIn{
     Single(String),
     WithArgs(String, Vec<String>)
@@ -65,24 +63,11 @@ pub enum ActionCommandIn{
 
 
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ButtonPos{
     LeftTop,
     LeftBottom,
     RightTop,
 }
 
-#[derive(Clone, Debug)]
-pub enum ProjectToFS{
-    Project(ProjectError),
-    FS(FileSystemError)
-}
 
-impl From<ProjectToFS> for InvokeError {
-    fn from(value: ProjectToFS) -> Self {
-        match value{
-            ProjectToFS::Project(error) => error.into(),
-            ProjectToFS::FS(error) => error.into()
-        }
-    }
-}
