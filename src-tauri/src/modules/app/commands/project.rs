@@ -1,6 +1,6 @@
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PROJECT_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::make_path_string;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::contexts::project::app::traits::TProjectService;
@@ -33,7 +33,7 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
     for path in vec_path {
         let get = path.get().clone();
 
-        let path_ = make_path(vec![get.as_str(), ".mount", "project.json"]);
+        let path_ = make_path_string(vec![get.as_str(), ".mount", "project.json"]);
         let file = PFile{name: "project.json".to_string(), path:Path(path_.clone()), typ: FileType::REGULAR};
         if FS_READ_SERVICE.exist_file(&file) {
             let config = FS_READ_SERVICE.read_file(&file);

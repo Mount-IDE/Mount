@@ -1,19 +1,22 @@
 use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::{make_path_string, make_path};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
-use crate::modules::contexts::filesystem::domain::values::FileType;
-use crate::modules::contexts::settings::domain::entities::Settings;
+use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::settings::domain::entities::{RecentProject, Settings};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use tauri::Manager;
 
 pub struct ConfigService();
+
+
+#[allow(unused_variables)]
 impl TConfigService for ConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError> {
         let dir = self.get_data_dir()?;
-        let path_to_settings = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let path_to_settings = make_path_string(vec![dir.get().as_str(), "settings.json"]);
         let file = PFile::from_path_reg(Path::new(&path_to_settings));
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
@@ -81,7 +84,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
             return Ok(());
         }
         let dir = dir.unwrap();
-        let settings = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let settings = make_path_string(vec![dir.get().as_str(), "settings.json"]);
         let file = PFile::regular("settings.json".to_string(), Path(settings));
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
@@ -89,7 +92,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
             self.repair_data_dir()?;
             return Ok(());
         }
-        let recent = make_path(vec![dir.get().as_str(), "recent-projects.json"]);
+        let recent = make_path_string(vec![dir.get().as_str(), "recent-projects.json"]);
         let file = PFile::regular("recent-projects.json".to_string(), Path(recent));
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
@@ -109,20 +112,45 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         }
         let dir = dir.get();
         println!("dir {dir}");
-        let path_to_settings = make_path(vec![dir.clone().as_str(), "settings.json"]);
-        let path_to_projects = make_path(vec![dir.clone().as_str(), "recent-projects.json"]);
+        let path_to_settings = make_path_string(vec![dir.clone().as_str(), "settings.json"]);
+        let path_to_projects = make_path_string(vec![dir.clone().as_str(), "recent-projects.json"]);
         let file1 = PFile::from_path_reg(Path(path_to_settings));
         let file2 = PFile::from_path_reg(Path(path_to_projects));
         let ext1 = FS_READ_SERVICE.exist_file(&file1);
         let ext2 = FS_READ_SERVICE.exist_file(&file2);
         if !ext1 {
             println!("settings created");
-            let _ = FS_WRITE_SERVICE.create_file(&file1.path);
+            self.add_settings_by_default()?;
+
         }
         if !ext2 {
             println!("recent created");
-            let _ = FS_WRITE_SERVICE.create_file(&file2.path);
+            self.add_recents_by_default()?;
         }
+        Ok(())
+    }
+
+    fn add_settings_by_default(&self) -> Result<(), ConfigError> {
+        let settings = Settings::new();
+        let dir= CONFIG_SERVICE.get_data_dir()?;
+        let path = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let file = PFile::from_path_reg(path.clone());
+        FS_WRITE_SERVICE.create_file(&path.clone())?;
+        let json = serde_json::to_string(&settings).map_err(|e|
+            ParsingError::Serialize {path, err:e}
+        )?;
+        FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
+        Ok(())
+    }
+
+    fn add_recents_by_default(&self) -> Result<(), ConfigError> {
+        let dir= CONFIG_SERVICE.get_data_dir()?;
+        let path = make_path(vec![dir.get().as_str(), "recent-projects.json"]);
+        let file = PFile::from_path_reg(path.clone());
+        let json = String::from("[ ]");
+
+        FS_WRITE_SERVICE.create_file(&path.clone())?;
+        FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
         Ok(())
     }
 }

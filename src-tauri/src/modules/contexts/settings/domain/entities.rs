@@ -9,9 +9,26 @@ pub struct Settings {
 
 }
 
+
+impl Settings {
+    pub fn new()->Settings {
+        Self {
+            doctype: String::from("opie/mount"),
+            version: String::from("1.0.0"),
+            general: GeneralSettings::new()
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GeneralSettings {
 
+}
+
+impl GeneralSettings {
+    pub fn new()->GeneralSettings{
+        Self{}
+    }
 }
 
 #[derive(Serialize, Deserialize)]

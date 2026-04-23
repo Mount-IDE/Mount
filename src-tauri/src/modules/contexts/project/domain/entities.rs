@@ -139,6 +139,7 @@ pub struct Section {
     params: Vec<Parameter>
 }
 
+#[allow(unused_variables)]
 impl Section{
     pub fn new(id: i32, label: String, list: Option<(bool, bool)>) -> Section {
         Self {

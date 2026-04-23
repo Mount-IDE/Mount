@@ -17,7 +17,7 @@ pub enum ProjectError {
         source: FileSystemError,
     },
 
-    #[error("failed to parse")]
+    #[error("failed to parse in project")]
     ParsingError(#[from] ParsingError)
    
 }
@@ -103,14 +103,17 @@ pub enum ConfigError {
         #[source]
         err: FileSystemError
     },
-    #[error("failed to parsing")]
-    Parsing (#[from] ParsingError)
+    #[error("failed to parse in config")]
+    ParsingError(#[from] ParsingError)
 ,
     #[error("failed to create app directory")]
     MakeDataDir {
         #[source]
         err: FileSystemError
-    }
+    },
+    #[error("filesystem error that can`t describe as config error")]
+    FileSystem (#[from]FileSystemError
+    )
 }
 
 #[derive(Debug, Error)]

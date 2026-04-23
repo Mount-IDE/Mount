@@ -71,7 +71,17 @@ export default function MainPage() {
                                 <Project project={el} key={i} />
                             )
                         }
-                        {recent.length==0 && <p>Not any recent projects</p>}
+                        {recent.length==0 && <p
+                            style={{
+                                color: "var(--subtitle)",
+                                width: "100%",
+                                height: "50%",
+                                display:"flex",
+                                flexDirection:"column",
+                                alignItems:"center",
+                                justifyContent:"center"
+                            }}
+                        >Not any recent projects</p>}
                     </div>
                 </div>
             </div>

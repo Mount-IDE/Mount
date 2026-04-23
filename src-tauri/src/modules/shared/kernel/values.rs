@@ -9,12 +9,13 @@ impl Path{
             0: name.to_string(),
         }
     }
-
-
     pub fn get(&self) -> String{
         self.0.clone()
     }
+    
+    
 }
+
 
 impl Display for Path {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -118,13 +119,13 @@ pub struct IfStatementPart{
 //     }
 // }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Dependency{
     program: String,
     level: DependencyLevel
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum DependencyLevel{
     CRITICAL,
     CONFLICTS,

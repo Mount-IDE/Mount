@@ -10,22 +10,22 @@ export default function TitleBar() {
         {
             icon: wrap,
             cb: async ()=>{
-                appWindow.minimize();
+                await appWindow.minimize();
             }
         },{
             icon: resize,
             cb: async ()=>{
                 const res=await appWindow.isMaximized();
                 if (res) {
-                    appWindow.unmaximize()
+                    await appWindow.unmaximize()
                 }else{
-                    appWindow.maximize();
+                    await appWindow.maximize();
                 }
             }
         },{
             icon: close,
             cb: async()=>{
-                appWindow.close()
+                await appWindow.close()
             }
         },
 

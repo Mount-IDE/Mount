@@ -17,7 +17,7 @@ pub fn split_path(path: &Path) -> Vec<String>{
 
 
 
-pub fn make_path(paths: Vec<&str>)->String{
+pub fn make_path_string(paths: Vec<&str>) ->String{
     if paths.len()==0{
         return "".to_string();
     }
@@ -34,3 +34,6 @@ pub fn make_path(paths: Vec<&str>)->String{
     res
 }
 
+pub fn make_path(path: Vec<&str>) -> Path {
+    Path(make_path_string(path))
+}

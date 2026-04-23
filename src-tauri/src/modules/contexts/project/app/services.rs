@@ -1,6 +1,6 @@
 use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::make_path_string;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::app::traits::TProjectService;
@@ -18,11 +18,11 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn create_project(&self, project: &Project) -> Result<(), ProjectError> {
-        let path_to_project = make_path(vec![project.path.get().as_str()]);
+        let path_to_project = make_path_string(vec![project.path.get().as_str()]);
 
         FS_WRITE_SERVICE.create_dir(&Path(path_to_project.clone()))?;
 
-        let path_to_mount = make_path(vec![
+        let path_to_mount = make_path_string(vec![
             path_to_project.clone().as_str(),
             project.name.as_str(),
             ".mount",
@@ -35,7 +35,7 @@ impl TProjectService for ProjectService {
             })
         })?;
 
-        let path_to_conf = make_path(vec![
+        let path_to_conf = make_path_string(vec![
             path_to_project.as_str(),
             project.name.as_str(),
             "project.json",
@@ -49,7 +49,7 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        let path = make_path(vec![project_path.get().as_str(), ".mount", "project.json"]);
+        let path = make_path_string(vec![project_path.get().as_str(), ".mount", "project.json"]);
         let config = PFile {
             name: "config.json".to_string(),
             path: Path(path),
@@ -91,7 +91,7 @@ impl TProjectService for ProjectService {
                 continue;
             }
             let mount = mount.unwrap().clone();
-            let path_to = make_path(vec![mount.path.get().as_str(), "project.json"]);
+            let path_to = make_path_string(vec![mount.path.get().as_str(), "project.json"]);
             let file = PFile {
                 name: "project.json".to_string(),
                 path: Path(path_to.clone()),
@@ -125,7 +125,7 @@ impl TProjectService for ProjectService {
             FS_WRITE_SERVICE.create_dir(&Path(dir.path.get()))?;
             return Ok(vec![]);
         }
-        let path_to = make_path(vec![dir.path.get().as_str(), "recent-projects.json"]);
+        let path_to = make_path_string(vec![dir.path.get().as_str(), "recent-projects.json"]);
         let file = PFile::from_path_reg(Path(path_to.clone()));
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
