@@ -3,7 +3,7 @@ use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWrite
 use crate::modules::contexts::filesystem::app::utils::{make_path_string, make_path};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::settings::domain::entities::{RecentProject, Settings};
+use crate::modules::contexts::settings::domain::entities::{Settings};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
@@ -16,23 +16,28 @@ pub struct ConfigService();
 impl TConfigService for ConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError> {
         let dir = self.get_data_dir()?;
-        let path_to_settings = make_path_string(vec![dir.get().as_str(), "settings.json"]);
-        let file = PFile::from_path_reg(Path::new(&path_to_settings));
+        println!("dir was gotten");
+        let path_to_settings = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let file = PFile::from_path_reg(path_to_settings.clone());
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
             CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
+            println!("repair data dir was gotten");
         }
+        println!("building file");
         let file_ = PFile {
             name: "settings.json".to_string(),
-            path: Path(path_to_settings),
+            path: path_to_settings,
             typ: FileType::REGULAR,
         };
         let file = FS_READ_SERVICE
             .read_file(&file_)
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
+        println!("read settings.json was gotten");
         let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e|
             ParsingError::Deserialize {path: file_.path, json: file, err:e}
         )?;
+        println!("parsing settings,json was gotten");
         Ok(settings)
     }
 
@@ -107,6 +112,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         let dir = CONFIG_SERVICE.get_data_dir().unwrap();
         let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir));
         if !path_ {
+            println!("repair");
             let data = APP.get().unwrap().path().app_data_dir().unwrap();
             let _ = FS_WRITE_SERVICE.create_dir(&Path(data.to_str().unwrap().to_string()));
         }

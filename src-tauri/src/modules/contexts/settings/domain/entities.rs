@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use crate::modules::shared::kernel::values::Path;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Settings {
     doctype: String,
     version: String,
     general: GeneralSettings,
-
+    appearance: Appearance
 }
 
 
@@ -15,21 +15,68 @@ impl Settings {
         Self {
             doctype: String::from("opie/mount"),
             version: String::from("1.0.0"),
-            general: GeneralSettings::new()
+            general: GeneralSettings::new(),
+            appearance: Appearance::new()
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct GeneralSettings {
 
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GeneralSettings {
+    path_to_projects: Path,
+    project_groups: Vec<String>
+}
+
+impl Default for GeneralSettings {
+    fn default() -> Self {
+        Self {
+            path_to_projects: Path("".to_string()),
+            project_groups:vec![String::from("general")]
+        }
+    }
 }
 
 impl GeneralSettings {
     pub fn new()->GeneralSettings{
-        Self{}
+        Self{
+            path_to_projects: Path(String::new()),
+            project_groups: Vec::new()
+        }
     }
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Appearance {
+    theme: String,
+    lang: String,
+    font: String,
+    font_size: u64
+}
+
+impl Default for Appearance {
+    fn default() -> Self {
+        Self {
+            theme: "default".to_string(),
+            lang: "en".to_string(),
+            font: "Jetbrains Mono".to_string(),
+            font_size: 16
+        }
+    }
+}
+
+impl Appearance{
+    pub fn new()->Appearance{
+        Self {
+            theme: String::new(),
+            lang: String::new(),
+            font: String::new(),
+            font_size: 16,
+        }
+    }
+}
+
 
 #[derive(Serialize, Deserialize)]
 pub struct RecentProject {
