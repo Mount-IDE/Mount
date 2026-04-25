@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "mount",
+        "title": "Mount",
         "maximized": true,
         "decorations":false,
         "visible": false
