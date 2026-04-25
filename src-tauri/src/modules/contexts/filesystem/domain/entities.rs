@@ -36,7 +36,7 @@ impl PFile {
         let found = self.name.rfind(".");
         if found.is_some() {
             let found = found.unwrap();
-            let slice = &self.name.clone()[found..];
+            let slice = &self.name.clone()[found+1..];
             return Some(slice.to_string());
         }
         None

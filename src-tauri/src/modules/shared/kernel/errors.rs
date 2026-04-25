@@ -1,6 +1,6 @@
+use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use thiserror::Error;
-use crate::modules::shared::kernel::entities::ErrorDto;
 
 #[derive(Error, Debug)]
 pub enum ProjectError {
@@ -17,9 +17,8 @@ pub enum ProjectError {
         source: FileSystemError,
     },
 
-    #[error("failed to parse in project")]
-    ParsingError(#[from] ParsingError)
-   
+    #[error("failed to parse in project: {err}")]
+    ParsingError{#[from]err: ParsingError},
 }
 
 #[derive(Error, Debug)]
@@ -85,54 +84,50 @@ pub enum FileSystemError {
         err: std::io::Error,
     },
     #[error("failed to parse path: {path}")]
-    PathParsing {
-        path: Path
-    }
+    PathParsing { path: Path },
 }
-
 
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error("failed to get app_data_dir")]
-    GetDataDir{
+    GetDataDir {
         #[source]
-        err: tauri::Error
+        err: tauri::Error,
     },
     #[error("global settings not found")]
-    SettingsNotFound{
+    SettingsNotFound {
         #[source]
-        err: FileSystemError
+        err: FileSystemError,
     },
-    #[error("failed to parse in config")]
-    ParsingError(#[from] ParsingError)
-,
+    #[error("failed to parse in config: {err}")]
+    ParsingError {
+        #[from]
+        err: ParsingError,
+    },
     #[error("failed to create app directory")]
     MakeDataDir {
         #[source]
-        err: FileSystemError
+        err: FileSystemError,
     },
     #[error("filesystem error that can`t describe as config error")]
-    FileSystem (#[from]FileSystemError
-    )
+    FileSystem(#[from] FileSystemError),
 }
 
 #[derive(Debug, Error)]
-pub enum ParsingError{
+pub enum ParsingError {
     #[error("failed to parse json to {path}")]
-    Serialize{
+    Serialize {
         path: Path,
         #[source]
-        err: serde_json::Error
+        err: serde_json::Error,
     },
-    #[error("failed to parse json from {path}")]
-    Deserialize{
+    #[error("failed to parse json from {path}: {json}")]
+    Deserialize {
         path: Path,
         json: String,
         #[source]
-        err: serde_json::Error
+        err: serde_json::Error,
     },
-
-
 }
 
 impl From<ProjectError> for ErrorDto {

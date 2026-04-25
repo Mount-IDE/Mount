@@ -50,7 +50,7 @@
 
 #create-project-hr {
     margin-left: 5%;
-    border: 1px solid var(--subtitle);
+    border: 1px solid var(--border);
     height: 80%;
     position: relative;
     top: 5%;

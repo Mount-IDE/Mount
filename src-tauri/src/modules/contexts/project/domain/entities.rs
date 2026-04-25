@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta};
-use crate::modules::shared::kernel::values::{IfStatement, Path, Schema, Val};
+use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Schema, Val};
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -139,7 +139,7 @@ impl TemplateStartup {
 pub struct Section {
     pub id: i32,
     pub label: String,
-    pub list: Option<(bool, bool)>,
+    pub list: (bool, bool),
     pub params: Vec<Parameter>
 }
 
@@ -149,7 +149,7 @@ impl Section{
         Self {
             id: 0,
             label: String::new(),
-            list: None,
+            list: (false, false),
             params: Vec::new()
         }
     }
@@ -186,9 +186,10 @@ impl Action {
 pub struct Parameter {
     pub out: String,
     pub label: ParameterLabel,
-    pub val: Val,
+    pub typ: Vec<ParameterTyp>,
+    // pub val: Val,
     pub def: Val,
-    pub while_: String
+    pub while_: Option<String>
 }
 
 impl Parameter {
@@ -196,9 +197,10 @@ impl Parameter {
         Self {
             out: String::new(),
             label: ParameterLabel::STR(String::new()),
-            val: Val::NUMBER(0.0),
+            // val: Val::NUMBER(0.0),
             def: Val::NUMBER(0.0),
-            while_: String::new()
+            while_: None,
+            typ: Vec::new()
         }
     }
 }

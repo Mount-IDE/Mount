@@ -21,6 +21,11 @@ interface IProject {
 interface ITemplate {
     id: string,
     name: string,
+    meta?: {
+        authors: string[],
+        description: string,
+        icon: string
+    }
     startup: {
         var: IVar[],
         actions: IAction[],
@@ -35,24 +40,25 @@ interface IVar {
     val: IVal
 }
 
-interface IVal {
-    [key: string]: string | number | boolean | IVal[]
-}
+type IVal= string | boolean | number | string[]
+
+
 
 
 interface ISection {
     id: number,
     label: string,
-    list?: [boolean, boolean],
+    list: [boolean, boolean],
     params: IParameter[]
 }
 
 interface IParameter {
     out: string,
-    label: { STR: string } | { COUPLE: [string, string] },
-    val: IVal,
+    label: string | [string, string],
+    // val: IVal,
     def: IVal,
-    while_: string
+    typ: string[]
+    while_?: string
 }
 
 
@@ -95,7 +101,7 @@ interface IPackage {
         description: string
     }
     startup: {
-        vars: IVar[],
+        var: IVar[],
         actions: IAction[],
         parameters: IParameter[]
     }

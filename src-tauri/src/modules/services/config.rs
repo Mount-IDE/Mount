@@ -118,11 +118,11 @@ impl TConfigService for ConfigService {
         let content = FS_READ_SERVICE.read_file(&file)?;
 
         let json = serde_json::from_str::<Vec<ProjectPackage>>(&content).map_err(|e| {
-            ConfigError::ParsingError(ParsingError::Deserialize {
+            ConfigError::ParsingError{err:ParsingError::Deserialize {
                 json: content,
                 path: path_.clone(),
                 err: e,
-            })
+            }}
         })?;
         Ok(json)
     }
@@ -135,11 +135,11 @@ impl TConfigService for ConfigService {
         let content = FS_READ_SERVICE.read_file(&file)?;
 
         let json = serde_json::from_str::<Vec<ProjectTemplate>>(&content).map_err(|e| {
-            ConfigError::ParsingError(ParsingError::Deserialize {
+            ConfigError::ParsingError{err:ParsingError::Deserialize {
                 json: content,
                 path: path_.clone(),
                 err: e,
-            })
+            }}
         })?;
         Ok(json)    }
 }

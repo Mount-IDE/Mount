@@ -9,13 +9,37 @@ import MainPage from "./components/pages/main-page/MainPage.tsx";
 import Blur from "./components/common/Blur.tsx";
 import {createProjectStore} from "./stores/create_project.ts";
 import CreateProject from "./components/pages/create-project/CreateProject.tsx";
+import {cacheStore} from "./stores/cache_store.ts";
 
 function App() {
     const current = pageStore(state => state.current);
-    const createProjectOpened = createProjectStore(state=>state.page_opened)
+    const createProjectOpened = createProjectStore(state => state.page_opened)
+
+    async function move_to_cache() {
+        try {
+            let templates = await invoke<ITemplate[]>("read_templates");
+            console.log(templates)
+            if (templates.length > 0) {
+                cacheStore.getState().add_templates_to_cache(templates);
+                let temp = templates[0];
+                cacheStore.getState().set_current_template(temp);
+            }
+        } catch (e) {
+            console.error("error while load templates: ", e)
+        }
+        try {
+            let packages = await invoke<IPackage[]>("read_packages");
+            cacheStore.getState().add_packages_to_cache(packages)
+            console.log(packages)
+        } catch (e) {
+            console.error("error while load packages: ", e)
+        }
+
+    }
+
     useEffect(() => {
-        setTimeout(() =>
-            invoke("show_win").then(), 0)
+        setTimeout(() => invoke("show_win").then(), 0)
+        move_to_cache().then();
     }, [])
 
     return (
@@ -24,7 +48,7 @@ function App() {
             <TitleBar/>
             <div id={"main"}>
                 {
-                    createProjectOpened&&
+                    createProjectOpened &&
                     <CreateProject/>
                 }
                 {

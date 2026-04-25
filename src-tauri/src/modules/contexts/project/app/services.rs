@@ -29,10 +29,10 @@ impl TProjectService for ProjectService {
         ]);
         FS_WRITE_SERVICE.create_dir(&Path(path_to_mount.clone()))?;
         let str = serde_json::to_string(&project).map_err(|e| {
-            ProjectError::ParsingError(ParsingError::Serialize {
+            ProjectError::ParsingError{err:ParsingError::Serialize {
                 path: Path(path_to_mount.clone()),
                 err: e,
-            })
+            }}
         })?;
 
         let path_to_conf = make_path_string(vec![
@@ -57,11 +57,11 @@ impl TProjectService for ProjectService {
         };
         let json = FS_READ_SERVICE.read_file(&config)?;
         let proj = serde_json::from_str::<Project>(&json).map_err(|e| {
-            ProjectError::ParsingError(ParsingError::Deserialize {
+            ProjectError::ParsingError{err:ParsingError::Deserialize {
                 json: json.clone(),
                 path: config.path.clone(),
                 err: e,
-            })
+            }}
         })?;
         Ok(proj)
     }
@@ -103,11 +103,11 @@ impl TProjectService for ProjectService {
             }
             let file = file.unwrap();
             let proj = serde_json::from_str::<Project>(&file).map_err(|e| {
-                ProjectError::ParsingError(ParsingError::Deserialize {
+                ProjectError::ParsingError{err:ParsingError::Deserialize {
                     json: file,
                     path: Path(path_to.clone()),
                     err: e,
-                })
+                }}
             })?;
             projects.push(proj);
         }
@@ -136,11 +136,11 @@ impl TProjectService for ProjectService {
 
         let text = FS_READ_SERVICE.read_file(&file)?;
         let projects = serde_json::from_str::<Vec<RecentProject>>(&text).map_err(|e| {
-            ProjectError::ParsingError(ParsingError::Deserialize {
+            ProjectError::ParsingError{err:ParsingError::Deserialize {
                 json: text,
                 path: file.path,
                 err: e,
-            })
+            }}
         })?;
         Ok(projects)
     }

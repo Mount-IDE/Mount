@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use ts_rs::TS;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
@@ -46,10 +46,22 @@ pub struct TemplateMeta {
     pub icon: String
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Deserialize, Clone, Debug, TS)]
 pub enum ParameterLabel{
     STR(String),
     COUPLE((String, String)),
+}
+
+impl Serialize for ParameterLabel{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer
+    {
+        match self {
+            ParameterLabel::STR(s) => serializer.serialize_str(s),
+            ParameterLabel::COUPLE((c1,c2)) =>serializer.collect_seq(vec![c1, c2]),
+        }
+    }
 }
 
 

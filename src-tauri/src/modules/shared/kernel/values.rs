@@ -50,8 +50,9 @@ pub enum Val {
     NUMBER(f64),
     STRING(String),
     BOOL(bool),
-    ARRAY(Vec<Val>),
+    ARRAY(Vec<String>),
 }
+
 
 impl Serialize for Val {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -63,6 +64,35 @@ impl Serialize for Val {
             Val::STRING(val)=>serializer.serialize_str(val),
             Val::BOOL(val)=>serializer.serialize_bool(*val),
             Val::ARRAY(val)=>serializer.collect_seq(val)
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, TS)]
+pub enum ParameterTyp {
+    INPUT(String),
+    CHECK,
+    LIST(Vec<String>),
+    FILE(Vec<String>)
+}
+
+
+impl Serialize for ParameterTyp {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer
+    {
+        match self {
+            ParameterTyp::INPUT(val) =>
+                vec!["input", val].serialize(serializer),
+
+            ParameterTyp::CHECK =>
+                vec!["check"].serialize(serializer),
+
+            ParameterTyp::LIST(val) =>
+                vec!["list"].into_iter().chain(val.iter().map(|s| s.as_str())).collect::<Vec<_>>().serialize(serializer),
+
+            ParameterTyp::FILE(val) =>
+                vec!["file"].into_iter().chain(val.iter().map(|s| s.as_str())).collect::<Vec<_>>().serialize(serializer),
         }
     }
 }

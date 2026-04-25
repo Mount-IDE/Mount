@@ -7,5 +7,6 @@
     &::-webkit-scrollbar{
         width: 2px;
     }
+    padding-bottom: 1px;
 
 }
