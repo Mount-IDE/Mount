@@ -1,7 +1,8 @@
 use std::fmt::Display;
 use serde::{Deserialize, Serialize, Serializer};
+use ts_rs::TS;
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, TS)]
 pub struct Path(pub String);
 impl Path{
     pub fn new(name: &str) -> Self{
@@ -33,7 +34,7 @@ impl Serialize for Path {
     }
 }
 
-#[derive(Deserialize, Clone, Debug)]
+#[derive(Deserialize, Clone, Debug, TS)]
 pub struct Schema(pub u8);
 impl Serialize for Schema {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -44,7 +45,7 @@ impl Serialize for Schema {
     }
 }
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug, TS)]
 pub enum Val {
     NUMBER(f64),
     STRING(String),
@@ -67,57 +68,20 @@ impl Serialize for Val {
 }
 
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatement{
     or: Vec<IfStatementPart>,
     all: Vec<IfStatementPart>
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatementPart{
     from: String,
     oper: String,
     value: Val
 }
 
-// #[derive(Debug, Clone, Serialize)]
-// pub enum FileSystemErrorType {
-//     FileCreationError,
-//     DirectoryCreationError,
-//     FileRemovingError,
-//     DirectoryRemovingError,
-//     FileWritingError,
-//     FileNotExists,
-//     DirectoryNotExists,
-//     DirectoryAlreadyExists,
-//     FileAlreadyExists,
-//     FilePathParsing,
-//     DirectoryPathParsing,
-//     DEFAULT
-// }
-// 
-// #[derive(Debug, Clone, Serialize)]
-// pub enum ProjectErrorType{
-//     Default,
-//     ProjectCreationDirError,
-//     ProjectCreationMountDirError,
-//     ProjectJsonParseError,
-//     ProjectWriteMetaError,
-//     ProjectReadMetaError,
-//     ProjectReadError
-// }
-// 
-// impl Default for ProjectErrorType{
-//     fn default() -> Self {
-//         ProjectErrorType::Default
-//     }
-// }
-// 
-// impl Default for FileSystemErrorType{
-//     fn default() -> Self {
-//         Self::DEFAULT
-//     }
-// }
+
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Dependency{

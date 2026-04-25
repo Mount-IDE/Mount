@@ -1,0 +1,11 @@
+
+#create-project-meta {
+    margin-left: 5%;
+    width: 60%;
+    height: 80%;
+    overflow: scroll;
+    &::-webkit-scrollbar{
+        width: 2px;
+    }
+
+}

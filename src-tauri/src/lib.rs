@@ -1,15 +1,22 @@
+use std::fs;
+use std::path::Path;
 use tauri::{generate_handler};
 use crate::modules::app::cmd::{get_projects, show_win};
 use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS};
-use crate::modules::app::commands::project::{get_recent_projects, read_recent_projects};
+use crate::modules::app::commands::project::{get_recent_projects, read_recent_projects, read_templates};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
 mod modules;
-
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+
+    let out_dir = Path::new("../src/types");
+    fs::create_dir_all(out_dir).unwrap();
+    
+
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app|{
@@ -23,7 +30,8 @@ pub fn run() {
             show_win,
             get_projects,
             get_recent_projects,
-            read_recent_projects
+            read_recent_projects,
+            read_templates
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

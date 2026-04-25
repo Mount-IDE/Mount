@@ -1,3 +1,4 @@
+use std::fs;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::shared::kernel::errors::FileSystemError;
@@ -5,6 +6,7 @@ use crate::modules::shared::kernel::values::{Path};
 
 pub trait TFSReadService{
     fn read_file(&self, file: &PFile) -> Result<String, FileSystemError>;
+    fn read_bytes(&self, file_: &PFile) -> Result<Vec<u8>, FileSystemError>;
     fn read_dir(&self, dir: &PDirectory) -> Result<PDirectory, FileSystemError>;
     fn exist_file(&self, file: &PFile) -> bool;
     fn exist_dir(&self, file: &PDirectory) -> bool;

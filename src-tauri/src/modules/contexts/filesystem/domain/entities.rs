@@ -32,6 +32,16 @@ impl PFile {
         }
     }
 
+    pub fn ext(&self)->Option<String> {
+        let found = self.name.rfind(".");
+        if found.is_some() {
+            let found = found.unwrap();
+            let slice = &self.name.clone()[found..];
+            return Some(slice.to_string());
+        }
+        None
+    }
+    
     pub fn from_path_reg(path: Path) -> PFile {
         let path_ = split_path(&path);
         if path_.len() == 0 {

@@ -1,0 +1,38 @@
+#create-project-templates{
+    width: 15%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#create-project-templates-p{
+    font-size: 10pt;
+    width: 100%;
+    text-align: center;
+    color: var(--subtitle);
+    font-weight: lighter;
+}
+
+#create-project-templates-list {
+    margin-left: 5%;
+    width: 90%;
+    height: 80%;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        width: 2px
+    }
+}
+
+#create-project-templates-manage {
+    width: 100%;
+    background: transparent;
+    color: var(--subtitle);
+    height: 5%;
+
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--title);
+    }
+}

@@ -1,0 +1,102 @@
+interface IRecentProject {
+    name: string,
+    path: string
+}
+
+
+interface IProject {
+    name: string,
+    path: string,
+    meta: {
+        authors: string[],
+        description: string,
+        license: string,
+        tags: string[],
+        group: string
+    },
+    packages: string[]
+}
+
+
+interface ITemplate {
+    id: string,
+    name: string,
+    startup: {
+        var: IVar[],
+        actions: IAction[],
+        sections: ISection[]
+    },
+    packages_id: string[]
+}
+
+
+interface IVar {
+    name: String,
+    val: IVal
+}
+
+interface IVal {
+    [key: string]: string | number | boolean | IVal[]
+}
+
+
+interface ISection {
+    id: number,
+    label: string,
+    list?: [boolean, boolean],
+    params: IParameter[]
+}
+
+interface IParameter {
+    out: string,
+    label: { STR: string } | { COUPLE: [string, string] },
+    val: IVal,
+    def: IVal,
+    while_: string
+}
+
+
+interface IAction {
+    id: number,
+    for_?: string,
+    callable: boolean,
+    if_: IfStatement[],
+    on_error: String,
+    next?: number
+    command: {
+        shell: string,
+        env?: [string, string][],
+        command: {
+            SINGLE: string
+        } |
+            {
+                WithArgs: [string, string[]]
+            }
+    }
+}
+
+interface IfStatement {
+    or?: IfStatementPart[],
+    all?: IfStatementPart[]
+}
+
+interface IfStatementPart {
+    from: string,
+    oper: string,
+    value: IVal
+}
+
+
+interface IPackage {
+    id: string,
+    name: string,
+    meta: {
+        authors: string[],
+        description: string
+    }
+    startup: {
+        vars: IVar[],
+        actions: IAction[],
+        parameters: IParameter[]
+    }
+}

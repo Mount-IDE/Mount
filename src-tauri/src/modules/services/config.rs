@@ -5,10 +5,12 @@ use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWrite
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
+use serde::__private228::de::IdentifierDeserializer;
 use std::string::ToString;
 use tauri::Manager;
 
@@ -107,6 +109,39 @@ impl TConfigService for ConfigService {
         }
         Ok(())
     }
+
+    fn read_packages(&self) -> Result<Vec<ProjectPackage>, ConfigError> {
+        let dir = self.get_data_dir()?;
+        let path_ = make_path(vec![dir.get().as_str(), "packages.json"]);
+        let file = PFile::from_path_reg(path_.clone());
+
+        let content = FS_READ_SERVICE.read_file(&file)?;
+
+        let json = serde_json::from_str::<Vec<ProjectPackage>>(&content).map_err(|e| {
+            ConfigError::ParsingError(ParsingError::Deserialize {
+                json: content,
+                path: path_.clone(),
+                err: e,
+            })
+        })?;
+        Ok(json)
+    }
+
+    fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError> {
+        let dir = self.get_data_dir()?;
+        let path_ = make_path(vec![dir.get().as_str(), "templates.json"]);
+        let file = PFile::from_path_reg(path_.clone());
+
+        let content = FS_READ_SERVICE.read_file(&file)?;
+
+        let json = serde_json::from_str::<Vec<ProjectTemplate>>(&content).map_err(|e| {
+            ConfigError::ParsingError(ParsingError::Deserialize {
+                json: content,
+                path: path_.clone(),
+                err: e,
+            })
+        })?;
+        Ok(json)    }
 }
 
 pub struct ConfigRecoveryService();

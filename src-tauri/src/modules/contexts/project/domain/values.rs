@@ -1,7 +1,8 @@
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectMeta{
     authors: Vec<String>,
     description: String,
@@ -23,7 +24,7 @@ impl ProjectMeta{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct PackageMeta {
     authors: Vec<String>,
     description: String,
@@ -38,21 +39,21 @@ impl PackageMeta{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct TemplateMeta {
-    authors: Vec<String>,
-    description: String,
-    icon: String
+    pub authors: Vec<String>,
+    pub description: String,
+    pub icon: String
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub enum ParameterLabel{
     STR(String),
     COUPLE((String, String)),
 }
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ActionCommand{
     shell: String,
     env: Option<Vec<(String, String)>>,
@@ -69,7 +70,7 @@ impl ActionCommand{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub enum ActionCommandIn{
     Single(String),
     WithArgs(String, Vec<String>)
@@ -77,7 +78,7 @@ pub enum ActionCommandIn{
 
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub enum ButtonPos{
     LeftTop,
     LeftBottom,

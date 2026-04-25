@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta};
 use crate::modules::shared::kernel::values::{IfStatement, Path, Schema, Val};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Project {
     pub name: String,
     pub(crate) path: Path,
@@ -32,7 +34,7 @@ impl Project {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct WorkSpace {
     widgets: Vec<Widget>,
     buttons: Vec<Button>,
@@ -49,16 +51,16 @@ impl WorkSpace{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Widget {}
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct OpenedFile {
     path: Path,
     cursor: (u32, u32),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Button{
     pos: ButtonPos,
     widget: String,
@@ -66,10 +68,10 @@ pub struct Button{
 }
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Task {}
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Var {
     name: String,
     value: Val
@@ -90,14 +92,15 @@ impl Var {
 }
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct ProjectTemplate {
-    id: String,
-    name: String,
-    schema: Schema,
-    meta: Option<TemplateMeta>,
-    startup: TemplateStartup,
-    packages_id: Vec<String>,
+    pub id: String,
+    pub name: String,
+    pub schema: Schema,
+    pub meta: Option<TemplateMeta>,
+    pub startup: TemplateStartup,
+    pub packages_id: Vec<String>,
 
 }
 
@@ -114,11 +117,11 @@ impl ProjectTemplate {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct TemplateStartup {
-    sections: Vec<Section>,
-    actions: Vec<Action>,
-    var: Vec<Var>,
+    pub sections: Vec<Section>,
+    pub actions: Vec<Action>,
+    pub var: Vec<Var>,
 }
 
 impl TemplateStartup {
@@ -131,12 +134,13 @@ impl TemplateStartup {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Section {
-    id: i32,
-    label: String,
-    list: Option<(bool, bool)>,
-    params: Vec<Parameter>
+    pub id: i32,
+    pub label: String,
+    pub list: Option<(bool, bool)>,
+    pub params: Vec<Parameter>
 }
 
 #[allow(unused_variables)]
@@ -151,36 +155,40 @@ impl Section{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Action {
-    id: u32,
-    callable: bool,
-    if_: Vec<IfStatement>,
-    on_error: String,
-    next: Option<u32>,
-    commands: ActionCommand
+    pub id: u32,
+    pub for_: Option<String>,
+    pub callable: bool,
+    pub if_: Vec<IfStatement>,
+    pub on_error: String,
+    pub next: Option<u32>,
+    pub command: ActionCommand
 
 }
 impl Action {
     pub fn new()->Action {
         Self{
             id: 0,
+            for_: None,
             callable: true,
             if_: Vec::new(),
             on_error: String::new(),
             next: None,
-            commands: ActionCommand::new()
+            command: ActionCommand::new()
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Parameter {
-    out: String,
-    label: ParameterLabel,
-    val: Val,
-    def: Val,
-    while_: String
+    pub out: String,
+    pub label: ParameterLabel,
+    pub val: Val,
+    pub def: Val,
+    pub while_: String
 }
 
 impl Parameter {
@@ -195,12 +203,13 @@ impl Parameter {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct ProjectPackage{
     id: String,
     name: String,
     meta: PackageMeta,
-    startup: ProjectStartup
+    startup: PackageStartup
 }
 
 
@@ -210,22 +219,26 @@ impl ProjectPackage{
             id: String::new(),
             name: String::new(),
             meta: PackageMeta::new(),
-            startup: ProjectStartup::new(),
+            startup: PackageStartup::new(),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ProjectStartup{
+
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
+pub struct PackageStartup {
     var: Vec<Var>,
+    actions: Vec<Action>,
     parameters: Vec<Parameter>
 }
 
-impl ProjectStartup{
-    pub fn new()->ProjectStartup {
+impl PackageStartup {
+    pub fn new()-> PackageStartup {
         Self {
             var: Vec::new(),
-            parameters: Vec::new()
+            parameters: Vec::new(),
+            actions: Vec::new(),
         }
     }
 }

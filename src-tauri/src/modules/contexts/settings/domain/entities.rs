@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use crate::modules::shared::kernel::values::Path;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Settings {
     doctype: String,
     version: String,
@@ -23,7 +25,7 @@ impl Settings {
 
 
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct GeneralSettings {
     path_to_projects: Path,
     project_groups: Vec<String>
@@ -47,7 +49,7 @@ impl GeneralSettings {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Appearance {
     theme: String,
     lang: String,
@@ -78,7 +80,8 @@ impl Appearance{
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct RecentProject {
     pub name: String,
     pub path: Path

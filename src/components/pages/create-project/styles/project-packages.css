@@ -1,0 +1,33 @@
+#create-project-packages{
+    width: 15%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#create-project-packages-p{
+    font-size: 10pt;
+    width: 100%;
+    text-align: center;
+    color: var(--subtitle);
+    font-weight: lighter;
+}
+
+
+#create-project-packages-list {
+    width: 100%;
+    height: 80%;
+}
+
+#create-project-packages-manage {
+    width: 100%;
+    background: transparent;
+    color: var(--subtitle);
+    height: 5%;
+
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--title);
+    }
+}

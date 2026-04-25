@@ -35,7 +35,7 @@ export default function MainPage() {
 
     async function loadRecents(){
         try {
-            let recent = await invoke<RecentProject[]>("get_recent_projects");
+            let recent = await invoke<IRecentProject[]>("get_recent_projects");
             let res = await invoke<IProject[]>("read_recent_projects", {
                 recent: recent
             });

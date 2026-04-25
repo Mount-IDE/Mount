@@ -47,49 +47,6 @@
     width: 100%;
     height: 90%;
 }
-#create-project-left{
-    width: 15%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-#create-project-templates-p{
-    font-size: 10pt;
-    width: 100%;
-    text-align: center;
-    color: var(--subtitle);
-    font-weight: lighter;
-}
-
-#create-project-templates {
-    margin-left: 5%;
-    width: 90%;
-    height: 80%;
-    overflow: scroll;
-
-    &::-webkit-scrollbar {
-        width: 2px
-    }
-}
-
-#create-project-packages-list {
-    width: 100%;
-    height: 80%;
-}
-
-#create-project-templates-manage, #create-project-packages-manage {
-    width: 100%;
-    background: transparent;
-    color: var(--subtitle);
-    height: 5%;
-
-    transition: all 0.2s;
-
-    &:hover {
-        color: var(--title);
-    }
-}
 
 #create-project-hr {
     margin-left: 5%;
@@ -99,28 +56,4 @@
     top: 5%;
 }
 
-#create-project-meta {
-    margin-left: 5%;
-    width: 60%;
-    height: 80%;
-    overflow: scroll;
-    &::-webkit-scrollbar{
-        width: 2px;
-    }
 
-}
-
-#create-project-packages{
-    width: 15%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-#create-project-packages-p{
-    font-size: 10pt;
-    width: 100%;
-    text-align: center;
-    color: var(--subtitle);
-    font-weight: lighter;
-}
