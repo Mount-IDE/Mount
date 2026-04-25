@@ -14,4 +14,5 @@ pub trait TConfigRecoveryService {
 
     fn add_settings_by_default(&self)->Result<(), ConfigError>;
     fn add_recents_by_default(&self)->Result<(), ConfigError>;
+    
 }

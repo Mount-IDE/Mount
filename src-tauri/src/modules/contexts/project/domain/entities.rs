@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta};
+use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta};
 use crate::modules::shared::kernel::values::{IfStatement, Path, Schema, Val};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -191,6 +191,41 @@ impl Parameter {
             val: Val::NUMBER(0.0),
             def: Val::NUMBER(0.0),
             while_: String::new()
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ProjectPackage{
+    id: String,
+    name: String,
+    meta: PackageMeta,
+    startup: ProjectStartup
+}
+
+
+impl ProjectPackage{
+    pub fn new()->ProjectPackage {
+        Self {
+            id: String::new(),
+            name: String::new(),
+            meta: PackageMeta::new(),
+            startup: ProjectStartup::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ProjectStartup{
+    var: Vec<Var>,
+    parameters: Vec<Parameter>
+}
+
+impl ProjectStartup{
+    pub fn new()->ProjectStartup {
+        Self {
+            var: Vec::new(),
+            parameters: Vec::new()
         }
     }
 }

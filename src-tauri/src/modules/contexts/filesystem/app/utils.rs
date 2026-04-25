@@ -23,6 +23,9 @@ pub fn make_path_string(paths: Vec<&str>) ->String{
     }
     let mut res = String::new();
     for i in 0..paths.len()-1 {
+        if paths[i].len()==0{
+            continue;
+        }
         println!("path element {i}");
         if cfg!(target_os = "windows") {
             res = format!("{}\\", paths[i]);

@@ -1,16 +1,41 @@
-use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
+use crate::modules::app::{
+    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
+};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::{make_path_string, make_path};
+use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::settings::domain::entities::{Settings};
+use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
+use std::string::ToString;
 use tauri::Manager;
 
 pub struct ConfigService();
 
+struct _File {
+    pub name: String,
+    pub path: Path,
+    pub content: String,
+}
+
+impl _File {
+    pub fn new(name: String, path: String) -> Self {
+        Self {
+            name,
+            path: Path(path),
+            content: String::from("{}"),
+        }
+    }
+    pub fn content(name: String, path: String, content: String) -> Self {
+        Self {
+            name,
+            path: Path(path),
+            content,
+        }
+    }
+}
 
 #[allow(unused_variables)]
 impl TConfigService for ConfigService {
@@ -34,9 +59,13 @@ impl TConfigService for ConfigService {
             .read_file(&file_)
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
         println!("read settings.json was gotten");
-        let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e|
-            ParsingError::Deserialize {path: file_.path, json: file, err:e}
-        )?;
+        let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e| {
+            ParsingError::Deserialize {
+                path: file_.path,
+                json: file,
+                err: e,
+            }
+        })?;
         println!("parsing settings,json was gotten");
         Ok(settings)
     }
@@ -55,7 +84,7 @@ impl TConfigService for ConfigService {
             }
             Err(e) => {
                 println!("{:?}", e);
-                Err(ConfigError::GetDataDir{ err:e })
+                Err(ConfigError::GetDataDir { err: e })
             }
         }
     }
@@ -63,22 +92,46 @@ impl TConfigService for ConfigService {
     fn make_data_dir(&self) -> Result<(), ConfigError> {
         let dir = APP.get().unwrap().path().app_data_dir();
         if dir.is_err() {
-            return Err(ConfigError::GetDataDir{ err:dir.unwrap_err() });
+            return Err(ConfigError::GetDataDir {
+                err: dir.unwrap_err(),
+            });
         }
         let dir = dir.unwrap().to_str().unwrap().to_owned();
         let dir_ = PDirectory::from_path(&Path(dir.clone()));
-        let ext =FS_READ_SERVICE.exist_dir(&dir_);
-        if ext {
-            FS_WRITE_SERVICE.create_dir(&Path(dir)).map_err(
-                |e|
-                  ConfigError::MakeDataDir {err:e}
-            )?;
+        let ext = FS_READ_SERVICE.exist_dir(&dir_);
+        if !ext {
+            FS_WRITE_SERVICE
+                .create_dir(&Path(dir))
+                .map_err(|e| ConfigError::MakeDataDir { err: e })?;
+            CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
         }
         Ok(())
     }
 }
 
 pub struct ConfigRecoveryService();
+
+fn get_files() -> Vec<_File> {
+    vec![
+        _File::new("settings.json".to_string(), "".to_string()),
+        _File::content(
+            "recent-projects.json".to_string(),
+            "".to_string(),
+            "[]".to_string(),
+        ),
+        _File::content(
+            "templates.json".to_string(),
+            "".to_string(),
+            "[]".to_string(),
+        ),
+        _File::content(
+            "packages.json".to_string(),
+            "".to_string(),
+            "[]".to_string(),
+        ),
+        _File::new("".to_string(), "icons".to_string()),
+    ]
+}
 
 impl TConfigRecoveryService for ConfigRecoveryService {
     fn check_data_dir(&self) -> Result<(), ConfigError> {
@@ -89,22 +142,35 @@ impl TConfigRecoveryService for ConfigRecoveryService {
             return Ok(());
         }
         let dir = dir.unwrap();
-        let settings = make_path_string(vec![dir.get().as_str(), "settings.json"]);
-        let file = PFile::regular("settings.json".to_string(), Path(settings));
-        let ext = FS_READ_SERVICE.exist_file(&file);
-        if !ext {
-            println!("no settings");
-            self.repair_data_dir()?;
-            return Ok(());
+        let files = get_files();
+        for file in files {
+            if file.name.len() == 0 {
+                let path_ = make_path(vec![
+                    dir.get().clone().as_str(),
+                    file.path.get().clone().as_str(),
+                ]);
+                let exists = FS_READ_SERVICE.exists(path_.clone());
+                if !exists {
+                    self.repair_data_dir()?;
+                }
+            } else {
+                let path_ = make_path(vec![
+                    dir.get().clone().as_str(),
+                    file.path.get().clone().as_str(),
+                    file.name.clone().as_str(),
+                ]);
+                let exists = FS_READ_SERVICE.exists(path_.clone());
+                if !exists {
+                    self.repair_data_dir()?;
+                }
+                let file = PFile::regular(file.name.clone(), path_.clone());
+                let content = FS_READ_SERVICE.read_file(&file)?;
+                if content.len() == 0 {
+                    self.repair_data_dir()?;
+                }
+            }
         }
-        let recent = make_path_string(vec![dir.get().as_str(), "recent-projects.json"]);
-        let file = PFile::regular("recent-projects.json".to_string(), Path(recent));
-        let ext = FS_READ_SERVICE.exist_file(&file);
-        if !ext {
-            println!("no recent");
-            self.repair_data_dir()?;
-            return Ok(());
-        }
+
         Ok(())
     }
 
@@ -118,39 +184,48 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         }
         let dir = dir.get();
         println!("dir {dir}");
-        let path_to_settings = make_path_string(vec![dir.clone().as_str(), "settings.json"]);
-        let path_to_projects = make_path_string(vec![dir.clone().as_str(), "recent-projects.json"]);
-        let file1 = PFile::from_path_reg(Path(path_to_settings));
-        let file2 = PFile::from_path_reg(Path(path_to_projects));
-        let ext1 = FS_READ_SERVICE.exist_file(&file1);
-        let ext2 = FS_READ_SERVICE.exist_file(&file2);
-        if !ext1 {
-            println!("settings created");
-            self.add_settings_by_default()?;
+        let files = get_files();
 
-        }
-        if !ext2 {
-            println!("recent created");
-            self.add_recents_by_default()?;
+        for i in files {
+            if i.name.len() == 0 {
+                let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
+                if !FS_READ_SERVICE.exists(path_.clone()) {
+                    FS_WRITE_SERVICE.create_dir(&path_)?;
+                }
+            } else {
+                let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
+                if !FS_READ_SERVICE.exists(path_.clone()) {
+                    FS_WRITE_SERVICE.create_dir(&path_)?;
+                }
+                let path_ = make_path(vec![path_.get().as_str(), i.name.clone().as_str()]);
+                if !FS_READ_SERVICE.exists(path_.clone()) {
+                    FS_WRITE_SERVICE.create_file(&path_)?;
+                    let file = PFile::regular(i.name.clone(), path_);
+                    FS_WRITE_SERVICE.write_file(
+                        &file,
+                        i.content.clone(),
+                        FileWriteAccess::APPEND,
+                    )?;
+                }
+            }
         }
         Ok(())
     }
 
     fn add_settings_by_default(&self) -> Result<(), ConfigError> {
         let settings = Settings::new();
-        let dir= CONFIG_SERVICE.get_data_dir()?;
+        let dir = CONFIG_SERVICE.get_data_dir()?;
         let path = make_path(vec![dir.get().as_str(), "settings.json"]);
         let file = PFile::from_path_reg(path.clone());
         FS_WRITE_SERVICE.create_file(&path.clone())?;
-        let json = serde_json::to_string(&settings).map_err(|e|
-            ParsingError::Serialize {path, err:e}
-        )?;
+        let json = serde_json::to_string(&settings)
+            .map_err(|e| ParsingError::Serialize { path, err: e })?;
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
         Ok(())
     }
 
     fn add_recents_by_default(&self) -> Result<(), ConfigError> {
-        let dir= CONFIG_SERVICE.get_data_dir()?;
+        let dir = CONFIG_SERVICE.get_data_dir()?;
         let path = make_path(vec![dir.get().as_str(), "recent-projects.json"]);
         let file = PFile::from_path_reg(path.clone());
         let json = String::from("[ ]");

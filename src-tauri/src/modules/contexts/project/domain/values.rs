@@ -23,6 +23,20 @@ impl ProjectMeta{
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct PackageMeta {
+    authors: Vec<String>,
+    description: String,
+}
+
+impl PackageMeta{
+    pub fn new()->Self{
+        Self {
+            authors: Vec::new(),
+            description: String::new(),
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TemplateMeta {

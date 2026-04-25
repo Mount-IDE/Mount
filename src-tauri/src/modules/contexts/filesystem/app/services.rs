@@ -102,6 +102,15 @@ impl TFSReadService for FileSystemReadService {
         let ext = ext.unwrap();
         ext
     }
+
+    fn exists(&self, path: Path) -> bool {
+        let path_ = path.get();
+        let ext = fs::exists(path_);
+        if ext.is_err(){
+            return false;
+        }
+        ext.unwrap()
+    }
 }
 
 

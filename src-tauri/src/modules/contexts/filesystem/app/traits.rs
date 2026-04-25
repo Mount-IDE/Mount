@@ -8,6 +8,10 @@ pub trait TFSReadService{
     fn read_dir(&self, dir: &PDirectory) -> Result<PDirectory, FileSystemError>;
     fn exist_file(&self, file: &PFile) -> bool;
     fn exist_dir(&self, file: &PDirectory) -> bool;
+    
+    
+    
+    fn exists(&self, path: Path) -> bool;
 }
 
 pub trait TFSWriteService {
