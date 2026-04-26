@@ -10,7 +10,6 @@ use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
-use serde::__private228::de::IdentifierDeserializer;
 use std::string::ToString;
 use tauri::Manager;
 
@@ -118,11 +117,13 @@ impl TConfigService for ConfigService {
         let content = FS_READ_SERVICE.read_file(&file)?;
 
         let json = serde_json::from_str::<Vec<ProjectPackage>>(&content).map_err(|e| {
-            ConfigError::ParsingError{err:ParsingError::Deserialize {
-                json: content,
-                path: path_.clone(),
-                err: e,
-            }}
+            ConfigError::ParsingError {
+                err: ParsingError::Deserialize {
+                    json: content,
+                    path: path_.clone(),
+                    err: e,
+                },
+            }
         })?;
         Ok(json)
     }
@@ -135,13 +136,52 @@ impl TConfigService for ConfigService {
         let content = FS_READ_SERVICE.read_file(&file)?;
 
         let json = serde_json::from_str::<Vec<ProjectTemplate>>(&content).map_err(|e| {
-            ConfigError::ParsingError{err:ParsingError::Deserialize {
-                json: content,
-                path: path_.clone(),
-                err: e,
-            }}
+            ConfigError::ParsingError {
+                err: ParsingError::Deserialize {
+                    json: content,
+                    path: path_.clone(),
+                    err: e,
+                },
+            }
         })?;
-        Ok(json)    }
+        Ok(json)
+    }
+
+    fn get_home_dir(&self) -> Result<Path, ConfigError> {
+        let path = APP
+            .get()
+            .unwrap()
+            .path()
+            .home_dir()
+            .map_err(|e| ConfigError::HomeDir { err: e })?;
+        let path_ = path.as_path().to_str().unwrap().to_string();
+        Ok(Path(path_))
+    }
+    fn make_projects_dir(&self) -> Result<(), ConfigError> {
+        let mut path = APP
+            .get()
+            .unwrap()
+            .path()
+            .home_dir()
+            .map_err(|e| ConfigError::HomeDir { err: e })?;
+        path.push("MountProjects");
+        let path_ = path.as_path().to_str().unwrap().to_string();
+        FS_WRITE_SERVICE.create_dir(&Path(path_))?;
+        Ok(())
+    }
+
+    fn get_projects_dir(&self) -> Result<Path, ConfigError> {
+        let mut path = APP
+            .get()
+            .unwrap()
+            .path()
+            .home_dir()
+            .map_err(|e| ConfigError::HomeDir { err: e })?;
+        
+        path.push("MountProjects");
+        let path_ = path.as_path().to_str().unwrap().to_string();
+        Ok(Path(path_))
+    }
 }
 
 pub struct ConfigRecoveryService();
@@ -177,6 +217,11 @@ impl TConfigRecoveryService for ConfigRecoveryService {
             return Ok(());
         }
         let dir = dir.unwrap();
+        let projects = CONFIG_SERVICE.get_projects_dir();
+        if projects.is_err() {
+            self.repair_data_dir()?;
+            return Ok(());
+        }
         let files = get_files();
         for file in files {
             if file.name.len() == 0 {
@@ -219,6 +264,11 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         }
         let dir = dir.get();
         println!("dir {dir}");
+        
+        let projects = CONFIG_SERVICE.get_projects_dir();
+        if projects.is_err() {
+            CONFIG_SERVICE.make_projects_dir()?;
+        }
         let files = get_files();
 
         for i in files {

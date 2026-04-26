@@ -6,7 +6,7 @@ use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS
 use crate::modules::app::commands::project::{get_recent_projects, read_recent_projects};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::app::commands::cache::{read_packages, read_templates};
-
+use crate::modules::app::commands::config::*;
 mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
@@ -34,7 +34,9 @@ pub fn run() {
             get_recent_projects,
             read_recent_projects,
             read_templates,
-            read_packages
+            read_packages,
+            get_home_dir,
+            get_projects_dir
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

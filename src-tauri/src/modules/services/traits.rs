@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::shared::kernel::errors::ConfigError;
@@ -10,6 +11,10 @@ pub trait TConfigService {
 
     fn read_packages(&self)->Result<Vec<ProjectPackage>, ConfigError>;
     fn read_templates(&self)->Result<Vec<ProjectTemplate>, ConfigError>;
+    
+    fn get_home_dir(&self)->Result<Path, ConfigError>;
+    fn make_projects_dir(&self) ->Result<(), ConfigError>;
+    fn get_projects_dir(&self)->Result<Path, ConfigError>;
 }
 
 pub trait TConfigRecoveryService {

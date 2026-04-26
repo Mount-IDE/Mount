@@ -111,6 +111,12 @@ pub enum ConfigError {
     },
     #[error("filesystem error that can`t describe as config error")]
     FileSystem(#[from] FileSystemError),
+    #[error("failed to get home dir")]
+    HomeDir{
+        #[source]
+        err: tauri::Error
+    }
+    
 }
 
 #[derive(Debug, Error)]

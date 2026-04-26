@@ -1,10 +1,13 @@
 import "./styles/project-meta.css"
 import Section from "./Section.tsx";
+import {cacheStore} from "../../../stores/cache_store.ts";
 
 
 
 
 export default function ProjectMeta() {
+
+    const project_path = cacheStore(state=>state.projects_path);
 
     const base_meta:ISection[] = [
         {
@@ -18,7 +21,7 @@ export default function ProjectMeta() {
                     out: "project-name",
                     typ: ["input", "base"],
                 },{
-                    def: "",
+                    def: project_path,
                     label: ["Project Path", "Enter a project path"],
                     out: "project-path",
                     typ: ["file", "dir"],

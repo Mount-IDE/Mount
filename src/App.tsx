@@ -35,6 +35,14 @@ function App() {
             console.error("error while load packages: ", e)
         }
 
+        try {
+            let path = await invoke<string>("get_projects_dir")
+            cacheStore.getState().set_projects_path(path);
+        } catch (e) {
+            console.error("error while load project path: ", e)
+
+        }
+
     }
 
     useEffect(() => {

@@ -13,7 +13,9 @@ interface Type {
     clear_templates: () => void
     clear_packages: () => void
     clear_current_template: () => void
-    set_current_template: (t:ITemplate)=>void
+    set_current_template: (t:ITemplate)=>void,
+    projects_path: string
+    set_projects_path:(path: string)=>void
 }
 
 
@@ -21,6 +23,7 @@ export const cacheStore = create<Type>((set, get) => ({
     currentTemplate: null,
     packages: [],
     templates: [],
+    projects_path: "",
     add_package_to_cache: (t: IPackage) => set(prev => {
         const pack = prev.packages;
         if (!pack.map(el=>el.id).includes(t.id)){
@@ -74,6 +77,8 @@ export const cacheStore = create<Type>((set, get) => ({
             templates: temps
         }
     }),
-    set_current_template: (t:ITemplate)=> set({currentTemplate: t})
+    set_current_template: (t:ITemplate)=> set({currentTemplate: t}),
+    set_projects_path:(path: string)=> set({projects_path:path})
+
 
 }))
