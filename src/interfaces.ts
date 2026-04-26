@@ -40,9 +40,7 @@ interface IVar {
     val: IVal
 }
 
-type IVal= string | boolean | number | string[]
-
-
+type IVal = string | boolean | number | string[]
 
 
 interface ISection {
@@ -69,16 +67,18 @@ interface IAction {
     if_: IfStatement[],
     on_error: String,
     next?: number
-    command: {
-        shell: string,
-        env?: [string, string][],
-        command: {
-            SINGLE: string
-        } |
-            {
-                WithArgs: [string, string[]]
-            }
-    }
+    command:
+        {
+            platform: string
+            shell: string,
+            env?: [string, string][],
+            command: {
+                SINGLE: string
+            } |
+                {
+                    WithArgs: [string, string[]]
+                }
+        }[]
 }
 
 interface IfStatement {

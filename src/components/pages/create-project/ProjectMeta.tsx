@@ -78,10 +78,18 @@ export default function ProjectMeta() {
         }
     ]
 
+    const template = cacheStore(state => state.currentTemplate);
+
+    const other_sections = template? template.startup.sections : []
+
+
     return (
         <div id={"create-project-meta"}>
             {base_meta.map(
                 (el, i)=>
+                <Section section={el} key={`base-${i}`}/>
+            )}
+            {other_sections.map((el, i)=>
                 <Section section={el} key={i}/>
             )}
         </div>

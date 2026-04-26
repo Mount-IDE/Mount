@@ -9,6 +9,8 @@
     &:hover{
         color: var(--title);
     }
+
+    margin-bottom: 10px;
 }
 .project-template-current{
     border-bottom: 1px solid var(--border) !important;
@@ -18,6 +20,8 @@
     gap:1%;
     transition: all 0.2s;
     color: var(--title);
+    margin-bottom: 10px;
+
 }
 
 .project-template-icon{

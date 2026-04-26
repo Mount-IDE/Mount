@@ -1,8 +1,8 @@
 use std::fmt::Display;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Deserializer, Serializer, de};
 use ts_rs::TS;
 
-#[derive(Clone, Debug, Deserialize, TS)]
+#[derive(Clone, Serialize, Debug, Deserialize, TS)]
 pub struct Path(pub String);
 impl Path{
     pub fn new(name: &str) -> Self{
@@ -25,27 +25,13 @@ impl Display for Path {
 }
 
 
-impl Serialize for Path {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer
-    {
-        serializer.collect_str(&self.0)
-    }
-}
 
-#[derive(Deserialize, Clone, Debug, TS)]
+#[derive(Deserialize, Serialize, Clone, Debug, TS)]
 pub struct Schema(pub u8);
-impl Serialize for Schema {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer
-    {
-        serializer.serialize_u8(self.0)
-    }
-}
 
-#[derive(Clone, Deserialize, Debug, TS)]
+
+#[derive(Clone,Serialize, Deserialize, Debug, TS)]
+#[serde(untagged)]
 pub enum Val {
     NUMBER(f64),
     STRING(String),
@@ -53,27 +39,41 @@ pub enum Val {
     ARRAY(Vec<String>),
 }
 
-
-impl Serialize for Val {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer
-    {
-        match self{
-            Val::NUMBER(val)=>serializer.serialize_f64(*val),
-            Val::STRING(val)=>serializer.serialize_str(val),
-            Val::BOOL(val)=>serializer.serialize_bool(*val),
-            Val::ARRAY(val)=>serializer.collect_seq(val)
-        }
+impl Default for Val {
+    fn default() -> Self {
+        Val::NUMBER(0.0)
     }
 }
 
-#[derive(Clone, Debug, Deserialize, TS)]
+
+#[derive(Clone, Debug, TS)]
 pub enum ParameterTyp {
     INPUT(String),
     CHECK,
     LIST(Vec<String>),
     FILE(Vec<String>)
+}
+
+impl Default for ParameterTyp{
+    fn default() -> Self {
+        Self::CHECK
+    }
+}
+
+impl<'de> Deserialize<'de> for ParameterTyp {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: Deserializer<'de>
+    {
+        let v: Vec<&str> = Vec::deserialize(deserializer)?;
+
+        match v.as_slice() {
+            ["check"] => Ok(ParameterTyp::CHECK),
+            ["input", val] => Ok(ParameterTyp::INPUT(val.to_string())),
+            ["list", rest @ ..] => Ok(ParameterTyp::LIST(rest.iter().map(|s| s.to_string()).collect())),
+            ["file", rest @ ..] => Ok(ParameterTyp::FILE(rest.iter().map(|s| s.to_string()).collect())),
+            _ => Err(de::Error::custom("invalid ParameterTyp"))
+        }
+    }
 }
 
 
@@ -100,8 +100,8 @@ impl Serialize for ParameterTyp {
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatement{
-    or: Vec<IfStatementPart>,
-    all: Vec<IfStatementPart>
+    or: Option<Vec<IfStatementPart>>,
+    all: Option<Vec<IfStatementPart>>
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]

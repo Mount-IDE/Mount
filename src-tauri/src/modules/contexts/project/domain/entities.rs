@@ -2,6 +2,9 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta};
 use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Schema, Val};
+use super::default::template::*;
+use super::default::section::*;
+use super::default::action::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -73,7 +76,9 @@ pub struct Task {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Var {
+    #[serde(default)]
     name: String,
+    #[serde(default)]
     value: Val
 }
 impl Var {
@@ -95,11 +100,16 @@ impl Var {
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct ProjectTemplate {
+    #[serde(default="t_id")]
     pub id: String,
+    #[serde(default="t_name")]
     pub name: String,
+    #[serde(default="t_schema")]
     pub schema: Schema,
     pub meta: Option<TemplateMeta>,
+    #[serde(default="t_startup")]
     pub startup: TemplateStartup,
+    #[serde(default)]
     pub packages_id: Vec<String>,
 
 }
@@ -119,8 +129,11 @@ impl ProjectTemplate {
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct TemplateStartup {
+    #[serde(default)]
     pub sections: Vec<Section>,
+    #[serde(default)]
     pub actions: Vec<Action>,
+    #[serde(default)]
     pub var: Vec<Var>,
 }
 
@@ -137,9 +150,13 @@ impl TemplateStartup {
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct Section {
+    #[serde(default)]
     pub id: i32,
+    #[serde(default)]
     pub label: String,
+    #[serde(default="t_list")]
     pub list: (bool, bool),
+    #[serde(default)]
     pub params: Vec<Parameter>
 }
 
@@ -158,13 +175,17 @@ impl Section{
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct Action {
+    #[serde(default)]
     pub id: u32,
     pub for_: Option<String>,
-    pub callable: bool,
+    pub callable: Option<bool>,
+    #[serde(default)]
     pub if_: Vec<IfStatement>,
+    #[serde(default="t_error")]
     pub on_error: String,
     pub next: Option<u32>,
-    pub command: ActionCommand
+    #[serde(default)]
+    pub command: Vec<ActionCommand>
 
 }
 impl Action {
@@ -172,11 +193,11 @@ impl Action {
         Self{
             id: 0,
             for_: None,
-            callable: true,
+            callable: None,
             if_: Vec::new(),
             on_error: String::new(),
             next: None,
-            command: ActionCommand::new()
+            command: Vec::new()
         }
     }
 }
@@ -184,10 +205,13 @@ impl Action {
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct Parameter {
+    #[serde(default)]
     pub out: String,
+    #[serde(default)]
     pub label: ParameterLabel,
-    pub typ: Vec<ParameterTyp>,
-    // pub val: Val,
+    #[serde(default)]
+    pub typ: ParameterTyp,
+    #[serde(default)]
     pub def: Val,
     pub while_: Option<String>
 }
@@ -200,7 +224,7 @@ impl Parameter {
             // val: Val::NUMBER(0.0),
             def: Val::NUMBER(0.0),
             while_: None,
-            typ: Vec::new()
+            typ: ParameterTyp::CHECK
         }
     }
 }

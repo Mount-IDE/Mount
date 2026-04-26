@@ -1,6 +1,8 @@
 use std::fmt::Debug;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use ts_rs::TS;
+use super::default::template::t_meta_icon;
+use super::default::action::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectMeta{
@@ -41,40 +43,47 @@ impl PackageMeta{
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct TemplateMeta {
+    #[serde(default)]
     pub authors: Vec<String>,
+    #[serde(default)]
     pub description: String,
+    #[serde(default="t_meta_icon")]
     pub icon: String
 }
 
-#[derive(Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[serde(untagged)]
 pub enum ParameterLabel{
     STR(String),
     COUPLE((String, String)),
 }
 
-impl Serialize for ParameterLabel{
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer
-    {
-        match self {
-            ParameterLabel::STR(s) => serializer.serialize_str(s),
-            ParameterLabel::COUPLE((c1,c2)) =>serializer.collect_seq(vec![c1, c2]),
-        }
+impl Default for ParameterLabel{
+    fn default()->Self{
+        ParameterLabel::STR("".to_string())
     }
 }
 
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ActionCommand{
+    #[serde(default="t_platform_def")]
+    platform: String,
+    #[serde(default="t_shell_def")]
     shell: String,
     env: Option<Vec<(String, String)>>,
+    #[serde(default)]
     command: ActionCommandIn
 }
+
+
+
+
 
 impl ActionCommand{
     pub fn new()->ActionCommand{
         Self{
+            platform: String::new(),
             shell: String::new(),
             env: None,
             command: ActionCommandIn::Single(String::new())
@@ -82,11 +91,21 @@ impl ActionCommand{
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize,Deserialize, Clone, Debug, TS)]
+#[serde(untagged)]
 pub enum ActionCommandIn{
     Single(String),
     WithArgs(String, Vec<String>)
 }
+
+impl Default for ActionCommandIn{
+    fn default()->Self{
+        Self::Single(String::new())
+    }
+}
+
+
+
 
 
 

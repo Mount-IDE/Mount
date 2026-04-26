@@ -4,7 +4,6 @@ import {open} from "@tauri-apps/plugin-dialog"
 import {ChangeEvent, InputEvent, useState} from "react";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
-import {parseAst} from "vite";
 
 type Props = {
     param: IParameter
