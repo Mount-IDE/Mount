@@ -4,10 +4,10 @@ import {open} from "@tauri-apps/plugin-dialog"
 import {ChangeEvent, InputEvent, useState} from "react";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
+import {parseAst} from "vite";
 
 type Props = {
     param: IParameter
-    // get_default: () => boolean | null
     set: (val: string | boolean) => void,
     section: number,
     allParams: IParameter[]
@@ -50,19 +50,28 @@ export default function Parameter(props: Props) {
     if (props.param.out.includes("git"))
         console.log(`active ${props.param.out} :: ${show}`)
 
+    const self_key = `${current_template?.id}:${section}:${param.out}`
+
+    const get = createProjectStore(state=>state.get_result);
+    const has = createProjectStore(state=>state.has_result);
+
+    const new_def = has(self_key)? get(self_key)!: props.param.def;
+
+
+
     return (
         <div className={"project-parameter"}>
             {typ == "input" &&
-                <InputParameter def={show} parameter={props.param} set_value={props.set}/>
+                <InputParameter val={new_def} def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "check" &&
-                <CheckParameter def={show} parameter={props.param} set_value={props.set}/>
+                <CheckParameter val={new_def} def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "list" &&
-                <ListParameter def={show} parameter={props.param} set_value={props.set}/>
+                <ListParameter val={new_def} def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "file" &&
-                <FileParameter def={show} parameter={props.param} set_value={props.set}/>
+                <FileParameter val={new_def} def={show} parameter={props.param} set_value={props.set}/>
             }
             {
                 typ == null &&
@@ -77,6 +86,7 @@ interface ParameterValue {
     parameter: IParameter,
     def: boolean,
     set_value: (val: string | boolean) => void
+    val: IVal
 }
 
 
@@ -84,7 +94,7 @@ function InputParameter(props: ParameterValue) {
     const typ = props.parameter.typ[1];
     const param = props.parameter;
     const label = param.label;
-    const def_ = props.parameter.def;
+    const def_ = props.val;
 
     function write(event: InputEvent<HTMLInputElement> | InputEvent<HTMLTextAreaElement>) {
         const tg = event.currentTarget.value;
@@ -115,7 +125,7 @@ function InputParameter(props: ParameterValue) {
 function CheckParameter(props: ParameterValue) {
     const param = props.parameter;
     const label = param.label;
-    const def_ = props.parameter.def;
+    const def_ = props.val;
 
     function write(event: ChangeEvent<HTMLInputElement>) {
         const tg = event.currentTarget.checked;
@@ -139,7 +149,7 @@ function CheckParameter(props: ParameterValue) {
 function ListParameter(props: ParameterValue) {
     const param = props.parameter;
     const label = param.label;
-    const def_ = props.parameter.def;
+    const def_ = props.val;
     const typ = props.parameter.typ.slice(1);
 
     function write(event: ChangeEvent<HTMLSelectElement>) {
@@ -170,8 +180,7 @@ function FileParameter(props: ParameterValue) {
     const typ = props.parameter.typ[1];
     const param = props.parameter;
     const label = param.label;
-    const def_ = props.parameter.def;
-
+    const def_ = props.val;
     const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
 
     async function openDialog() {
@@ -212,10 +221,12 @@ function FileParameter(props: ParameterValue) {
     return (
         <div className={classes}>
             <p className={"project-parameter-input-p"}>{label[0]}</p>
-            <input placeholder={label[1]} value={val} onInput={write}/>
-            <button onClick={openDialog}>
-                <img src={dir}/>
-            </button>
+            <div>
+                <input placeholder={label[1]} value={val} onInput={write}/>
+                <button onClick={openDialog}>
+                    <img src={dir}/>
+                </button>
+            </div>
 
         </div>
     )

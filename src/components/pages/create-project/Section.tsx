@@ -28,32 +28,6 @@ export default function Section(props: Props) {
         }
     }, [props.section]);
 
-
-   /* const fn = /!*useCallback<(el: IParameter)=>boolean|null>(*!/
-        (el: IParameter)=>{
-        if (el.while_ === undefined){
-            return null;
-        }
-        const dependency = props.section.params.find(p => p.out === el.while_);
-        if (!dependency) {
-            return null;
-        }
-
-        const key = `${current_template.id}:${props.section.id}:${dependency.out}`;
-
-        if (!has_result(key)){
-            return false;
-        }
-
-        const currentValue = get_result(key);
-
-        if (typeof currentValue !== typeof dependency.def) {
-            return false;
-        }
-        return currentValue !== dependency.def;
-
-    }/!*,[props.section.params, current_template, props.section.id, has_result, get_result]);*!/*/
-
     return (
         <div className={"project-section"}>
             <div className={"project-section-head"}
@@ -88,7 +62,6 @@ export default function Section(props: Props) {
                         }}
                         param={el}
                         key={`${props.section.id}${el.out}`}
-                        // get_default={()=>fn(el)}
                         section={props.section.id}
                         allParams={props.section.params}
                     />)}

@@ -16,6 +16,7 @@
     width: 100%;
     height: 100%;
     gap: 10px;
+    transition: all 0.2s;
 }
 
 .project-parameter-value-disabled {
@@ -25,7 +26,7 @@
 .project-parameter-input, .project-parameter-file {
     flex-direction: column;
 
-    & > input, & > textarea {
+    &  input, &  textarea {
         width: 100%;
         min-height: 5vh;
         background: var(--input);
@@ -41,32 +42,38 @@
         }
     }
 
-    & > textarea {
+    &  textarea {
         resize: vertical;
     }
 
-    & > p {
+    &  p {
         color: var(--subtitle);
         font-size: 10pt;
     }
 }
 .project-parameter-file{
-    flex-direction: row;
-    &>button{
-        height: 100%;
-        aspect-ratio: 1/1;
-        background: transparent;
+    &>div{
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        &>img{
-            width: 50%;
-            height: 50%;
-            display: block;
-            object-fit: contain;
+        width: 100%;
+
+        &>button{
+            height: 100%;
+            aspect-ratio: 1/1;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            &>img{
+                width: 50%;
+                height: 50%;
+                display: block;
+                object-fit: contain;
+            }
         }
     }
+
+
 }
 
 
