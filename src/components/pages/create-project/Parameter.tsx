@@ -1,29 +1,68 @@
 import "./styles/parameter.css"
-
+import dir from "../../../assets/dir.svg"
+import {open} from "@tauri-apps/plugin-dialog"
+import {ChangeEvent, InputEvent, useState} from "react";
+import {cacheStore} from "../../../stores/cache_store.ts";
+import {createProjectStore} from "../../../stores/create_project.ts";
 
 type Props = {
     param: IParameter
-    get_default: () => boolean | null
-    set: (val: string | boolean )=>void
+    // get_default: () => boolean | null
+    set: (val: string | boolean) => void,
+    section: number,
+    allParams: IParameter[]
 }
 
 export default function Parameter(props: Props) {
-
-    const is_active = props.get_default();
     const typ = props.param.typ.length > 0 ? props.param.typ[0] : null;
+
+    const {param, section} = props;
+
+    const current_template = cacheStore(state => state.currentTemplate);
+
+    const dependencyKey = param.while_
+        ? `${current_template!.id}:${section}:${param.while_}`
+        : null;
+
+    const dependencyValue = createProjectStore(state =>
+        dependencyKey ? state.results.get(dependencyKey) : undefined
+    );
+
+    const dependency = param.while_
+        ? props.allParams.find(el => el.out == param.while_)
+        : null;
+
+    const is_active = (() => {
+        if (!param.while_) return null;
+        if (!dependency) return null;
+        if (dependencyValue === undefined) {
+            return false;
+        }
+        if (typeof dependencyValue !== typeof dependency.def) {
+            return false;
+        }
+
+        return dependencyValue !== dependency.def;
+    })();
+
+    const show = typeof is_active == "boolean" ? is_active : true;
+
+    if (props.param.out.includes("git"))
+        console.log(`active ${props.param.out} :: ${show}`)
+
     return (
         <div className={"project-parameter"}>
             {typ == "input" &&
-                <InputParameter def={is_active} parameter={props.param} set_value={props.set}/>
+                <InputParameter def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "check" &&
-                <CheckParameter def={is_active} parameter={props.param} set_value={props.set}/>
+                <CheckParameter def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "list" &&
-                <ListParameter def={is_active} parameter={props.param} set_value={props.set}/>
+                <ListParameter def={show} parameter={props.param} set_value={props.set}/>
             }
             {typ == "file" &&
-                <FileParameter def={is_active} parameter={props.param} set_value={props.set}/>
+                <FileParameter def={show} parameter={props.param} set_value={props.set}/>
             }
             {
                 typ == null &&
@@ -36,7 +75,7 @@ export default function Parameter(props: Props) {
 
 interface ParameterValue {
     parameter: IParameter,
-    def: boolean | null,
+    def: boolean,
     set_value: (val: string | boolean) => void
 }
 
@@ -47,16 +86,27 @@ function InputParameter(props: ParameterValue) {
     const label = param.label;
     const def_ = props.parameter.def;
 
+    function write(event: InputEvent<HTMLInputElement> | InputEvent<HTMLTextAreaElement>) {
+        const tg = event.currentTarget.value;
+        setVal(tg)
+        props.set_value(tg)
+    }
+
+    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
+
+    let classes = props.def ? "project-parameter-value project-parameter-input" :
+        "project-parameter-value project-parameter-input project-parameter-value-disabled"
+
 
     return (
-        <div className={"project-parameter-value project-parameter-input"}>
+        <div className={classes}>
             <p className={"project-parameter-input-p"}>{label[0]}</p>
             {typ == "base" &&
-                <input placeholder={label[1]} defaultValue={typeof def_ == "string" ? def_ : ""}/>
+                <input placeholder={label[1]} value={val} onInput={write}/>
             }
             {
                 typ == "resize" &&
-                <textarea placeholder={label[1]} defaultValue={typeof def_ == "string" ? def_ : ""}/>
+                <textarea placeholder={label[1]} value={val} onInput={write}/>
             }
         </div>
     )
@@ -66,9 +116,21 @@ function CheckParameter(props: ParameterValue) {
     const param = props.parameter;
     const label = param.label;
     const def_ = props.parameter.def;
+
+    function write(event: ChangeEvent<HTMLInputElement>) {
+        const tg = event.currentTarget.checked;
+        setVal(tg)
+        props.set_value(tg)
+    }
+
+    const [val, setVal] = useState<boolean>(typeof def_ == "boolean" ? def_ : false)
+
+    let classes = props.def ? "project-parameter-value project-parameter-check" :
+        "project-parameter-value project-parameter-check project-parameter-value-disabled"
+
     return (
-        <div className={"project-parameter-value project-parameter-check"}>
-            <input type={"checkbox"} defaultChecked={typeof def_ == "boolean" ? def_ : false}/>
+        <div className={classes}>
+            <input type={"checkbox"} checked={val} onChange={write}/>
             <p>{label}</p>
         </div>
     )
@@ -79,9 +141,22 @@ function ListParameter(props: ParameterValue) {
     const label = param.label;
     const def_ = props.parameter.def;
     const typ = props.parameter.typ.slice(1);
+
+    function write(event: ChangeEvent<HTMLSelectElement>) {
+        const tg = event.currentTarget.value;
+        setVal(tg)
+        props.set_value(tg)
+    }
+
+    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
+
+    let classes = props.def ? "project-parameter-value project-parameter-list" :
+        "project-parameter-value project-parameter-list project-parameter-value-disabled"
+
+
     return (
-        <div className={"project-parameter-value project-parameter-list"}>
-            <select>
+        <div className={classes}>
+            <select value={val} onChange={write}>
                 {typ.map((el, i) =>
                     <option key={i}>{el}</option>
                 )}
@@ -92,8 +167,55 @@ function ListParameter(props: ParameterValue) {
 }
 
 function FileParameter(props: ParameterValue) {
+    const typ = props.parameter.typ[1];
+    const param = props.parameter;
+    const label = param.label;
+    const def_ = props.parameter.def;
+
+    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
+
+    async function openDialog() {
+        if (typ == "file") {
+            const res = await open({
+                directory: false,
+                title: "Choose the file"
+            })
+            if (res !== null) {
+                console.log("path ", res)
+                props.set_value(res)
+                setVal(res)
+            }
+        } else {
+            const res = await open({
+                directory: true,
+                title: "Choose the directory"
+            })
+            if (res !== null) {
+                console.log("path ", res)
+                props.set_value(res)
+                setVal(res)
+            }
+        }
+    }
+
+    function write(event: InputEvent<HTMLInputElement>) {
+        const tg = event.currentTarget.value;
+        setVal(tg)
+
+        props.set_value(tg)
+    }
+
+    let classes = props.def ? "project-parameter-value project-parameter-file" :
+        "project-parameter-value project-parameter-file project-parameter-value-disabled"
+
+
     return (
-        <div className={"project-parameter-value project-parameter-file"}>
+        <div className={classes}>
+            <p className={"project-parameter-input-p"}>{label[0]}</p>
+            <input placeholder={label[1]} value={val} onInput={write}/>
+            <button onClick={openDialog}>
+                <img src={dir}/>
+            </button>
 
         </div>
     )

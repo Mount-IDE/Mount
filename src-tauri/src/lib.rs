@@ -20,6 +20,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app|{
             APP.set(app.handle().clone()).expect("no app btw :(");
             CONFIG_RECOVERY_SERVICE.check_data_dir().expect("TODO: panic message");

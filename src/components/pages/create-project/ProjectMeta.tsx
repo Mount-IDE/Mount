@@ -21,7 +21,7 @@ export default function ProjectMeta() {
                     def: "",
                     label: ["Project Path", "Enter a project path"],
                     out: "project-path",
-                    typ: ["input", "base"],
+                    typ: ["file", "dir"],
                 }
             ]
         },{

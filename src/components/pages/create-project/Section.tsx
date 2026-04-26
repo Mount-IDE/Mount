@@ -16,9 +16,9 @@ export default function Section(props: Props) {
     const [isList, _] = useState(props.section.list[0]);
 
     const current_template = cacheStore.getState().currentTemplate!;
-    const get_result = createProjectStore.getState().get_result;
-    const has_result = createProjectStore.getState().has_result;
-    const set_value = createProjectStore.getState().add_result;
+    const get_result = createProjectStore(state=>state.get_result);
+    const has_result = createProjectStore(state=>state.has_result);
+    const set_value = createProjectStore(state=>state.add_result);
     useEffect(() => {
         const is_opened = props.section.list[1];
         if (!isList) {
@@ -29,26 +29,30 @@ export default function Section(props: Props) {
     }, [props.section]);
 
 
-    const fn = useCallback<(el: IParameter)=>boolean|null>((el: IParameter)=>{
-        if (el.while_ ===undefined){
-            return null
+   /* const fn = /!*useCallback<(el: IParameter)=>boolean|null>(*!/
+        (el: IParameter)=>{
+        if (el.while_ === undefined){
+            return null;
         }
-        const result=`${current_template.id}:${props.section.id}:${el.out}`
-        const res= has_result(result);
-        if (!res){
-            return true;
-        }
-        const val = get_result(result)!;
-        const def = props.section.params.find(el=>el.out==el.while_);
-        if (def!==undefined){
-            const val2 =def.def;
-            if (typeof val != typeof val2) return false
-            return val==val2
+        const dependency = props.section.params.find(p => p.out === el.while_);
+        if (!dependency) {
+            return null;
         }
 
-        return null
-    },[props.section.params, current_template, props.section.id, has_result, get_result])
+        const key = `${current_template.id}:${props.section.id}:${dependency.out}`;
 
+        if (!has_result(key)){
+            return false;
+        }
+
+        const currentValue = get_result(key);
+
+        if (typeof currentValue !== typeof dependency.def) {
+            return false;
+        }
+        return currentValue !== dependency.def;
+
+    }/!*,[props.section.params, current_template, props.section.id, has_result, get_result]);*!/*/
 
     return (
         <div className={"project-section"}>
@@ -75,7 +79,8 @@ export default function Section(props: Props) {
                     }}
                     className={"project-section-head-p"}>{props.section.label}</p>
             </div>
-            <div className={isOpened ? "project-section-in-open project-section-in" : "project-section-in"}>                {props.section.params.map(el=>
+            <div className={isOpened ? "project-section-in-open project-section-in" : "project-section-in"}>
+                {props.section.params.map(el=>
                     <Parameter
                         set={(val)=>{
                             const from = `${current_template.id}:${props.section.id}:${el.out}`
@@ -83,7 +88,9 @@ export default function Section(props: Props) {
                         }}
                         param={el}
                         key={`${props.section.id}${el.out}`}
-                        get_default={()=>fn(el)}
+                        // get_default={()=>fn(el)}
+                        section={props.section.id}
+                        allParams={props.section.params}
                     />)}
             </div>
         </div>

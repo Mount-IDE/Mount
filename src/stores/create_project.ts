@@ -23,6 +23,7 @@ export const createProjectStore = create<Type>((set, get) => ({
         const results = prev.results;
         results.set(from, value);
 
+        console.log("results: ", results)
         return {
             results: results
         }

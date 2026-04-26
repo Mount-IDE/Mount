@@ -18,7 +18,7 @@ function App() {
     async function move_to_cache() {
         try {
             let templates = await invoke<ITemplate[]>("read_templates");
-            console.log(templates)
+            // console.log(templates)
             if (templates.length > 0) {
                 cacheStore.getState().add_templates_to_cache(templates);
                 let temp = templates[0];
@@ -30,7 +30,7 @@ function App() {
         try {
             let packages = await invoke<IPackage[]>("read_packages");
             cacheStore.getState().add_packages_to_cache(packages)
-            console.log(packages)
+            // console.log(packages)
         } catch (e) {
             console.error("error while load packages: ", e)
         }
