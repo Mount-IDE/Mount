@@ -1,7 +1,7 @@
 import "./styles/parameter.css"
 import dir from "../../../assets/dir.svg"
 import {open} from "@tauri-apps/plugin-dialog"
-import {ChangeEvent, InputEvent, useEffect, useState} from "react";
+import {ChangeEvent, InputEvent} from "react";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
 
@@ -19,12 +19,9 @@ export default function Parameter(props: Props) {
 
     const current_template = cacheStore(state => state.currentTemplate);
 
-    const dependencyKey = param.while_
-        ? `${current_template!.id}:${section}:${param.while_}`
-        : null;
 
     const dependencyValue = createProjectStore(state =>
-        dependencyKey ? state.results.get(dependencyKey) : undefined
+        current_template ? state.results[current_template.id]?.[section]?.[param.while_??""] : undefined
     );
 
     const dependency = param.while_
@@ -45,8 +42,11 @@ export default function Parameter(props: Props) {
     })()
 
     const show = typeof is_active == "boolean" ? is_active : true;
-    const self_key = `${current_template?.id}:${section}:${param.out}`
-    const value = createProjectStore(state => state.results.get(self_key));
+    const value =
+        current_template? createProjectStore(
+            state =>
+                state.results[current_template.id]?.[section]?.[param.out]
+        ) : undefined;
     const new_def = value !== undefined ? value : props.param.def;
 
 

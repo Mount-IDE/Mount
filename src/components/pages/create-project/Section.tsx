@@ -101,8 +101,7 @@ export default function Section(props: Props) {
                 {props.section.params.map(el =>
                     <Parameter
                         set={(val) => {
-                            const from = `${current_template.id}:${props.section.id}:${el.out}`
-                            set_value(from, val);
+                            set_value(current_template.id, props.section.id, el.out, val);
                         }}
                         param={el}
                         key={`${props.section.id}${el.out}`}

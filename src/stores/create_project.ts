@@ -5,14 +5,22 @@ interface Type {
     page_opened: boolean;
     open: () => void;
     close: () => void;
-    results: Map<string, string | boolean>,
+    results: Result,
     packages: Map<string, IPackage>
-    add_result:(from: string, value: string | boolean)=>void,
-    get_result:(from:string)=>string | boolean | undefined,
-    has_result: (from:string)=>boolean,
+    add_result:(tid: string, sid:number, pid: string, value: string | boolean)=>void,
+    // get_result:(tid: string, sid:number, pid: string)=>string | boolean | undefined,
+    // has_result: (from:string)=>boolean,
     add_package: (pack: IPackage)=>void
     add_packages: (pack: IPackage[])=>void
     remove_package: (pack: IPackage)=>void
+}
+
+export interface Result {
+    [template: string]: {
+        [section: number]: {
+            [parameter: string]: string | boolean
+        }
+    }
 }
 
 
@@ -20,19 +28,27 @@ interface Type {
 
 export const createProjectStore = create<Type>((set, get) => ({
     page_opened: false,
-    results: new Map(),
+    results: {},
     packages: new Map(),
     close: () => set({page_opened: false}),
     open: () => set({page_opened: true}),
-    add_result: (from, value)=> set(prev=>{
+    add_result: (tid: string, sid:number, pid: string, value)=> set(prev=>{
         const results = prev.results;
-        results.set(from, value);
         return {
-            results: results
+            results: {
+                ...results,
+                [tid]: {
+                    ...results[tid],
+                    [sid]: {
+                        ...results[tid]?.[sid],
+                        [pid]: value
+                    }
+                }
+            }
         }
     }),
-    get_result:(from: string)=> get().results.get(from),
-    has_result:(from: string)=>get().results.has(from),
+    // get_result:(from: string)=> get().results.get(from),
+    // has_result:(from: string)=>get().results.has(from),
     add_package:(pack: IPackage)=> set(prev=>{
         const newMap = new Map(prev.packages);
         newMap.set(pack.id, pack);
