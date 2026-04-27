@@ -14,6 +14,7 @@
 }
 
 .project-section-head-arrow {
+    cursor: pointer;
     height: 100%;
     /*overflow: hidden;*/
 aspect-ratio: 1/1;
@@ -21,6 +22,7 @@ aspect-ratio: 1/1;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    transition: all 0.2s;
     & > svg {
         height: 70%;
         aspect-ratio: 1/1;
@@ -37,16 +39,14 @@ aspect-ratio: 1/1;
 
 .project-section-in{
     max-height: 0;
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: all 0.2s;
-
+    overflow: hidden;
+    transition: max-height 0.3s ease;
 }
 
 .project-section-in-open{
-    max-height: 100% !important;
-    grid-template-rows: 1fr;
-    transition: all 0.2s;
+    /*max-height: 100% !important;*/
+    /*grid-template-rows: 1fr;*/
+    /*transition: all 0.2s;*/
 }
 
 .project-section-in > * {

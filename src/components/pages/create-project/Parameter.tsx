@@ -220,9 +220,9 @@ function FileParameter(props: ParameterValue) {
     return (
         <div className={classes}>
             <p className={"project-parameter-input-p"}>{label[0]}</p>
-            <div>
+            <div className={"project-parameter-file-in"}>
                 <input placeholder={label[1]} value={val} onInput={write}/>
-                <button onClick={openDialog}>
+                <button className={"project-parameter-file-in-bt"} onClick={openDialog}>
                     <img src={dir}/>
                 </button>
             </div>

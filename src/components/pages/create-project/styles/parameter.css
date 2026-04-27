@@ -7,6 +7,7 @@
         color: var(--subtitle);
     }
 
+    min-height: 4vh;
     margin-top: 10px;
 }
 
@@ -14,6 +15,7 @@
 .project-parameter-value {
     display: flex;
     width: 100%;
+    min-height: 100%;
     height: 100%;
     gap: 10px;
     transition: all 0.2s;
@@ -23,10 +25,11 @@
     opacity: 50%;
     pointer-events: none;
 }
+
 .project-parameter-input, .project-parameter-file {
     flex-direction: column;
 
-    &  input, &  textarea {
+    & input, & textarea {
         width: 100%;
         min-height: 5vh;
         background: var(--input);
@@ -42,34 +45,43 @@
         }
     }
 
-    &  textarea {
+    & textarea {
         resize: vertical;
     }
 
-    &  p {
+    & p {
         color: var(--subtitle);
         font-size: 10pt;
     }
 }
-.project-parameter-file{
-    &>div{
+
+.project-parameter-file {
+    & .project-parameter-file-in {
         display: flex;
         width: 100%;
+        height: 100%;
+        min-height: 4vh;
+    }
 
-        &>button{
-            height: 100%;
-            aspect-ratio: 1/1;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            &>img{
-                width: 50%;
-                height: 50%;
-                display: block;
-                object-fit: contain;
-            }
+    & input {
+        width: 95% !important;
+    }
+
+    & .project-parameter-file-in-bt {
+        cursor: pointer;
+        min-height: 4vh;
+        aspect-ratio: 1/1;
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & > img {
+            width: 50%;
+            height: 50%;
+            display: block;
+            object-fit: contain;
         }
     }
 
@@ -82,6 +94,10 @@
         color: var(--subtitle);
         font-size: 10pt;
     }
+
+    & input[type=checkbox]{
+        cursor: pointer;
+    }
 }
 
 
@@ -92,7 +108,7 @@
     }
 
 
-    &>select{
+    & > select {
         background: transparent;
         color: var(--subtitle);
         border: none;

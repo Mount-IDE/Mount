@@ -1,5 +1,5 @@
 import "./styles/section.css"
-import {useCallback, useEffect, useState} from "react";
+import React, {use, useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 import arrow from "../../../assets/arrow.svg"
 import Parameter from "./Parameter.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
@@ -12,51 +12,107 @@ type Props = {
 
 export default function Section(props: Props) {
 
-    const [isOpened, setIsOpened] = useState<boolean>(false);
-    const [isList, _] = useState(props.section.list[0]);
-
+    const collapsible = props.section.list[0];
+    const defaultOpened = !collapsible ? true : props.section.list[1];
+    const [isOpened, setIsOpened] = useState<boolean>(defaultOpened);
     const current_template = cacheStore.getState().currentTemplate!;
-    const get_result = createProjectStore(state=>state.get_result);
-    const has_result = createProjectStore(state=>state.has_result);
-    const set_value = createProjectStore(state=>state.add_result);
-    useEffect(() => {
-        const is_opened = props.section.list[1];
-        if (!isList) {
-            setIsOpened(true)
+    const set_value = createProjectStore(state => state.add_result);
+    // useEffect(() => {
+    //     const is_opened = props.section.list[1];
+    //     if (!isList) {
+    //         setIsOpened(true)
+    //         body_ref.current!.classList.add("project-section-in-open")
+    //     } else {
+    //         setIsOpened(is_opened);
+    //     }
+    // }, [props.section]);
+
+    const body_ref = useRef<HTMLDivElement>(null)
+
+    function toggle(e: React.MouseEvent<HTMLDivElement>) {
+        const body = body_ref.current!;
+        if (!collapsible) return
+        if (body.classList.contains("project-section-in-open")) {
+            body.style.maxHeight = body.scrollHeight + "px";
+
+            requestAnimationFrame(() => {
+                body.style.maxHeight = "0px";
+            });
+
+            body.classList.remove("project-section-in-open");
+            setIsOpened(false);
         } else {
-            setIsOpened(is_opened);
+            body.classList.add("project-section-in-open");
+            body.style.maxHeight = body.scrollHeight + "px";
+            setIsOpened(true);
+        }
+
+    }
+
+    useEffect(() => {
+        if (!collapsible){
+            const body = body_ref.current!;
+            body.style.maxHeight = body.scrollHeight + "px";
+        }else {
+
         }
     }, [props.section]);
+
+    useLayoutEffect(() => {
+        const body = body_ref.current;
+        if (!body) return;
+
+        if (isOpened) {
+            body.style.maxHeight = body.scrollHeight + "px";
+        } else {
+            body.style.maxHeight = "0px";
+        }
+    }, [isOpened]);
+
+    useEffect(() => {
+        if (!collapsible) {
+            setIsOpened(true);
+        }
+    }, [collapsible]);
+
+    console.log(`sec: ${props.section.id}::${isOpened}`)
 
     return (
         <div className={"project-section"}>
             <div className={"project-section-head"}
-                onClick={()=>{
-                    if (isList) {
-                        setIsOpened(prev=>!prev)
-                    }
-                }}
+                 onClick={(e) => {
+                     if (collapsible) {
+                         toggle(e)
+                     }
+                 }}
             >
-                {isList&& <div
+                {collapsible && <div
                     style={{
-                        transform: isOpened? "rotate(0deg)": "rotate(-90deg)"
+                        transform: isOpened ? "rotate(0deg)" : "rotate(-90deg)"
                     }}
                     className={"project-section-head-arrow"}>
                     <svg width="19" height="10" viewBox="0 0 19 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0.421718 0.412777C-0.140573 0.956418 -0.140573 1.83792 0.421718 2.38154L7.46557 9.18545C8.59035 10.2719 10.4129 10.2714 11.5371 9.18461L18.5782 2.37653C19.1406 1.8329 19.1406 0.951407 18.5782 0.407752C18.016 -0.135917 17.1043 -0.135917 16.542 0.407752L10.5155 6.23469C9.95328 6.77845 9.04159 6.77831 8.47934 6.23469L2.45792 0.412777C1.89564 -0.130892 0.983995 -0.130892 0.421718 0.412777Z" fill="#A4A4A4"/>
+                        <path
+                            d="M0.421718 0.412777C-0.140573 0.956418 -0.140573 1.83792 0.421718 2.38154L7.46557 9.18545C8.59035 10.2719 10.4129 10.2714 11.5371 9.18461L18.5782 2.37653C19.1406 1.8329 19.1406 0.951407 18.5782 0.407752C18.016 -0.135917 17.1043 -0.135917 16.542 0.407752L10.5155 6.23469C9.95328 6.77845 9.04159 6.77831 8.47934 6.23469L2.45792 0.412777C1.89564 -0.130892 0.983995 -0.130892 0.421718 0.412777Z"
+                            fill="#A4A4A4"/>
                     </svg>
 
                 </div>}
                 <p
                     style={{
-                        color: isOpened? "var(--title)":"var(--subtitle)"
+                        color: isOpened ? "var(--title)" : "var(--subtitle)"
                     }}
                     className={"project-section-head-p"}>{props.section.label}</p>
             </div>
-            <div className={isOpened ? "project-section-in-open project-section-in" : "project-section-in"}>
-                {props.section.params.map(el=>
+            <div ref={body_ref}
+                 className={"project-section-in"}
+                 // style={{
+                 //     maxHeight: isOpened ? body_ref.current?.scrollHeight + "px" : "0px"
+                 // }}
+                 >
+                {props.section.params.map(el =>
                     <Parameter
-                        set={(val)=>{
+                        set={(val) => {
                             const from = `${current_template.id}:${props.section.id}:${el.out}`
                             set_value(from, val);
                         }}
