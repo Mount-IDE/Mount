@@ -40,6 +40,7 @@ export const createProjectStore = create<Type>((set, get) => ({
     open: () => set({page_opened: true}),
     add_result: (tid: string, sid:number, pid: string, value)=> set(prev=>{
         const results = prev.results;
+
         return {
             results: {
                 ...results,

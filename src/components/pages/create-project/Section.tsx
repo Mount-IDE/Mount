@@ -103,6 +103,7 @@ export default function Section(props: Props) {
                 {props.section.params.map(el =>
                     <Parameter
                         set={(val) => {
+                            console.log("value writted", val)
                             if (is_main){
                                 set_value("__meta__", props.section.id, el.out, val);
                             }else {
@@ -113,6 +114,7 @@ export default function Section(props: Props) {
                         key={`${props.section.id}${el.out}`}
                         section={props.section.id}
                         allParams={props.section.params}
+                        is_main={is_main}
                     />)}
             </div>
         </div>

@@ -1,7 +1,7 @@
 import "./styles/parameter.css"
 import dir from "../../../assets/dir.svg"
 import {open} from "@tauri-apps/plugin-dialog"
-import {ChangeEvent, InputEvent} from "react";
+import {ChangeEvent, InputEvent, useEffect} from "react";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
 
@@ -10,6 +10,7 @@ type Props = {
     set: (val: string | boolean) => void,
     section: number,
     allParams: IParameter[]
+    is_main:boolean
 }
 
 export default function Parameter(props: Props) {
@@ -20,8 +21,13 @@ export default function Parameter(props: Props) {
     const current_template = cacheStore(state => state.currentTemplate);
 
 
+    let key = "__meta__";
+    if (!props.is_main){
+        key = current_template? current_template.id : "__garbage__"
+    }
+
     const dependencyValue = createProjectStore(state =>
-        current_template ? state.results[current_template.id]?.[section]?.[param.while_??""] : undefined
+        current_template ? state.results[key]?.[section]?.[param.while_??""] : undefined
     );
 
     const dependency = param.while_
@@ -42,12 +48,22 @@ export default function Parameter(props: Props) {
     })()
 
     const show = typeof is_active == "boolean" ? is_active : true;
-    const value =
-        current_template? createProjectStore(
+
+
+
+    const value = createProjectStore(
             state =>
-                state.results[current_template.id]?.[section]?.[param.out]
-        ) : undefined;
+                state.results[key]?.[section]?.[param.out]
+            );
     const new_def = value !== undefined ? value : props.param.def;
+
+    useEffect(() => {
+        props.set(props.param.def as string|boolean)
+    }, [props.param.def]);
+
+
+    const res = createProjectStore(state=>state.results)
+
 
 
     return (

@@ -8,6 +8,8 @@ import Project from "./Project.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {open_project} from "../../../services/create-project.ts";
+import {cacheStore} from "../../../stores/cache_store.ts";
+import {mainPageStore} from "../../../stores/main_page_store.ts";
 
 export default function MainPage() {
 
@@ -33,6 +35,8 @@ export default function MainPage() {
     ]
     const [recent, setRecent] = useState<IProject[]>([]);
 
+    const groups = mainPageStore(state=>state.groups);
+    
     async function loadRecents(){
         try {
             let recent = await invoke<IRecentProject[]>("get_recent_projects");
@@ -68,7 +72,9 @@ export default function MainPage() {
                 <div id={"main-page-right-dec"}>
                     <Filters/>
                     <div id={"main-page-groups"}>
-
+                        {groups.map((el)=>
+                            <button key={el.id} className={"main-page-group"}>{el.name}</button>
+                        )}
                     </div>
                     <div id={"main-page-projects"}>
                         {recent.length>0&&

@@ -15,6 +15,8 @@ pub trait TConfigService {
     fn get_home_dir(&self)->Result<Path, ConfigError>;
     fn make_projects_dir(&self) ->Result<(), ConfigError>;
     fn get_projects_dir(&self)->Result<Path, ConfigError>;
+    
+    fn get_settings(&self)->Result<Settings, ConfigError>;
 }
 
 pub trait TConfigRecoveryService {

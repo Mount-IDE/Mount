@@ -1,11 +1,12 @@
 import {create} from "zustand"
+import {path} from "@tauri-apps/api";
 
 
 interface Type {
     packages: IPackage[]
     templates: ITemplate[]
     currentTemplate: ITemplate | null,
-
+    groups: string[]
     add_template_to_cache: (t: ITemplate) => void
     add_templates_to_cache: (t: ITemplate[]) => void
     add_package_to_cache: (t: IPackage) => void
@@ -16,6 +17,7 @@ interface Type {
     set_current_template: (t:ITemplate)=>void,
     projects_path: string
     set_projects_path:(path: string)=>void
+    load_groups:(groups: string[])=>void
 }
 
 
@@ -24,7 +26,8 @@ export const cacheStore = create<Type>((set, get) => ({
     packages: [],
     templates: [],
     projects_path: "",
-    add_package_to_cache: (t: IPackage) => set(prev => {
+    groups: []
+        ,    add_package_to_cache: (t: IPackage) => set(prev => {
         const pack = prev.packages;
         if (!pack.map(el=>el.id).includes(t.id)){
             pack.push(t);
@@ -78,7 +81,10 @@ export const cacheStore = create<Type>((set, get) => ({
         }
     }),
     set_current_template: (t:ITemplate)=> set({currentTemplate: t}),
-    set_projects_path:(path: string)=> set({projects_path:path})
+    set_projects_path:(path: string)=> set({projects_path:path}), 
+    load_groups:(groups: string[])=> set({
+        groups
+    })
 
 
 }))

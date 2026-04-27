@@ -12,7 +12,6 @@ use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::errors::ProjectError::ConfigError;
 use crate::modules::shared::kernel::values::{Path, Val};
 use std::collections::HashMap;
 

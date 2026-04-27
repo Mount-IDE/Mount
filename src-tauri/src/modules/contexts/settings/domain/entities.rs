@@ -5,10 +5,10 @@ use crate::modules::shared::kernel::values::Path;
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct Settings {
-    doctype: String,
-    version: String,
-    general: GeneralSettings,
-    appearance: Appearance
+    pub doctype: String,
+    pub version: String,
+    pub general: GeneralSettings,
+    pub appearance: Appearance
 }
 
 
@@ -27,8 +27,8 @@ impl Settings {
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct GeneralSettings {
-    path_to_projects: Path,
-    project_groups: Vec<String>
+    pub path_to_projects: Path,
+    pub project_groups: Vec<String>
 }
 
 impl Default for GeneralSettings {
@@ -51,10 +51,10 @@ impl GeneralSettings {
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Appearance {
-    theme: String,
-    lang: String,
-    font: String,
-    font_size: u64
+    pub theme: String,
+    pub lang: String,
+    pub font: String,
+    pub font_size: u64
 }
 
 impl Default for Appearance {

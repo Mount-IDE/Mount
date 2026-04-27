@@ -1,6 +1,4 @@
-use crate::modules::app::{
-    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
-};
+use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, SETTINGS};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
@@ -11,6 +9,7 @@ use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use std::string::ToString;
+use serde::Serialize;
 use tauri::Manager;
 
 pub struct ConfigService();
@@ -61,13 +60,26 @@ impl TConfigService for ConfigService {
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
         println!("read settings.json was gotten");
         let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e| {
-            ParsingError::Deserialize {
+                ParsingError::Deserialize {
                 path: file_.path,
                 json: file,
                 err: e,
             }
-        })?;
-        println!("parsing settings,json was gotten");
+        });
+        if settings.is_err() {
+            let dir = self.get_data_dir()?;
+            let settings_ = Settings::new();
+            let json = serde_json::to_string(&settings_).map_err(|e|
+                ParsingError::Serialize {path: dir.clone(), err: e}
+            )?;
+            let dir = make_path(vec![dir.get().as_str(), "settings.json"]);
+            let file = PFile::from_path_reg(dir.clone());
+            FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
+            println!("parsing settings.json was gotten");
+            return Ok(settings_)
+        }
+        let settings=settings.unwrap();
+        println!("parsing settings.json was gotten");
         Ok(settings)
     }
 
@@ -182,6 +194,17 @@ impl TConfigService for ConfigService {
         let path_ = path.as_path().to_str().unwrap().to_string();
         Ok(Path(path_))
     }
+
+    fn get_settings(&self) -> Result<Settings, ConfigError> {
+        let settings = SETTINGS.get();
+        if settings.is_none() {
+            let settings_ = self.read_settings()?;
+            SETTINGS.set(settings_.clone()).map_err(|_| ConfigError::ReadSettingsError)?;
+            return Ok(settings_)
+        }
+
+        Ok(settings.unwrap().clone())
+    }
 }
 
 pub struct ConfigRecoveryService();
@@ -232,6 +255,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
                 let exists = FS_READ_SERVICE.exists(path_.clone());
                 if !exists {
                     self.repair_data_dir()?;
+                    return Ok(());
                 }
             } else {
                 let path_ = make_path(vec![
@@ -242,11 +266,13 @@ impl TConfigRecoveryService for ConfigRecoveryService {
                 let exists = FS_READ_SERVICE.exists(path_.clone());
                 if !exists {
                     self.repair_data_dir()?;
+                    return Ok(());
                 }
                 let file = PFile::regular(file.name.clone(), path_.clone());
                 let content = FS_READ_SERVICE.read_file(&file)?;
                 if content.len() == 0 {
                     self.repair_data_dir()?;
+                    return Ok(());
                 }
             }
         }
@@ -255,11 +281,14 @@ impl TConfigRecoveryService for ConfigRecoveryService {
     }
 
     fn repair_data_dir(&self) -> Result<(), ConfigError> {
-        let dir = CONFIG_SERVICE.get_data_dir().unwrap();
+        let dir = CONFIG_SERVICE.get_data_dir()?;
         let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir));
         if !path_ {
             println!("repair");
-            let data = APP.get().unwrap().path().app_data_dir().unwrap();
+            let data = APP.get().unwrap().path().app_data_dir().map_err(
+                |e|
+                    ConfigError::GetDataDir {err:e}
+            )?;
             let _ = FS_WRITE_SERVICE.create_dir(&Path(data.to_str().unwrap().to_string()));
         }
         let dir = dir.get();

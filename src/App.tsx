@@ -10,6 +10,7 @@ import Blur from "./components/common/Blur.tsx";
 import {createProjectStore} from "./stores/create_project.ts";
 import CreateProject from "./components/pages/create-project/CreateProject.tsx";
 import {cacheStore} from "./stores/cache_store.ts";
+import {Group, mainPageStore} from "./stores/main_page_store.ts";
 
 function App() {
     const current = pageStore(state => state.current);
@@ -41,6 +42,19 @@ function App() {
         } catch (e) {
             console.error("error while load project path: ", e)
 
+        }
+        try {
+            let groups = await invoke<string[]>("get_groups");
+            let id = 0
+            let n_groups: Group[] = groups.map(el => {
+                return {
+                    id: id++,
+                    name: el
+                }
+            });
+            mainPageStore.getState().set_groups(n_groups);
+        } catch (e) {
+            console.error("error while load tags: ", e)
         }
 
     }

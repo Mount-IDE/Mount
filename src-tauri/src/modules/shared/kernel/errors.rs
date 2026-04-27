@@ -110,6 +110,10 @@ pub enum ConfigError {
         #[source]
         err: FileSystemError,
     },
+    #[error("cannot read settings")]
+    ReadSettingsError,
+    #[error("settings not in global scope")]
+    SettingsIsEmpty,
     #[error("failed to parse in config: {err}")]
     ParsingError {
         #[from]
