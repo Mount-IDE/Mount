@@ -221,7 +221,6 @@ impl Parameter {
         Self {
             out: String::new(),
             label: ParameterLabel::STR(String::new()),
-            // val: Val::NUMBER(0.0),
             def: Val::NUMBER(0.0),
             while_: None,
             typ: ParameterTyp::CHECK
@@ -232,9 +231,13 @@ impl Parameter {
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct ProjectPackage{
+    #[serde(default)]
     id: String,
+    #[serde(default)]
     name: String,
+    #[serde(default)]
     meta: PackageMeta,
+    #[serde(default)]
     startup: PackageStartup
 }
 
@@ -254,9 +257,22 @@ impl ProjectPackage{
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct PackageStartup {
+    #[serde(default)]
     var: Vec<Var>,
+    #[serde(default)]
     actions: Vec<Action>,
+    #[serde(default)]
     parameters: Vec<Parameter>
+}
+
+impl Default for PackageStartup{
+    fn default() -> Self {
+        Self {
+            var: Vec::new(),
+            actions: Vec::new(),
+            parameters: Vec::new()
+        }
+    }
 }
 
 impl PackageStartup {
@@ -265,6 +281,24 @@ impl PackageStartup {
             var: Vec::new(),
             parameters: Vec::new(),
             actions: Vec::new(),
+        }
+    }
+}
+
+
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+pub struct ProjectTag {
+    #[serde(default)]
+    pub id: u32,
+    #[serde(default)]
+    pub name: String,
+}
+
+impl Default for ProjectTag{
+    fn default() -> Self {
+        Self {
+            id: 0,
+            name: String::new(),
         }
     }
 }

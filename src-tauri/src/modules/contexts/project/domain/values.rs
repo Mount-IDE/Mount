@@ -1,18 +1,33 @@
+use std::collections::HashMap;
 use std::fmt::Debug;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use ts_rs::TS;
+use crate::modules::shared::kernel::values::Val;
 use super::default::template::t_meta_icon;
 use super::default::action::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectMeta{
-    authors: Vec<String>,
-    description: String,
-    license: Option<String>,
-    group: String,
-    tags: Vec<String>,
+    pub(crate) authors: Vec<String>,
+    pub(crate) description: String,
+    pub(crate) license: Option<String>,
+    pub(crate) group: String,
+    pub(crate) tags: Vec<String>,
     
 }
+
+impl Default for ProjectMeta {
+    fn default() -> Self {
+        Self {
+            authors: Vec::new(),
+            description: String::new(),
+            license: None,
+            group: String::from("general"),
+            tags: Vec::new()
+        }
+    }
+}
+
 
 impl ProjectMeta{
     pub fn new()->Self{
@@ -28,8 +43,19 @@ impl ProjectMeta{
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct PackageMeta {
+    #[serde(default)]
     authors: Vec<String>,
+    #[serde(default)]
     description: String,
+}
+
+impl Default for PackageMeta{
+    fn default() -> Self {
+        Self {
+            authors: Vec::new(),
+            description: String::new(),
+        }
+    }
 }
 
 impl PackageMeta{
@@ -105,10 +131,6 @@ impl Default for ActionCommandIn{
 }
 
 
-
-
-
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub enum ButtonPos{
     LeftTop,
@@ -117,3 +139,5 @@ pub enum ButtonPos{
 }
 
 
+
+pub(crate) type CreateProjectResult= HashMap<String, HashMap<i8, HashMap<String, Val>>>;

@@ -6,11 +6,13 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 
 type Props = {
     section: ISection
+    is_main?: boolean
 }
 
 
 export default function Section(props: Props) {
 
+    const is_main = props.is_main!==undefined ?props.is_main:false;
     const collapsible = props.section.list[0];
     const defaultOpened = !collapsible ? true : props.section.list[1];
     const [isOpened, setIsOpened] = useState<boolean>(defaultOpened);
@@ -101,7 +103,11 @@ export default function Section(props: Props) {
                 {props.section.params.map(el =>
                     <Parameter
                         set={(val) => {
-                            set_value(current_template.id, props.section.id, el.out, val);
+                            if (is_main){
+                                set_value("__meta__", props.section.id, el.out, val);
+                            }else {
+                                set_value(current_template.id, props.section.id, el.out, val);
+                            }
                         }}
                         param={el}
                         key={`${props.section.id}${el.out}`}

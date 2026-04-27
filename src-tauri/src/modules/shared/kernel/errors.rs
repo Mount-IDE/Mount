@@ -8,7 +8,7 @@ pub enum ProjectError {
     ConfigError(#[from] ConfigError),
     #[error("filesystem error that can`t describe as project error")]
     FileSystemError(#[from] FileSystemError),
-
+    
     #[error("project already exists")]
     AlreadyExists,
     #[error("project creation failed")]
@@ -19,6 +19,17 @@ pub enum ProjectError {
 
     #[error("failed to parse in project: {err}")]
     ParsingError{#[from]err: ParsingError},
+    
+    
+    #[error("failed to get meta section (probably not set name or path)")]
+    MetaNotFound,
+    #[error("failed to get meta.-4 section (with name and path)")]
+    MainMetaNotFound,
+    #[error("failed to get name of project")]
+    NameNotFound,
+    #[error("failed to get project path")]
+    PathNotFound,
+    
 }
 
 #[derive(Error, Debug)]
