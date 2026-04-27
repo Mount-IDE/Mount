@@ -17,6 +17,12 @@
 #create-project-packages-list {
     width: 100%;
     height: 80%;
+    overflow: scroll;
+    margin-top: 20px;
+    &::-webkit-scrollbar{
+        width: 0;
+        height: 0;
+    }
 }
 
 #create-project-packages-manage {

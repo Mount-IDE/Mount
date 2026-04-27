@@ -1,7 +1,7 @@
 import "./styles/parameter.css"
 import dir from "../../../assets/dir.svg"
 import {open} from "@tauri-apps/plugin-dialog"
-import {ChangeEvent, InputEvent, useState} from "react";
+import {ChangeEvent, InputEvent, useEffect, useState} from "react";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
 
@@ -31,7 +31,7 @@ export default function Parameter(props: Props) {
         ? props.allParams.find(el => el.out == param.while_)
         : null;
 
-    const is_active = (() => {
+    const is_active=(() => {
         if (!param.while_) return null;
         if (!dependency) return null;
         if (dependencyValue === undefined) {
@@ -42,20 +42,12 @@ export default function Parameter(props: Props) {
         }
 
         return dependencyValue !== dependency.def;
-    })();
+    })()
 
     const show = typeof is_active == "boolean" ? is_active : true;
-
-    if (props.param.out.includes("git"))
-        console.log(`active ${props.param.out} :: ${show}`)
-
     const self_key = `${current_template?.id}:${section}:${param.out}`
-
-    const get = createProjectStore(state=>state.get_result);
-    const has = createProjectStore(state=>state.has_result);
-
-    const new_def = has(self_key)? get(self_key)!: props.param.def;
-
+    const value = createProjectStore(state => state.results.get(self_key));
+    const new_def = value !== undefined ? value : props.param.def;
 
 
     return (
@@ -97,11 +89,9 @@ function InputParameter(props: ParameterValue) {
 
     function write(event: InputEvent<HTMLInputElement> | InputEvent<HTMLTextAreaElement>) {
         const tg = event.currentTarget.value;
-        setVal(tg)
         props.set_value(tg)
     }
 
-    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
 
     let classes = props.def ? "project-parameter-value project-parameter-input" :
         "project-parameter-value project-parameter-input project-parameter-value-disabled"
@@ -111,11 +101,11 @@ function InputParameter(props: ParameterValue) {
         <div className={classes}>
             <p className={"project-parameter-input-p"}>{label[0]}</p>
             {typ == "base" &&
-                <input placeholder={label[1]} value={val} onInput={write}/>
+                <input placeholder={label[1]} value={typeof def_ == "string" ? def_ : ""} onInput={write}/>
             }
             {
                 typ == "resize" &&
-                <textarea placeholder={label[1]} value={val} onInput={write}/>
+                <textarea placeholder={label[1]} value={typeof def_ == "string" ? def_ : ""} onInput={write}/>
             }
         </div>
     )
@@ -128,18 +118,16 @@ function CheckParameter(props: ParameterValue) {
 
     function write(event: ChangeEvent<HTMLInputElement>) {
         const tg = event.currentTarget.checked;
-        setVal(tg)
         props.set_value(tg)
     }
 
-    const [val, setVal] = useState<boolean>(typeof def_ == "boolean" ? def_ : false)
 
     let classes = props.def ? "project-parameter-value project-parameter-check" :
         "project-parameter-value project-parameter-check project-parameter-value-disabled"
 
     return (
         <div className={classes}>
-            <input type={"checkbox"} checked={val} onChange={write}/>
+            <input type={"checkbox"} checked={typeof def_ == "boolean" ? def_ : false} onChange={write}/>
             <p>{label}</p>
         </div>
     )
@@ -153,11 +141,9 @@ function ListParameter(props: ParameterValue) {
 
     function write(event: ChangeEvent<HTMLSelectElement>) {
         const tg = event.currentTarget.value;
-        setVal(tg)
         props.set_value(tg)
     }
 
-    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
 
     let classes = props.def ? "project-parameter-value project-parameter-list" :
         "project-parameter-value project-parameter-list project-parameter-value-disabled"
@@ -165,7 +151,7 @@ function ListParameter(props: ParameterValue) {
 
     return (
         <div className={classes}>
-            <select value={val} onChange={write}>
+            <select value={typeof def_ == "string" ? def_ : ""} onChange={write}>
                 {typ.map((el, i) =>
                     <option key={i}>{el}</option>
                 )}
@@ -180,7 +166,6 @@ function FileParameter(props: ParameterValue) {
     const param = props.parameter;
     const label = param.label;
     const def_ = props.val;
-    const [val, setVal] = useState<string>(typeof def_ == "string" ? def_ : "")
 
     async function openDialog() {
         if (typ == "file") {
@@ -189,9 +174,7 @@ function FileParameter(props: ParameterValue) {
                 title: "Choose the file"
             })
             if (res !== null) {
-                console.log("path ", res)
                 props.set_value(res)
-                setVal(res)
             }
         } else {
             const res = await open({
@@ -199,16 +182,13 @@ function FileParameter(props: ParameterValue) {
                 title: "Choose the directory"
             })
             if (res !== null) {
-                console.log("path ", res)
                 props.set_value(res)
-                setVal(res)
             }
         }
     }
 
     function write(event: InputEvent<HTMLInputElement>) {
         const tg = event.currentTarget.value;
-        setVal(tg)
 
         props.set_value(tg)
     }
@@ -221,7 +201,7 @@ function FileParameter(props: ParameterValue) {
         <div className={classes}>
             <p className={"project-parameter-input-p"}>{label[0]}</p>
             <div className={"project-parameter-file-in"}>
-                <input placeholder={label[1]} value={val} onInput={write}/>
+                <input placeholder={label[1]} value={typeof def_ == "string" ? def_ : ""} onInput={write}/>
                 <button className={"project-parameter-file-in-bt"} onClick={openDialog}>
                     <img src={dir}/>
                 </button>

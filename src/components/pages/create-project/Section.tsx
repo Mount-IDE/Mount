@@ -1,6 +1,5 @@
 import "./styles/section.css"
-import React, {use, useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
-import arrow from "../../../assets/arrow.svg"
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import Parameter from "./Parameter.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
@@ -15,21 +14,13 @@ export default function Section(props: Props) {
     const collapsible = props.section.list[0];
     const defaultOpened = !collapsible ? true : props.section.list[1];
     const [isOpened, setIsOpened] = useState<boolean>(defaultOpened);
-    const current_template = cacheStore.getState().currentTemplate!;
+    const current_template = cacheStore(state=>state.currentTemplate!);
     const set_value = createProjectStore(state => state.add_result);
-    // useEffect(() => {
-    //     const is_opened = props.section.list[1];
-    //     if (!isList) {
-    //         setIsOpened(true)
-    //         body_ref.current!.classList.add("project-section-in-open")
-    //     } else {
-    //         setIsOpened(is_opened);
-    //     }
-    // }, [props.section]);
+
 
     const body_ref = useRef<HTMLDivElement>(null)
 
-    function toggle(e: React.MouseEvent<HTMLDivElement>) {
+    function toggle(_: React.MouseEvent<HTMLDivElement>) {
         const body = body_ref.current!;
         if (!collapsible) return
         if (body.classList.contains("project-section-in-open")) {
@@ -75,7 +66,6 @@ export default function Section(props: Props) {
         }
     }, [collapsible]);
 
-    console.log(`sec: ${props.section.id}::${isOpened}`)
 
     return (
         <div className={"project-section"}>
@@ -106,9 +96,7 @@ export default function Section(props: Props) {
             </div>
             <div ref={body_ref}
                  className={"project-section-in"}
-                 // style={{
-                 //     maxHeight: isOpened ? body_ref.current?.scrollHeight + "px" : "0px"
-                 // }}
+
                  >
                 {props.section.params.map(el =>
                     <Parameter
