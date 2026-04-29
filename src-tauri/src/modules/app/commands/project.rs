@@ -2,7 +2,7 @@ use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVI
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
-use crate::modules::contexts::filesystem::domain::values::FileType;
+use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::app::traits::TProjectService;
 use crate::modules::contexts::project::domain::entities::{Project, ProjectPackage, ProjectTag, ProjectTemplate};
 use crate::modules::contexts::project::domain::values::{CreateProjectResult, ProjectMeta};
@@ -80,7 +80,7 @@ pub fn create_project(
     let path = meta
         .get(&-4i8)
         .ok_or(ProjectError::MainMetaNotFound)?
-        .get("project-name")
+        .get("project-path")
         .ok_or(ProjectError::NameNotFound)?;
 
     let name = match name {
@@ -93,6 +93,7 @@ pub fn create_project(
         Val::STRING(val)=>val.clone(),
         _=> return Err(ProjectError::PathNotFound.into())
     };
+    println!("{}::{}",name, path);
 
     let path_ = make_path(vec![path.as_str(), name.as_str()]);
     let ext = FS_READ_SERVICE.exists(path_.clone());
@@ -118,9 +119,9 @@ pub fn create_project(
     let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
     let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
     let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
-    let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "settings"]);
-    let settings = FS_WRITE_SERVICE.create_dir(&path_to_settings)?;
-
+    let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "project.json"]);
+    let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
+    FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
     Ok(())
 }
 
@@ -163,6 +164,8 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
     }
     if let Val::STRING(val) = group {
         meta_.group = val;
+    }else {
+        meta_.group="general".to_string();
     }
     let _tags_= tags.iter().map(|el|el.name.clone()).collect::<Vec<String>>();
     meta_.tags=_tags_.clone();

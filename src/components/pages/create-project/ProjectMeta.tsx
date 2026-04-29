@@ -51,7 +51,7 @@ export default function ProjectMeta() {
                     typ: ["list", "NonLicense", "LGPL", "APACHE"],
                 },
                 {
-                    def: "",
+                    def: "general",
                     label: ["Group", ""],
                     out: "project-group",
                     typ: ["list", "general"],
