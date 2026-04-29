@@ -1,5 +1,6 @@
 pub mod cmd;
 pub mod commands;
+pub mod utils;
 
 use super::contexts::filesystem::app::services::{FileSystemReadService, FileSystemWriteService};
 use crate::modules::contexts::project::app::services::ProjectService;

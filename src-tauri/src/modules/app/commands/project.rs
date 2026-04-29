@@ -1,7 +1,5 @@
-use crate::modules::app::{
-    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PROJECT_SERVICE,
-};
-use crate::modules::contexts::filesystem::app::traits::TFSReadService;
+use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PROJECT_SERVICE};
+use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::FileType;
@@ -11,9 +9,10 @@ use crate::modules::contexts::project::domain::values::{CreateProjectResult, Pro
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::errors::ProjectError;
+use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::{Path, Val};
 use std::collections::HashMap;
+use serde::Serialize;
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -83,11 +82,49 @@ pub fn create_project(
         .ok_or(ProjectError::MainMetaNotFound)?
         .get("project-name")
         .ok_or(ProjectError::NameNotFound)?;
+
+    let name = match name {
+        Val::STRING(val)=> val.clone(),
+        _=> return Err(ProjectError::NameNotFound.into())
+    };
+
+
+    let path = match path {
+        Val::STRING(val)=>val.clone(),
+        _=> return Err(ProjectError::PathNotFound.into())
+    };
+
+    let path_ = make_path(vec![path.as_str(), name.as_str()]);
+    let ext = FS_READ_SERVICE.exists(path_.clone());
+    if ext{
+        return Err(ProjectError::AlreadyExists.into());
+    }
+
     let additions = make_meta(meta.get(&-3i8), &tags);
 
+    let vars = template.startup.var;
+    let actions = template.startup.actions;
+    let mut project=  Project::new();
+    project.name = name;
+    project.path = Path(path.clone());
+    project.meta = additions;
+    project.vars = vars;
+
+
+
+    let json = serde_json::to_string(&project).map_err(|e|ProjectError::ParsingError { err:ParsingError::Serialize { path:
+        Path(path.clone()), err: e } })?;
+
+    let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
+    let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
+    let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
+    let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "settings"]);
+    let settings = FS_WRITE_SERVICE.create_dir(&path_to_settings)?;
 
     Ok(())
 }
+
+
 
 
 fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -> ProjectMeta {
