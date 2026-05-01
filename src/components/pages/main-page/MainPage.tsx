@@ -5,16 +5,13 @@ import logo from "../../../assets/logo.svg"
 import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
-import {createProjectStore} from "../../../stores/create_project.ts";
-import pageStore from "../../../stores/page_store.ts";
 import {open_project} from "../../../services/create-project.ts";
-import {cacheStore} from "../../../stores/cache_store.ts";
 import {mainPageStore} from "../../../stores/main_page_store.ts";
+
+
 
 export default function MainPage() {
 
-    // const openCreateProject=  createProjectStore(state=>state.open);
-    // const setBlur = pageStore(state=>state.setFilter);
     const buttons = [
         {
             title: "New Project",
@@ -40,9 +37,6 @@ export default function MainPage() {
     async function loadRecents(){
         try {
             let recent = await invoke<IRecentProject[]>("get_recent_projects");
-            // let res = await invoke<IProject[]>("read_recent_projects", {
-            //     recent: recent
-            // });
             console.log("recent loaded", recent)
             setRecent(recent);
         } catch (e){

@@ -1,5 +1,4 @@
-import {useEffect} from "react";
-// import reactLogo from "./assets/react.svg";
+import { useEffect} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
@@ -12,6 +11,8 @@ import CreateProject from "./components/pages/create-project/CreateProject.tsx";
 import {cacheStore} from "./stores/cache_store.ts";
 import {Group, mainPageStore} from "./stores/main_page_store.ts";
 
+
+
 function App() {
     const current = pageStore(state => state.current);
     const createProjectOpened = createProjectStore(state => state.page_opened)
@@ -19,7 +20,6 @@ function App() {
     async function move_to_cache() {
         try {
             let templates = await invoke<ITemplate[]>("read_templates");
-            // console.log(templates)
             if (templates.length > 0) {
                 cacheStore.getState().add_templates_to_cache(templates);
                 let temp = templates[0];
@@ -71,7 +71,7 @@ function App() {
             <div id={"main"}>
                 {
                     createProjectOpened &&
-                    <CreateProject/>
+                        <CreateProject/>
                 }
                 {
                     current == Window.Main &&
