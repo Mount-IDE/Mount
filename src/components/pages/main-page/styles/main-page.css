@@ -96,4 +96,10 @@
 #main-page-projects{
     width: 100%;
     height: calc(95% - 50px);
+    overflow: auto;
+
+    &::-webkit-scrollbar{
+        width: 0;
+        height: 0;
+    }
 }

@@ -122,6 +122,7 @@ pub fn create_project(
     let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "project.json"]);
     let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
     FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
+    PROJECT_SERVICE.add_to_recents(&project)?;
     Ok(())
 }
 

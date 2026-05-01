@@ -1,6 +1,7 @@
+use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::contexts::project::domain::values::ProjectMeta;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -8,43 +9,40 @@ pub struct Settings {
     pub doctype: String,
     pub version: String,
     pub general: GeneralSettings,
-    pub appearance: Appearance
+    pub appearance: Appearance,
 }
 
-
 impl Settings {
-    pub fn new()->Settings {
+    pub fn new() -> Settings {
         Self {
             doctype: String::from("opie/mount"),
             version: String::from("1.0.0"),
             general: GeneralSettings::new(),
-            appearance: Appearance::new()
+            appearance: Appearance::new(),
         }
     }
 }
 
-
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct GeneralSettings {
     pub path_to_projects: Path,
-    pub project_groups: Vec<String>
+    pub project_groups: Vec<String>,
 }
 
 impl Default for GeneralSettings {
     fn default() -> Self {
         Self {
             path_to_projects: Path("".to_string()),
-            project_groups:vec![String::from("general")]
+            project_groups: vec![String::from("general")],
         }
     }
 }
 
 impl GeneralSettings {
-    pub fn new()->GeneralSettings{
-        Self{
+    pub fn new() -> GeneralSettings {
+        Self {
             path_to_projects: Path(String::new()),
-            project_groups: Vec::new()
+            project_groups: Vec::new(),
         }
     }
 }
@@ -54,7 +52,7 @@ pub struct Appearance {
     pub theme: String,
     pub lang: String,
     pub font: String,
-    pub font_size: u64
+    pub font_size: u64,
 }
 
 impl Default for Appearance {
@@ -63,13 +61,13 @@ impl Default for Appearance {
             theme: "default".to_string(),
             lang: "en".to_string(),
             font: "Jetbrains Mono".to_string(),
-            font_size: 16
+            font_size: 16,
         }
     }
 }
 
-impl Appearance{
-    pub fn new()->Appearance{
+impl Appearance {
+    pub fn new() -> Appearance {
         Self {
             theme: String::new(),
             lang: String::new(),
@@ -79,10 +77,13 @@ impl Appearance{
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct RecentProject {
     pub name: String,
-    pub path: Path
+    pub path: Path,
+    pub last_opened: u64,
+    pub meta: ProjectMeta,
+    pub(crate) packages: Vec<String>
+
 }

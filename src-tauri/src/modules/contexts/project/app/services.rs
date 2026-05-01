@@ -1,6 +1,7 @@
-use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
+use std::time::{Instant, Duration, UNIX_EPOCH, SystemTime};
+use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::make_path_string;
+use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::app::traits::TProjectService;
@@ -9,7 +10,7 @@ use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::Path;
 
 use crate::modules::contexts::settings::domain::entities::RecentProject;
-use crate::modules::services::traits::TConfigService;
+use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
 pub struct ProjectService();
 
@@ -156,6 +157,45 @@ impl TProjectService for ProjectService {
     }
 
     fn add_to_recents(&self, _project: &Project) -> Result<(), ProjectError> {
-        todo!()
+        let data=  SystemTime::now();
+        let now = data.duration_since(UNIX_EPOCH).unwrap().as_secs();
+        let path = _project.path.clone();
+        let name=_project.name.clone();
+        let meta = _project.meta.clone();
+        let packages = _project.packages.clone();
+        let recent = RecentProject{
+            name,path, last_opened: now, meta, packages
+        };
+        let mut dir=CONFIG_SERVICE.get_data_dir();
+        if dir.is_err(){
+            CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
+            dir = CONFIG_SERVICE.get_data_dir();
+            if dir.is_err(){
+                return Err(dir.err().unwrap().into());
+            }
+        }
+        let dir = dir.unwrap();
+        let path_ = make_path(vec![dir.get().clone().as_str(), "recent-projects.json"]);
+        let file = PFile::from_path_reg(path_.clone());
+        let mut text = FS_READ_SERVICE.read_file(&file);
+        if text.is_err() {
+            CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
+            text = FS_READ_SERVICE.read_file(&file);
+            if text.is_err() {
+                return Err(text.err().unwrap().into());
+            }
+        }
+        let text=text.unwrap();
+        let mut data = serde_json::from_str::<Vec<RecentProject>>(text.as_str()).map_err(|e|
+            ProjectError::ParsingError {err: ParsingError::Deserialize {json: text.clone(), path: path_.clone(), err: e}}
+        )?;
+        data.push(recent.clone());
+        data.sort_by(|a, b| a.last_opened.cmp(&b.last_opened));
+
+        let text = serde_json::to_string(&data).map_err(|e| ProjectError::ParsingError {err:ParsingError::Serialize {
+            path: path_.clone(), err:e
+        }})?;
+        FS_WRITE_SERVICE.write_file(&file, text, FileWriteAccess::WRITE)?;
+        Ok(())
     }
 }

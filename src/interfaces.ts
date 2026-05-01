@@ -1,6 +1,15 @@
 interface IRecentProject {
     name: string,
     path: string
+    meta: {
+        authors: string[],
+        description: string,
+        license: string,
+        group: string,
+        tags: string[]
+    },
+    packages: string[],
+    last_opened: number
 }
 
 

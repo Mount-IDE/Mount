@@ -33,18 +33,18 @@ export default function MainPage() {
             cb: () => {}
         }
     ]
-    const [recent, setRecent] = useState<IProject[]>([]);
+    const [recent, setRecent] = useState<IRecentProject[]>([]);
 
     const groups = mainPageStore(state=>state.groups);
     
     async function loadRecents(){
         try {
             let recent = await invoke<IRecentProject[]>("get_recent_projects");
-            let res = await invoke<IProject[]>("read_recent_projects", {
-                recent: recent
-            });
-            console.log("recent loaded")
-            setRecent(res);
+            // let res = await invoke<IProject[]>("read_recent_projects", {
+            //     recent: recent
+            // });
+            console.log("recent loaded", recent)
+            setRecent(recent);
         } catch (e){
             console.log("not loaded", e)
         }
