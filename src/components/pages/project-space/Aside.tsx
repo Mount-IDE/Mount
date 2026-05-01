@@ -1,15 +1,19 @@
 import "./styles/aside.css"
 
 
+type Props ={
+    left?:boolean
+}
 
+export default function Aside(props: Props) {
 
-export default function Aside() {
-
-
-
+    let key=props.left? "borderRight":"borderLeft"
     return (
-        <div id={"project-aside"}>
-
+        <div
+            style={{
+                [key]: "1px solid var(--border2)"
+            }}
+            className={"project-aside"}>
         </div>
     )
 }

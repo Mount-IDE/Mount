@@ -9,7 +9,7 @@ import Central from "./Central.tsx";
 export default function ProjectWorkSpace() {
     return (
         <div id={"project-workspace"}>
-            <MiniAside/>
+            <MiniAside is_left/>
             <Aside/>
             <Central/>
             <Aside/>

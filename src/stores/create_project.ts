@@ -1,7 +1,5 @@
 import {create} from "zustand";
-import {cacheStore} from "./cache_store.ts";
 import {invoke} from "@tauri-apps/api/core";
-import pageStore from "./page_store.ts";
 
 
 interface Type {

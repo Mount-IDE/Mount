@@ -6,7 +6,6 @@ import ProjectMeta from "./ProjectMeta.tsx";
 import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
-import pageStore from "../../../stores/page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 
@@ -14,7 +13,6 @@ export default function CreateProject() {
 
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
-    const open_project = pageStore(state=>state.openProject)
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
     const getPath = () =>
         createProjectStore.getState()
