@@ -12,7 +12,6 @@ use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::{Path, Val};
 use std::collections::HashMap;
-use serde::Serialize;
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -172,4 +171,13 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
     meta_.tags=_tags_.clone();
 
     meta_
+}
+
+
+
+
+#[tauri::command]
+pub fn read_project(path: Path)->Result<Project, ErrorDto> {
+    println!("path command {}", path.clone());
+    PROJECT_SERVICE.open_project(&path).map_err(|e|e.into())
 }

@@ -7,6 +7,7 @@ use crate::modules::app::commands::project::*;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::app::commands::cache::*;
 use crate::modules::app::commands::config::*;
+use crate::modules::app::commands::utils::*;
 mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
@@ -38,7 +39,9 @@ pub fn run() {
             get_home_dir,
             get_projects_dir,
             get_groups,
-            create_project
+            create_project,
+            make_path_command,
+            read_project
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -7,15 +7,36 @@ import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import pageStore from "../../../stores/page_store.ts";
+import {projectStore} from "../../../stores/project_store.ts";
+import {invoke} from "@tauri-apps/api/core";
 
 export default function CreateProject() {
 
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
     const open_project = pageStore(state=>state.openProject)
-    function create_project_() {
+    const set_current_path = projectStore(state=>state.set_path_to_current_project);
+    const getPath = () =>
+        createProjectStore.getState()
+            .results?.["__meta__"]?.[-4]?.["project_path"];
+
+    const getName = () =>
+        createProjectStore.getState()
+            .results?.["__meta__"]?.[-4]?.["project_name"];
+
+    async function create_project_() {
+        const path = getPath();
+        const name = getName();
+
         if (current_template) {
-            create_project(current_template!, open_project).catch(console.error).then()
+            let res = await create_project(current_template!);
+
+            if (res == 0) {
+                let path__ = await invoke<string>("make_path_command", {
+                    components: [path, name]
+                })
+                set_current_path(path__);
+            }
         }
     }
 
@@ -34,7 +55,7 @@ export default function CreateProject() {
             <div id={"create-project-bottom"}>
                 <div id={"create-project-buttons"}>
                     <Button title={"Close"} cb={() => close_project()}/>
-                    <Button title={"Create Project"} cb={create_project_}/>
+                    <Button title={"Create Project"} cb={()=>create_project_()}/>
                 </div>
             </div>
         </div>

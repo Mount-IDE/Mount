@@ -7,7 +7,7 @@ pub enum ProjectError {
     #[error("config error that can`t describe as project error")]
     ConfigError(#[from] ConfigError),
     #[error("filesystem error that can`t describe as project error")]
-    FileSystemError(#[from] FileSystemError),
+    FileSystemError(#[from]#[source] FileSystemError),
     
     #[error("project already exists")]
     AlreadyExists,

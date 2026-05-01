@@ -21,7 +21,7 @@ interface Type {
     remove_tag: (id: number)=>void
     change_tag: (id: number, to: string)=>void
 
-    create_project(template: ITemplate, open: ()=>void):Promise<number>
+    create_project(template: ITemplate):Promise<number>
 
 }
 
@@ -95,7 +95,7 @@ export const createProjectStore = create<Type>((set, get) => ({
             tags: prev.tags.map(el=>el.id==id? {id, name:to}: el)
         }
     }),
-    async create_project(template: ITemplate, open:()=>void) {
+    async create_project(template: ITemplate) {
         let results = get().results;
         let packages = get().packages;
         let tags = get().tags;
@@ -106,7 +106,6 @@ export const createProjectStore = create<Type>((set, get) => ({
             await invoke<void>("create_project", {
                 template, results, packages, tags
             })
-            open();
         } catch (e) {
             console.error(e)
             return 2 //error while create project

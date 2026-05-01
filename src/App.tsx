@@ -1,4 +1,4 @@
-import { useEffect} from "react";
+import {useEffect} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
@@ -10,13 +10,17 @@ import {createProjectStore} from "./stores/create_project.ts";
 import CreateProject from "./components/pages/create-project/CreateProject.tsx";
 import {cacheStore} from "./stores/cache_store.ts";
 import {Group, mainPageStore} from "./stores/main_page_store.ts";
-
+import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
+import {projectStore} from "./stores/project_store.ts";
 
 
 function App() {
     const current = pageStore(state => state.current);
     const createProjectOpened = createProjectStore(state => state.page_opened)
+    const current_path = projectStore(state => state.path_to_current_project);
 
+    const set_current_project = ()=>projectStore.getState().set_current_project
+    const openProject = ()=>pageStore.getState().openProject
     async function move_to_cache() {
         try {
             let templates = await invoke<ITemplate[]>("read_templates");
@@ -64,6 +68,32 @@ function App() {
         move_to_cache().then();
     }, [])
 
+    async function setup_project() {
+        if (current_path.length > 0) {
+            try {
+                let res = await invoke<IProject>("read_project", {
+                    path: current_path
+                })
+                const set = set_current_project();
+                set(res);
+                const open = openProject()
+                open();
+
+
+            } catch (e) {
+                console.error(e)
+            }
+        } else {
+            console.log("path is empty")
+        }
+    }
+
+    useEffect(() => {
+        setup_project().then()
+
+    }, [current_path]);
+
+
     return (
         <>
             <Blur/>
@@ -71,11 +101,15 @@ function App() {
             <div id={"main"}>
                 {
                     createProjectOpened &&
-                        <CreateProject/>
+                    <CreateProject/>
                 }
                 {
                     current == Window.Main &&
                     <MainPage/>
+                }
+                {
+                    current == Window.Project &&
+                    <ProjectSpace/>
                 }
             </div>
         </>

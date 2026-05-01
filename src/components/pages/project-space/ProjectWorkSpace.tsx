@@ -1,6 +1,6 @@
 import "./styles/project-workspace.css"
 import MiniAside from "./MiniAside.tsx";
-import Aside from "./styles/Aside.tsx";
+import Aside from "./Aside.tsx";
 import Central from "./Central.tsx";
 
 

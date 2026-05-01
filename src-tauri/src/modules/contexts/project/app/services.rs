@@ -1,4 +1,4 @@
-use std::time::{Instant, Duration, UNIX_EPOCH, SystemTime};
+use std::time::{UNIX_EPOCH, SystemTime};
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
@@ -50,12 +50,15 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        let path = make_path_string(vec![project_path.get().as_str(), ".mount", "project.json"]);
+        println!("path open {}", project_path.clone());
+        let path = make_path(vec![
+            project_path.clone().get().as_str(), ".mount", "project.json"]);
         let config = PFile {
-            name: "config.json".to_string(),
-            path: Path(path),
+            name: "project.json".to_string(),
+            path: path.clone(),
             typ: FileType::REGULAR,
         };
+        println!("path {path}");
         let json = FS_READ_SERVICE.read_file(&config)?;
         let proj = serde_json::from_str::<Project>(&json).map_err(|e| {
             ProjectError::ParsingError{err:ParsingError::Deserialize {

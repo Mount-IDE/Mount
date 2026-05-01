@@ -62,7 +62,7 @@ export default function Parameter(props: Props) {
     }, [props.param.def]);
 
 
-    const res = createProjectStore(state=>state.results)
+    // const _ = createProjectStore(state=>state.results)
 
 
 
