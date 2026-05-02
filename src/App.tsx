@@ -12,6 +12,7 @@ import {cacheStore} from "./stores/cache_store.ts";
 import {Group, mainPageStore} from "./stores/main_page_store.ts";
 import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
 import {projectStore} from "./stores/project_store.ts";
+import {asideButtonsStore} from "./stores/aside_buttons_store.ts";
 
 
 function App() {
@@ -78,8 +79,33 @@ function App() {
                 set(res);
                 const open = openProject()
                 open();
+                const buttons = res.workspace.buttons;
+                let left_top = buttons.filter(el=>el.pos=="LeftTop")
+                let left_bot = buttons.filter(el=>el.pos=="LeftBottom")
+                let right_top = buttons.filter(el=>el.pos=="RightTop")
+
+                let left_top_2 =
+                    left_top.map<IAsideButton>(el=>({
+                    id: el.order,
+                    ...el
+                }));
+
+                let left_bot_2 =
+                    left_bot.map<IAsideButton>(el=>({
+                    id: el.order,
+                    ...el
+                }));
+
+                let right_top_2 =
+                    right_top.map<IAsideButton>(el=>({
+                    id: el.order,
+                    ...el
+                }));
 
 
+                asideButtonsStore.getState().load_left_top(left_top_2);
+                asideButtonsStore.getState().load_left_top(left_bot_2);
+                asideButtonsStore.getState().load_left_top(right_top_2);
             } catch (e) {
                 console.error(e)
             }

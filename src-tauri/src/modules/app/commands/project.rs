@@ -12,6 +12,7 @@ use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::{Path, Val};
 use std::collections::HashMap;
+use crate::modules::app::utils::project::make_buttons;
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -110,7 +111,9 @@ pub fn create_project(
     project.meta = additions;
     project.vars = vars;
 
+    let buttons = make_buttons();
 
+    project.workspace.buttons=buttons;
 
     let json = serde_json::to_string(&project).map_err(|e|ProjectError::ParsingError { err:ParsingError::Serialize { path:
         Path(path.clone()), err: e } })?;

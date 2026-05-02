@@ -39,9 +39,9 @@ impl Project {
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct WorkSpace {
-    widgets: Vec<Widget>,
-    buttons: Vec<Button>,
-    opened_files: Vec<OpenedFile>
+    pub widgets: Vec<Widget>,
+    pub buttons: Vec<Button>,
+    pub opened_files: Vec<OpenedFile>
 }
 
 impl WorkSpace{
@@ -65,11 +65,12 @@ pub struct OpenedFile {
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Button{
-    pos: ButtonPos,
-    widget: String,
-    order: u8,
-    keys: String,
-    icon: ButtonIcon
+    pub pos: ButtonPos,
+    pub widget: String,
+    pub order: u8,
+    pub alt: String,
+    pub keys: String,
+    pub icon: ButtonIcon
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]

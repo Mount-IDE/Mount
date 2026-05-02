@@ -26,7 +26,7 @@ interface IProject {
     packages: string[],
     workspace:{
         widgets: {}[],
-        buttons: IAsideButton[],
+        buttons: IAsideButtonExtended[],
         opened_files: OpenedFile[]
     }
 }
@@ -124,6 +124,16 @@ interface IPackage {
 
 interface IAsideButton {
     id: number
+    alt: string
+    keys: string
+    icon: ["main" | "other",string] | string
+    component: ()=> React.ReactElement
+
+}
+
+interface IAsideButtonExtended {
+    pos: string
+    order: number
     alt: string
     keys: string
     icon: ["main" | "other",string] | string
