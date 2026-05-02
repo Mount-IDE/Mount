@@ -228,6 +228,7 @@ fn get_files() -> Vec<_File> {
             "[]".to_string(),
         ),
         _File::new("".to_string(), "icons".to_string()),
+        _File::new("".to_string(), "aside_icons".to_string())
     ]
 }
 

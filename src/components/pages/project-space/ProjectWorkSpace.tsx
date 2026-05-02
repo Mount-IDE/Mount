@@ -16,11 +16,11 @@ export default function ProjectWorkSpace() {
 
     return (
         <div id={"project-workspace"}>
-            <MiniAside is_left/>
+            <MiniAside top={left_top} bottom={left_bot} max_top={3}/>
             <Aside/>
             <Central/>
             <Aside/>
-            <MiniAside/>
+            <MiniAside top={right_top} max_top={3}/>
         </div>
     )
 }

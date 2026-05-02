@@ -126,7 +126,7 @@ interface IAsideButton {
     id: number
     alt: string
     keys: string
-    icon: ["main" | "other",string] | string
+    icon: string
     component: ()=> React.ReactElement
 
 }
@@ -136,7 +136,7 @@ interface IAsideButtonExtended {
     order: number
     alt: string
     keys: string
-    icon: ["main" | "other",string] | string
+    icon: string
     component: ()=> React.ReactElement
 
 }

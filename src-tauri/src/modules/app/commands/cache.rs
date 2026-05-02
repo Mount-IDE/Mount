@@ -56,3 +56,10 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
     }
     Ok(templates)
 }
+
+
+
+#[tauri::command]
+pub fn get_data_dir() -> Result<Path, ErrorDto> {
+    CONFIG_SERVICE.get_data_dir().map_err(|e|e.into())
+}

@@ -41,7 +41,10 @@ pub fn run() {
             get_groups,
             create_project,
             make_path_command,
-            read_project
+            read_project,
+            get_data_dir,
+            make_path_from_icon,
+            make_base64
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

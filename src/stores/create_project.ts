@@ -19,7 +19,7 @@ interface Type {
     remove_tag: (id: number)=>void
     change_tag: (id: number, to: string)=>void
 
-    create_project(template: ITemplate):Promise<number>
+    create_project(template: ITemplate):Promise<[number, string]>
 
 }
 
@@ -98,7 +98,7 @@ export const createProjectStore = create<Type>((set, get) => ({
         let packages = get().packages;
         let tags = get().tags;
         if (!template) {
-            return 1; // undefined template
+            return [1, ""]; // undefined template
         }
         try {
             await invoke<void>("create_project", {
@@ -106,9 +106,17 @@ export const createProjectStore = create<Type>((set, get) => ({
             })
         } catch (e) {
             console.error(e)
-            return 2 //error while create project
+            return [2, ""] //error while create project
         }
-        return 0
+        let name = get().results?.["__meta__"]?.[-4]?.["project-name"];
+        let path = get().results?.["__meta__"]?.[-4]?.["project-path"];
+        console.log(path, name);
+
+        console.log(get().results)
+        let unified = await invoke<string>("make_path_command", {
+            components: [path, name]
+        })
+        return [0, unified]
 
     }
 

@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
@@ -20,8 +20,9 @@ function App() {
     const createProjectOpened = createProjectStore(state => state.page_opened)
     const current_path = projectStore(state => state.path_to_current_project);
 
-    const set_current_project = ()=>projectStore.getState().set_current_project
-    const openProject = ()=>pageStore.getState().openProject
+    const set_current_project = () => projectStore.getState().set_current_project
+    const openProject = () => pageStore.getState().openProject
+
     async function move_to_cache() {
         try {
             let templates = await invoke<ITemplate[]>("read_templates");
@@ -62,6 +63,13 @@ function App() {
             console.error("error while load tags: ", e)
         }
 
+        try {
+            let res = await invoke<string>("get_data_dir");
+            cacheStore.getState().set_data_dir(res)
+        } catch (e) {
+            console.error(e)
+        }
+
     }
 
     useEffect(() => {
@@ -80,32 +88,38 @@ function App() {
                 const open = openProject()
                 open();
                 const buttons = res.workspace.buttons;
-                let left_top = buttons.filter(el=>el.pos=="LeftTop")
-                let left_bot = buttons.filter(el=>el.pos=="LeftBottom")
-                let right_top = buttons.filter(el=>el.pos=="RightTop")
+                let left_top = buttons.filter(el => el.pos == "LeftTop")
+                let left_bot = buttons.filter(el => el.pos == "LeftBottom")
+                let right_top = buttons.filter(el => el.pos == "RightTop")
 
                 let left_top_2 =
-                    left_top.map<IAsideButton>(el=>({
-                    id: el.order,
-                    ...el
-                }));
+                    left_top.map<IAsideButton>(el => ({
+                        id: el.order,
+                        alt: el.alt,
+                        component: () => <></>,
+                        icon: el.icon, keys: el.keys
+                    }));
 
                 let left_bot_2 =
-                    left_bot.map<IAsideButton>(el=>({
-                    id: el.order,
-                    ...el
-                }));
+                    left_bot.map<IAsideButton>(el => ({
+                        id: el.order,
+                        alt: el.alt,
+                        component: () => <></>,
+                        icon: el.icon, keys: el.keys
+                    }));
 
                 let right_top_2 =
-                    right_top.map<IAsideButton>(el=>({
-                    id: el.order,
-                    ...el
-                }));
-
+                    right_top.map<IAsideButton>(el => ({
+                        id: el.order,
+                        alt: el.alt,
+                        component: () => <></>,
+                        icon: el.icon, keys: el.keys
+                    }));
+                console.log(left_top, left_bot, right_top)
 
                 asideButtonsStore.getState().load_left_top(left_top_2);
-                asideButtonsStore.getState().load_left_top(left_bot_2);
-                asideButtonsStore.getState().load_left_top(right_top_2);
+                asideButtonsStore.getState().load_left_bot(left_bot_2);
+                asideButtonsStore.getState().load_right_top(right_top_2);
             } catch (e) {
                 console.error(e)
             }

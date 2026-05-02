@@ -6,7 +6,8 @@ interface Type {
     packages: IPackage[]
     templates: ITemplate[]
     currentTemplate: ITemplate | null,
-    groups: string[]
+    groups: string[],
+    data_dir: string,
     add_template_to_cache: (t: ITemplate) => void
     add_templates_to_cache: (t: ITemplate[]) => void
     add_package_to_cache: (t: IPackage) => void
@@ -18,6 +19,7 @@ interface Type {
     projects_path: string
     set_projects_path:(path: string)=>void
     load_groups:(groups: string[])=>void
+    set_data_dir: (str: string)=>void
 }
 
 
@@ -25,6 +27,7 @@ export const cacheStore = create<Type>((set, get) => ({
     currentTemplate: null,
     packages: [],
     templates: [],
+    data_dir:"",
     projects_path: "",
     groups: []
         ,    add_package_to_cache: (t: IPackage) => set(prev => {
@@ -84,7 +87,12 @@ export const cacheStore = create<Type>((set, get) => ({
     set_projects_path:(path: string)=> set({projects_path:path}), 
     load_groups:(groups: string[])=> set({
         groups
-    })
+    }),
+    set_data_dir(str: string): void {
+        set({
+            data_dir: str
+        })
+    }
 
 
 }))

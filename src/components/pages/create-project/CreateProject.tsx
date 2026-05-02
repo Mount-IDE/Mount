@@ -7,33 +7,30 @@ import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
-import {invoke} from "@tauri-apps/api/core";
+// import {invoke} from "@tauri-apps/api/core";
 
 export default function CreateProject() {
 
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
-    const getPath = () =>
+    /*const getPath = () =>
         createProjectStore.getState()
             .results?.["__meta__"]?.[-4]?.["project_path"];
 
     const getName = () =>
         createProjectStore.getState()
             .results?.["__meta__"]?.[-4]?.["project_name"];
-
+*/
     async function create_project_() {
-        const path = getPath();
+        /*const path = getPath();
         const name = getName();
-
+        */
         if (current_template) {
             let res = await create_project(current_template!);
 
-            if (res == 0) {
-                let path__ = await invoke<string>("make_path_command", {
-                    components: [path, name]
-                })
-                set_current_path(path__);
+            if (res[0] == 0) {
+                set_current_path(res[1]);
             }
         }
     }

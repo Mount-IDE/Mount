@@ -1,0 +1,26 @@
+.project-mini-aside-button{
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width:  80%;
+    aspect-ratio: 1/1;
+    transition: all 0.2s;
+    border-radius: 5px;
+
+    & img {
+        width:85%;
+        height:85%;
+        display: block;
+        object-fit: contain;
+    }
+    &:hover{
+        filter: brightness(1.5);
+    }
+}
+
+
+.project-mini-aside-button.selected{
+    background: var(--border2);
+}

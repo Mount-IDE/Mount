@@ -70,15 +70,9 @@ pub struct Button{
     pub order: u8,
     pub alt: String,
     pub keys: String,
-    pub icon: ButtonIcon
+    pub icon: String
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[serde(untagged)]
-pub enum ButtonIcon{
-    Single(String),
-    Couple(String, String)
-}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Task {}

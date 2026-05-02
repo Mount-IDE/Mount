@@ -1,4 +1,4 @@
-use crate::modules::contexts::project::domain::entities::{Button, ButtonIcon, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{Button, ProjectTemplate};
 use crate::modules::contexts::project::domain::values::{ButtonPos, CreateProjectResult};
 
 pub mod functions {}
@@ -13,7 +13,7 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("FsAside"),
         order: 0,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "dir.svg".to_string()),
+        icon: "dir.svg".to_string(),
     });
     res.push(Button {
         alt: "Commit".to_string(),
@@ -21,7 +21,7 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("CommitAside"),
         order: 1,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "commit.svg".to_string()),
+        icon: "commit.svg".to_string(),
     });
 
     res.push(Button {
@@ -30,7 +30,7 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("DebugAside"),
         order: 0,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "debug.svg".to_string()),
+        icon: "debug.svg".to_string(),
     });
     res.push(Button {
         alt: "Launch".to_string(),
@@ -38,31 +38,31 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("LaunchAside"),
         order: 1,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "play.svg".to_string()),
+        icon: "play.svg".to_string(),
     });
     res.push(Button {
         alt: "Terminal".to_string(),
         pos: ButtonPos::LeftBottom,
         widget: String::from("TerminalAside"),
-        order: 3,
+        order: 2,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "terminal.svg".to_string()),
+        icon: "terminal.svg".to_string(),
     });
     res.push(Button {
         alt: "Problems".to_string(),
         pos: ButtonPos::LeftBottom,
         widget: String::from("ProblemsAside"),
-        order: 4,
+        order: 3,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "problems.svg".to_string()),
+        icon:  "problems.svg".to_string(),
     });
     res.push(Button {
         alt: "Git".to_string(),
         pos: ButtonPos::LeftBottom,
         widget: String::from("GitAside"),
-        order: 5,
+        order: 4,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "git.svg".to_string()),
+        icon:"git.svg".to_string(),
 
 
     });res.push(Button {
@@ -71,8 +71,8 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("SettingsAside"),
         order: 0,
         keys: String::new(),
-        icon: ButtonIcon::Couple("main".to_string(), "settings.svg".to_string()),
+        icon: "settings.svg".to_string(),
     });
 
-    vec![]
+    res
 }
