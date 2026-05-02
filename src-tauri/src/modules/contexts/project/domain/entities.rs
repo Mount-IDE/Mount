@@ -67,9 +67,17 @@ pub struct OpenedFile {
 pub struct Button{
     pos: ButtonPos,
     widget: String,
-    order: u8
+    order: u8,
+    keys: String,
+    icon: ButtonIcon
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[serde(untagged)]
+pub enum ButtonIcon{
+    Single(String),
+    Couple(String, String)
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Task {}

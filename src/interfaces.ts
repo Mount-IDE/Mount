@@ -23,7 +23,12 @@ interface IProject {
         tags: string[],
         group: string
     },
-    packages: string[]
+    packages: string[],
+    workspace:{
+        widgets: {}[],
+        buttons: IAsideButton[],
+        opened_files: OpenedFile[]
+    }
 }
 
 
@@ -114,4 +119,19 @@ interface IPackage {
         actions: IAction[],
         parameters: IParameter[]
     }
+}
+
+
+interface IAsideButton {
+    id: number
+    alt: string
+    keys: string
+    icon: ["main" | "other",string] | string
+    component: ()=> React.ReactElement
+
+}
+
+interface OpenedFile {
+    path: string,
+    cursor: [number, number]
 }
