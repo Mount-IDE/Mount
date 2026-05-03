@@ -2,17 +2,17 @@ import "./styles/aside.css"
 import {useEffect, useRef} from "react";
 import Header from "../../aside-widgets/Header.tsx";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {asideStore} from "../../../stores/aside_store.ts";
 
 
 type Props = {
     left?: boolean
+    state: boolean
 }
 
 export default function Aside(props: Props) {
 
     const ref = useRef<HTMLDivElement>(null)
-    const ref_=useRef<HTMLHRElement>(null)
+    const ref_ = useRef<HTMLHRElement>(null)
     const base_pos = useRef(0);
     const base_width = useRef(0)
     const is_moving = useRef(false)
@@ -35,15 +35,17 @@ export default function Aside(props: Props) {
 
         function move(e: MouseEvent) {
             if (!is_moving.current) return
-            const delta = e.clientX - base_pos.current;
-            const next = !props.left ?
-                base_width.current - delta :
-                base_width.current + delta
-            const MIN = 120;
-            const MAX = window.innerWidth * 0.8;
+            requestAnimationFrame(() => {
+                const delta = e.clientX - base_pos.current;
+                const next = !props.left ?
+                    base_width.current - delta :
+                    base_width.current + delta
+                const MIN = 120;
+                const MAX = window.innerWidth * 0.8;
 
-            const clamped = Math.max(MIN, Math.min(MAX, next));
-            current.style.width = `${clamped}px`
+                const clamped = Math.max(MIN, Math.min(MAX, next));
+                current.style.width = `${clamped}px`
+            })
         }
 
 
@@ -67,26 +69,17 @@ export default function Aside(props: Props) {
     }, [ref_]);
 
 
-    let state= props.left?
-        asideStore(state => state.left_aside) :
-        asideStore(state => state.right_aside);
-
-
-
-
-
-    // const cur = props.left ?
-    //     asideStore(state => state.current_left) :
-    //     asideStore(state => state.current_right)
     const current_top = props.left ?
-        asideButtonsStore(state => state.current_left_top) :
-        asideButtonsStore(state => state.current_right_top)
+        asideButtonsStore(state => state.current_left) :
+        asideButtonsStore(state => state.current_right)
 
     return (
         <>
-            {!props.left &&
-            <hr ref={ref_} className={"project-hr"}/>}
-            <div ref={ref} className={state ? "project-aside" : "project-aside-dis"}>
+            {
+                !props.left &&
+                <hr ref={ref_} className={"project-hr"}/>
+            }
+            <div ref={ref} className={props.state ? "project-aside" : "project-aside-dis"}>
                 <Header label={current_top?.alt ?? ""}/>
                 <div className={"project-aside-body"}>
                 </div>

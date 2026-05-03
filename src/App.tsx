@@ -115,9 +115,9 @@ function App() {
                         component: () => <></>,
                         icon: el.icon, keys: el.keys
                     }));
-                asideButtonsStore.getState().load_left_top(left_top_2);
-                asideButtonsStore.getState().load_left_bot(left_bot_2);
-                asideButtonsStore.getState().load_right_top(right_top_2);
+                asideButtonsStore.getState().load_left(left_top_2);
+                asideButtonsStore.getState().load_bottom(left_bot_2);
+                asideButtonsStore.getState().load_right(right_top_2);
             } catch (e) {
                 console.error(e)
             }

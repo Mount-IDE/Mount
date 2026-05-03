@@ -1,6 +1,6 @@
 import "./styles/mini-aside.css"
 import more2 from "../../../assets/more2.svg"
-import {ReactElement} from "react";
+import {ReactElement, useState} from "react";
 import AsideButton from "./AsideButton.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {asideStore} from "../../../stores/aside_store.ts";
@@ -11,8 +11,8 @@ type Props = {
     bottom?: IAsideButton[],
     max_top: number|null
     max_bot: number|null
-    set_top?: (elem: ReactElement | null) => void
-    set_bot?: (elem: ReactElement | null) => void
+    set_top?: (elem: (elem:ReactElement | null)=>void) => void
+    set_bot?: (elem: (elem:ReactElement | null)=>void) => void
     is_left: boolean
 }
 
@@ -30,22 +30,19 @@ export default function MiniAside(props: Props) {
 
     let data_dir = cacheStore(state => state.data_dir)
 
-    const current_top_button = props.is_left ?
-        asideButtonsStore(state => state.current_left_top) :
-        asideButtonsStore(state => state.current_right_top)
-
-    const current_bot_button = asideButtonsStore(state => state.current_left_bot)
+    const [currentTop, setCurrentTop]=useState<number| null>(null)
+    const [currentBot, setCurrentBot]=useState<number| null>(null)
 
 
     const left = asideStore(state=>state.left_aside)
     const right = asideStore(state=>state.right_aside)
 
     const set_current_top_button = props.is_left ?
-        asideButtonsStore(state => state.set_current_left_top_button) :
-        asideButtonsStore(state => state.set_current_right_top_button)
+        asideButtonsStore(state => state.set_current_left_button) :
+        asideButtonsStore(state => state.set_current_right_button)
 
     const set_current_bot_button =
-        asideButtonsStore(state => state.set_current_left_bot_button)
+        asideButtonsStore(state => state.set_current_bottom_button)
 
 
     const toggle_top_visibility = props.is_left ?
@@ -55,27 +52,31 @@ export default function MiniAside(props: Props) {
     const toggle_bot_visibility = asideStore(state=>state.toggle_bottom);
 
 
-    function toggleTop(el:IAsideButton, val: boolean) {
+    async function toggleTop(el:IAsideButton, val: boolean) {
         if (val) {
             set_current_top_button(null);
+            setCurrentTop(null);
             toggle_top_visibility!(_ => false)
-            props.set_top!(null);
+            props.set_top!(()=>null);
 
         } else {
             set_current_top_button(el)
+            setCurrentTop(el.id)
             toggle_top_visibility!(_ => true)
-            props.set_top!(el.component())
+            props.set_top!(el.component)
         }
     }
-    function toggleBottom(el:IAsideButton, val: boolean) {
+    async function toggleBottom(el:IAsideButton, val: boolean) {
         if (val) {
             set_current_bot_button(null);
+            setCurrentBot(null)
             toggle_bot_visibility!(_ => false)
-            props.set_bot!(null)
+            props.set_bot!(()=>null)
         } else {
             set_current_bot_button(el)
+            setCurrentBot(el.id)
             toggle_bot_visibility!(_ => true)
-            props.set_bot!(el.component())
+            props.set_bot!(el.component)
         }
     }
 
@@ -91,7 +92,7 @@ export default function MiniAside(props: Props) {
                 <div className={"project-mini-aside-top"}>
                     <div className={"project-mini-aside-buttons"}>
                         {top.map((el) =>
-                            <AsideButton cb={toggleTop} selected={el.id == current_top_button?.id} bt={el} key={el.id}
+                            <AsideButton cb={toggleTop} selected={el.id == currentTop} bt={el} key={el.id}
                                          data_dir={data_dir}/>
                         )}
                     </div>
@@ -112,7 +113,7 @@ export default function MiniAside(props: Props) {
                             </button>}
                         <div className={"project-mini-aside-buttons"}>
                             {bottom!.map((el) =>
-                                <AsideButton cb={toggleBottom} selected={el.id == current_bot_button?.id} bt={el} key={el.id}
+                                <AsideButton cb={toggleBottom} selected={el.id == currentBot} bt={el} key={el.id}
                                              data_dir={data_dir}/>
                             )}
                         </div>

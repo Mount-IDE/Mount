@@ -1,0 +1,14 @@
+.aside-header{
+    width: 100%;
+    height: 5vh;
+    display: flex;
+
+}
+
+.aside--header-p{
+    width: 80%;
+    height: 100%;
+    margin-left: 10px;
+    color: var(--subtitle);
+    font: 10pt "JetBrains Mono";
+}

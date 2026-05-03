@@ -21,6 +21,6 @@
 
 .project-hr{
     border: 2px solid var(--border2);
-    cursor: col-resize;
+    cursor: w-resize;
 }
 

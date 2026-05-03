@@ -1,4 +1,4 @@
-import React, {ReactElement} from "react";
+import {ReactElement} from "react";
 import {create} from "zustand";
 
 interface Type {
@@ -6,18 +6,20 @@ interface Type {
     right_aside: boolean,
     bottom: boolean,
 
-    current_left: () => ReactElement | null
-    current_right: () => ReactElement | null
-    current_bottom: () => ReactElement | null
+    current_left: comp
+    current_right: comp
+    current_bottom: comp
 
     toggle_left: toggleCallback
     toggle_right: toggleCallback
     toggle_bottom: toggleCallback
 
-    set_current_left: (elem: ReactElement | null) => void
-    set_current_right: (elem: ReactElement | null) => void
-    set_current_bottom: (elem: ReactElement | null) => void
+    set_current_left: (elem: comp) => void
+    set_current_right: (elem: comp) => void
+    set_current_bottom: (elem: comp) => void
 }
+
+type comp =  (elem:ReactElement|null)=> void
 
 type prev_ = (prev: boolean) => boolean
 
@@ -30,14 +32,14 @@ export const asideStore = create<Type>((set, get) => ({
     current_bottom: () => null,
     current_left: () => null,
     current_right: () => null,
-    set_current_bottom:(elem: React.ReactElement | null)=>set({
-            current_bottom: ()=>elem
+    set_current_bottom:(elem: comp)=>set({
+            current_bottom: elem
         }),
-    set_current_left:(elem: React.ReactElement | null)=>set({
-        current_left: ()=>elem
+    set_current_left:(elem: comp)=>set({
+        current_left: elem
     }),
-    set_current_right:(elem: React.ReactElement | null)=>set({
-        current_left: ()=>elem
+    set_current_right:(elem: comp)=>set({
+        current_left: elem
     }),
     toggle_bottom(prev: prev_ | undefined): void {
         if (prev!==undefined){
@@ -49,7 +51,8 @@ export const asideStore = create<Type>((set, get) => ({
                 bottom: !get().bottom
             })
         }
-    }, toggle_left(prev: prev_ | undefined): void {
+    },
+    toggle_left(prev: prev_ | undefined): void {
         if (prev!==undefined){
             set({
                 left_aside: prev(get().left_aside)
@@ -59,7 +62,8 @@ export const asideStore = create<Type>((set, get) => ({
                 left_aside: !get().left_aside
             })
         }
-    }, toggle_right(prev: prev_ | undefined): void {
+    },
+    toggle_right(prev: prev_ | undefined): void {
         if (prev!==undefined){
             set({
                 right_aside: prev(get().right_aside)
@@ -70,6 +74,5 @@ export const asideStore = create<Type>((set, get) => ({
             })
         }
     }
-
 
 }))
