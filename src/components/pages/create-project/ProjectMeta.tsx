@@ -1,9 +1,6 @@
 import "./styles/project-meta.css"
 import Section from "./Section.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
-import {createProjectStore} from "../../../stores/create_project.ts";
-import cross from "../../../assets/title-close.svg"
-import plus from "../../../assets/plus.svg"
 import Tags from "./Tags.tsx";
 
 

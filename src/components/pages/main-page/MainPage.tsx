@@ -37,10 +37,9 @@ export default function MainPage() {
     async function loadRecents(){
         try {
             let recent = await invoke<IRecentProject[]>("get_recent_projects");
-            console.log("recent loaded", recent)
             setRecent(recent);
         } catch (e){
-            console.log("not loaded", e)
+            console.warn("not loaded", e)
         }
     }
     useEffect(()=>{

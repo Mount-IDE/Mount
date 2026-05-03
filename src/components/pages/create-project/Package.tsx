@@ -1,4 +1,5 @@
 import "./styles/package.css"
+import {ChangeEvent} from "react";
 
 
 type Props={
@@ -10,7 +11,7 @@ type Props={
 
 export default function Package(props: Props){
 
-    function toggle(e: React.ChangeEvent<HTMLInputElement>) {
+    function toggle(e: ChangeEvent<HTMLInputElement>) {
         const val = e.currentTarget.checked;
         props.set(val);
     }

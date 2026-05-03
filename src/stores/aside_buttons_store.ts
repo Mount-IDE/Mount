@@ -1,11 +1,14 @@
 import {create} from "zustand"
-import React from "react";
 
 
 interface Type{
     left_top_buttons: IAsideButton[],
     left_bottom_buttons: IAsideButton[],
     right_top_buttons: IAsideButton[],
+
+    current_left_top: IAsideButton |null
+    current_right_top: IAsideButton | null
+    current_left_bot: IAsideButton | null
 
     load_left_top: (bt: IAsideButton[])=>void
     load_left_bot: (bt: IAsideButton[])=>void
@@ -18,6 +21,10 @@ interface Type{
     remove_from_left_top: (id: number)=>void
     remove_from_left_bot: (id: number)=>void
     remove_from_right_top: (id: number)=>void
+
+    set_current_left_top_button: (bt: IAsideButton |null)=>void;
+    set_current_left_bot_button: (bt: IAsideButton| null)=>void;
+    set_current_right_top_button: (bt: IAsideButton| null)=>void;
 }
 
 
@@ -26,17 +33,6 @@ export const asideButtonsStore= create<Type>((set, get)=>({
     left_bottom_buttons: [],
     right_top_buttons: [],
     add_to_left_bot(bt: IAsideButton): void {
-        const buttons = get().left_top_buttons;
-        const id = buttons.map(el=>el.id)
-        if (id.includes(bt.id)){
-            while (id.includes(bt.id)){
-                bt.id+=1
-            }
-        }
-        buttons.push(bt)
-        set({left_top_buttons: [...buttons]})
-    },
-    add_to_left_top(bt: IAsideButton): void {
         const buttons = get().left_bottom_buttons;
         const id = buttons.map(el=>el.id)
         if (id.includes(bt.id)){
@@ -46,6 +42,17 @@ export const asideButtonsStore= create<Type>((set, get)=>({
         }
         buttons.push(bt)
         set({left_bottom_buttons: [...buttons]})
+    },
+    add_to_left_top(bt: IAsideButton): void {
+        const buttons = get().left_top_buttons;
+        const id = buttons.map(el=>el.id)
+        if (id.includes(bt.id)){
+            while (id.includes(bt.id)){
+                bt.id+=1
+            }
+        }
+        buttons.push(bt)
+        set({left_top_buttons: [...buttons]})
     },
     add_to_right_top(bt: IAsideButton): void {
         const buttons = get().right_top_buttons;
@@ -58,7 +65,6 @@ export const asideButtonsStore= create<Type>((set, get)=>({
         buttons.push(bt)
         set({right_top_buttons: [...buttons]})
     },
-
     load_left_bot(bt: IAsideButton[]): void {
         set(prev=>{
             let buttons = prev.left_bottom_buttons
@@ -89,7 +95,6 @@ export const asideButtonsStore= create<Type>((set, get)=>({
             }
         })
     },
-
     remove_from_left_bot(id: number): void {
         const res = get().left_bottom_buttons.filter(el=>el.id!=id)
         set({
@@ -107,6 +112,25 @@ export const asideButtonsStore= create<Type>((set, get)=>({
         set({
             right_top_buttons: [...res]
         })
+    },
+    current_left_bot: null,
+    current_left_top: null,
+    current_right_top: null,
+    set_current_left_bot_button(bt: IAsideButton| null): void {
+        set({
+            current_left_bot: bt
+        })
+    },
+    set_current_left_top_button(bt: IAsideButton|null): void {
+        set({
+            current_left_top: bt
+        })
+    },
+    set_current_right_top_button(bt: IAsideButton|null): void {
+        set({
+            current_right_top: bt
+        })
     }
+
 
 }))

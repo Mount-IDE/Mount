@@ -1,5 +1,4 @@
 import {create} from "zustand"
-import {path} from "@tauri-apps/api";
 
 
 interface Type {

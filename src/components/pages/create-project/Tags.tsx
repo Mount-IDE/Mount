@@ -1,5 +1,4 @@
 import "./styles/tags.css"
-import Section from "./Section.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import cross from "../../../assets/title-close.svg";
 import plus from "../../../assets/plus.svg";

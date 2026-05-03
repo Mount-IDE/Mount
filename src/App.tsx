@@ -115,8 +115,6 @@ function App() {
                         component: () => <></>,
                         icon: el.icon, keys: el.keys
                     }));
-                console.log(left_top, left_bot, right_top)
-
                 asideButtonsStore.getState().load_left_top(left_top_2);
                 asideButtonsStore.getState().load_left_bot(left_bot_2);
                 asideButtonsStore.getState().load_right_top(right_top_2);
@@ -124,7 +122,7 @@ function App() {
                 console.error(e)
             }
         } else {
-            console.log("path is empty")
+            console.warn("path is empty")
         }
     }
 
