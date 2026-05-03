@@ -37,7 +37,8 @@ export default function MainPage() {
     async function loadRecents(){
         try {
             let recent = await invoke<IRecentProject[]>("get_recent_projects");
-            setRecent(recent);
+            let res = recent.sort((a,b)=>b.last_opened-a.last_opened)
+            setRecent(res);
         } catch (e){
             console.warn("not loaded", e)
         }

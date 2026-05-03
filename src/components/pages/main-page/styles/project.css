@@ -5,9 +5,14 @@
     gap: 3%;
     position: relative;
     background: var(--bg);
-    transition: all 0.2s;
+    transition: all 0.1s;
+    margin-bottom: 20px;
+    border-radius: 10px;
     &:hover{
-        color: var(--border);
+        background: var(--proj-hover);
+        & .main-page-project-name {
+            color: var(--title)
+        }
     }
 }
 
@@ -37,9 +42,8 @@
 }
 
 .main-page-project-right-{
-    z-index: 10;
     position: absolute;
-    right: 4%;
+    right: 5%;
     top: 0;
     width: 50%;
     height: 100%;
@@ -54,7 +58,7 @@
 
 .main-page-project-button{
     position: absolute;
-    right: 0;
+    right: 2%;
     top: 0;
     height: 100%;
     width: 1%;

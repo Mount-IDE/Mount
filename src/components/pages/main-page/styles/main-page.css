@@ -78,7 +78,7 @@
     background: transparent;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: start;
     justify-content: center;
     transition: color 0.2s;
     overflow-x: scroll;
@@ -97,6 +97,7 @@
     width: 100%;
     height: calc(95% - 50px);
     overflow: auto;
+    margin-top: 10px;
 
     &::-webkit-scrollbar{
         width: 0;
