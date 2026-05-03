@@ -29,7 +29,7 @@ npm i
 3. Compile project
 ```bash
 # dev 
-npm run tauri
+npm run dev
 # release
 npm run tauri:release
 ```

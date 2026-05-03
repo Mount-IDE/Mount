@@ -39,7 +39,7 @@ export const asideStore = create<Type>((set, get) => ({
         current_left: elem
     }),
     set_current_right:(elem: comp)=>set({
-        current_left: elem
+        current_right: elem
     }),
     toggle_bottom(prev: prev_ | undefined): void {
         if (prev!==undefined){

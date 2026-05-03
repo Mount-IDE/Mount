@@ -1,4 +1,6 @@
 .aside-header{
+    position: absolute;
+    top: 10px;
     width: 100%;
     height: 5vh;
     display: flex;

@@ -1,5 +1,5 @@
 import "./styles/aside.css"
-import {useEffect, useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import Header from "../../aside-widgets/Header.tsx";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 
@@ -9,7 +9,7 @@ type Props = {
     state: boolean
 }
 
-export default function Aside(props: Props) {
+function Aside(props: Props) {
 
     const ref = useRef<HTMLDivElement>(null)
     const ref_ = useRef<HTMLHRElement>(null)
@@ -25,6 +25,7 @@ export default function Aside(props: Props) {
         let current = current_!;
         let hr = hr_!;
 
+        let frame: number | null=null;
         function start_move(e: MouseEvent) {
             is_moving.current = true;
             base_pos.current = e.clientX;
@@ -35,7 +36,11 @@ export default function Aside(props: Props) {
 
         function move(e: MouseEvent) {
             if (!is_moving.current) return
-            requestAnimationFrame(() => {
+
+            if (frame!=null)return
+
+            frame = requestAnimationFrame(() => {
+                frame=null;
                 const delta = e.clientX - base_pos.current;
                 const next = !props.left ?
                     base_width.current - delta :
@@ -53,7 +58,7 @@ export default function Aside(props: Props) {
             if (!is_moving.current) return
             is_moving.current = false
             document.body.style.userSelect = "";
-            current.style.transition = "width 0.2s";
+            current.style.transition = "all 0.2s";
         }
 
         hr.addEventListener("mousedown", start_move);
@@ -79,10 +84,9 @@ export default function Aside(props: Props) {
                 !props.left &&
                 <hr ref={ref_} className={"project-hr"}/>
             }
-            <div ref={ref} className={props.state ? "project-aside" : "project-aside-dis"}>
-                <Header label={current_top?.alt ?? ""}/>
-                <div className={"project-aside-body"}>
-                </div>
+            <div ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
+                    <Header label={current_top?.alt ?? ""}/>
+                    <div className={"project-aside-body"}></div>
             </div>
             {props.left &&
                 <hr ref={ref_} className={"project-hr"}/>}
@@ -90,3 +94,4 @@ export default function Aside(props: Props) {
 
     )
 }
+export default React.memo(Aside)
