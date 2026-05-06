@@ -18,6 +18,7 @@
     &:hover{
         filter: brightness(1.5);
     }
+    cursor: pointer;
 }
 
 

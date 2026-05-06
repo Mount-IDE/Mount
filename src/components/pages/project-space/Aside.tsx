@@ -14,7 +14,7 @@ function Aside(props: Props) {
     const ref = useRef<HTMLDivElement>(null)
     const ref_ = useRef<HTMLHRElement>(null)
     const base_pos = useRef(0);
-    const base_width = useRef(0)
+    const base_width = useRef(10)
     const is_moving = useRef(false)
 
     useEffect(() => {
@@ -31,7 +31,7 @@ function Aside(props: Props) {
             base_pos.current = e.clientX;
             base_width.current = current.getBoundingClientRect().width;
             document.body.style.userSelect = "none";
-            current.style.transition = "none";
+            // current.style.transition = "none";
         }
 
         function move(e: MouseEvent) {
@@ -45,11 +45,12 @@ function Aside(props: Props) {
                 const next = !props.left ?
                     base_width.current - delta :
                     base_width.current + delta
-                const MIN = 120;
+                const MIN = 50;
                 const MAX = window.innerWidth * 0.8;
 
                 const clamped = Math.max(MIN, Math.min(MAX, next));
                 current.style.width = `${clamped}px`
+                console.log(clamped, current.style.width)
             })
         }
 
@@ -58,7 +59,7 @@ function Aside(props: Props) {
             if (!is_moving.current) return
             is_moving.current = false
             document.body.style.userSelect = "";
-            current.style.transition = "all 0.2s";
+            // current.style.transition = "all 0.2s";
         }
 
         hr.addEventListener("mousedown", start_move);
@@ -84,7 +85,11 @@ function Aside(props: Props) {
                 !props.left &&
                 <hr ref={ref_} className={"project-hr"}/>
             }
-            <div ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
+            <div
+                style={{
+                    width: base_width.current
+                }}
+                ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
                     <Header label={current_top?.alt ?? ""}/>
                     <div className={"project-aside-body"}></div>
             </div>

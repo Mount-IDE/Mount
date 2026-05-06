@@ -145,3 +145,8 @@ interface OpenedFile {
     path: string,
     cursor: [number, number]
 }
+
+interface ICodeSpace{
+    id: number
+    opened_files: OpenedFile[]
+}
