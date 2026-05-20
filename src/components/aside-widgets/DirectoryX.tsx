@@ -2,6 +2,7 @@ import "./styles/directory.css"
 import FileX from "./FileX.tsx";
 import arrow from "../../assets/arrow.svg"
 import {useLayoutEffect, useRef, useState} from "react";
+import {fsExtStore} from "../../stores/fs_ext_store.tsx";
 
 type Props = {
    obj: FsDirectory
@@ -29,6 +30,9 @@ export default function DirectoryX(props: Props){
     //
     // }, [opened, directories.length, files.length]);
 
+    const ico = fsExtStore.getState().get_dir_by_type()
+
+    const path = `/builtin/fs-icons/${ico[1]}`
 
     return (
         <div className={"fs-dirx"}>
@@ -41,7 +45,11 @@ export default function DirectoryX(props: Props){
                 >
                     <img src={arrow}/>
                 </div>
-                <div className={"fs-aside-icon"}></div>
+                <div className={"fs-aside-icon"}>
+                    {ico[0] &&
+                        <img src={path}/>
+                    }
+                </div>
                 <div className={"fs-aside-name"}>{props.obj.name}</div>
             </div>
             {opened && <div ref={ref} className={"dirx-body"}>

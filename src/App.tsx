@@ -14,6 +14,7 @@ import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
 import {projectStore} from "./stores/project_store.ts";
 import {asideButtonsStore} from "./stores/aside_buttons_store.ts";
 import FsAside from "./components/aside-widgets/FsAside.tsx";
+import {fsExtStore} from "./stores/fs_ext_store.tsx";
 
 
 function App() {
@@ -70,6 +71,8 @@ function App() {
         } catch (e) {
             console.error(e)
         }
+        await fsExtStore.getState().load();
+
 
     }
 

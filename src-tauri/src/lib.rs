@@ -48,7 +48,8 @@ pub fn run() {
             get_data_dir,
             make_path_from_icon,
             make_base64,
-            read_dir_rec
+            read_dir_rec,
+            get_fs_ext_icons
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .run(tauri::generate_context!())

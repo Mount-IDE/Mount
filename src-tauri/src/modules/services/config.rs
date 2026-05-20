@@ -9,7 +9,6 @@ use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use std::string::ToString;
-use serde::Serialize;
 use tauri::Manager;
 
 pub struct ConfigService();
@@ -228,7 +227,11 @@ fn get_files() -> Vec<_File> {
             "[]".to_string(),
         ),
         _File::new("".to_string(), "icons".to_string()),
-        _File::new("".to_string(), "aside_icons".to_string())
+        _File::new("".to_string(), "aside_icons".to_string()),
+        _File::content(
+            "file_ext_icons.json".to_string(),
+            "".to_string(),
+            r#"[{"theme":"_", scheme: 1, "icons": []}]"#.to_string()),
     ]
 }
 

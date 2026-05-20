@@ -167,3 +167,16 @@ interface FsFile {
     path: string;
     typ_: "file"
 }
+
+
+
+interface FsExtIcon{
+    typ: string,
+    ext: string[],
+    icon: string
+}
+interface FsConfigIcons{
+    theme: string,
+    scheme: number,
+    icons:FsExtIcon[]
+}
