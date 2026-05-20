@@ -59,6 +59,8 @@ pub struct Widget {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct OpenedFile {
+    #[serde(default)]
+    name: String,
     path: Path,
     cursor: (u32, u32),
 }

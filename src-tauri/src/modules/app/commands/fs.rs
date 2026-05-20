@@ -1,6 +1,6 @@
 use crate::modules::app::FS_READ_SERVICE;
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::domain::entities::PDirectory;
+use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 
@@ -12,5 +12,12 @@ pub fn read_dir_rec(cwd: String)->Result<PDirectory, ErrorDto>{
 }
 
 
+#[tauri::command]
+pub fn read_file(path: String)->Result<String, ErrorDto>{
+    let path = Path::new(&path);
+    let file = PFile::from_path_reg(path);
+    let content = FS_READ_SERVICE.read_file(&file)?;
+    Ok(content)
+}
 
 

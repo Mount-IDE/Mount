@@ -143,12 +143,17 @@ interface IAsideButtonExtended {
 
 interface OpenedFile {
     path: string,
-    cursor: [number, number]
+    cursor: [number, number],
+    name: string
+}
+
+interface Opened extends OpenedFile{
+    id: number
 }
 
 interface ICodeSpace{
     id: number
-    opened_files: OpenedFile[]
+    opened_files: Opened[]
 }
 
 
@@ -179,4 +184,10 @@ interface FsConfigIcons{
     theme: string,
     scheme: number,
     icons:FsExtIcon[]
+}
+
+
+interface FileCache{
+    path: string,
+    content: string;
 }
