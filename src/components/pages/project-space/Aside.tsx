@@ -51,7 +51,6 @@ function Aside(props: Props) {
 
                 const clamped = Math.max(MIN, Math.min(MAX, next));
                 current.style.width = `${clamped}px`
-                console.log(clamped, current.style.width)
             })
         }
 
