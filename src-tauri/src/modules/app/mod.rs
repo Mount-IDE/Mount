@@ -18,3 +18,4 @@ pub const CONFIG_RECOVERY_SERVICE: ConfigRecoveryService = ConfigRecoveryService
 pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
 pub static SETTINGS: OnceLock<Settings> = OnceLock::new();
+

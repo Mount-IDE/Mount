@@ -96,6 +96,8 @@ pub enum FileSystemError {
     },
     #[error("failed to parse path: {path}")]
     PathParsing { path: Path },
+    #[error("failed to watch directory {path}")]
+    Watch { path: Path }
 }
 
 #[derive(Error, Debug)]

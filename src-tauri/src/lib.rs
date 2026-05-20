@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 use tauri::{generate_handler};
 use crate::modules::app::cmd::{get_projects, show_win};
 use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS};
@@ -8,6 +9,8 @@ use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::app::commands::cache::*;
 use crate::modules::app::commands::config::*;
 use crate::modules::app::commands::utils::*;
+use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
+use crate::modules::app::commands::fs::*;
 mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
@@ -44,8 +47,10 @@ pub fn run() {
             read_project,
             get_data_dir,
             make_path_from_icon,
-            make_base64
+            make_base64,
+            read_dir_recursive
         ])
+        .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

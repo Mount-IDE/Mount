@@ -1,6 +1,9 @@
 use std::fs;
+use crate::modules::app::{APP, CONFIG_SERVICE};
+use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
-use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
+use crate::modules::contexts::filesystem::domain::values::{FileWriteAccess, FsPath};
+use crate::modules::services::traits::TConfigService;
 use crate::modules::shared::kernel::errors::FileSystemError;
 use crate::modules::shared::kernel::values::{Path};
 
@@ -11,6 +14,8 @@ pub trait TFSReadService{
     fn exist_file(&self, file: &PFile) -> bool;
     fn exist_dir(&self, file: &PDirectory) -> bool;
     
+    
+    fn read_dir_recursive(&self, dir: &PDirectory) -> Result<PDirectory, FileSystemError>;
     
     
     fn exists(&self, path: Path) -> bool;
@@ -33,3 +38,11 @@ pub trait TFSManageService {
 
 
 }
+
+
+
+pub trait TFWatchService{
+    fn watch(&self, cwd:Path, proj_path: Path, label: String,     state: tauri::State<SharedWatcherManager>,)->Result<(), FileSystemError>;
+}
+
+

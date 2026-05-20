@@ -150,3 +150,20 @@ interface ICodeSpace{
     id: number
     opened_files: OpenedFile[]
 }
+
+
+interface FsType{
+    name: string;
+    typ: string;
+}
+
+interface FsDirectory extends FsType{
+    name: string;
+    typ: "dir";
+    children: FsType[]
+}
+
+interface FsFile extends FsType{
+    name: string;
+    typ: "file"
+}

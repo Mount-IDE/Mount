@@ -1,12 +1,22 @@
-use super::utils::split_path;
-use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
+use super::utils::{make_path, split_path};
+use crate::modules::app::APP;
+use crate::modules::contexts::filesystem::app::traits::{
+    TFSReadService, TFSWriteService, TFWatchService,
+};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
-use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::filesystem::domain::values::{
+    FileType, FileWriteAccess, WatchInstance,
+};
 use crate::modules::shared::kernel::errors::FileSystemError;
 use crate::modules::shared::kernel::values::Path;
-use std::fs;
+use notify::{Config, Event, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher};
 use std::fs::File;
 use std::io::Read;
+use std::path::Path as std_path;
+use std::sync::mpsc::channel;
+use std::{fs, thread};
+use tauri::{Emitter, Manager};
+use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 
 pub struct FileSystemReadService();
 
@@ -119,6 +129,17 @@ impl TFSReadService for FileSystemReadService {
         ext
     }
 
+    fn read_dir_recursive(&self, dir: &PDirectory) -> Result<PDirectory, FileSystemError> {
+        let mut content = self.read_dir(&dir)?;
+        for i in 0..content.directories.len(){
+            let path_ = content.directories[i].path.clone();
+            let dir_ = PDirectory::from_path(&path_);
+            let content_ = self.read_dir_recursive(&dir_)?;
+            content.directories[i].directories=content_.directories;
+        }
+        Ok(content)
+    }
+
     fn exists(&self, path: Path) -> bool {
         let path_ = path.get();
         let ext = fs::exists(path_);
@@ -127,6 +148,10 @@ impl TFSReadService for FileSystemReadService {
         }
         ext.unwrap()
     }
+
+
+
+
 }
 
 pub struct FileSystemWriteService();
@@ -213,6 +238,56 @@ impl TFSWriteService for FileSystemWriteService {
             path: path.clone(),
             err: e,
         })?;
+        Ok(())
+    }
+}
+
+pub struct FileSystemWatchService();
+
+impl TFWatchService for FileSystemWatchService {
+    fn watch(&self, cwd: Path, proj_path: Path, label: String,
+             state: tauri::State<SharedWatcherManager>,) -> Result<(), FileSystemError> {
+        let app = APP
+            .get()
+            .ok_or(FileSystemError::Watch { path: cwd.clone() })?
+            .clone();
+
+        let window = app
+            .get_webview_window(label.as_str())
+            .ok_or(FileSystemError::Watch { path: cwd.clone() })?;
+
+        let new_path = make_path(vec![
+            proj_path.get().clone().as_str(),
+            cwd.get().clone().as_str(),
+        ]);
+        let (tx, rx) = channel();
+
+        let mut watcher = RecommendedWatcher::new(
+            move |res: NResult<Event>| {
+                tx.send(res).unwrap();
+            },
+            Config::default(),
+        )
+            .unwrap();
+
+        watcher
+            .watch(std_path::new(&new_path.get()), RecursiveMode::Recursive)
+            .unwrap();
+
+        let thread = thread::spawn(move || {
+            for res in rx {
+                match res {
+                    Ok(event) => {
+                        println!("{:?}", event);
+                        window.emit("fs-event", format!("{:?}", event)).unwrap();
+                    }
+                    Err(e) => {}
+                }
+            }
+        });
+
+        let instance = WatchInstance { watcher, thread };
+        state.lock().unwrap().watchers.insert(label, instance);
         Ok(())
     }
 }

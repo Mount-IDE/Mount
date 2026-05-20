@@ -1,6 +1,8 @@
 use std::fmt::Display;
 use serde::{Deserialize, Serialize, Deserializer, Serializer, de};
 use ts_rs::TS;
+use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::domain::values::FsPath;
 
 #[derive(Clone, Serialize, Debug, Deserialize, TS)]
 pub struct Path(pub String);
@@ -13,7 +15,18 @@ impl Path{
     pub fn get(&self) -> String{
         self.0.clone()
     }
-    
+
+    pub fn from_fs_path(path_: Vec<FsPath>)->Self{
+        let str_ = path_.iter()
+            .map(|e|
+                e.to_string_()
+            ).collect::<Vec<String>>();
+        let str_ = str_.iter().map(|e|e.as_str()).collect::<Vec<&str>>();
+
+        let path = make_path(str_);
+        path
+
+    }
     
 }
 
