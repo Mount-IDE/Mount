@@ -6,10 +6,8 @@ type Props = {
 
 export default function DirectoryX(props: Props){
 
-    const directories = props.obj.children
-        .filter(el=>el.typ=="dir") as FsDirectory[];
-    const files = props.obj.children
-        .filter(el=>el.typ=="file") as FsFile[];
+    const directories = props.obj.directories
+    const files = props.obj.files
 
 
 

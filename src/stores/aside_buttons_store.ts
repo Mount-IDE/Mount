@@ -1,5 +1,5 @@
 import {create} from "zustand"
-
+import FsAside from "../components/aside-widgets/FsAside.tsx"
 
 interface Type{
     left_buttons: IAsideButton[],

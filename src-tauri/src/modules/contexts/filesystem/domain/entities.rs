@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use crate::modules::contexts::filesystem::app::utils::split_path;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::shared::kernel::values::Path;
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PFile {
     pub name: String,
     pub path: Path,
@@ -68,8 +69,7 @@ impl PFile {
     }
 }
 
-#[derive(Clone)]
-
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PDirectory {
     pub name: String,
     pub path: Path,

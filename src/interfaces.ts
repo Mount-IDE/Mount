@@ -152,18 +152,18 @@ interface ICodeSpace{
 }
 
 
-interface FsType{
+
+
+interface FsDirectory {
     name: string;
-    typ: string;
+    typ_: "dir";
+    directories: FsDirectory[]
+    files: FsFile[]
+    path: string;
 }
 
-interface FsDirectory extends FsType{
+interface FsFile {
     name: string;
-    typ: "dir";
-    children: FsType[]
-}
-
-interface FsFile extends FsType{
-    name: string;
-    typ: "file"
+    path: string;
+    typ_: "file"
 }

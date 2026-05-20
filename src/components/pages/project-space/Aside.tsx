@@ -17,6 +17,7 @@ function Aside(props: Props) {
     const base_width = useRef(10)
     const is_moving = useRef(false)
 
+
     useEffect(() => {
         let current_ = ref.current
         let hr_ = ref_.current
@@ -91,7 +92,9 @@ function Aside(props: Props) {
                 }}
                 ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
                     <Header label={current_top?.alt ?? ""}/>
-                    <div className={"project-aside-body"}></div>
+                    <div className={"project-aside-body"}>
+                        {current_top?.component()}
+                    </div>
             </div>
             {props.left &&
                 <hr ref={ref_} className={"project-hr"}/>}

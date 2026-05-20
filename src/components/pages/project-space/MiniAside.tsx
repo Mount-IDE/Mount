@@ -10,8 +10,8 @@ type Props = {
     bottom?: IAsideButton[],
     max_top: number|null
     max_bot: number|null
-    set_top?: (elem: (elem:ReactElement | null)=>void) => void
-    set_bot?: (elem: (elem:ReactElement | null)=>void) => void
+    set_top?: (elem: (elem:ReactElement | null)=>ReactElement|null) => void
+    set_bot?: (elem: (elem:ReactElement | null)=>ReactElement|null) => void
     is_left: boolean
     top_button: (el: IAsideButton|null)=>void
     bot_button?: (el: IAsideButton|null)=>void

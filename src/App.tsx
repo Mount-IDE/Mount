@@ -13,6 +13,7 @@ import {Group, mainPageStore} from "./stores/main_page_store.ts";
 import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
 import {projectStore} from "./stores/project_store.ts";
 import {asideButtonsStore} from "./stores/aside_buttons_store.ts";
+import FsAside from "./components/aside-widgets/FsAside.tsx";
 
 
 function App() {
@@ -96,7 +97,7 @@ function App() {
                     left_top.map<IAsideButton>(el => ({
                         id: el.order,
                         alt: el.alt,
-                        component: () => <></>,
+                        component: () => <FsAside></FsAside>,
                         icon: el.icon, keys: el.keys
                     }));
 

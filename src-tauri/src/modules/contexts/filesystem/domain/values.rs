@@ -4,7 +4,8 @@ use notify::RecommendedWatcher;
 use serde::{Deserialize, Serialize};
 
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum FileType {
     BINARY,
     REGULAR
