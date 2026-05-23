@@ -19,6 +19,10 @@ export default function Code(props: Props) {
     const [text, setText]=useState(file.content);
     const rows = text.split("\n");
 
+    useEffect(() => {
+        setText(file.content)
+    }, [file]);
+
     return (
         <div className={"project-code"}>
             <div className={"project-code-rows"}
@@ -88,7 +92,7 @@ function CodeEditor(props: CodeProps) {
                     overflow: "auto",
                     whiteSpace:"nowrap"
                 }}
-                defaultValue={props.text}
+                value={props.text}
                 onInput={(e) => props.setText((e.target as HTMLTextAreaElement).value)}
             />
             {/*<canvas*/}

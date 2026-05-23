@@ -6,6 +6,7 @@ import {fsExtStore} from "../../stores/fs_ext_store.ts";
 
 type Props = {
    obj: FsDirectory
+    onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile, path?:string)=>void
 }
 
 export default function DirectoryX(props: Props){
@@ -21,8 +22,15 @@ export default function DirectoryX(props: Props){
     const path = `/builtin/fs-icons/${ico[1]}`
 
     return (
-        <div className={"fs-dirx"}>
-            <div className={"fs-aside-head"}>
+        <div
+            className={"fs-dirx"}>
+            <div
+                onContextMenu={
+                    (e)=> {
+                        e.stopPropagation()
+                        props.onContext(e, props.obj)
+                    }}
+                className={"fs-aside-head"}>
                 <div className={"fs-aside-icon"}
                      style={{
                      transform: opened? "rotate(0deg)":"rotate(-90deg)"
@@ -40,10 +48,10 @@ export default function DirectoryX(props: Props){
             </div>
             {opened && <div ref={ref} className={"dirx-body"}>
                 {directories.map(el=>
-                    <DirectoryX obj={el} key={`${el.path}`}/>
+                    <DirectoryX onContext={props.onContext} obj={el} key={`${el.path}`}/>
                 )}
                 {files.map(el=>
-                    <FileX obj={el} key={`${el.path}`}/>
+                    <FileX parent_path={props.obj.path} onContext={props.onContext} obj={el} key={`${el.path}`}/>
                 )}
             </div>}
         </div>

@@ -72,7 +72,7 @@ function Aside(props: Props) {
             window.removeEventListener("mouseup", stop_move);
         }
 
-    }, [ref_]);
+    }, [ref_, props.state]);
 
 
     const current_top = props.left ?
@@ -82,7 +82,7 @@ function Aside(props: Props) {
     return (
         <>
             {
-                !props.left &&
+                !props.left && props.state&&
                 <hr ref={ref_} className={"project-hr"}/>
             }
             <div
@@ -95,7 +95,7 @@ function Aside(props: Props) {
                         {current_top?.component()}
                     </div>
             </div>
-            {props.left &&
+            {props.left && props.state &&
                 <hr ref={ref_} className={"project-hr"}/>}
         </>
 

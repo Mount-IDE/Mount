@@ -1,7 +1,7 @@
 .fs-dirx{
     width: 100%;
     min-height: 3vh;
-
+    margin-bottom: 5px;
 }
 
 .fs-aside-head{
@@ -25,16 +25,17 @@
     }
 
     & .fs-aside-name{
+        user-select: none;
         font: 10pt "JetBrains Mono Light";
         color: var(--subtitle);
     }
 }
 
 .dirx-body{
-    padding-left: 20px;
+    padding-left: 25px;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    gap: 10px;
+    gap: 5px;
     overflow: hidden;
 }

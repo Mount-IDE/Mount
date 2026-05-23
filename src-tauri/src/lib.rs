@@ -51,7 +51,11 @@ pub fn run() {
             get_fs_ext_icons,
             read_file,
             watch_project,
-            unwatch_project
+            unwatch_project,
+            get_file_templates,
+            get_os,
+            create_file,
+            create_dir
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .run(tauri::generate_context!())

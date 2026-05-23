@@ -2,7 +2,7 @@ use crate::modules::contexts::project::domain::entities::{ProjectPackage, Projec
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::shared::kernel::errors::ConfigError;
 use crate::modules::shared::kernel::values::Path;
-use std::path::PathBuf;
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
     fn save_settings(&self, settings: &Settings) -> Result<(), ConfigError>;
@@ -17,6 +17,8 @@ pub trait TConfigService {
     fn get_projects_dir(&self) -> Result<Path, ConfigError>;
 
     fn get_settings(&self) -> Result<Settings, ConfigError>;
+
+    fn get_file_templates(&self)->Result<Vec<ConfigFsTemplate>, ConfigError>;
 }
 
 pub trait TConfigRecoveryService {

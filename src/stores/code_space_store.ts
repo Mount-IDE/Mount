@@ -47,7 +47,7 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                 }]
             })
         } else {
-            let found = spaces.find(el => el.id)!;
+            let found = spaces.find(el => el.id==id)!;
             let i = spaces.indexOf(found);
             if (spaces[i] === undefined) {
                 return;
@@ -56,11 +56,30 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                 return
             }
             let last = spaces[i].opened_files;
-            let last_ = last[last.length - 1];
-            spaces[i].opened_files.push({...file, id: last_.id + 1, cache_id});
+            const nextId =
+                last.length > 0
+                    ? last[last.length - 1].id + 1
+                    : 0;            const updated = spaces.map(space => {
+                if (space.id !== id) {
+                    return space;
+                }
+
+                return {
+                    ...space,
+                    opened_files: [
+                        ...space.opened_files,
+                        {
+                            ...file,
+                            id: nextId,
+                            cache_id
+                        }
+                    ]
+                };
+            });
+
             set({
-                spaces: [...spaces]
-            })
+                spaces: updated
+            });
         }
     },
     remove_code_space(id: number): void {

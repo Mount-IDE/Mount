@@ -1,5 +1,7 @@
 .aside-in{
     position: absolute;
     top: 5vh;
-    left:1vw;
+    height: 100%;
+    width: 100%;
+    padding: 5px;
 }

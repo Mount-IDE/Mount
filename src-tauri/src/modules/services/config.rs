@@ -12,6 +12,7 @@ use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use std::string::ToString;
 use tauri::Manager;
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 
 pub struct ConfigService();
 
@@ -209,6 +210,18 @@ impl TConfigService for ConfigService {
 
         Ok(settings.unwrap().clone())
     }
+
+    fn get_file_templates(&self) -> Result<Vec<ConfigFsTemplate>, ConfigError> {
+        let dir = self.get_data_dir()?;
+        let path_ = make_path(vec![dir.get().as_str(), "file_templates.json"]);
+        let file = PFile::from_path_reg(path_.clone());
+        let content = FS_READ_SERVICE.read_file(&file)?;
+        let json = serde_json::from_str::
+        <Vec<ConfigFsTemplate>>(&content)
+            .map_err(|e| ParsingError::Deserialize {err: e, json: content, path: path_.clone() })?;
+
+        Ok(json)
+    }
 }
 
 pub struct ConfigRecoveryService();
@@ -238,6 +251,11 @@ fn get_files() -> Vec<_File> {
             "".to_string(),
             r#"[{"theme":"_", scheme: 1, "icons": []}]"#.to_string(),
         ),
+        _File::content(
+            "file_templates.json".to_string(),
+            "".to_string(),
+            r#"[{"id":"empty","title":"Empty File","typ":"file","icon":"any.svg"},{"id":"dir","title":"Directory","typ":"dir","icon":"dir.svg"}]"#.to_string()),
+
     ]
 }
 

@@ -8,3 +8,18 @@ pub struct FsIcon {
     #[serde(default)]
     icon: String,
 }
+
+
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum FsType{
+    file,
+    dir
+}
+
+
+impl Default for FsType {
+    fn default() -> Self {
+        FsType::file
+    }
+}

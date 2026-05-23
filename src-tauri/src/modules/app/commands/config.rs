@@ -1,5 +1,5 @@
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE};
-use crate::modules::contexts::config::entities::FsConfigIcons;
+use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
@@ -48,4 +48,22 @@ pub fn get_fs_ext_icons() -> Result<Vec<FsConfigIcons>, ErrorDto> {
     })?;
 
     Ok(str)
+}
+
+#[tauri::command]
+pub fn get_file_templates()->Result<Vec<ConfigFsTemplate>, ErrorDto> {
+    CONFIG_SERVICE.get_file_templates().map_err(|e| e.into())
+}
+
+#[tauri::command]
+pub fn get_os()->String{
+    if cfg!(target_os = "windows") {
+        "windows".to_string()
+    }
+    else if cfg!(target_os = "macos") {
+        "macos".to_string()
+    }
+    else {
+        "linux".to_string()
+    }
 }

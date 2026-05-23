@@ -198,3 +198,15 @@ interface FileCache extends  FileCacheLight{
     id: number
 
 }
+
+
+interface configFsTemplate{
+    id: string,
+    title: string,
+    typ: "file"|"dir",
+    icon?:string,
+    ext?:string,
+    default_content?:string,
+    inner?:configFsTemplate[],
+    base_name?:string
+}

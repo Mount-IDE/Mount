@@ -244,6 +244,8 @@ export const fsAsideTreeStore =
                     console.error(e)
                 }
             },
+
+
             async watch(cwd: string): Promise<void> {
                 if (cwd.length === 0 || watched_project_path === cwd) {
                     return;
