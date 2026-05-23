@@ -1,10 +1,15 @@
-use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PROJECT_SERVICE};
+use crate::modules::app::utils::project::make_buttons;
+use crate::modules::app::{
+    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PROJECT_SERVICE,
+};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::app::traits::TProjectService;
-use crate::modules::contexts::project::domain::entities::{Project, ProjectPackage, ProjectTag, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{
+    Project, ProjectPackage, ProjectTag, ProjectTemplate,
+};
 use crate::modules::contexts::project::domain::values::{CreateProjectResult, ProjectMeta};
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
@@ -12,7 +17,6 @@ use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::{Path, Val};
 use std::collections::HashMap;
-use crate::modules::app::utils::project::make_buttons;
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -68,7 +72,7 @@ pub fn create_project(
     template: ProjectTemplate,
     results: CreateProjectResult,
     packages: HashMap<String, ProjectPackage>,
-    tags: Vec<ProjectTag>
+    tags: Vec<ProjectTag>,
 ) -> Result<(), ErrorDto> {
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
@@ -84,20 +88,19 @@ pub fn create_project(
         .ok_or(ProjectError::NameNotFound)?;
 
     let name = match name {
-        Val::STRING(val)=> val.clone(),
-        _=> return Err(ProjectError::NameNotFound.into())
+        Val::STRING(val) => val.clone(),
+        _ => return Err(ProjectError::NameNotFound.into()),
     };
-
 
     let path = match path {
-        Val::STRING(val)=>val.clone(),
-        _=> return Err(ProjectError::PathNotFound.into())
+        Val::STRING(val) => val.clone(),
+        _ => return Err(ProjectError::PathNotFound.into()),
     };
-    println!("{}::{}",name, path);
+    println!("{}::{}", name, path);
 
     let path_ = make_path(vec![path.as_str(), name.as_str()]);
     let ext = FS_READ_SERVICE.exists(path_.clone());
-    if ext{
+    if ext {
         return Err(ProjectError::AlreadyExists.into());
     }
 
@@ -105,7 +108,7 @@ pub fn create_project(
 
     let vars = template.startup.var;
     let actions = template.startup.actions;
-    let mut project=  Project::new();
+    let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
     project.meta = additions;
@@ -113,10 +116,14 @@ pub fn create_project(
 
     let buttons = make_buttons();
 
-    project.workspace.buttons=buttons;
+    project.workspace.buttons = buttons;
 
-    let json = serde_json::to_string(&project).map_err(|e|ProjectError::ParsingError { err:ParsingError::Serialize { path:
-        Path(path.clone()), err: e } })?;
+    let json = serde_json::to_string(&project).map_err(|e| ProjectError::ParsingError {
+        err: ParsingError::Serialize {
+            path: Path(path.clone()),
+            err: e,
+        },
+    })?;
 
     let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
     let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
@@ -127,9 +134,6 @@ pub fn create_project(
     PROJECT_SERVICE.add_to_recents(&project)?;
     Ok(())
 }
-
-
-
 
 fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -> ProjectMeta {
     if additions.is_none() {
@@ -167,20 +171,20 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
     }
     if let Val::STRING(val) = group {
         meta_.group = val;
-    }else {
-        meta_.group="general".to_string();
+    } else {
+        meta_.group = "general".to_string();
     }
-    let _tags_= tags.iter().map(|el|el.name.clone()).collect::<Vec<String>>();
-    meta_.tags=_tags_.clone();
+    let _tags_ = tags
+        .iter()
+        .map(|el| el.name.clone())
+        .collect::<Vec<String>>();
+    meta_.tags = _tags_.clone();
 
     meta_
 }
 
-
-
-
 #[tauri::command]
-pub fn read_project(path: Path)->Result<Project, ErrorDto> {
+pub fn read_project(path: Path) -> Result<Project, ErrorDto> {
     println!("path command {}", path.clone());
-    PROJECT_SERVICE.open_project(&path).map_err(|e|e.into())
+    PROJECT_SERVICE.open_project(&path).map_err(|e| e.into())
 }

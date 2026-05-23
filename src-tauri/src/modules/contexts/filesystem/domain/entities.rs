@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use crate::modules::contexts::filesystem::app::utils::split_path;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::shared::kernel::values::Path;
+use serde::{Deserialize, Serialize};
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PFile {
     pub name: String,
@@ -33,16 +33,16 @@ impl PFile {
         }
     }
 
-    pub fn ext(&self)->Option<String> {
+    pub fn ext(&self) -> Option<String> {
         let found = self.name.rfind(".");
         if found.is_some() {
             let found = found.unwrap();
-            let slice = &self.name.clone()[found+1..];
+            let slice = &self.name.clone()[found + 1..];
             return Some(slice.to_string());
         }
         None
     }
-    
+
     pub fn from_path_reg(path: Path) -> PFile {
         let path_ = split_path(&path);
         if path_.len() == 0 {
@@ -85,7 +85,7 @@ impl PDirectory {
             directories: Vec::new(),
         }
     }
-    
+
     pub fn from_path(path: &Path) -> PDirectory {
         let path_ = split_path(&path);
         if path_.len() == 0 {

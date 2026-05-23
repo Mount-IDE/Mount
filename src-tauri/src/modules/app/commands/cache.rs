@@ -1,5 +1,3 @@
-use base64::Engine;
-use base64::engine::general_purpose;
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
@@ -8,14 +6,14 @@ use crate::modules::contexts::project::domain::entities::{ProjectPackage, Projec
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
+use base64::engine::general_purpose;
+use base64::Engine;
 
 #[tauri::command]
-pub fn read_packages()->Result<Vec<ProjectPackage>, ErrorDto>{
+pub fn read_packages() -> Result<Vec<ProjectPackage>, ErrorDto> {
     let packs = CONFIG_SERVICE.read_packages()?;
     Ok(packs)
 }
-
-
 
 #[tauri::command]
 pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
@@ -28,12 +26,11 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
 
     for i in 0..templates.len() {
         let meta = templates[i].meta.clone();
-        if meta.is_none(){continue;}
-        let icon= meta.unwrap().icon;
-        let path = make_path(vec![
-            path_.clone().as_str(),
-            icon.clone().as_str()
-        ]);
+        if meta.is_none() {
+            continue;
+        }
+        let icon = meta.unwrap().icon;
+        let path = make_path(vec![path_.clone().as_str(), icon.clone().as_str()]);
         let ext = FS_READ_SERVICE.exists(path.clone());
         if !ext {
             templates[i].meta.as_mut().unwrap().icon = String::new();
@@ -41,15 +38,15 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
         };
         let file = PFile::from_path_reg(path.clone());
         let bytes = FS_READ_SERVICE.read_bytes(&file)?;
-        let res= general_purpose::STANDARD.encode(bytes);
+        let res = general_purpose::STANDARD.encode(bytes);
         let typ = file.ext();
-        if typ.is_none(){
+        if typ.is_none() {
             templates[i].meta.as_mut().unwrap().icon = String::new();
             continue;
         }
         let mut typ = typ.unwrap();
-        if typ=="svg"{
-            typ+="+xml";
+        if typ == "svg" {
+            typ += "+xml";
         }
         let res = format!("data:image/{};base64,{}", typ, res);
         templates[i].meta.as_mut().unwrap().icon = res;
@@ -57,9 +54,7 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
     Ok(templates)
 }
 
-
-
 #[tauri::command]
 pub fn get_data_dir() -> Result<Path, ErrorDto> {
-    CONFIG_SERVICE.get_data_dir().map_err(|e|e.into())
+    CONFIG_SERVICE.get_data_dir().map_err(|e| e.into())
 }

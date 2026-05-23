@@ -5,7 +5,7 @@ use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::errors::{ParsingError};
+use crate::modules::shared::kernel::errors::ParsingError;
 use crate::modules::shared::kernel::values::Path;
 
 #[tauri::command]

@@ -1,6 +1,7 @@
 import "./styles/code-space.css"
 import CodeFiles from "./CodeFiles.tsx";
 import Code from "./Code.tsx";
+import {useState} from "react";
 
 
 
@@ -9,10 +10,14 @@ type Props={
 }
 
 export default function CodeSpace(props: Props) {
+
+
+    const [current,setCurrent]=useState<[number, number]>([0,0])
+
     return (
         <div id={"project-code-space"}>
-            <CodeFiles files={props.obj.opened_files}/>
-            <Code/>
+            <CodeFiles current={current} setCurrent={setCurrent} files={props.obj.opened_files} id={props.obj.id}/>
+            <Code current={current}/>
         </div>
     )
 }

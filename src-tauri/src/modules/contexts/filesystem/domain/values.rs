@@ -1,50 +1,47 @@
-use std::fmt::{Display, Formatter};
-use std::thread::JoinHandle;
 use notify::RecommendedWatcher;
 use serde::{Deserialize, Serialize};
-
+use std::fmt::{Display, Formatter};
+use std::thread::JoinHandle;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum FileType {
     BINARY,
-    REGULAR
+    REGULAR,
 }
 
 #[derive(Clone)]
 
-pub enum FileWriteAccess{
+pub enum FileWriteAccess {
     WRITE,
-    APPEND
+    APPEND,
 }
-#[derive(Debug,Clone, Serialize,Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum FsPath{
+pub enum FsPath {
     SINGLE(String),
-    COUPLE(String, String)
+    COUPLE(String, String),
 }
 
-impl Display for FsPath{
+impl Display for FsPath {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            FsPath::SINGLE(v)=>write!(f, "{}", v),
-            FsPath::COUPLE(v, _)=>write!(f, "{}", v),
+            FsPath::SINGLE(v) => write!(f, "{}", v),
+            FsPath::COUPLE(v, _) => write!(f, "{}", v),
         }
     }
 }
 
-impl FsPath{
-    pub fn to_string_(&self)->String{
+impl FsPath {
+    pub fn to_string_(&self) -> String {
         match self {
-            FsPath::SINGLE(s)=> s.to_string(),
-            FsPath::COUPLE(v,_)=>v.to_string()
+            FsPath::SINGLE(s) => s.to_string(),
+            FsPath::COUPLE(v, _) => v.to_string(),
         }
     }
 }
 
-
-pub struct WatchInstance{
+pub struct WatchInstance {
     pub watcher: RecommendedWatcher,
-    pub thread: JoinHandle<()>
+    pub thread: JoinHandle<()>,
 }
-

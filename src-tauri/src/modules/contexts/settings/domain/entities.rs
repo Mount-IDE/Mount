@@ -1,7 +1,7 @@
+use crate::modules::contexts::project::domain::values::ProjectMeta;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-use crate::modules::contexts::project::domain::values::ProjectMeta;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -84,6 +84,5 @@ pub struct RecentProject {
     pub path: Path,
     pub last_opened: u64,
     pub meta: ProjectMeta,
-    pub(crate) packages: Vec<String>
-
+    pub(crate) packages: Vec<String>,
 }

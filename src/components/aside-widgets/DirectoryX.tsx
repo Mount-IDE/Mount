@@ -2,7 +2,7 @@ import "./styles/directory.css"
 import FileX from "./FileX.tsx";
 import arrow from "../../assets/arrow.svg"
 import {useLayoutEffect, useRef, useState} from "react";
-import {fsExtStore} from "../../stores/fs_ext_store.tsx";
+import {fsExtStore} from "../../stores/fs_ext_store.ts";
 
 type Props = {
    obj: FsDirectory
@@ -16,20 +16,6 @@ export default function DirectoryX(props: Props){
     const [opened, setOpened]=useState(false);
 
     const ref=useRef<HTMLDivElement>(null);
-    //
-    // useLayoutEffect(() => {
-    //
-    //     const div = ref.current;
-    //     if (!div)return;
-    //     requestAnimationFrame(() => {
-    //         div.style.maxHeight = opened
-    //             ? `${div.scrollHeight}px`
-    //             : "0px";
-    //     });
-    //
-    //
-    // }, [opened, directories.length, files.length]);
-
     const ico = fsExtStore.getState().get_dir_by_type()
 
     const path = `/builtin/fs-icons/${ico[1]}`
@@ -54,10 +40,10 @@ export default function DirectoryX(props: Props){
             </div>
             {opened && <div ref={ref} className={"dirx-body"}>
                 {directories.map(el=>
-                    <DirectoryX obj={el} key={`dir::${el.name}`}/>
+                    <DirectoryX obj={el} key={`${el.path}`}/>
                 )}
                 {files.map(el=>
-                    <FileX obj={el} key={`file::${el.name}`}/>
+                    <FileX obj={el} key={`${el.path}`}/>
                 )}
             </div>}
         </div>

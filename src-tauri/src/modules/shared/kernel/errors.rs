@@ -7,8 +7,12 @@ pub enum ProjectError {
     #[error("config error that can`t describe as project error")]
     ConfigError(#[from] ConfigError),
     #[error("filesystem error that can`t describe as project error")]
-    FileSystemError(#[from]#[source] FileSystemError),
-    
+    FileSystemError(
+        #[from]
+        #[source]
+        FileSystemError,
+    ),
+
     #[error("project already exists")]
     AlreadyExists,
     #[error("project creation failed")]
@@ -18,9 +22,11 @@ pub enum ProjectError {
     },
 
     #[error("failed to parse in project: {err}")]
-    ParsingError{#[from]err: ParsingError},
-    
-    
+    ParsingError {
+        #[from]
+        err: ParsingError,
+    },
+
     #[error("failed to get meta section (probably not set name or path)")]
     MetaNotFound,
     #[error("failed to get meta.-4 section (with name and path)")]
@@ -29,7 +35,6 @@ pub enum ProjectError {
     NameNotFound,
     #[error("failed to get project path")]
     PathNotFound,
-    
 }
 
 #[derive(Error, Debug)]
@@ -97,7 +102,7 @@ pub enum FileSystemError {
     #[error("failed to parse path: {path}")]
     PathParsing { path: Path },
     #[error("failed to watch directory {path}")]
-    Watch { path: Path }
+    Watch { path: Path },
 }
 
 #[derive(Error, Debug)]
@@ -129,11 +134,10 @@ pub enum ConfigError {
     #[error("filesystem error that can`t describe as config error")]
     FileSystem(#[from] FileSystemError),
     #[error("failed to get home dir")]
-    HomeDir{
+    HomeDir {
         #[source]
-        err: tauri::Error
-    }
-    
+        err: tauri::Error,
+    },
 }
 
 #[derive(Debug, Error)]

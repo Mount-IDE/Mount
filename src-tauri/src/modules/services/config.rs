@@ -1,4 +1,6 @@
-use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, SETTINGS};
+use crate::modules::app::{
+    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, SETTINGS,
+};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
@@ -59,7 +61,7 @@ impl TConfigService for ConfigService {
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
         println!("read settings.json was gotten");
         let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e| {
-                ParsingError::Deserialize {
+            ParsingError::Deserialize {
                 path: file_.path,
                 json: file,
                 err: e,
@@ -68,16 +70,17 @@ impl TConfigService for ConfigService {
         if settings.is_err() {
             let dir = self.get_data_dir()?;
             let settings_ = Settings::new();
-            let json = serde_json::to_string(&settings_).map_err(|e|
-                ParsingError::Serialize {path: dir.clone(), err: e}
-            )?;
+            let json = serde_json::to_string(&settings_).map_err(|e| ParsingError::Serialize {
+                path: dir.clone(),
+                err: e,
+            })?;
             let dir = make_path(vec![dir.get().as_str(), "settings.json"]);
             let file = PFile::from_path_reg(dir.clone());
             FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
             println!("parsing settings.json was gotten");
-            return Ok(settings_)
+            return Ok(settings_);
         }
-        let settings=settings.unwrap();
+        let settings = settings.unwrap();
         println!("parsing settings.json was gotten");
         Ok(settings)
     }
@@ -188,7 +191,7 @@ impl TConfigService for ConfigService {
             .path()
             .home_dir()
             .map_err(|e| ConfigError::HomeDir { err: e })?;
-        
+
         path.push("MountProjects");
         let path_ = path.as_path().to_str().unwrap().to_string();
         Ok(Path(path_))
@@ -198,8 +201,10 @@ impl TConfigService for ConfigService {
         let settings = SETTINGS.get();
         if settings.is_none() {
             let settings_ = self.read_settings()?;
-            SETTINGS.set(settings_.clone()).map_err(|_| ConfigError::ReadSettingsError)?;
-            return Ok(settings_)
+            SETTINGS
+                .set(settings_.clone())
+                .map_err(|_| ConfigError::ReadSettingsError)?;
+            return Ok(settings_);
         }
 
         Ok(settings.unwrap().clone())
@@ -231,7 +236,8 @@ fn get_files() -> Vec<_File> {
         _File::content(
             "file_ext_icons.json".to_string(),
             "".to_string(),
-            r#"[{"theme":"_", scheme: 1, "icons": []}]"#.to_string()),
+            r#"[{"theme":"_", scheme: 1, "icons": []}]"#.to_string(),
+        ),
     ]
 }
 
@@ -289,15 +295,17 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir));
         if !path_ {
             println!("repair");
-            let data = APP.get().unwrap().path().app_data_dir().map_err(
-                |e|
-                    ConfigError::GetDataDir {err:e}
-            )?;
+            let data = APP
+                .get()
+                .unwrap()
+                .path()
+                .app_data_dir()
+                .map_err(|e| ConfigError::GetDataDir { err: e })?;
             let _ = FS_WRITE_SERVICE.create_dir(&Path(data.to_str().unwrap().to_string()));
         }
         let dir = dir.get();
         println!("dir {dir}");
-        
+
         let projects = CONFIG_SERVICE.get_projects_dir();
         if projects.is_err() {
             CONFIG_SERVICE.make_projects_dir()?;

@@ -1,35 +1,32 @@
-use std::fmt::Display;
-use serde::{Deserialize, Serialize, Deserializer, Serializer, de};
-use ts_rs::TS;
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::values::FsPath;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Display;
+use ts_rs::TS;
 
 #[derive(Clone, Serialize, Debug, Deserialize, TS)]
 pub struct Path(pub String);
-impl Path{
-    pub fn new(name: &str) -> Self{
+impl Path {
+    pub fn new(name: &str) -> Self {
         Self {
             0: name.to_string(),
         }
     }
-    pub fn get(&self) -> String{
+    pub fn get(&self) -> String {
         self.0.clone()
     }
 
-    pub fn from_fs_path(path_: Vec<FsPath>)->Self{
-        let str_ = path_.iter()
-            .map(|e|
-                e.to_string_()
-            ).collect::<Vec<String>>();
-        let str_ = str_.iter().map(|e|e.as_str()).collect::<Vec<&str>>();
+    pub fn from_fs_path(path_: Vec<FsPath>) -> Self {
+        let str_ = path_
+            .iter()
+            .map(|e| e.to_string_())
+            .collect::<Vec<String>>();
+        let str_ = str_.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
 
         let path = make_path(str_);
         path
-
     }
-    
 }
-
 
 impl Display for Path {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -37,13 +34,10 @@ impl Display for Path {
     }
 }
 
-
-
 #[derive(Deserialize, Serialize, Clone, Debug, TS)]
 pub struct Schema(pub u8);
 
-
-#[derive(Clone,Serialize, Deserialize, Debug, TS)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 #[serde(untagged)]
 pub enum Val {
     NUMBER(f64),
@@ -58,16 +52,15 @@ impl Default for Val {
     }
 }
 
-
 #[derive(Clone, Debug, TS)]
 pub enum ParameterTyp {
     INPUT(String),
     CHECK,
     LIST(Vec<String>),
-    FILE(Vec<String>)
+    FILE(Vec<String>),
 }
 
-impl Default for ParameterTyp{
+impl Default for ParameterTyp {
     fn default() -> Self {
         Self::CHECK
     }
@@ -75,70 +68,72 @@ impl Default for ParameterTyp{
 
 impl<'de> Deserialize<'de> for ParameterTyp {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let v: Vec<&str> = Vec::deserialize(deserializer)?;
 
         match v.as_slice() {
             ["check"] => Ok(ParameterTyp::CHECK),
             ["input", val] => Ok(ParameterTyp::INPUT(val.to_string())),
-            ["list", rest @ ..] => Ok(ParameterTyp::LIST(rest.iter().map(|s| s.to_string()).collect())),
-            ["file", rest @ ..] => Ok(ParameterTyp::FILE(rest.iter().map(|s| s.to_string()).collect())),
-            _ => Err(de::Error::custom("invalid ParameterTyp"))
+            ["list", rest @ ..] => Ok(ParameterTyp::LIST(
+                rest.iter().map(|s| s.to_string()).collect(),
+            )),
+            ["file", rest @ ..] => Ok(ParameterTyp::FILE(
+                rest.iter().map(|s| s.to_string()).collect(),
+            )),
+            _ => Err(de::Error::custom("invalid ParameterTyp")),
         }
     }
 }
-
 
 impl Serialize for ParameterTyp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer
+    where
+        S: Serializer,
     {
         match self {
-            ParameterTyp::INPUT(val) =>
-                vec!["input", val].serialize(serializer),
+            ParameterTyp::INPUT(val) => vec!["input", val].serialize(serializer),
 
-            ParameterTyp::CHECK =>
-                vec!["check"].serialize(serializer),
+            ParameterTyp::CHECK => vec!["check"].serialize(serializer),
 
-            ParameterTyp::LIST(val) =>
-                vec!["list"].into_iter().chain(val.iter().map(|s| s.as_str())).collect::<Vec<_>>().serialize(serializer),
+            ParameterTyp::LIST(val) => vec!["list"]
+                .into_iter()
+                .chain(val.iter().map(|s| s.as_str()))
+                .collect::<Vec<_>>()
+                .serialize(serializer),
 
-            ParameterTyp::FILE(val) =>
-                vec!["file"].into_iter().chain(val.iter().map(|s| s.as_str())).collect::<Vec<_>>().serialize(serializer),
+            ParameterTyp::FILE(val) => vec!["file"]
+                .into_iter()
+                .chain(val.iter().map(|s| s.as_str()))
+                .collect::<Vec<_>>()
+                .serialize(serializer),
         }
     }
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
-pub struct IfStatement{
+pub struct IfStatement {
     or: Option<Vec<IfStatementPart>>,
-    all: Option<Vec<IfStatementPart>>
+    all: Option<Vec<IfStatementPart>>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
-pub struct IfStatementPart{
+pub struct IfStatementPart {
     from: String,
     oper: String,
-    value: Val
+    value: Val,
 }
 
-
-
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Dependency{
+pub struct Dependency {
     program: String,
-    level: DependencyLevel
+    level: DependencyLevel,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum DependencyLevel{
+pub enum DependencyLevel {
     CRITICAL,
     CONFLICTS,
-    OPTIONAL
+    OPTIONAL,
 }
-
-
-
-

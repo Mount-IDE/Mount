@@ -54,7 +54,7 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("ProblemsAside"),
         order: 3,
         keys: String::new(),
-        icon:  "problems.svg".to_string(),
+        icon: "problems.svg".to_string(),
     });
     res.push(Button {
         alt: "Git".to_string(),
@@ -62,10 +62,9 @@ pub fn make_buttons() -> Vec<Button> {
         widget: String::from("GitAside"),
         order: 4,
         keys: String::new(),
-        icon:"git.svg".to_string(),
-
-
-    });res.push(Button {
+        icon: "git.svg".to_string(),
+    });
+    res.push(Button {
         alt: "Project Settings".to_string(),
         pos: ButtonPos::RightTop,
         widget: String::from("SettingsAside"),

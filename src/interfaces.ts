@@ -148,7 +148,8 @@ interface OpenedFile {
 }
 
 interface Opened extends OpenedFile{
-    id: number
+    id: number;
+    cache_id:number
 }
 
 interface ICodeSpace{
@@ -171,6 +172,7 @@ interface FsFile {
     name: string;
     path: string;
     typ_: "file"
+    modified?: boolean;
 }
 
 
@@ -187,7 +189,12 @@ interface FsConfigIcons{
 }
 
 
-interface FileCache{
+
+interface FileCacheLight{
     path: string,
     content: string;
+}
+interface FileCache extends  FileCacheLight{
+    id: number
+
 }

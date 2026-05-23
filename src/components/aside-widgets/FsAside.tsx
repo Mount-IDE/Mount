@@ -9,11 +9,22 @@ export default function FsAside() {
 
     const tree = fsAsideTreeStore(state => state.tree);
     const load_tree = fsAsideTreeStore(state => state.load_tree);
+    const watch = fsAsideTreeStore(state => state.watch);
+    const unwatch = fsAsideTreeStore(state => state.unwatch);
     const cwd = projectStore(state => state.path_to_current_project);
 
     useEffect(() => {
+        if (cwd.length === 0) {
+            return;
+        }
+
         load_tree(cwd);
-    }, [cwd]);
+        watch(cwd);
+
+        return () => {
+            void unwatch();
+        }
+    }, [cwd, load_tree, watch, unwatch]);
 
     return (
         <div className={"aside-in"}>

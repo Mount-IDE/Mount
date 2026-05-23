@@ -1,11 +1,10 @@
+use crate::modules::contexts::filesystem::domain::values::WatchInstance;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use crate::modules::contexts::filesystem::domain::values::WatchInstance;
 
-pub struct FileSystemWatchManager{
-    pub watchers: HashMap<String, WatchInstance>
+pub struct FileSystemWatchManager {
+    pub watchers: HashMap<String, WatchInstance>,
 }
-
 
 impl FileSystemWatchManager {
     pub fn new() -> Self {

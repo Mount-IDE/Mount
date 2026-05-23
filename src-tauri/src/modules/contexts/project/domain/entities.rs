@@ -1,10 +1,12 @@
+use super::default::action::*;
+use super::default::section::*;
+use super::default::template::*;
+use crate::modules::contexts::project::domain::values::{
+    ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
+};
+use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Schema, Val};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-use crate::modules::contexts::project::domain::values::{ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta};
-use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Schema, Val};
-use super::default::template::*;
-use super::default::section::*;
-use super::default::action::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -20,9 +22,8 @@ pub struct Project {
     pub packages: Vec<String>,
 }
 
-
 impl Project {
-    pub fn new()->Project {
+    pub fn new() -> Project {
         Self {
             name: String::new(),
             path: Path(String::new()),
@@ -32,7 +33,7 @@ impl Project {
             workspace: WorkSpace::new(),
             vars: Vec::new(),
             tasks: Vec::new(),
-            packages: Vec::new()
+            packages: Vec::new(),
         }
     }
 }
@@ -41,15 +42,15 @@ impl Project {
 pub struct WorkSpace {
     pub widgets: Vec<Widget>,
     pub buttons: Vec<Button>,
-    pub opened_files: Vec<OpenedFile>
+    pub opened_files: Vec<OpenedFile>,
 }
 
-impl WorkSpace{
+impl WorkSpace {
     pub fn new() -> Self {
-        Self{
+        Self {
             widgets: Vec::new(),
             buttons: Vec::new(),
-            opened_files: Vec::new()
+            opened_files: Vec::new(),
         }
     }
 }
@@ -66,15 +67,14 @@ pub struct OpenedFile {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub struct Button{
+pub struct Button {
     pub pos: ButtonPos,
     pub widget: String,
     pub order: u8,
     pub alt: String,
     pub keys: String,
-    pub icon: String
+    pub icon: String,
 }
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Task {}
@@ -84,44 +84,39 @@ pub struct Var {
     #[serde(default)]
     name: String,
     #[serde(default)]
-    value: Val
+    value: Val,
 }
 impl Var {
     pub fn new(name: String, value: Val) -> Var {
-        Self {
-            name,
-            value,
-        }
+        Self { name, value }
     }
     pub fn from(_json: String) {
         todo!()
     }
-    pub fn to_json(&self) -> String{
+    pub fn to_json(&self) -> String {
         todo!()
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct ProjectTemplate {
-    #[serde(default="t_id")]
+    #[serde(default = "t_id")]
     pub id: String,
-    #[serde(default="t_name")]
+    #[serde(default = "t_name")]
     pub name: String,
-    #[serde(default="t_schema")]
+    #[serde(default = "t_schema")]
     pub schema: Schema,
     pub meta: Option<TemplateMeta>,
-    #[serde(default="t_startup")]
+    #[serde(default = "t_startup")]
     pub startup: TemplateStartup,
     #[serde(default)]
     pub packages_id: Vec<String>,
-
 }
 
 impl ProjectTemplate {
-    pub fn new()->Self{
-        Self{
+    pub fn new() -> Self {
+        Self {
             id: String::new(),
             name: String::new(),
             schema: Schema(1),
@@ -159,20 +154,20 @@ pub struct Section {
     pub id: i32,
     #[serde(default)]
     pub label: String,
-    #[serde(default="t_list")]
+    #[serde(default = "t_list")]
     pub list: (bool, bool),
     #[serde(default)]
-    pub params: Vec<Parameter>
+    pub params: Vec<Parameter>,
 }
 
 #[allow(unused_variables)]
-impl Section{
+impl Section {
     pub fn new(id: i32, label: String, list: Option<(bool, bool)>) -> Section {
         Self {
             id: 0,
             label: String::new(),
             list: (false, false),
-            params: Vec::new()
+            params: Vec::new(),
         }
     }
 }
@@ -186,23 +181,22 @@ pub struct Action {
     pub callable: Option<bool>,
     #[serde(default)]
     pub if_: Vec<IfStatement>,
-    #[serde(default="t_error")]
+    #[serde(default = "t_error")]
     pub on_error: String,
     pub next: Option<u32>,
     #[serde(default)]
-    pub command: Vec<ActionCommand>
-
+    pub command: Vec<ActionCommand>,
 }
 impl Action {
-    pub fn new()->Action {
-        Self{
+    pub fn new() -> Action {
+        Self {
             id: 0,
             for_: None,
             callable: None,
             if_: Vec::new(),
             on_error: String::new(),
             next: None,
-            command: Vec::new()
+            command: Vec::new(),
         }
     }
 }
@@ -218,7 +212,7 @@ pub struct Parameter {
     pub typ: ParameterTyp,
     #[serde(default)]
     pub def: Val,
-    pub while_: Option<String>
+    pub while_: Option<String>,
 }
 
 impl Parameter {
@@ -228,14 +222,14 @@ impl Parameter {
             label: ParameterLabel::STR(String::new()),
             def: Val::NUMBER(0.0),
             while_: None,
-            typ: ParameterTyp::CHECK
+            typ: ParameterTyp::CHECK,
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
-pub struct ProjectPackage{
+pub struct ProjectPackage {
     #[serde(default)]
     id: String,
     #[serde(default)]
@@ -243,12 +237,11 @@ pub struct ProjectPackage{
     #[serde(default)]
     meta: PackageMeta,
     #[serde(default)]
-    startup: PackageStartup
+    startup: PackageStartup,
 }
 
-
-impl ProjectPackage{
-    pub fn new()->ProjectPackage {
+impl ProjectPackage {
+    pub fn new() -> ProjectPackage {
         Self {
             id: String::new(),
             name: String::new(),
@@ -258,7 +251,6 @@ impl ProjectPackage{
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct PackageStartup {
@@ -267,21 +259,21 @@ pub struct PackageStartup {
     #[serde(default)]
     actions: Vec<Action>,
     #[serde(default)]
-    parameters: Vec<Parameter>
+    parameters: Vec<Parameter>,
 }
 
-impl Default for PackageStartup{
+impl Default for PackageStartup {
     fn default() -> Self {
         Self {
             var: Vec::new(),
             actions: Vec::new(),
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
 
 impl PackageStartup {
-    pub fn new()-> PackageStartup {
+    pub fn new() -> PackageStartup {
         Self {
             var: Vec::new(),
             parameters: Vec::new(),
@@ -289,7 +281,6 @@ impl PackageStartup {
         }
     }
 }
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectTag {
@@ -299,7 +290,7 @@ pub struct ProjectTag {
     pub name: String,
 }
 
-impl Default for ProjectTag{
+impl Default for ProjectTag {
     fn default() -> Self {
         Self {
             id: 0,
