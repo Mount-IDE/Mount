@@ -55,7 +55,11 @@ pub fn run() {
             get_file_templates,
             get_os,
             create_file,
-            create_dir
+            create_dir,
+            write_file,
+            remove_file,
+            remove_dir,
+            rename_file
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .run(tauri::generate_context!())

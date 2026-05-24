@@ -6,8 +6,10 @@ interface Type {
     set_current: (i: number) => void
     add_code_space: () => void
     remove_code_space: (id: number) => void
-    add_file_to_code_space: (id: number, cache_id: number, file: OpenedFile) => void
+    add_file_to_code_space: (id: number, cache_id: number, file: OpenedFile) => number
     remove_file_from_code_space: (id: number, file: Opened) => void
+    select_current_file: (id: number, id2: number|null)=>void // id of space and id of file
+    get_space: (id: number)=>ICodeSpace|null
 }
 
 export const codeSpaceStore = create<Type>((set, get) => ({
@@ -17,49 +19,57 @@ export const codeSpaceStore = create<Type>((set, get) => ({
             set({
                 spaces: [{
                     id: 0,
-                    opened_files: []
+                    opened_files: [],
+                    current_file: null
                 }]
             })
         } else {
             let id = spaces[spaces.length - 1].id + 1;
             set({
-                spaces: [...spaces, {id, opened_files: []}]
+                spaces: [...spaces, {
+                    id, opened_files: [], current_file: null
+                }]
             })
         }
 
     },
-    add_file_to_code_space(id: number, cache_id: number, file: OpenedFile): void {
+    add_file_to_code_space(id: number, cache_id: number, file: OpenedFile): number {
         let spaces = get().spaces;
         if (id == -1) {
             set({
                 spaces: [{
-                    id: 0, opened_files: [{...file, id: 0, cache_id}]
+                    id: 0, opened_files: [{
+                        ...file, id: 0, cache_id
+                    }], current_file: 0
                 }],
                 current: 0
             })
+            return 0;
         }
         let id_ = spaces.map(el => el.id)
 
         if (!id_.includes(id)) {
             set({
                 spaces: [...spaces, {
-                    id, opened_files: [{...file, id: 0, cache_id}]
+                    id, opened_files: [{...file, id: 0, cache_id}], current_file: 0
                 }]
             })
+            return 0;
         } else {
-            let found = spaces.find(el => el.id==id)!;
+            let found = spaces.find(el => el.id == id)!;
             let i = spaces.indexOf(found);
             if (spaces[i] === undefined) {
-                return;
+                return -1;
             }
             if (spaces[i].opened_files.map(el => el.path).includes(file.path)) {
-                return
+                return -1;
             }
             let last = spaces[i].opened_files;
             const nextId =
                 last.length > 0
                     ? last[last.length - 1].id + 1
-                    : 0;            const updated = spaces.map(space => {
+                    : 0;
+            const updated = spaces.map(space => {
                 if (space.id !== id) {
                     return space;
                 }
@@ -73,13 +83,15 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                             id: nextId,
                             cache_id
                         }
-                    ]
+                    ],
+                    current_file: nextId
                 };
             });
 
             set({
                 spaces: updated
             });
+            return nextId
         }
     },
     remove_code_space(id: number): void {
@@ -114,7 +126,26 @@ export const codeSpaceStore = create<Type>((set, get) => ({
     },
     spaces: [],
     current: 0,
-    set_current: (i) => set({current: i})
+    set_current: (i) => set({current: i}),
+    select_current_file(id: number, id2: number|null): void {
+        const spaces = get().spaces.map(el=>{
+            if (el.id!=id){
+                return el;
+            }
+            el.current_file = id2;
+            return el;
+        })
+        set({
+            spaces: spaces
+        })
+    }, get_space(id: number): ICodeSpace | null {
+        const got = get().spaces.find(el=>el.id==id);
+        if (!got) {
+            return null
+        }
+        return got!
+    }
+
 
 }))
 

@@ -241,6 +241,27 @@ impl TFSWriteService for FileSystemWriteService {
         })?;
         Ok(())
     }
+
+    fn rename_file(&self, from: &PFile, to: &PFile) -> Result<(), FileSystemError> {
+        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e|
+            FileSystemError::Rename {
+                from: from.path.clone(), 
+                to: to.path.clone(),
+                e
+            }
+        )?;
+        Ok(())
+    }
+
+    fn rename_dir(&self, from: &PDirectory, to: &PDirectory) -> Result<(), FileSystemError> {
+        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e|
+            FileSystemError::Rename {
+                from: from.path.clone(),
+                to: to.path.clone(),
+                e
+            }
+        )?;
+        Ok(())    }
 }
 
 pub struct FileSystemWatchService();

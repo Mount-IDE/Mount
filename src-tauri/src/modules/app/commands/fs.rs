@@ -65,3 +65,36 @@ pub fn create_dir(path: String) -> Result<(), ErrorDto> {
 
     Ok(())
 }
+
+
+#[tauri::command]
+pub fn write_file(path:String, content:String)->Result<(), ErrorDto>{
+    let file = PFile::from_path_reg(Path(path));
+    FS_WRITE_SERVICE.write_file(&file, content, FileWriteAccess::WRITE)?;
+    Ok(())
+}
+
+
+#[tauri::command]
+pub fn remove_file(path: String)->Result<(), ErrorDto>{
+    let path = Path::new(&path);
+    let file = PFile::from_path_reg(path);
+    FS_WRITE_SERVICE.remove_file(&file)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn remove_dir(path: String)->Result<(), ErrorDto>{
+    let path = Path::new(&path);
+    let dir = PDirectory::from_path(&path);
+    FS_WRITE_SERVICE.remove_dir(&dir)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn rename_file(from: String, to: String)->Result<(), ErrorDto> {
+    let file1 = PFile::from_path_reg(Path(from));
+    let file2 = PFile::from_path_reg(Path(to));
+    FS_WRITE_SERVICE.rename_file(&file1, &file2)?;
+    Ok(())
+}

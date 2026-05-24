@@ -6,7 +6,7 @@ import {fsExtStore} from "../../stores/fs_ext_store.ts";
 
 type Props = {
    obj: FsDirectory
-    onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile, path?:string)=>void
+    onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile,is_file:boolean, path?:string, path_file?:string)=>void
 }
 
 export default function DirectoryX(props: Props){
@@ -28,7 +28,7 @@ export default function DirectoryX(props: Props){
                 onContextMenu={
                     (e)=> {
                         e.stopPropagation()
-                        props.onContext(e, props.obj)
+                        props.onContext(e, props.obj, false)
                     }}
                 className={"fs-aside-head"}>
                 <div className={"fs-aside-icon"}

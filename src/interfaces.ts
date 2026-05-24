@@ -153,7 +153,8 @@ interface Opened extends OpenedFile{
 }
 
 interface ICodeSpace{
-    id: number
+    id: number,
+    current_file: number|null // opened file id
     opened_files: Opened[]
 }
 
@@ -193,6 +194,7 @@ interface FsConfigIcons{
 interface FileCacheLight{
     path: string,
     content: string;
+    is_dirty: boolean
 }
 interface FileCache extends  FileCacheLight{
     id: number

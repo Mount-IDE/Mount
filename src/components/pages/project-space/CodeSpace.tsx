@@ -1,7 +1,8 @@
 import "./styles/code-space.css"
 import CodeFiles from "./CodeFiles.tsx";
 import Code from "./Code.tsx";
-import {useState} from "react";
+import {use, useEffect, useState} from "react";
+import {codeSpaceStore} from "../../../stores/code_space_store.ts";
 
 
 
@@ -11,12 +12,24 @@ type Props={
 
 export default function CodeSpace(props: Props) {
 
+    const [current, setCurrent]= useState<[number|null, number]>([props.obj.current_file,0]) // id and cache-id
+    function setCurrent_(current_file: number|null, cache:number){
+        setCurrent([current_file, cache])
+    }
 
-    const [current,setCurrent]=useState<[number, number]>([0,0])
+    useEffect(() => {
+        setCurrent(prev=>{
+            const cache = props.obj.opened_files.find(el=>el.id==props.obj.current_file);
+            if (!cache){
+                return prev;
+            }
+            return [props.obj.current_file, cache.cache_id]
+        })
+    }, [props.obj.current_file]);
 
     return (
         <div id={"project-code-space"}>
-            <CodeFiles current={current} setCurrent={setCurrent} files={props.obj.opened_files} id={props.obj.id}/>
+            <CodeFiles current={current} setCurrent={setCurrent_} files={props.obj.opened_files} id={props.obj.id}/>
             <Code current={current}/>
         </div>
     )

@@ -1,14 +1,15 @@
 import "./styles/code-files.css"
 import {fsExtStore} from "../../../stores/fs_ext_store.ts";
 import cross from "../../../assets/title-close.svg"
-import {Dispatch, SetStateAction, useState} from "react";
+import {Dispatch, SetStateAction, use, useEffect, useState} from "react";
 import {codeSpaceStore} from "../../../stores/code_space_store.ts";
+import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
 type Props = {
     files: Opened[]
     id: number;
-    current: [number, number],
-    setCurrent: Dispatch<SetStateAction<[number, number]>>
+    current: [number|null, number],
+    setCurrent: (id: number, id2:number)=>void
 }
 
 
@@ -20,8 +21,10 @@ export default function CodeFiles(props: Props) {
         console.log("deleted")
     }
     function onSelect(obj_: Opened){
-        props.setCurrent([obj_.id,obj_.cache_id]);
+        props.setCurrent(obj_.id, obj_.cache_id);
     }
+
+
     return (
         <div className={"code-space-files"}>
             {props.files.map(el =>
@@ -44,6 +47,8 @@ function CodeFile(props: FileProps) {
     const name = props.obj.name;
     const get = fsExtStore.getState().get_file_by_name(name);
     const path_to = `/builtin/fs-icons/${get[1]}`
+    const from_cache = fileCacheStore(state=>state.get_by_id(props.obj.cache_id));
+
     return (
         <div onClick={()=>props.onSelect(props.obj)}
             style={{
@@ -53,6 +58,7 @@ function CodeFile(props: FileProps) {
             <div className={"code-file-img"}>
                 <img src={path_to}/>
             </div>
+            {from_cache!=null && from_cache.is_dirty && <p>*</p>}
             <p>{name}</p>
             <button onClick={()=>props.onRemove(props.obj)}>
                 <img src={cross}/>

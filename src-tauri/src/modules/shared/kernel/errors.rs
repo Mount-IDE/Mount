@@ -103,6 +103,8 @@ pub enum FileSystemError {
     PathParsing { path: Path },
     #[error("failed to watch directory {path}")]
     Watch { path: Path },
+    #[error("failed to rename from \"{from}\" to \"{to}\"")]
+    Rename{from: Path,to:Path, e: std::io::Error}
 }
 
 #[derive(Error, Debug)]
