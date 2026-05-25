@@ -23,7 +23,12 @@
   --border: #A9A9A9;
   --input: #0B0B0B;
   --border2:#464646;
-  --proj-hover: #353535
+  --proj-hover: #353535;
+
+  --bg1: #1E1F22;
+  --bg2: #181818;
+
+  --border3: #272727;
 }
 
 *{

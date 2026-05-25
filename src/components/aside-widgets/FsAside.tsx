@@ -1,6 +1,6 @@
 import "./styles/fs-aside.css"
 import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
-import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {projectStore} from "../../stores/project_store.ts";
 import DirectoryX from "./DirectoryX.tsx";
 import ContextMenu, {IContextMenuButton} from "../common/ContextMenu.tsx";
@@ -10,7 +10,6 @@ import {contextStore} from "../../stores/context_store.ts";
 import {ModalButton} from "../common/Modal.tsx";
 import {invoke} from "@tauri-apps/api/core"
 import {cacheStore} from "../../stores/cache_store.ts";
-import {menu} from "@tauri-apps/api";
 
 export default function FsAside() {
 
@@ -39,26 +38,6 @@ export default function FsAside() {
 
     const open_window = menuStore(state => state.open_file_create_menu)
 
-    const buttons_: IContextMenuButton[] = [
-        {
-            cb: () => open_window(),
-            hotkeys: "",
-            icon: "copy.svg",
-            title: "New"
-        }, {
-            cb: () => {
-            },
-            hotkeys: "Ctrl+X",
-            icon: "copy.svg",
-            title: "Cut"
-        }, {
-            cb: () => {
-            },
-            hotkeys: "Ctrl+C",
-            icon: "copy.svg",
-            title: "Copy"
-        },
-    ]
     const [buttons, setButtons] = useState<IContextMenuButton[]>([])
 
     const set_path = contextStore(state => state.set_path)

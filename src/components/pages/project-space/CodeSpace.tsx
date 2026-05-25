@@ -1,8 +1,7 @@
 import "./styles/code-space.css"
 import CodeFiles from "./CodeFiles.tsx";
 import Code from "./Code.tsx";
-import {use, useEffect, useState} from "react";
-import {codeSpaceStore} from "../../../stores/code_space_store.ts";
+import { useEffect, useState} from "react";
 
 
 

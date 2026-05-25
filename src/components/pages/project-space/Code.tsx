@@ -1,7 +1,6 @@
 import "./styles/code.css"
-import {Dispatch, SetStateAction, useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState} from "react";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
-import {sortUserPlugins} from "vite";
 
 type Props = {
     current: [number | null, number]

@@ -24,7 +24,14 @@
 }
 
 .project-hr{
-    border: 2px solid var(--border2);
+    /*width: 2px;*/
+    /*background: var(--border3);*/
+    border: 1px solid var(--border3);
+    /*border: 1px solid transparent;*/
     cursor: w-resize;
+    /*transition: all 0.2s;*/
+    /*&:hover{*/
+    /*    border: 3px solid #304bd0;*/
+    /*}*/
 }
 

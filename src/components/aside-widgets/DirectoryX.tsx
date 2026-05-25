@@ -1,7 +1,7 @@
 import "./styles/directory.css"
 import FileX from "./FileX.tsx";
 import arrow from "../../assets/arrow.svg"
-import {useLayoutEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {fsExtStore} from "../../stores/fs_ext_store.ts";
 
 type Props = {
@@ -39,7 +39,7 @@ export default function DirectoryX(props: Props){
                 >
                     <img src={arrow}/>
                 </div>
-                <div className={"fs-aside-icon"}>
+                <div className={"fs-aside-icon2"}>
                     {ico[0] &&
                         <img src={path}/>
                     }

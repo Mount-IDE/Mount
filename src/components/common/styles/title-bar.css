@@ -6,7 +6,7 @@
     position: relative;
     left: 0;
     top: 0;
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border3);
     z-index: 20;
 }
 
@@ -26,7 +26,11 @@
     border: none;
 
     & > img {
-        width: 50%;
+        width: 30%;
+    }
+
+    &:hover{
+        filter: brightness(2);
     }
 }
 

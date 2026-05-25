@@ -69,7 +69,7 @@ export default function FileX(props: Props) {
 
             className={"fs-filex"} onClick={click}>
             <div className={"fs-aside-head"}>
-                <div className={"fs-aside-icon"}>
+                <div className={"fs-aside-icon2"}>
                     {ico[0] &&
                         <img src={path}/>
                     }

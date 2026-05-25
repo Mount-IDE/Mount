@@ -15,7 +15,7 @@ interface Type {
 }
 
 
-export const menuStore = create<Type>((set, get) => ({
+export const menuStore = create<Type>((set, _) => ({
     file_create_menu: false,
     close_file_create_menu: () => {
         set({

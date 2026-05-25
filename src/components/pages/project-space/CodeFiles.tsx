@@ -1,7 +1,6 @@
 import "./styles/code-files.css"
 import {fsExtStore} from "../../../stores/fs_ext_store.ts";
 import cross from "../../../assets/title-close.svg"
-import {Dispatch, SetStateAction, use, useEffect, useState} from "react";
 import {codeSpaceStore} from "../../../stores/code_space_store.ts";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 

@@ -14,7 +14,7 @@ use notify::event::{ModifyKind, RenameMode};
 use notify::{
     Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Serialize};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path as std_path, PathBuf};
