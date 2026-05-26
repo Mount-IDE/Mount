@@ -1,0 +1,10 @@
+#bottom-header{
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+#bottom-header-p{
+    margin-left: 20px;
+    color: var(--title)
+}

@@ -1,0 +1,19 @@
+.project-bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    /*padding: 1rem 0;*/
+    max-height: 70vw;
+    min-height: 10vh;
+    overflow: hidden;
+}
+
+.project-bottom-dis {
+    max-height: 0;
+    height: 0 !important;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}

@@ -2,10 +2,10 @@ import "./styles/project-workspace.css"
 import MiniAside from "./MiniAside.tsx";
 import Aside from "./Aside.tsx";
 import Central from "./Central.tsx";
-import React, {useEffect} from "react";
+import React from "react";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {asideStore} from "../../../stores/aside_store.ts";
-import FsAside from "../../aside-widgets/FsAside.tsx";
+import Bottom from "./Bottom.tsx";
 
 
 export default function ProjectWorkSpace() {
@@ -39,9 +39,14 @@ export default function ProjectWorkSpace() {
                        set_top={set_current_left} set_bot={set_current_bot}
                        top={left_top} bottom={left_bot} max_top={3} max_bot={null}/>
             <hr className={"project-hr"}/>
-            <Aside state={left} left={true}/>
-            <Central/>
-            <Aside state={right} left={false}/>
+            <div id={"project-center"}>
+                <div id={"project-top"}>
+                    <Aside state={left} left={true}/>
+                    <Central/>
+                    <Aside state={right} left={false}/>
+                </div>
+                <Bottom />
+            </div>
             <hr className={"project-hr"}/>
             <MiniAside top_button={set_current_right_button} is_left={false} set_top={set_current_right}
                        set_bot={set_current_bot} top={right_top}

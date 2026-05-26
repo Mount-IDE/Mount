@@ -15,7 +15,6 @@ import {projectStore} from "./stores/project_store.ts";
 import {asideButtonsStore} from "./stores/aside_buttons_store.ts";
 import FsAside from "./components/aside-widgets/FsAside.tsx";
 import {fsExtStore} from "./stores/fs_ext_store.ts";
-import {menuStore} from "./stores/menu_store.ts";
 
 
 function App() {

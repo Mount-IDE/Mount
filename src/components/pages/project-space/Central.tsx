@@ -20,14 +20,18 @@ export default function Central() {
                     style={{
                         userSelect:"none",
                         width:"100%",
-                        height:"100%"
+                        height:"100%",
+                        display: "flex",
+                        flexDirection:"column",
+                        alignItems:"center",
+                        justifyContent:"center"
                     }}
                 >
                     <div
                         style={{
-                            position:"relative",
-                            left: "calc(50% - 100px)",
-                            top:"70px",
+                            // position:"relative",
+                            // left: "calc(50% - 100px)",
+                            // top:"70px",
                             display:"flex",
                             width:"200px",
                             height:"200px",
