@@ -212,3 +212,16 @@ interface configFsTemplate{
     inner?:configFsTemplate[],
     base_name?:string
 }
+
+
+interface Cache {
+    templates: ITemplate[],
+    packages: IPackage[],
+    groups: string[],
+    data_dir_path: string,
+    projects_dir: string,
+    os: string,
+    file_icons: FsConfigIcons[],
+    file_templates: configFsTemplate[]
+
+}

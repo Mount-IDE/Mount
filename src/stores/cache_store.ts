@@ -1,5 +1,4 @@
 import {create} from "zustand"
-import {invoke} from "@tauri-apps/api/core";
 
 
 interface Type {
@@ -10,6 +9,7 @@ interface Type {
     data_dir: string,
     os: string,
     set_os: (val:string)=>void,
+
     add_template_to_cache: (t: ITemplate) => void
     add_templates_to_cache: (t: ITemplate[]) => void
     add_package_to_cache: (t: IPackage) => void
@@ -23,7 +23,7 @@ interface Type {
     load_groups: (groups: string[]) => void
     set_data_dir: (str: string) => void,
     file_templates: configFsTemplate[],
-    load_file_templates: ()=> Promise<void>
+    set_file_templates: (temp: configFsTemplate[]) => void
 }
 
 
@@ -105,15 +105,10 @@ export const cacheStore = create<Type>((set, _) => ({
             data_dir: str
         })
     },
-    load_file_templates: async (): Promise<void>=> {
-        try{
-            const data = await invoke<configFsTemplate[]>("get_file_templates");
-            set({
-                file_templates: data
-            })
-        }catch (e){
-            console.error(e)
-        }
+    set_file_templates: async (temp: configFsTemplate[]) => {
+        set({
+            file_templates: temp
+        })
     }
 
 

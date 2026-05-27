@@ -16,17 +16,21 @@ function Aside(props: Props) {
     const base_pos = useRef(0);
     const base_width = useRef(10)
     const is_moving = useRef(false)
-
+    // const ref_?fixed = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         let current_ = ref.current
+
+        // let cur = ref_fixed.current;
         let hr_ = ref_.current
         if (!hr_) return
         if (!current_) return
+        // if (!cur) return
         let current = current_!;
         let hr = hr_!;
 
-        let frame: number | null=null;
+        let frame: number | null = null;
+
         function start_move(e: MouseEvent) {
             is_moving.current = true;
             base_pos.current = e.clientX;
@@ -38,10 +42,10 @@ function Aside(props: Props) {
         function move(e: MouseEvent) {
             if (!is_moving.current) return
 
-            if (frame!=null)return
+            if (frame != null) return
 
             frame = requestAnimationFrame(() => {
-                frame=null;
+                frame = null;
                 const delta = e.clientX - base_pos.current;
                 const next = !props.left ?
                     base_width.current - delta :
@@ -74,6 +78,13 @@ function Aside(props: Props) {
 
     }, [ref_, props.state]);
 
+    // useEffect(() => {
+    //         if (props.state) {
+    //           ref_fixed.current!.style.left = ref_.current!.style.left;
+    //         }
+    //     }, [props.state]
+    // )
+
 
     const current_top = props.left ?
         asideButtonsStore(state => state.current_left) :
@@ -82,23 +93,32 @@ function Aside(props: Props) {
     return (
         <>
             {
-                !props.left && props.state&&
-                <hr ref={ref_} className={"project-hr"}/>
+                !props.left && props.state &&
+                <>
+                    <hr ref={ref_} className={"project-hr"}/>
+
+                </>
+
             }
             <div
                 style={{
                     width: base_width.current
                 }}
-                ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
-                    <Header label={current_top?.alt ?? ""}/>
-                    <div className={"project-aside-body"}>
-                        {current_top?.component()}
-                    </div>
+                ref={ref}
+                className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
+                <Header label={current_top?.alt ?? ""}/>
+                <div className={"project-aside-body"}>
+                    {current_top?.component()}
+                </div>
             </div>
             {props.left && props.state &&
-                <hr ref={ref_} className={"project-hr"}/>}
+                <>
+                    <hr ref={ref_} className={"project-hr"}/>
+                </>
+            }
         </>
 
     )
 }
+
 export default React.memo(Aside)

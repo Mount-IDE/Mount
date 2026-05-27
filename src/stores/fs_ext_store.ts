@@ -1,9 +1,8 @@
 import {create} from "zustand"
-import {invoke} from "@tauri-apps/api/core"
 
 interface Type {
     config: FsConfigIcons[] | null,
-    load: () => Promise<void>;
+    set_icons: (icons: FsConfigIcons[]) => void;
     get_dir_by_type: (typ?: string) => [boolean, string, string];
     get_file_by_ext: (ext: string) => [boolean, string, string];
     get_file_by_name: (name: string) => [boolean, string, string];
@@ -12,14 +11,10 @@ interface Type {
 
 export const fsExtStore = create<Type>((set, get) => ({
     config: null,
-    load: async () => {
-        try {
-            const conf = await invoke<FsConfigIcons[]>("get_fs_ext_icons");
-            set({config: conf});
-            console.log(conf)
-        } catch (e) {
-            console.error(e)
-        }
+    set_icons: (icons) => {
+        set({
+            config: icons
+        })
     },
     get_dir_by_type(typ: string | undefined): [boolean, string, string] {
         const config = get().config;

@@ -73,7 +73,7 @@ pub fn create_project(
     results: CreateProjectResult,
     packages: HashMap<String, ProjectPackage>,
     tags: Vec<ProjectTag>,
-) -> Result<(), ErrorDto> {
+) -> Result<Project, ErrorDto> {
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
         .get(&-4i8)
@@ -118,7 +118,7 @@ pub fn create_project(
 
     project.workspace.buttons = buttons;
 
-    let json = serde_json::to_string(&project).map_err(|e| ProjectError::ParsingError {
+    let json = serde_json::to_string(&project.clone()).map_err(|e| ProjectError::ParsingError {
         err: ParsingError::Serialize {
             path: Path(path.clone()),
             err: e,
@@ -132,7 +132,7 @@ pub fn create_project(
     let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
     FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
     PROJECT_SERVICE.add_to_recents(&project)?;
-    Ok(())
+    Ok(project)
 }
 
 fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -> ProjectMeta {

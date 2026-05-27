@@ -1,5 +1,7 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
+import {projectStore} from "./project_store.ts";
+import pageStore from "./page_store.ts";
 
 
 interface Type {
@@ -19,7 +21,7 @@ interface Type {
     remove_tag: (id: number)=>void
     change_tag: (id: number, to: string)=>void
 
-    create_project(template: ITemplate):Promise<[number, string]>
+    create_project(template: ITemplate): Promise<[number, string, IProject | null]>
 
 }
 
@@ -98,25 +100,31 @@ export const createProjectStore = create<Type>((set, get) => ({
         let packages = get().packages;
         let tags = get().tags;
         if (!template) {
-            return [1, ""]; // undefined template
+            return [1, "", null]; // undefined template
         }
         try {
-            await invoke<void>("create_project", {
+            const project = await invoke<IProject>("create_project", {
                 template, results, packages, tags
             })
+            let name = get().results?.["__meta__"]?.[-4]?.["project-name"];
+            let path = get().results?.["__meta__"]?.[-4]?.["project-path"];
+            console.log(path, name);
+
+            console.log(get().results)
+            let unified = await invoke<string>("make_path_command", {
+                components: [path, name]
+            })
+            console.log(project);
+            projectStore.getState().set_current_project(project);
+            pageStore.getState().openProject();
+            pageStore.getState().setFilter(false);
+
+            return [0, unified, project]
         } catch (e) {
             console.error(e)
-            return [2, ""] //error while create project
+            return [2, "", null] //error while create project
         }
-        let name = get().results?.["__meta__"]?.[-4]?.["project-name"];
-        let path = get().results?.["__meta__"]?.[-4]?.["project-path"];
-        console.log(path, name);
 
-        console.log(get().results)
-        let unified = await invoke<string>("make_path_command", {
-            components: [path, name]
-        })
-        return [0, unified]
 
     }
 

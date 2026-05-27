@@ -1,4 +1,6 @@
+use crate::modules::app::commands::config::{get_file_templates, get_fs_ext_icons};
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE};
+use crate::modules::contexts::config::values::Cache;
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
@@ -57,4 +59,40 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
 #[tauri::command]
 pub fn get_data_dir() -> Result<Path, ErrorDto> {
     CONFIG_SERVICE.get_data_dir().map_err(|e| e.into())
+}
+
+#[tauri::command]
+pub fn get_cache() -> Result<Cache, ErrorDto> {
+    let packages = read_packages()?;
+    let templates = read_templates()?;
+    let data_dir_path = get_data_dir()?;
+    let settings = CONFIG_SERVICE.get_settings()?;
+
+    let groups = settings.general.project_groups;
+
+    let os = if cfg!(target_os = "windows") {
+        "windows"
+    } else if cfg!(target_os = "macos") {
+        "macos"
+    } else {
+        "linux"
+    };
+    let mut projects_dir = settings.general.path_to_projects;
+    println!("PROJECT DIR {projects_dir}");
+    if projects_dir.get().len() == 0 {
+        projects_dir = CONFIG_SERVICE.get_projects_dir()?;
+    }
+    let icons = get_fs_ext_icons()?;
+    let f_templates = get_file_templates()?;
+    let res = Cache {
+        templates,
+        packages,
+        data_dir_path,
+        groups,
+        os: os.to_string(),
+        projects_dir,
+        file_icons: icons,
+        file_templates: f_templates,
+    };
+    Ok(res)
 }

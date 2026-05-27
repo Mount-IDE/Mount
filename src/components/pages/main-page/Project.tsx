@@ -1,23 +1,24 @@
 import "./styles/project.css"
 import more from "../../../assets/more.svg"
-import {projectStore} from "../../../stores/project_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 
 type Props = {
     project: IRecentProject
+    onClick: (path: string) => void
 }
 
 export default function Project(props: Props) {
     const {project} = props;
 
-    const set_current = projectStore(state => state.set_path_to_current_project)
+    // const set_current = projectStore(state => state.set_path_to_current_project)
 
     async function loadProject() {
         try {
             let path = await invoke<string>("make_path_command", {
                 components: [project.path, project.name]
             })
-            set_current(path)
+            // set_current(path)
+            props.onClick(path);
         } catch (e) {
             console.error(e)
         }

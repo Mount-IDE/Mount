@@ -59,7 +59,8 @@ pub fn run() {
             write_file,
             remove_file,
             remove_dir,
-            rename_file
+            rename_file,
+            get_cache
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .run(tauri::generate_context!())

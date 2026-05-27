@@ -23,6 +23,25 @@
     /*transition: all 0.2s;*/
 }
 
+/*.project-hr {*/
+/*    width: 12px;*/
+/*    border: none;*/
+/*    margin: 0;*/
+/*    cursor: w-resize;*/
+/*    position: relative;*/
+/*    flex-shrink: 0;*/
+/*}*/
+
+/*.project-hr::after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    bottom: 0;*/
+/*    left: 50%;*/
+/*    width: 1px;*/
+/*    transform: translateX(-50%);*/
+/*    background: var(--border3);*/
+/*}*/
 .project-hr{
     /*width: 2px;*/
     /*background: var(--border3);*/
@@ -33,5 +52,31 @@
     /*&:hover{*/
     /*    border: 3px solid #304bd0;*/
     /*}*/
+    position: relative;
+
+    /*&:hover{*/
+    /*    !*background: red;*!*/
+    /*    border: 2px solid red;*/
+    /*}*/
 }
 
+
+/*.project-hr:after {*/
+/*    content: "";*/
+/*    cursor: w-resize;*/
+/*    pointer-events: auto;*/
+/*    !*    position:relative;*!*/
+/*    !*    height: 100%;*!*/
+/*    !*    top: 0;*!*/
+/*    !*    left: -10px;*!*/
+/*    !*    right: -10px;*!*/
+/*    !*}*!*/
+/*    position: absolute;*/
+/*    !*inset: -5px;*!*/
+/*    !*position: absolute;*!*/
+/*    left: -10px;*/
+/*    top: 0;*/
+/*    width: 22px; !* 2 + 5 + 5 *!*/
+/*    height: 100%;*/
+/*    z-index: 20;*/
+/*}*/
