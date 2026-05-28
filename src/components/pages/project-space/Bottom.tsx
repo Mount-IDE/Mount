@@ -1,8 +1,7 @@
 import "./styles/bottom.css"
-import BottomHeader from "./BottomHeader.tsx";
 import {asideStore} from "../../../stores/aside_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {useEffect, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 
 
 type Props = {
@@ -15,13 +14,17 @@ export default function Bottom(props: Props) {
     const state = asideStore(state=>state.bottom);
 
     const current = asideButtonsStore(state=>state.current_bottom)
+    const bottomButtons = asideButtonsStore(state => state.bottom_buttons);
+    const heavyButtons = useMemo(
+        () => bottomButtons.filter(button => button.component_type === "Heavy"),
+        [bottomButtons]
+    );
 
     const ref = useRef<HTMLDivElement>(null)
     const ref_ = useRef<HTMLHRElement>(null)
     const base_pos = useRef(0);
     const base_height = useRef(10)
     const is_moving = useRef(false)
-
 
     useEffect(() => {
         let current_ = ref.current
@@ -78,6 +81,9 @@ export default function Bottom(props: Props) {
 
     }, [ref_, state]);
 
+    const lightComponent =
+        current?.component_type === "Light" && state ? current.component({active: true}) : null;
+
 
     return (
         <>
@@ -88,11 +94,20 @@ export default function Bottom(props: Props) {
                     // bottom:0,
                 }}
                 ref={ref} id={"project-bottom"} className={state?"project-bottom":"project-bottom-dis"}>
-                <BottomHeader title={current?.alt??"Not Found"}/>
+                {/*<BottomHeader ref={head_ref} title={current?.alt??"Not Found"}/>*/}
                 <div id={"project-bottom-in"}>
-                    {
-                        current?.component()
-                    }
+                    {heavyButtons.map(button => {
+                        const active = state && current?.id === button.id;
+                        return (
+                            <div
+                                key={`${button.widget}-${button.id}`}
+                                className={active ? "project-bottom-panel" : "project-bottom-panel project-bottom-panel-hidden"}
+                            >
+                                {button.component({active})}
+                            </div>
+                        );
+                    })}
+                    {lightComponent}
                 </div>
             </div>
         </>

@@ -17,3 +17,23 @@
     overflow: hidden;
     position: relative;
 }
+
+#project-bottom-in {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.project-bottom-panel {
+    position: absolute;
+    inset: 0;
+}
+
+.project-bottom-panel-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}

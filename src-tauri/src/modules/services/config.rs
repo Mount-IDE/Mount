@@ -1,6 +1,7 @@
 use crate::modules::app::{
     APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, SETTINGS,
 };
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
@@ -12,7 +13,6 @@ use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use std::string::ToString;
 use tauri::Manager;
-use crate::modules::contexts::config::entities::ConfigFsTemplate;
 
 pub struct ConfigService();
 
@@ -216,9 +216,13 @@ impl TConfigService for ConfigService {
         let path_ = make_path(vec![dir.get().as_str(), "file_templates.json"]);
         let file = PFile::from_path_reg(path_.clone());
         let content = FS_READ_SERVICE.read_file(&file)?;
-        let json = serde_json::from_str::
-        <Vec<ConfigFsTemplate>>(&content)
-            .map_err(|e| ParsingError::Deserialize {err: e, json: content, path: path_.clone() })?;
+        let json = serde_json::from_str::<Vec<ConfigFsTemplate>>(&content).map_err(|e| {
+            ParsingError::Deserialize {
+                err: e,
+                json: content,
+                path: path_.clone(),
+            }
+        })?;
 
         Ok(json)
     }
@@ -228,7 +232,8 @@ pub struct ConfigRecoveryService();
 
 fn get_files() -> Vec<_File> {
     vec![
-        _File::new("settings.json".to_string(), "".to_string()),
+        _File::content("settings.json".to_string(), "".to_string(),
+                       serde_json::to_string(&Settings::new()).unwrap()),
         _File::content(
             "recent-projects.json".to_string(),
             "".to_string(),

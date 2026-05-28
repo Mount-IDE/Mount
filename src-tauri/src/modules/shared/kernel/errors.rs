@@ -104,7 +104,11 @@ pub enum FileSystemError {
     #[error("failed to watch directory {path}")]
     Watch { path: Path },
     #[error("failed to rename from \"{from}\" to \"{to}\"")]
-    Rename{from: Path,to:Path, e: std::io::Error}
+    Rename {
+        from: Path,
+        to: Path,
+        e: std::io::Error,
+    },
 }
 
 #[derive(Error, Debug)]
@@ -114,6 +118,8 @@ pub enum ConfigError {
         #[source]
         err: tauri::Error,
     },
+    #[error("Cannot get app")]
+    App,
     #[error("global settings not found")]
     SettingsNotFound {
         #[source]
@@ -157,6 +163,30 @@ pub enum ParsingError {
         #[source]
         err: serde_json::Error,
     },
+}
+
+#[derive(Debug, Error)]
+pub enum TerminalError {
+    #[error("error of config context tha can`t described by terminal err")]
+    Config { err: ConfigError },
+    #[error("cannot spawn terminal process {shell}")]
+    Spawn { shell: String },
+    #[error("Terminal width {id} not found")]
+    NotFound { id: String },
+    #[error("Cannot write to terminal")]
+    Write { err: std::io::Error, id: String },
+    #[error("cannot resize the terminal")]
+    Resize { id: String },
+    #[error("cannot close terminal")]
+    Close { err: std::io::Error, id: String },
+}
+
+impl From<TerminalError> for ErrorDto {
+    fn from(value: TerminalError) -> Self {
+        Self {
+            message: format!("{:?}", value),
+        }
+    }
 }
 
 impl From<ProjectError> for ErrorDto {

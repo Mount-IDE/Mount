@@ -10,8 +10,8 @@ type Props = {
     bottom?: IAsideButton[],
     max_top: number|null
     max_bot: number|null
-    set_top?: (elem: (elem:ReactElement | null)=>ReactElement|null) => void
-    set_bot?: (elem: (elem:ReactElement | null)=>ReactElement|null) => void
+    set_top?: (elem: (props?: { active?: boolean }) => ReactElement | null) => void
+    set_bot?: (elem: (props?: { active?: boolean }) => ReactElement | null) => void
     is_left: boolean
     top_button: (el: IAsideButton|null)=>void
     bot_button?: (el: IAsideButton|null)=>void
@@ -60,15 +60,17 @@ function MiniAside(props: Props) {
     }
     async function toggleBottom(el:IAsideButton, val: boolean) {
         if (val) {
-            props.bot_button!(null);
+            if (el.component_type === "Light") {
+                props.bot_button!(null);
+                props.set_bot!(() => null)
+            }
             setCurrentBot(null)
             toggle_bot_visibility!(_ => false)
-            props.set_bot!(()=>null)
         } else {
             props.bot_button!(el)
             setCurrentBot(el.id)
             toggle_bot_visibility!(_ => true)
-            props.set_bot!(el.component)
+            if (el.component_type === "Light") props.set_bot!(el.component)
         }
     }
 

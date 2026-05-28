@@ -43,6 +43,8 @@ function App() {
             if (cache.templates.length > 0) {
                 cacheStore.getState().set_current_template(cache.templates[0])
             }
+
+            cacheStore.getState().set_shells(cache.shells);
         } catch (e) {
             console.warn(e)
         }

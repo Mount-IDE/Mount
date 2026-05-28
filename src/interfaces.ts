@@ -1,3 +1,5 @@
+//import {RefObject} from "react";
+
 interface IRecentProject {
     name: string,
     path: string
@@ -127,17 +129,21 @@ interface IAsideButton {
     alt: string
     keys: string
     icon: string
-    component: ()=> React.ReactElement
+    widget: string
+    component_type: "Light" | "Heavy"
+    component: (props?: { active?: boolean }) => React.ReactElement
 
 }
 
 interface IAsideButtonExtended {
     pos: string
+    widget: string
     order: number
     alt: string
     keys: string
     icon: string
-    component: ()=> React.ReactElement
+    component_type?: "Light" | "Heavy"
+    component?: () => React.ReactElement
 
 }
 
@@ -223,5 +229,6 @@ interface Cache {
     os: string,
     file_icons: FsConfigIcons[],
     file_templates: configFsTemplate[]
+    shells: string[]
 
 }

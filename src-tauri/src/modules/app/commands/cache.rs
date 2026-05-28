@@ -10,6 +10,7 @@ use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use base64::engine::general_purpose;
 use base64::Engine;
+use which::which;
 
 #[tauri::command]
 pub fn read_packages() -> Result<Vec<ProjectPackage>, ErrorDto> {
@@ -84,6 +85,21 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     }
     let icons = get_fs_ext_icons()?;
     let f_templates = get_file_templates()?;
+
+    let shells = settings.run.shells;
+
+    let exists = |e: String| {
+        if cfg!(target_os = "windows") && e == "bash".to_string() {
+            return false;
+        }
+        which(e).is_ok()
+    };
+    let shells = shells
+        .iter()
+        .filter(|e| exists(e.to_string().clone()))
+        .map(|e| e.to_string())
+        .collect::<Vec<String>>();
+
     let res = Cache {
         templates,
         packages,
@@ -93,6 +109,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
         projects_dir,
         file_icons: icons,
         file_templates: f_templates,
+        shells,
     };
     Ok(res)
 }

@@ -7,8 +7,8 @@ import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
-import FsAside from "../../aside-widgets/FsAside.tsx";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
+import {mapProjectButton} from "../../../utils/project-buttons.tsx";
 // import {invoke} from "@tauri-apps/api/core";
 
 export default function CreateProject() {
@@ -31,28 +31,13 @@ export default function CreateProject() {
                 let right_top = buttons.filter(el => el.pos == "RightTop")
 
                 let left_top_2 =
-                    left_top.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <FsAside></FsAside>,
-                        icon: el.icon, keys: el.keys
-                    }));
+                    left_top.map<IAsideButton>(mapProjectButton);
 
                 let left_bot_2 =
-                    left_bot.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <></>,
-                        icon: el.icon, keys: el.keys
-                    }));
+                    left_bot.map<IAsideButton>(mapProjectButton);
 
                 let right_top_2 =
-                    right_top.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <></>,
-                        icon: el.icon, keys: el.keys
-                    }));
+                    right_top.map<IAsideButton>(mapProjectButton);
                 asideButtonsStore.getState().load_left(left_top_2);
                 asideButtonsStore.getState().load_bottom(left_bot_2);
                 asideButtonsStore.getState().load_right(right_top_2);

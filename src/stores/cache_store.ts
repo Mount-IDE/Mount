@@ -10,6 +10,8 @@ interface Type {
     os: string,
     set_os: (val:string)=>void,
 
+    shells: string[]
+    set_shells: (shells: string[]) => void
     add_template_to_cache: (t: ITemplate) => void
     add_templates_to_cache: (t: ITemplate[]) => void
     add_package_to_cache: (t: IPackage) => void
@@ -109,7 +111,9 @@ export const cacheStore = create<Type>((set, _) => ({
         set({
             file_templates: temp
         })
-    }
+    }, set_shells(shells: string[]): void {
+        set({shells: shells})
+    }, shells: []
 
 
 }))

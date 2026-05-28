@@ -7,6 +7,7 @@ use super::contexts::filesystem::app::services::{
 };
 use crate::modules::contexts::project::app::services::ProjectService;
 use crate::modules::contexts::settings::domain::entities::Settings;
+use crate::modules::contexts::terminal::app::services::TerminalService;
 use crate::modules::services::config::{ConfigRecoveryService, ConfigService};
 use std::sync::OnceLock;
 use tauri::AppHandle;
@@ -21,3 +22,5 @@ pub const CONFIG_RECOVERY_SERVICE: ConfigRecoveryService = ConfigRecoveryService
 pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
 pub static SETTINGS: OnceLock<Settings> = OnceLock::new();
+
+pub static TERMINAL_SERVICE: TerminalService = TerminalService;

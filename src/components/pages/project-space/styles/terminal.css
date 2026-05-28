@@ -1,0 +1,172 @@
+@import "@xterm/xterm/css/xterm.css";
+
+#terminal-page {
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /*background: var(--bg2);*/
+}
+
+#terminal-tabs {
+    height: 32px;
+    width: 100%;
+    /*flex: 0 0 32px;*/
+    display: flex;
+    /*align-items: stretch;*/
+    border-bottom: 1px solid var(--border3);
+    background: var(--bg2);
+}
+
+#terminal-other {
+    height: 100%;
+    /*flex: 1;*/
+    display: flex;
+    background: var(--bg2);
+    align-items: center;
+}
+
+.terminal-tab {
+    min-width: 120px;
+    max-width: 220px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 8px 0 12px;
+    border: 0;
+    border-right: 1px solid var(--border3);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+
+    & img {
+        display: block;
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+    }
+}
+
+.terminal-tab-active {
+    background: #101112;
+    color: #f4f4f5;
+}
+
+.terminal-tab span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.terminal-tab-close {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    color: var(--text2);
+}
+
+.terminal-tab-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+#terminal-label {
+    margin: 0 15px;
+    height: 100%;
+    color: var(--title);
+    display: flex;
+    align-items: center;
+}
+
+#terminal-add {
+    height: 100%;
+    display: flex;
+    border-right: 1px solid var(--border3);
+
+
+    & select {
+        background: transparent;
+        color: var(--subtitle);
+        border: none;
+        outline: none;
+    }
+
+    & option {
+        background: transparent;
+    }
+}
+
+#terminal-new {
+    width: 34px;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        display: block;
+        width: 80%;
+        height: 80%;
+        object-fit: contain;
+    }
+}
+
+
+#terminal-new:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#terminal-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.terminal-proc {
+    position: absolute;
+    inset: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    background: transparent;
+    overflow: hidden;
+}
+
+.terminal-proc-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.terminal-proc-fit {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.terminal-proc .xterm {
+    width: 100%;
+    height: 100%;
+}
+
+.terminal-proc .xterm-viewport {
+    background: transparent !important;
+}

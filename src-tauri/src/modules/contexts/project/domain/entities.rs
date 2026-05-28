@@ -70,10 +70,19 @@ pub struct OpenedFile {
 pub struct Button {
     pub pos: ButtonPos,
     pub widget: String,
+    #[serde(default)]
+    pub component_type: ButtonComponentType,
     pub order: u8,
     pub alt: String,
     pub keys: String,
     pub icon: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, TS)]
+pub enum ButtonComponentType {
+    #[default]
+    Light,
+    Heavy,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]

@@ -10,6 +10,7 @@ pub struct Settings {
     pub version: String,
     pub general: GeneralSettings,
     pub appearance: Appearance,
+    pub run: Run,
 }
 
 impl Settings {
@@ -19,6 +20,26 @@ impl Settings {
             version: String::from("1.0.0"),
             general: GeneralSettings::new(),
             appearance: Appearance::new(),
+            run: Run::default(),
+        }
+    }
+}
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
+pub struct Run {
+    pub shells: Vec<String>,
+}
+
+impl Default for Run {
+    fn default() -> Self {
+        Self {
+            shells: vec![
+                "bash".to_string(),
+                "sh".to_string(),
+                "zsh".to_string(),
+                "ksh".to_string(),
+                "cmd".to_string(),
+                "powershell".to_string(),
+            ],
         }
     }
 }

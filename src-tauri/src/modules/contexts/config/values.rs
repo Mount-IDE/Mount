@@ -33,4 +33,5 @@ pub struct Cache {
     pub os: String,
     pub file_templates: Vec<ConfigFsTemplate>,
     pub file_icons: Vec<FsConfigIcons>,
+    pub shells: Vec<String>,
 }

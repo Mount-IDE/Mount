@@ -68,32 +68,32 @@ export const asideButtonsStore= create<Type>((set, get)=>({
         set({right_buttons: [...buttons]})
     },
     load_bottom(bt: IAsideButton[]): void {
-        set(prev=>{
-            let buttons = prev.bottom_buttons
-            bt.forEach(el=>buttons.push(el));
+        set(() => {
+            let buttons = [...bt]
             buttons.sort((a,b)=>a.id-b.id)
             return {
-                bottom_buttons: [...buttons]
+                bottom_buttons: buttons,
+                current_bottom: null
             }
         })
     },
     load_left(bt: IAsideButton[]): void {
-        set(prev=>{
-            let buttons = prev.left_buttons
-            bt.forEach(el=>buttons.push(el));
+        set(() => {
+            let buttons = [...bt]
             buttons.sort((a,b)=>a.id-b.id)
             return {
-                left_buttons: [...buttons]
+                left_buttons: buttons,
+                current_left: null
             }
         })
     },
     load_right(bt: IAsideButton[]): void {
-        set(prev=>{
-            let buttons = prev.right_buttons
-            bt.forEach(el=>buttons.push(el));
+        set(() => {
+            let buttons = [...bt]
             buttons.sort((a,b)=>a.id-b.id)
             return {
-                right_buttons: [...buttons]
+                right_buttons: buttons,
+                current_right: null
             }
         })
     },

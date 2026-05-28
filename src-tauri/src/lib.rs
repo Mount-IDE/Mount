@@ -3,14 +3,18 @@ use crate::modules::app::commands::cache::*;
 use crate::modules::app::commands::config::*;
 use crate::modules::app::commands::fs::*;
 use crate::modules::app::commands::project::*;
+use crate::modules::app::commands::terminal::*;
 use crate::modules::app::commands::utils::*;
 use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS};
 use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
+
+use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tauri::generate_handler;
+
 mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
@@ -60,9 +64,14 @@ pub fn run() {
             remove_file,
             remove_dir,
             rename_file,
-            get_cache
+            get_cache,
+            open_terminal,
+            write_terminal,
+            resize_terminal,
+            close_terminal
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
+        .manage(Arc::new(Mutex::new(TerminalManager::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
