@@ -1,4 +1,4 @@
-![](./public/logo.svg)
+![](public/icon.svg)
 
 # Mount
 An open source Integrated Development Environment
@@ -29,7 +29,7 @@ npm i
 3. Compile project
 ```bash
 # dev 
-npm run dev
+npm run tauri
 # release
 npm run tauri:release
 ```

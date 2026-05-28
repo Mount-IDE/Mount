@@ -1,7 +1,7 @@
 import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
-import logo from "../../../assets/logo.svg"
+import logo from "../../../assets/icon.svg"
 import {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
