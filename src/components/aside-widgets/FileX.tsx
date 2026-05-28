@@ -11,7 +11,11 @@ type Props = {
     parent_path: string
 }
 
-
+/**
+ * file component that is used in project hierarchy tree
+ * @param props
+ * @constructor
+ */
 export default function FileX(props: Props) {
     const name = props.obj.name;
     const last_point = name.lastIndexOf(".");
@@ -29,6 +33,11 @@ export default function FileX(props: Props) {
     const current = codeSpaceStore(state => state.current)
     const check_in_cache = fileCacheStore(state => state.check)
 
+
+    /**
+     * Function that added file to cache and on tab of current space
+     * @async
+     */
     async function click() {
         const path = props.obj.path;
         const file: OpenedFile = {

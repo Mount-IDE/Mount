@@ -4,11 +4,22 @@ import arrow from "../../assets/arrow.svg"
 import React, {useRef, useState} from "react";
 import {fsExtStore} from "../../stores/fs_ext_store.ts";
 
+/**
+ * @type Props
+ * @param obj directory object
+ * @param onContext a function that calls when OnContext event was emitted
+ */
 type Props = {
    obj: FsDirectory
     onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile,is_file:boolean, path?:string, path_file?:string)=>void
+
 }
 
+/**
+ * A directory component that is used in project hierarchy tree
+ * @param props Props
+ * @constructor
+ */
 export default function DirectoryX(props: Props){
 
     const directories = props.obj.directories

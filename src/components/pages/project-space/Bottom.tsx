@@ -9,7 +9,7 @@ type Props = {
 }
 
 
-export default function Bottom(props: Props) {
+export default function Bottom(_: Props) {
 
     const state = asideStore(state=>state.bottom);
 

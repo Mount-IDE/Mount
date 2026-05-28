@@ -12,7 +12,7 @@ pub fn t_platform_def() -> String {
     if cfg!(target_os = "macos") {
         return "macos".to_string();
     }
-    return "!win".to_string();
+    "!win".to_string()
 }
 
 pub fn t_shell_def() -> String {

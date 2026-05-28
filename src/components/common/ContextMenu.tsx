@@ -11,13 +11,21 @@ export interface IContextMenuButton {
 
 
 type Props = {
-    buttons: IContextMenuButton[]
-    x: number;
-    y: number;
-    show: boolean;
-    ref?:RefObject<HTMLDivElement|null>
+    buttons: IContextMenuButton[] // array of buttons
+    x: number; // x cord of mouse click
+    y: number; // y cord of mouse click
+    show: boolean; // if true that component can be visible and hidden otherwise
+    ref?: RefObject<HTMLDivElement | null> // reference to manage the component
 }
 
+
+/**
+ * Component of Context menu
+ *
+ * receives an array of buttons and render it
+ * @param props
+ * @constructor
+ */
 export default function ContextMenu(props: Props) {
 
     return (
@@ -39,9 +47,15 @@ export default function ContextMenu(props: Props) {
 }
 
 type ButtonProps = {
-    obj: IContextMenuButton
+    obj: IContextMenuButton // object of button
 }
 
+
+/**
+ * Button of context menu
+ * @param props
+ * @constructor
+ */
 function ContextMenuButton(props: ButtonProps) {
     const {obj} = props;
     return (

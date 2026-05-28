@@ -11,6 +11,10 @@ import {ModalButton} from "../common/Modal.tsx";
 import {invoke} from "@tauri-apps/api/core"
 import {cacheStore} from "../../stores/cache_store.ts";
 
+/**
+ * Component of project-hierarchy tree
+ * @constructor
+ */
 export default function FsAside() {
 
     const tree = fsAsideTreeStore(state => state.tree);
@@ -70,8 +74,17 @@ export default function FsAside() {
     const open_modal = menuStore(state => state.open_modal)
 
     const close_modal = menuStore(state => state.close_modal)
-    // const remove_from_cache = fileCacheStore(state => state.remove);
 
+
+    /**
+     * @function open_context_menu
+     * function tha makes ContextMenu visible
+     * @param e event of mouse (needed for cords)
+     * @param obj entity object that was clicked on
+     * @param is_file a flag that indicates whether a click was made on the file
+     * @param path path to the folder where the entity is located
+     * @param path_file path to entity
+     */
     function open_context_menu(e: React.MouseEvent, obj: FsFile | FsDirectory, is_file: boolean, path?: string, path_file?: string) {
         e.preventDefault()
         const x = e.clientX;
@@ -163,6 +176,105 @@ export default function FsAside() {
                                     if (val !== undefined) {
                                         const os = cacheStore.getState().os;
                                         const sep = os!=="windows"?"/":"\\"
+                                        const path_ = `${path}${sep}${val}`
+                                        console.log("rename: ", obj.path, path_);
+                                        try {
+                                            invoke("rename_file", {from: obj.path, to: path_}).then();
+                                            close_modal();
+                                        } catch (e) {
+                                            console.error(e)
+                                        }
+                                    }
+                                },
+                                title: "Confirm",
+                                typ: "input"
+                            }
+                        ]
+                        open_modal({
+                            buttons: buttons,
+                            title: `Rename ${obj.name}?`,
+                            typ: "prompt",
+                            val: obj.name
+                        })
+                    },
+                    hotkeys: "",
+                    icon: "",
+                    title: "Rename"
+
+                }
+                ]
+            )
+        } else {
+            setButtons(
+                [
+                    {
+                        cb: () => open_window(),
+                        hotkeys: "",
+                        icon: "plus.svg",
+                        title: "New"
+                    },
+                    {
+                        cb: () => {
+                        },
+                        hotkeys: "Ctrl+X",
+                        icon: "cut.svg",
+                        title: "Cut"
+                    },
+                    {
+                        cb: () => {
+                        },
+                        hotkeys: "Ctrl+C",
+                        icon: "copy.svg",
+                        title: "Copy"
+                    }, {
+                    cb: () => {
+                    },
+                    hotkeys: "Ctrl+C",
+                    icon: "copy.svg",
+                    title: "Copy Path"
+                }, {
+                    cb: () => {
+                    },
+                    hotkeys: "Ctrl+C",
+                    icon: "copy.svg",
+                    title: "Paste"
+                }, {
+                    cb(): void {
+                        const buttons: ModalButton[] = [
+                            {
+                                cb: (_) => {
+                                    try {
+                                        invoke("remove_file", {path: obj.path}).then();
+                                        // remove_from_cache(obj.path);
+                                        close_modal()
+                                    } catch (e) {
+                                        console.error(e)
+                                    }
+                                },
+                                title: "Confirm",
+                                typ: "cancel"
+                            }
+                        ]
+                        open_modal({
+                            buttons: buttons,
+                            title: `Delete ${obj.name}?`,
+                            typ: "confirm",
+                        })
+
+                    },
+                    hotkeys: "",
+                    icon: "",
+                    title: "Delete"
+
+                }, {
+                    cb: () => {
+                        const buttons: ModalButton[] = [
+                            {
+                                cb: (val) => {
+                                    console.log("rename ready", val)
+                                    if (val !== undefined) {
+                                        const os = cacheStore.getState().os;
+                                        const sep = os !== "windows" ? "/" : "\\"
                                         const path_ = `${path}${sep}${val}`
                                         console.log("rename: ", obj.path, path_);
                                         try {
