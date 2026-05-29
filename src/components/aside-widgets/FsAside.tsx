@@ -38,7 +38,7 @@ export default function FsAside() {
 
     const [cursor, setCursor] = useState([0, 0])
     const [showContext, setShowContext] = useState(false)
-    const [contextTree, setContextTree] = useState<FsFile | FsDirectory | null>(null)
+    const [_, setContextTree] = useState<FsFile | FsDirectory | null>(null)
 
     const open_window = menuStore(state => state.open_file_create_menu)
 

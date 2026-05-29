@@ -12,6 +12,7 @@
     height: 20px;
     display: flex;
     position: relative;
+    cursor: pointer;
     &:hover{
         background: var(--border3);
         & p{
