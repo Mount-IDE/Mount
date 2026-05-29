@@ -32,6 +32,7 @@ export default function DirectoryX(props: Props){
 
     const path = `/builtin/fs-icons/${ico[1]}`
 
+
     return (
         <div
             className={"fs-dirx"}>

@@ -66,3 +66,32 @@ button{
   width: 100%;
   height: calc(100% - 30px)
 }
+
+*::-webkit-scrollbar {
+  background: transparent;
+  width: 5px;
+  height: 5px;
+
+}
+
+*::-webkit-scrollbar-corner {
+  width: 0;
+  height: 0;
+}
+
+
+*::-webkit-scrollbar-thumb:vertical {
+  background: var(--border2);
+  /*opacity: 0.4;*/
+  margin: 10px 0;
+  border-radius: 50px;
+  width: 3px;
+}
+
+*::-webkit-scrollbar-thumb:horizontal {
+  background: var(--border2);
+  /*opacity: 0.4;*/
+  margin: 10px 0;
+  border-radius: 50px;
+  height: 3px;
+}

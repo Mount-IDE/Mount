@@ -131,9 +131,16 @@
 .create-entity-field{
     width: 50%;
     margin-bottom: 20px;
-    background: #0B0B0B;
     padding-left: 10px;
+    transform-origin: 0 0;
+    animation: field 0.2s;
+
+    & p {
+        margin-bottom: 5px;
+        color: var(--border2);
+    }
     & input{
+        padding: 0 10px;
         height: 50px;
         width: 100%;
         background: #0B0B0B;
@@ -145,6 +152,7 @@
             color: var(--title)
         }
     } & textarea{
+          padding: 10px;
         min-height: 50px;
         width: 100%;
         background: #0B0B0B;
@@ -159,3 +167,13 @@
     }
 }
 
+
+@keyframes field {
+    from {
+        opacity: 0.5
+    }
+    to {
+        opacity: 1;
+        max-height: 100%;
+    }
+}

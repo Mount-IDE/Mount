@@ -2,6 +2,9 @@ use super::values::{FsIcon, FsType};
 use crate::modules::shared::kernel::values::Schema;
 use serde::{Deserialize, Serialize};
 
+///
+///
+///
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FsConfigIcons {
     theme: String,
@@ -9,7 +12,9 @@ pub struct FsConfigIcons {
     scheme: Schema,
 }
 
-
+///
+///
+///
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigFsTemplate {
     #[serde(default)]

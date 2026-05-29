@@ -28,6 +28,12 @@ impl Path {
     }
 }
 
+impl Default for Path {
+    fn default() -> Self {
+        Self("".to_string())
+    }
+}
+
 impl Display for Path {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.get())
@@ -36,6 +42,12 @@ impl Display for Path {
 
 #[derive(Deserialize, Serialize, Clone, Debug, TS)]
 pub struct Schema(pub u8);
+
+impl Default for Schema {
+    fn default() -> Self {
+        Self(1)
+    }
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
 #[serde(untagged)]

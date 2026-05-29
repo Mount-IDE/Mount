@@ -4,6 +4,8 @@
     display: flex;
     border-bottom: 1px solid var(--border2);
     gap: 20px;
+    padding-left: 10px;
+    overflow: auto;
 }
 
 .code-space-file {
@@ -25,8 +27,8 @@
 
         & img {
             display: block;
-            width: 80%;
-            height: 80%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
         }
     }

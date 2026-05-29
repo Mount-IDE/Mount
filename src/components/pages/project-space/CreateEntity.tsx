@@ -5,14 +5,18 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import {contextStore} from "../../../stores/context_store.ts";
 import {menuStore} from "../../../stores/menu_store.ts";
 
-
-type Props = {}
-
+/**
+ *
+ */
 type FieldValue = {
     [key: string]: string
 }
 
-export default function CreateEntity(_: Props) {
+/**
+ *
+ * @constructor
+ */
+export default function CreateEntity() {
     const templates = cacheStore(state => state.file_templates)
     const [current_template, setCurrentTemplate] = useState<number | null>(null)
 
@@ -39,6 +43,7 @@ export default function CreateEntity(_: Props) {
     }, [current]);
 
     async function create_fs() {
+        console.log(fields)
         if (current == null) {
             console.warn("0")
             return;
@@ -48,7 +53,7 @@ export default function CreateEntity(_: Props) {
             return;
         }
         const name = fields["name"];
-        const ext = fields["ext"];
+        const ext = fields["ext"] ?? "";
 
         try {
             const os = await invoke<string>("get_os");
@@ -77,16 +82,6 @@ export default function CreateEntity(_: Props) {
             close_window()
         }
     }
-
-
-    useEffect(() => {
-        console.log(current)
-    }, [current]);
-
-    useEffect(() => {
-        console.log("fields", fields, current)
-    }, [fields]);
-
 
     return (
         <>
@@ -119,15 +114,17 @@ export default function CreateEntity(_: Props) {
                                            copy["name"] = val;
                                            return copy
                                        })} placeholder={"Name"}/>
-
-                                <Field id={"ext"} val={fields["ext"] ?? ""} cb={(val: string) => setFields(prev => {
-                                    const copy = {...prev};
-                                    copy["ext"] = val;
-                                    return copy
-                                })} placeholder={"Extension"}/>
+                                {current.typ == "file" &&
+                                    <Field id={"ext"} val={fields["ext"] ?? ""} cb={(val: string) => setFields(prev => {
+                                        const copy = {...prev};
+                                        copy["ext"] = val;
+                                        return copy
+                                    })} placeholder={"Extension"}/>
+                                }
                                 {
-                                    current.default_content !== undefined &&
+                                    current.default_content !== undefined && current.default_content != null &&
                                     <Field area id={"content"} val={fields["content"]}
+                                           placeholder={"Content"}
                                            cb={(val: string) => setFields(prev => {
                                                const copy = {...prev}
                                                copy["content"] = val;
@@ -211,6 +208,12 @@ type FieldProps = {
     area?: boolean
 }
 
+
+/**
+ *
+ * @param props
+ * @constructor
+ */
 function Field(props: FieldProps) {
 
 
@@ -219,14 +222,12 @@ function Field(props: FieldProps) {
     useEffect(() => {
         const cur = ref.current;
         if (!cur) return;
-        cur.style.height=`${cur.scrollHeight}px`
+        cur.style.height = `${cur.scrollHeight + 50}px`
     }, [props.val, props.area]);
 
-    // useEffect(() => {
-    //     props.cb(props.val)
-    // }, []);
     return (
         <div className={"create-entity-field"}>
+            <p className={"create-entity-field-p"}>{props.placeholder}</p>
             {props.area &&
                 <textarea ref={ref} placeholder={props.placeholder} value={props.val}
                           onInput={(e) => props.cb(e.currentTarget.value)}/>

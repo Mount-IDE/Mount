@@ -8,21 +8,37 @@ use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Sc
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use super::default::workspace::*;
+
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct Project {
+    #[serde(default)]
     pub name: String,
-    pub(crate) path: Path,
+    #[serde(default)]
+    pub path: Path,
+    #[serde(default)]
     pub template: ProjectTemplate,
+    #[serde(default)]
     pub meta: ProjectMeta,
+    #[serde(default)]
     pub schema: Schema,
+    #[serde(default)]
     pub workspace: WorkSpace,
+    #[serde(default)]
     pub vars: Vec<Var>,
+    #[serde(default)]
     pub tasks: Vec<Task>,
     pub packages: Vec<String>,
 }
 
 impl Project {
+    ///
+    ///
+    ///
     pub fn new() -> Project {
         Self {
             name: String::new(),
@@ -38,6 +54,9 @@ impl Project {
     }
 }
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct WorkSpace {
     pub widgets: Vec<Widget>,
@@ -45,7 +64,22 @@ pub struct WorkSpace {
     pub opened_files: Vec<OpenedFile>,
 }
 
+impl Default for WorkSpace {
+    ///
+    ///
+    ///
+    fn default() -> Self {
+        Self {
+            widgets: Vec::new(),
+            buttons: buttons(),
+            opened_files: Vec::new(),
+        }
+    }
+}
 impl WorkSpace {
+    ///
+    ///
+    ///
     pub fn new() -> Self {
         Self {
             widgets: Vec::new(),
@@ -55,9 +89,15 @@ impl WorkSpace {
     }
 }
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Widget {}
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct OpenedFile {
     #[serde(default)]
@@ -66,6 +106,9 @@ pub struct OpenedFile {
     cursor: (u32, u32),
 }
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Button {
     pub pos: ButtonPos,
@@ -78,6 +121,9 @@ pub struct Button {
     pub icon: String,
 }
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, Default, TS)]
 pub enum ButtonComponentType {
     #[default]
@@ -85,9 +131,15 @@ pub enum ButtonComponentType {
     Heavy,
 }
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Task {}
 
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Var {
     #[serde(default)]
@@ -107,6 +159,10 @@ impl Var {
     }
 }
 
+///
+///
+///
+///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
 pub struct ProjectTemplate {
@@ -123,6 +179,18 @@ pub struct ProjectTemplate {
     pub packages_id: Vec<String>,
 }
 
+impl Default for ProjectTemplate {
+    fn default() -> Self {
+        Self {
+            id: "opie.empty".to_string(),
+            name: "Empty Project".to_string(),
+            schema: Schema(1),
+            meta: None,
+            startup: TemplateStartup::new(),
+            packages_id: vec![],
+        }
+    }
+}
 impl ProjectTemplate {
     pub fn new() -> Self {
         Self {

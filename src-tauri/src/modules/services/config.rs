@@ -242,7 +242,7 @@ fn get_files() -> Vec<_File> {
         _File::content(
             "templates.json".to_string(),
             "".to_string(),
-            "[]".to_string(),
+            serde_json::to_string(&Vec::<ProjectTemplate>::default().clone()).unwrap().to_string(),
         ),
         _File::content(
             "packages.json".to_string(),

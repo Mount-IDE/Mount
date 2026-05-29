@@ -18,9 +18,9 @@ type Props = {
  */
 export default function FileX(props: Props) {
     const name = props.obj.name;
-    const last_point = name.lastIndexOf(".");
-    const ext = name.slice(last_point);
-    const ico = fsExtStore.getState().get_file_by_ext(ext);
+    // const last_point = name.lastIndexOf(".");
+    // const ext = name.slice(last_point);
+    const ico = fsExtStore.getState().get_file_by_name(name);
     const path = `/builtin/fs-icons/${ico[1]}`
 
     const setCurrentFile = codeSpaceStore(state => state.select_current_file)

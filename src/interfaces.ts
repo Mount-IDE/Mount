@@ -186,7 +186,8 @@ interface FsFile {
 
 interface FsExtIcon{
     typ: string,
-    ext: string[],
+    ext: string[] | null,
+    name: string[] | null,
     icon: string
 }
 interface FsConfigIcons{
