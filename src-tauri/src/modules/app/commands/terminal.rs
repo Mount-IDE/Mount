@@ -3,19 +3,26 @@ use crate::modules::contexts::terminal::app::managers::SharedTerminalManager;
 use crate::modules::contexts::terminal::app::traits::TTerminalService;
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
-use tauri::State;
+use tauri::{State, WebviewWindow};
 
 #[tauri::command]
 pub async fn open_terminal(
-    id: Option<String>,
     shell: String,
     cwd: String,
     rows: u16,
     cols: u16,
+    window: WebviewWindow,
     state: State<'_, SharedTerminalManager>,
 ) -> Result<String, ErrorDto> {
     let id = TERMINAL_SERVICE
-        .open_terminal(id, shell, Path::new(&cwd), rows, cols, state)
+        .open_terminal(
+            window.label().to_string(),
+            shell,
+            Path::new(&cwd),
+            rows,
+            cols,
+            state,
+        )
         .await?;
 
     Ok(id)
@@ -52,6 +59,18 @@ pub async fn close_terminal(
     state: State<'_, SharedTerminalManager>,
 ) -> Result<(), ErrorDto> {
     TERMINAL_SERVICE.close_terminal(id, state).await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn close_window_terminals(
+    window: WebviewWindow,
+    state: State<'_, SharedTerminalManager>,
+) -> Result<(), ErrorDto> {
+    TERMINAL_SERVICE
+        .close_window_terminals(window.label().to_string(), state)
+        .await?;
 
     Ok(())
 }

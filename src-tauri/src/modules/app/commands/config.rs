@@ -51,19 +51,17 @@ pub fn get_fs_ext_icons() -> Result<Vec<FsConfigIcons>, ErrorDto> {
 }
 
 #[tauri::command]
-pub fn get_file_templates()->Result<Vec<ConfigFsTemplate>, ErrorDto> {
+pub fn get_file_templates() -> Result<Vec<ConfigFsTemplate>, ErrorDto> {
     CONFIG_SERVICE.get_file_templates().map_err(|e| e.into())
 }
 
 #[tauri::command]
-pub fn get_os()->String{
+pub fn get_os() -> String {
     if cfg!(target_os = "windows") {
         "windows".to_string()
-    }
-    else if cfg!(target_os = "macos") {
+    } else if cfg!(target_os = "macos") {
         "macos".to_string()
-    }
-    else {
+    } else {
         "linux".to_string()
     }
 }

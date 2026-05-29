@@ -18,7 +18,7 @@
 }
 .create-project-tag{
     flex-shrink: 0;
-    animation: tag 0.5s;
+    animation: tag 0.2s;
     display: flex;
     width: 8vw;
     height: 70%;
@@ -26,11 +26,11 @@
     padding-left: 10px;
     align-items: center;
     justify-content: center;
-    background: #c63838;
+    background: #cb693c;
     border-radius: 10px;
     overflow: hidden;
     &> input{
-        color: var(--subtitle);
+        color: var(--title);
         width: 60%;
         background: transparent;
         border: 0;

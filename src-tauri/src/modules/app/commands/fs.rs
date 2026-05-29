@@ -1,11 +1,13 @@
 use crate::modules::app::{FS_READ_SERVICE, FS_WATCH_SERVICE, FS_WRITE_SERVICE};
 use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
-use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService, TFWatchService};
+use crate::modules::contexts::filesystem::app::traits::{
+    TFSReadService, TFSWriteService, TFWatchService,
+};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
+use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use tauri::{State, WebviewWindow};
-use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 
 #[tauri::command]
 pub fn read_dir_rec(cwd: String) -> Result<PDirectory, ErrorDto> {
@@ -46,7 +48,6 @@ pub fn unwatch_project(
     Ok(())
 }
 
-
 #[tauri::command]
 pub fn create_file(path: String, content: Option<String>) -> Result<(), ErrorDto> {
     let path = Path::new(&path);
@@ -66,17 +67,15 @@ pub fn create_dir(path: String) -> Result<(), ErrorDto> {
     Ok(())
 }
 
-
 #[tauri::command]
-pub fn write_file(path:String, content:String)->Result<(), ErrorDto>{
+pub fn write_file(path: String, content: String) -> Result<(), ErrorDto> {
     let file = PFile::from_path_reg(Path(path));
     FS_WRITE_SERVICE.write_file(&file, content, FileWriteAccess::WRITE)?;
     Ok(())
 }
 
-
 #[tauri::command]
-pub fn remove_file(path: String)->Result<(), ErrorDto>{
+pub fn remove_file(path: String) -> Result<(), ErrorDto> {
     let path = Path::new(&path);
     let file = PFile::from_path_reg(path);
     FS_WRITE_SERVICE.remove_file(&file)?;
@@ -84,7 +83,7 @@ pub fn remove_file(path: String)->Result<(), ErrorDto>{
 }
 
 #[tauri::command]
-pub fn remove_dir(path: String)->Result<(), ErrorDto>{
+pub fn remove_dir(path: String) -> Result<(), ErrorDto> {
     let path = Path::new(&path);
     let dir = PDirectory::from_path(&path);
     FS_WRITE_SERVICE.remove_dir(&dir)?;
@@ -92,7 +91,7 @@ pub fn remove_dir(path: String)->Result<(), ErrorDto>{
 }
 
 #[tauri::command]
-pub fn rename_file(from: String, to: String)->Result<(), ErrorDto> {
+pub fn rename_file(from: String, to: String) -> Result<(), ErrorDto> {
     let file1 = PFile::from_path_reg(Path(from));
     let file2 = PFile::from_path_reg(Path(to));
     FS_WRITE_SERVICE.rename_file(&file1, &file2)?;

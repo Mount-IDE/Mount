@@ -55,7 +55,7 @@ pub struct TerminalService;
 impl TTerminalService for TerminalService {
     async fn open_terminal(
         &self,
-        id: Option<String>,
+        window_id: String,
         shell: String,
         cwd: Path,
         rows: u16,
@@ -70,11 +70,12 @@ impl TTerminalService for TerminalService {
             .clone();
 
         let shell = normalize_shell(shell);
-        let id = id.unwrap_or_else(|| Uuid::new_v4().to_string());
+        let id = Uuid::new_v4().to_string();
         let cwd_str = cwd.get().to_string();
 
         let shell_for_spawn = shell.clone();
         let cwd_for_spawn = cwd_str.clone();
+        let window_id_for_session = window_id.clone();
 
         let (session, mut reader) = tauri::async_runtime::spawn_blocking(move || {
             let pty_system = native_pty_system();
@@ -111,6 +112,7 @@ impl TTerminalService for TerminalService {
                 })?;
 
             let session = TerminalSession {
+                window_id: window_id_for_session,
                 master: Arc::new(Mutex::new(pair.master)),
                 writer: Arc::new(Mutex::new(writer)),
                 child: Arc::new(Mutex::new(child)),
@@ -226,6 +228,23 @@ impl TTerminalService for TerminalService {
         };
 
         if let Some(session) = session {
+            session.join();
+        }
+
+        Ok(())
+    }
+
+    async fn close_window_terminals(
+        &self,
+        window_id: String,
+        state: State<'_, SharedTerminalManager>,
+    ) -> Result<(), TerminalError> {
+        let sessions = {
+            let mut manager = state.lock().unwrap();
+            manager.remove_window_terminals(&window_id)
+        };
+
+        for session in sessions {
             session.join();
         }
 

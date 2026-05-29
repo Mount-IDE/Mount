@@ -79,91 +79,31 @@
 }
 
 #main-page-groups-list {
-    /*width: 100%;*/
     height: 100%;
     display: flex;
     background: transparent;
-    /*overflow-x: scroll;*/
-    /*overflow-y: hidden;*/
 
-    /*&::-webkit-scrollbar {*/
-    /*    width: 0;*/
-    /*    height: 0;*/
-    /*}*/
 }
 
 .main-page-group {
     flex-shrink: 0;
-    width: 6vw;
+    /*width: 6vw;*/
     height: 100%;
     background: transparent;
     display: flex;
-    /*flex-direction: column;*/
     align-items: center;
     justify-content: center;
     transition: color 0.2s;
     overflow-x: scroll;
-
+    font: 10pt "JetBrains Mono Light";
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
     }
 
-    &:hover {
-        & input {
-            color: var(--title);
-        }
-    }
-
-    & input {
-        width: 70%;
-        height: 100%;
-        background: transparent;
-        border: none;
-        outline: none;
-        font: 10pt "JetBrains Mono Light";
-        color: var(--subtitle);
-    }
-
-    & button {
-        height: 70%;
-        aspect-ratio: 1/1;
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        & img {
-            display: block;
-            width: 30%;
-            height: 30%;
-            object-fit: contain;
-        }
-    }
 
 }
 
-#main-page-add-group {
-    height: 100%;
-    aspect-ratio: 1/1;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    & img {
-        display: block;
-        width: 40%;
-        height: 40%;
-        object-fit: contain;
-    }
-
-    &:hover {
-        filter: brightness(2);
-    }
-}
 
 #main-page-projects {
     width: 100%;

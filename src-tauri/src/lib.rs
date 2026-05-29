@@ -13,7 +13,7 @@ use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
-use tauri::generate_handler;
+use tauri::{generate_handler, Manager, WindowEvent};
 
 mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -34,6 +34,22 @@ pub fn run() {
             let settings = CONFIG_SERVICE.read_settings()?;
             SETTINGS.set(settings).expect("Unable to sert settings");
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if matches!(
+                event,
+                WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed
+            ) {
+                let state = window.state::<Arc<Mutex<TerminalManager>>>();
+                let sessions = {
+                    let mut manager = state.lock().unwrap();
+                    manager.remove_window_terminals(window.label())
+                };
+
+                for session in sessions {
+                    session.join();
+                }
+            }
         })
         .invoke_handler(generate_handler![
             show_win,
@@ -68,7 +84,8 @@ pub fn run() {
             open_terminal,
             write_terminal,
             resize_terminal,
-            close_terminal
+            close_terminal,
+            close_window_terminals
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

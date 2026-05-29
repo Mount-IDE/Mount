@@ -12,13 +12,9 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 
 type TerminalOutput = { id: string; data: string };
 type TerminalExit = { id: string };
-type TerminalTab = { id: string; title: string; exited: boolean; shell: string };
+type TerminalTab = { key: string; id: string | null; title: string; exited: boolean; shell: string };
 
 type Props = { active?: boolean };
-
-function makeTerminalId() {
-    return `terminal-${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-}
 
 
 /**
@@ -29,7 +25,7 @@ function makeTerminalId() {
 export default function Terminal(props: Props) {
     const cwd = projectStore((state) => state.path_to_current_project);
     const [tabs, setTabs] = useState<TerminalTab[]>([]);
-    const [activeId, setActiveId] = useState<string | null>(null);
+    const [activeKey, setActiveKey] = useState<string | null>(null);
     const nextIndex = useRef(1);
 
     const shells = cacheStore((state) => state.shells);
@@ -37,27 +33,35 @@ export default function Terminal(props: Props) {
 
     const createTerminal = useCallback(() => {
         const index = nextIndex.current++;
-        const id = makeTerminalId();
+        const key = `terminal-tab-${index}`;
         const shell = currentShell ?? shells[0] ?? "cmd";
-        const tab: TerminalTab = {id, title: `terminal ${index}`, exited: false, shell};
+        const tab: TerminalTab = {key, id: null, title: `terminal ${index}`, exited: false, shell};
         setTabs((prev) => [...prev, tab]);
-        setActiveId(id);
+        setActiveKey(key);
     }, [currentShell, shells]);
 
     useEffect(() => {
         if (props.active && tabs.length === 0) createTerminal();
     }, [props.active, tabs.length, createTerminal]);
 
-    const closeTerminal = useCallback((id: string) => {
-        const next = tabs.filter((tab) => tab.id !== id);
+    const closeTerminal = useCallback((key: string) => {
+        const next = tabs.filter((tab) => tab.key !== key);
         setTabs(next);
-        if (activeId === id) setActiveId(next.length > 0 ? next[next.length - 1].id : null);
-    }, [activeId, tabs]);
+        if (activeKey === key) setActiveKey(next.length > 0 ? next[next.length - 1].key : null);
+    }, [activeKey, tabs]);
 
-    const markExited = useCallback((id: string) => {
+    const markExited = useCallback((key: string) => {
         setTabs((prev) =>
             prev.map((tab) =>
-                tab.id === id ? {...tab, exited: true, title: `${tab.title} exited`} : tab
+                tab.key === key ? {...tab, exited: true, title: `${tab.title} exited`} : tab
+            )
+        );
+    }, []);
+
+    const setBackendId = useCallback((key: string, id: string) => {
+        setTabs((prev) =>
+            prev.map((tab) =>
+                tab.key === key ? {...tab, id} : tab
             )
         );
     }, []);
@@ -69,16 +73,16 @@ export default function Terminal(props: Props) {
                 <div id="terminal-other">
                     {tabs.map((tab) => (
                         <button
-                            key={tab.id}
-                            className={tab.id === activeId ? "terminal-tab terminal-tab-active" : "terminal-tab"}
-                            onClick={() => setActiveId(tab.id)}
+                            key={tab.key}
+                            className={tab.key === activeKey ? "terminal-tab terminal-tab-active" : "terminal-tab"}
+                            onClick={() => setActiveKey(tab.key)}
                         >
                             <span>{tab.title}</span>
                             <span
                                 className="terminal-tab-close"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    closeTerminal(tab.id);
+                                    closeTerminal(tab.key);
                                 }}
                             >
                 <img src={cross}/>
@@ -106,12 +110,13 @@ export default function Terminal(props: Props) {
             <div id="terminal-body">
                 {tabs.map((tab) => (
                     <TerminalProc
-                        key={tab.id}
-                        id={tab.id}
+                        key={tab.key}
+                        tabKey={tab.key}
                         shell={tab.shell}
                         cwd={cwd || "."}
-                        active={Boolean(props.active) && tab.id === activeId}
+                        active={Boolean(props.active) && tab.key === activeKey}
                         onExit={markExited}
+                        onReady={setBackendId}
                     />
                 ))}
             </div>
@@ -120,24 +125,26 @@ export default function Terminal(props: Props) {
 }
 
 type TermProps = {
-    id: string;
+    tabKey: string;
     cwd: string;
     active: boolean;
     shell: string;
-    onExit: (id: string) => void;
+    onExit: (key: string) => void;
+    onReady: (key: string, id: string) => void;
 };
 
 
 /**
  *
- * @param id
+ * @param tabKey
  * @param cwd
  * @param active
  * @param shell
  * @param onExit
+ * @param onReady
  * @constructor
  */
-function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
+function TerminalProc({tabKey, cwd, active, shell, onExit, onReady}: TermProps) {
     const ref = useRef<HTMLDivElement>(null);
     const termRef = useRef<XTerm | null>(null);
     const readyRef = useRef(false);
@@ -152,8 +159,7 @@ function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
 
         disposedRef.current = false;
         readyRef.current = false;
-        const backendId = `${id}-${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`}`;
-        backendIdRef.current = backendId;
+        backendIdRef.current = null;
 
         const term = new XTerm({
             allowTransparency: true,
@@ -183,7 +189,8 @@ function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
                 return;
             }
             lastSizeRef.current = {cols: term.cols, rows: term.rows};
-            if (readyRef.current) {
+            if (readyRef.current && backendIdRef.current) {
+                const backendId = backendIdRef.current;
                 void invoke("resize_terminal", {id: backendId, rows: term.rows, cols: term.cols});
             }
         };
@@ -194,7 +201,8 @@ function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
         resizeObserver.observe(element);
 
         term.onData((data) => {
-            if (!readyRef.current) return;
+            const backendId = backendIdRef.current;
+            if (!readyRef.current || !backendId) return;
             void invoke("write_terminal", {id: backendId, data});
         });
 
@@ -222,26 +230,27 @@ function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
         listen<TerminalExit>("terminal-exit", (e) => {
             if (e.payload.id === backendIdRef.current) {
                 readyRef.current = false;
-                onExit(id);
+                onExit(tabKey);
                 term.writeln("\r\n[process exited]");
-                void invoke("close_terminal", {id: backendId});
+                void invoke("close_terminal", {id: e.payload.id});
             }
         }).then((unlisten) => {
             exitUnlisten = unlisten;
         });
 
         invoke<string>("open_terminal", {
-            id: backendId,
             shell,
             cwd,
             rows: lastSizeRef.current.rows,
             cols: lastSizeRef.current.cols,
         })
-            .then(() => {
+            .then((backendId) => {
+                backendIdRef.current = backendId;
                 if (disposedRef.current) {
                     void invoke("close_terminal", {id: backendId});
                     return;
                 }
+                onReady(tabKey, backendId);
                 readyRef.current = true;
                 fitAndResize();
                 term.focus();
@@ -255,11 +264,13 @@ function TerminalProc({id, cwd, active, shell, onExit}: TermProps) {
             resizeObserver.disconnect();
             outputUnlisten?.();
             exitUnlisten?.();
-            void invoke("close_terminal", {id: backendId});
+            if (backendIdRef.current) {
+                void invoke("close_terminal", {id: backendIdRef.current});
+            }
             termRef.current = null;
             fitAddonRef.current = null;
         };
-    }, [id, cwd, shell, onExit]);
+    }, [tabKey, cwd, shell, onExit, onReady]);
 
     useEffect(() => {
         if (!active) return;

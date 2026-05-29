@@ -41,9 +41,6 @@ export default function CreateProject() {
                 asideButtonsStore.getState().load_left(left_top_2);
                 asideButtonsStore.getState().load_bottom(left_bot_2);
                 asideButtonsStore.getState().load_right(right_top_2);
-
-
-
             }
         }
     }

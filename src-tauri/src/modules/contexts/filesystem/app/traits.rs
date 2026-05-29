@@ -28,8 +28,8 @@ pub trait TFSWriteService {
         access: FileWriteAccess,
     ) -> Result<(), FileSystemError>;
 
-    fn rename_file(&self, from:&PFile, to:&PFile) -> Result<(), FileSystemError>;
-    fn rename_dir(&self, from:&PDirectory, to:&PDirectory) -> Result<(), FileSystemError>;
+    fn rename_file(&self, from: &PFile, to: &PFile) -> Result<(), FileSystemError>;
+    fn rename_dir(&self, from: &PDirectory, to: &PDirectory) -> Result<(), FileSystemError>;
 }
 
 pub trait TFSManageService {

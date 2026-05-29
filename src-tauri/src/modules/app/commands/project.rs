@@ -29,10 +29,10 @@ pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
     let ext = FS_READ_SERVICE.exist_file(&file);
     if !ext {
         let _ = CONFIG_RECOVERY_SERVICE.check_data_dir()?;
-        println!("get second");
+        // println!("get second");
     }
     let recent = PROJECT_SERVICE.get_recent_projects()?;
-    println!("GET_RECENT_OK");
+    // println!("GET_RECENT_OK");
     Ok(recent)
 }
 #[tauri::command]
@@ -63,7 +63,7 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
             res.push(json);
         }
     }
-    println!("READ_RECENT_OK");
+    // println!("READ_RECENT_OK");
     Ok(res)
 }
 
@@ -96,7 +96,7 @@ pub fn create_project(
         Val::STRING(val) => val.clone(),
         _ => return Err(ProjectError::PathNotFound.into()),
     };
-    println!("{}::{}", name, path);
+    // println!("{}::{}", name, path);
 
     let path_ = make_path(vec![path.as_str(), name.as_str()]);
     let ext = FS_READ_SERVICE.exists(path_.clone());
@@ -185,6 +185,6 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
 
 #[tauri::command]
 pub fn read_project(path: Path) -> Result<Project, ErrorDto> {
-    println!("path command {}", path.clone());
+    // println!("path command {}", path.clone());
     PROJECT_SERVICE.open_project(&path).map_err(|e| e.into())
 }

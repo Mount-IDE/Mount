@@ -1,0 +1,158 @@
+.menu-bar-section {
+    margin-left: 10px;
+    position: relative;
+    height: 100%;
+}
+
+.menu-bar-section-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+
+}
+
+.menu-bar-section-logo {
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        display: block;
+        width: 50%;
+        height: 50%;
+        object-fit: contain;
+    }
+}
+
+.menu-bar-section-cover {
+    background: #fa8530;
+    border-radius: 5px;
+    height: 60%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & p {
+        color: var(--title);
+        font: 8pt "JetBrains Mono Light"
+    }
+}
+
+.menu-bar-section-p {
+    color: var(--title);
+    font: 8pt "JetBrains Mono Light";
+}
+
+.menu-bar-section-in {
+    position: absolute;
+    width: 200px;
+    overflow: auto;
+    background: var(--bg);
+    border: 1px solid var(--border3);
+    max-height: 40vh;
+}
+
+.menu-bar-section-search {
+    width: 100%;
+    height: 20px;
+    display: flex;
+    gap: 2%;
+
+    & .menu-bar-section-search-img {
+        height: 100%;
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & img {
+            display: block;
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+        }
+    }
+
+    & input {
+        flex: 1;
+        background: transparent;
+        color: var(--subtitle);
+        font: 9pt "JetBrains Mono Light";
+        border: none;
+        outline: none;
+    }
+}
+
+.menu-bar-section-buttons, .menu-bar-section-lists {
+    width: 100%;
+    padding: 5px;
+}
+
+.menu-bar-section-elem {
+    width: 100%;
+    display: flex;
+    height: 30px;
+    align-items: center;
+    background: transparent;
+    gap: 10px;
+
+    .menu-bar-section-elem-img {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        aspect-ratio: 1/1;
+
+        & img {
+            display: block;
+            object-fit: contain;
+            width: 70%;
+            height: 70%;
+        }
+    }
+
+    .menu-bar-section-elem-cover {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60%;
+        aspect-ratio: 1/1;
+        border-radius: 4px;
+        background: #eaab2a;
+
+        & p {
+            font: 10pt "JetBrains Mono Light";
+            color: var(--title);
+        }
+    }
+
+
+    & > p {
+        color: var(--subtitle);
+        font: 9pt "JetBrains Mono Light";
+
+    }
+}
+
+.menu-bar-section-list {
+    width: 100%;
+    margin-bottom: 5px;
+
+    & > p {
+        color: var(--border2);
+        font: 9pt "JetBrains Mono Light";
+        margin-bottom: 10px;
+    }
+}

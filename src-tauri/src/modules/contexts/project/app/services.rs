@@ -52,7 +52,7 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        println!("path open {}", project_path.clone());
+        // println!("path open {}", project_path.clone());
         let path = make_path(vec![
             project_path.clone().get().as_str(),
             ".mount",
@@ -63,7 +63,7 @@ impl TProjectService for ProjectService {
             path: path.clone(),
             typ: FileType::REGULAR,
         };
-        println!("path {path}");
+        // println!("path {path}");
         let json = FS_READ_SERVICE.read_file(&config)?;
         let proj =
             serde_json::from_str::<Project>(&json).map_err(|e| ProjectError::ParsingError {

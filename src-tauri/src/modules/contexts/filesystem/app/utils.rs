@@ -28,7 +28,7 @@ pub fn make_path_string(paths: Vec<&str>) -> String {
     } else {
         res = paths.join("/");
     }
-    println!("path end {}", res.clone());
+    // println!("path end {}", res.clone());
     res
 }
 

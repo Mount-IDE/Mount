@@ -8,7 +8,7 @@ use tauri::State;
 pub trait TTerminalService {
     async fn open_terminal(
         &self,
-        id: Option<String>,
+        window_id: String,
         shell: String,
         cwd: Path,
         rows: u16,
@@ -34,6 +34,12 @@ pub trait TTerminalService {
     async fn close_terminal(
         &self,
         id: String,
+        state: State<'_, SharedTerminalManager>,
+    ) -> Result<(), TerminalError>;
+
+    async fn close_window_terminals(
+        &self,
+        window_id: String,
         state: State<'_, SharedTerminalManager>,
     ) -> Result<(), TerminalError>;
 }

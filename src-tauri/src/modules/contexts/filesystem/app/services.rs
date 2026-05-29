@@ -14,7 +14,7 @@ use notify::event::{ModifyKind, RenameMode};
 use notify::{
     Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher,
 };
-use serde::{Serialize};
+use serde::Serialize;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path as std_path, PathBuf};
@@ -166,7 +166,7 @@ impl TFSWriteService for FileSystemWriteService {
             path: path.clone(),
             err: e,
         })?;
-        println!("file {}", path.get());
+        // println!("file {}", path.get());
 
         let splited = split_path(&path);
         let name = splited
@@ -243,25 +243,26 @@ impl TFSWriteService for FileSystemWriteService {
     }
 
     fn rename_file(&self, from: &PFile, to: &PFile) -> Result<(), FileSystemError> {
-        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e|
+        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e| {
             FileSystemError::Rename {
-                from: from.path.clone(), 
+                from: from.path.clone(),
                 to: to.path.clone(),
-                e
+                e,
             }
-        )?;
+        })?;
         Ok(())
     }
 
     fn rename_dir(&self, from: &PDirectory, to: &PDirectory) -> Result<(), FileSystemError> {
-        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e|
+        fs::rename(from.path.clone().get(), to.path.clone().get()).map_err(|e| {
             FileSystemError::Rename {
                 from: from.path.clone(),
                 to: to.path.clone(),
-                e
+                e,
             }
-        )?;
-        Ok(())    }
+        })?;
+        Ok(())
+    }
 }
 
 pub struct FileSystemWatchService();

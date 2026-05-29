@@ -10,7 +10,7 @@ type Props = {
     set: (val: string | boolean) => void,
     section: number,
     allParams: IParameter[]
-    is_main:boolean
+    is_main: boolean
 }
 
 export default function Parameter(props: Props) {
@@ -22,19 +22,19 @@ export default function Parameter(props: Props) {
 
 
     let key = "__meta__";
-    if (!props.is_main){
-        key = current_template? current_template.id : "__garbage__"
+    if (!props.is_main) {
+        key = current_template ? current_template.id : "__garbage__"
     }
 
     const dependencyValue = createProjectStore(state =>
-        current_template ? state.results[key]?.[section]?.[param.while_??""] : undefined
+        current_template ? state.results[key]?.[section]?.[param.while_ ?? ""] : undefined
     );
 
     const dependency = param.while_
         ? props.allParams.find(el => el.out == param.while_)
         : null;
 
-    const is_active=(() => {
+    const is_active = (() => {
         if (!param.while_) return null;
         if (!dependency) return null;
         if (dependencyValue === undefined) {
@@ -50,21 +50,15 @@ export default function Parameter(props: Props) {
     const show = typeof is_active == "boolean" ? is_active : true;
 
 
-
     const value = createProjectStore(
-            state =>
-                state.results[key]?.[section]?.[param.out]
-            );
+        state =>
+            state.results[key]?.[section]?.[param.out]
+    );
     const new_def = value !== undefined ? value : props.param.def;
 
     useEffect(() => {
-        props.set(props.param.def as string|boolean)
+        props.set(props.param.def as string | boolean)
     }, [props.param.def]);
-
-
-    // const _ = createProjectStore(state=>state.results)
-
-
 
     return (
         <div className={"project-parameter"}>

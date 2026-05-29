@@ -79,7 +79,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
         "linux"
     };
     let mut projects_dir = settings.general.path_to_projects;
-    println!("PROJECT DIR {projects_dir}");
+    // println!("PROJECT DIR {projects_dir}");
     if projects_dir.get().len() == 0 {
         projects_dir = CONFIG_SERVICE.get_projects_dir()?;
     }

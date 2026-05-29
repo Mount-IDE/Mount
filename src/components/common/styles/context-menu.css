@@ -1,9 +1,10 @@
 .context-menu{
     position: fixed;
     width: 200px;
-    background: var(--border2);
-    padding: 10px;
+    background: var(--bg);
+    padding: 5px;
     z-index: 20;
+    border: 1px solid vaR(--border2);
 }
 
 .context-menu-button{
@@ -12,6 +13,7 @@
     display: flex;
     position: relative;
     &:hover{
+        background: var(--border3);
         & p{
             color: var(--title)
         }
@@ -40,13 +42,13 @@
 .context-menu-button-p{
     position: absolute;
     top: 0;
-    left: 40px;
+    left: 20px;
     height: 20px;
     width: 50%;
     display: flex;
     align-items: center;
-    text-align: left;
-    justify-content: center;
+    text-align: start;
+    justify-content: start;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -57,7 +59,7 @@
 .context-menu-button-hotkey{
     position: absolute;
     top: 0;
-    left: 140px;
+    right: 0;
     height: 20px;
     width: 60px;
     display: flex;

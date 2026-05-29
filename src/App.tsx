@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
@@ -21,6 +21,7 @@ function App() {
 
     const current = pageStore(state => state.current);
     const createProjectOpened = createProjectStore(state => state.page_opened)
+    const [windowReady, setWindowReady] = useState(false);
 
     /**
      * Caching many data while app is opening
@@ -53,8 +54,28 @@ function App() {
     }
 
     useEffect(() => {
-        setTimeout(() => invoke("show_win").then(), 0)
-        move_to_cache().then();
+        let cancelled = false;
+
+        async function setupWindow() {
+            try {
+                await invoke("close_window_terminals");
+            } catch (e) {
+                console.error(e);
+            }
+
+            if (cancelled) return;
+
+            setWindowReady(true);
+            setTimeout(() => invoke("show_win").then(), 0);
+            move_to_cache().then();
+        }
+
+        setupWindow().then();
+
+        return () => {
+            cancelled = true;
+            invoke("close_window_terminals").catch((e) => console.error(e));
+        };
     }, [])
 
 
@@ -67,15 +88,15 @@ function App() {
             <TitleBar/>
             <div id={"main"}>
                 {
-                    createProjectOpened &&
+                    windowReady && createProjectOpened &&
                     <CreateProject/>
                 }
                 {
-                    current == Window.Main &&
+                    windowReady && current == Window.Main &&
                     <MainPage/>
                 }
                 {
-                    current == Window.Project &&
+                    windowReady && current == Window.Project &&
                     <ProjectSpace/>
                 }
             </div>

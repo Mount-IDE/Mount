@@ -1,8 +1,8 @@
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::shared::kernel::errors::ConfigError;
 use crate::modules::shared::kernel::values::Path;
-use crate::modules::contexts::config::entities::ConfigFsTemplate;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
     fn save_settings(&self, settings: &Settings) -> Result<(), ConfigError>;
@@ -18,7 +18,7 @@ pub trait TConfigService {
 
     fn get_settings(&self) -> Result<Settings, ConfigError>;
 
-    fn get_file_templates(&self)->Result<Vec<ConfigFsTemplate>, ConfigError>;
+    fn get_file_templates(&self) -> Result<Vec<ConfigFsTemplate>, ConfigError>;
 }
 
 pub trait TConfigRecoveryService {

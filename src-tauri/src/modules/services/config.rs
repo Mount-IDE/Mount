@@ -60,7 +60,7 @@ impl TConfigService for ConfigService {
         let file = FS_READ_SERVICE
             .read_file(&file_)
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
-        println!("read settings.json was gotten");
+        // println!("read settings.json was gotten");
         let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e| {
             ParsingError::Deserialize {
                 path: file_.path,
@@ -82,7 +82,7 @@ impl TConfigService for ConfigService {
             return Ok(settings_);
         }
         let settings = settings.unwrap();
-        println!("parsing settings.json was gotten");
+        // println!("parsing settings.json was gotten");
         Ok(settings)
     }
 
@@ -317,7 +317,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         let dir = CONFIG_SERVICE.get_data_dir()?;
         let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir));
         if !path_ {
-            println!("repair");
+            // println!("repair");
             let data = APP
                 .get()
                 .unwrap()

@@ -3,6 +3,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 pub struct TerminalSession {
+    pub window_id: String,
     pub master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
     pub writer: Arc<Mutex<Box<dyn Write + Send>>>,
     pub child: Arc<Mutex<Box<dyn Child + Send + Sync>>>,
@@ -11,7 +12,9 @@ pub struct TerminalSession {
 impl TerminalSession {
     pub fn join(&self) {
         if let Ok(mut child) = self.child.lock() {
-            let _ = child.kill();
+            if let Err(e) = child.kill() {
+                println!("kill error: {:?}", e);
+            }
             let _ = child.wait();
         }
 

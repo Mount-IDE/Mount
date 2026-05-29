@@ -118,6 +118,7 @@ export default function FsAside() {
                         title: "Copy"
                     }, {
                     cb: () => {
+                        navigator.clipboard.writeText(obj.path).then()
                     },
                     hotkeys: "Ctrl+C",
                     icon: "copy.svg",
@@ -228,6 +229,7 @@ export default function FsAside() {
                         title: "Copy"
                     }, {
                     cb: () => {
+                        navigator.clipboard.writeText(obj.path).then()
                     },
                     hotkeys: "Ctrl+C",
                     icon: "copy.svg",

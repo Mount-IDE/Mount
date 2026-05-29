@@ -2,21 +2,31 @@
     width: 100%;
     min-height: 3vh;
     margin-bottom: 2px;
+
+    &:hover {
+        & > .fs-aside-head > .fs-aside-name {
+            color: var(--title);
+        }
+    }
+
 }
 
 .fs-aside-head {
     display: flex;
     /*width: 100%;*/
     min-height: 3vh;
-    gap: 10px;
+    gap: 5px;
     position: relative;
     align-items: start;
     justify-content: start;
 
+    &:hover {
+        & > .fs-aside-name {
+            color: var(--title);
+        }
+    }
+
     & .fs-aside-icon {
-        /*position: absolute;*/
-        /*top: 5px;*/
-        /*left: 5px;*/
         height: 100%;
         aspect-ratio: 1/1;
         display: flex;
@@ -33,9 +43,7 @@
     }
 
     & .fs-aside-icon2 {
-        /*position: absolute;*/
-        /*top: 0;*/
-        /*left: 20px;*/
+
         height: 100%;
         aspect-ratio: 1/1;
         display: flex;
@@ -52,9 +60,7 @@
     }
 
     & .fs-aside-name {
-        /*position: absolute;*/
-        /*left: 45px;*/
-        /*top: 0;*/
+
         user-select: none;
         font: 9pt "JetBrains Mono Light";
         color: var(--subtitle);

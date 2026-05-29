@@ -8,6 +8,9 @@ interface Type {
     groups: string[],
     data_dir: string,
     os: string,
+    recent_projects: IRecentProject[]
+    set_recent_projects: (rec: IRecentProject[]) => void
+
     set_os: (val:string)=>void,
 
     shells: string[]
@@ -113,7 +116,12 @@ export const cacheStore = create<Type>((set, _) => ({
         })
     }, set_shells(shells: string[]): void {
         set({shells: shells})
-    }, shells: []
+    },
+    shells: [],
+    recent_projects: [],
+    set_recent_projects(rec: IRecentProject[]): void {
+        set({recent_projects: rec})
+    }
 
 
 }))

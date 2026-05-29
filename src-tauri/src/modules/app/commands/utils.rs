@@ -20,7 +20,7 @@ pub fn make_path_from_icon(
     code: bool,
 ) -> Result<String, ErrorDto> {
     let dir = CONFIG_SERVICE.get_data_dir()?;
-    println!("data dir is {}", dir.clone());
+    // println!("data dir is {}", dir.clone());
     let path = make_path(vec![dir.get().as_str(), path.as_str(), components.as_str()]);
     if code {
         return make_base64(path.get());
