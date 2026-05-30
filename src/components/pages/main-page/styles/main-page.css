@@ -96,10 +96,7 @@
     transition: color 0.2s;
     overflow-x: scroll;
     font: 10pt "JetBrains Mono Light";
-    &::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-    }
+
 
 
 }
@@ -107,12 +104,9 @@
 
 #main-page-projects {
     width: 100%;
-    height: calc(95% - 50px);
+    height: calc(85% - 50px);
     overflow: auto;
     margin-top: 10px;
 
-    &::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-    }
+
 }

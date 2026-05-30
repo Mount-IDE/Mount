@@ -13,6 +13,8 @@ interface Type {
 
     set_os: (val:string)=>void,
 
+    make_path: (pieces: string[]) => string
+    
     shells: string[]
     set_shells: (shells: string[]) => void
     add_template_to_cache: (t: ITemplate) => void
@@ -32,7 +34,7 @@ interface Type {
 }
 
 
-export const cacheStore = create<Type>((set, _) => ({
+export const cacheStore = create<Type>((set, get) => ({
     currentTemplate: null,
     packages: [],
     templates: [],
@@ -121,6 +123,18 @@ export const cacheStore = create<Type>((set, _) => ({
     recent_projects: [],
     set_recent_projects(rec: IRecentProject[]): void {
         set({recent_projects: rec})
+    },
+    make_path(pieces: string[]): string {
+        if (pieces.length == 0) {
+            return ""
+        }
+        let res = "";
+        let os = get().os;
+        for (let i = 0; i < pieces.length - 1; i++) {
+            res += `${pieces[i]}${os == "windows" ? "\\" : "/"}`
+        }
+        res += pieces[pieces.length - 1]
+        return res;
     }
 
 

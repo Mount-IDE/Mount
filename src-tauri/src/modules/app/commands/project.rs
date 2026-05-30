@@ -9,14 +9,16 @@ use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
-    Project, ProjectPackage, ProjectTag, ProjectTemplate,
+    Action, Project, ProjectPackage, ProjectTag, ProjectTemplate, Var,
 };
-use crate::modules::contexts::project::domain::values::{CreateProjectResult, ProjectMeta};
+use crate::modules::contexts::project::domain::values::{
+    ActionCommand, ActionCommandIn, CreateProjectResult, ProjectMeta,
+};
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
-use crate::modules::shared::kernel::values::{Path, Val};
+use crate::modules::shared::kernel::values::{IfStatementPart, Path, Val};
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -69,8 +71,8 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
 }
 
 #[tauri::command]
-pub fn create_project(
-    template: ProjectTemplate,
+pub async fn create_project(
+    mut template: ProjectTemplate,
     results: CreateProjectResult,
     packages: HashMap<String, ProjectPackage>,
     tags: Vec<ProjectTag>,
@@ -106,13 +108,89 @@ pub fn create_project(
 
     let additions = make_meta(meta.get(&-3i8), &tags);
 
-    let vars = template.clone().startup.var;
+    let mut vars = template.clone().startup.var;
+    vars.push(Var {
+        name: "project-name".to_string(),
+        value: Val::STRING(name.clone()),
+    });
+    vars.push(Var {
+        name: "project-path".to_string(),
+        value: Val::STRING(path.clone()),
+    });
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
     project.meta = additions;
     project.vars = vars.clone();
 
+    template.startup.actions.insert(
+        0,
+        Action {
+            id: -1,
+            if_: vec![vec![IfStatementPart {
+                from: "#-2.project-git".to_string(),
+                oper: "==".to_string(),
+                value: Val::BOOL(true),
+            }]],
+            on_error: "continue".to_string(),
+            next: None,
+            command: vec![ActionCommand {
+                platform: "all".to_string(),
+                shell: "@".to_string(),
+                env: None,
+                command: ActionCommandIn::Single("git init".to_string()),
+            }],
+        },
+    );
+    template.startup.actions.insert(
+        1,
+        Action {
+            id: -2,
+            if_: vec![vec![IfStatementPart {
+                from: "#-2.project-git-gitignore".to_string(),
+                oper: "==".to_string(),
+                value: Val::BOOL(true),
+            }]],
+            on_error: "continue".to_string(),
+            next: None,
+            command: vec![
+                ActionCommand {
+                    platform: "windows".to_string(),
+                    shell: "@".to_string(),
+                    env: None,
+                    command: ActionCommandIn::Single("echo .> .gitignore".to_string()),
+                },
+                ActionCommand {
+                    platform: "!".to_string(),
+                    shell: "@".to_string(),
+                    env: None,
+                    command: ActionCommandIn::Single("touch .gitignore".to_string()),
+                },
+            ],
+        },
+    );
+    template.startup.actions.insert(
+        2,
+        Action {
+            id: -2,
+            if_: vec![vec![IfStatementPart {
+                from: "#-2.project-git-remote".to_string(),
+                oper: "!empty".to_string(),
+                value: Val::STRING("".to_string()),
+            }]],
+            on_error: "continue".to_string(),
+            next: None,
+            command: vec![ActionCommand {
+                platform: "all".to_string(),
+                shell: "@".to_string(),
+                env: None,
+                command: ActionCommandIn::WithArgs(
+                    "git remote add origin".to_string(),
+                    vec!["#-2.project-git-remote".to_string()],
+                ),
+            }],
+        },
+    );
     let buttons = make_buttons();
 
     project.workspace.buttons = buttons;
@@ -130,7 +208,11 @@ pub fn create_project(
     let tasks = ACTION_PROJECT_SERVICE.compile(&template, &results, &vars);
 
     if let Some(val) = tasks {
-        println!("TASKS: {:?}", val.1);
+        // println!("TASKS: {:?}", val.1);
+
+        for i in val.1.clone() {
+            println!("TASK {i:?}");
+        }
 
         let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
         let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
@@ -148,7 +230,8 @@ pub fn create_project(
             })?;
         FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
         PROJECT_SERVICE.add_to_recents(&project)?;
-        let _ = ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1);
+
+        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1)
     }
 
     Ok(project)
@@ -200,6 +283,13 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
     meta_.tags = _tags_.clone();
 
     meta_
+}
+
+#[tauri::command]
+pub fn remove_project(path: Path) -> Result<(), ErrorDto> {
+    let project = PROJECT_SERVICE.delete_project(&path)?;
+    let _ = PROJECT_SERVICE.remove_from_recents(&project)?;
+    Ok(())
 }
 
 #[tauri::command]

@@ -90,7 +90,8 @@ export const createProjectStore = create<Type>((set, get) => ({
         return {
             tags: prev.tags.filter(el=>el.id!=id)
         }
-    }), change_tag:(id: number, to: string)=> set(prev=> {
+    }),
+    change_tag: (id: number, to: string) => set(prev => {
         return {
             tags: prev.tags.map(el=>el.id==id? {id, name:to}: el)
         }

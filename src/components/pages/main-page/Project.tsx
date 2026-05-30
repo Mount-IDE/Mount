@@ -1,23 +1,22 @@
 import "./styles/project.css"
 import more from "../../../assets/more.svg"
 import {invoke} from "@tauri-apps/api/core";
+import {cacheStore} from "../../../stores/cache_store.ts";
 
 type Props = {
     project: IRecentProject
     onClick: (path: string) => void
+    onContext: (e: React.MouseEvent, path: string) => void
 }
 
 export default function Project(props: Props) {
     const {project} = props;
 
-    // const set_current = projectStore(state => state.set_path_to_current_project)
-
-    async function loadProject() {
+    async function loadProject(e: React.MouseEvent) {
         try {
             let path = await invoke<string>("make_path_command", {
                 components: [project.path, project.name]
             })
-            // set_current(path)
             props.onClick(path);
         } catch (e) {
             console.error(e)
@@ -39,7 +38,11 @@ export default function Project(props: Props) {
                     project.meta.tags.length > 0 ? project.meta.tags.slice(5).join(" ") : "no tags"
                 }</p>
             </div>
-            <div className={"main-page-project-button"}>
+            <div className={"main-page-project-button"} onClick={(e) => {
+                e.stopPropagation()
+                const path = cacheStore.getState().make_path([props.project.path, props.project.name]);
+                props.onContext(e, path);
+            }}>
                 <img src={more}/>
             </div>
         </div>

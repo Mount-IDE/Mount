@@ -2,7 +2,7 @@ import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
 import logo from "../../../assets/icon.svg"
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
 import {open_project} from "../../../services/create-project.ts";
@@ -12,6 +12,7 @@ import pageStore from "../../../stores/page_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {mapProjectButton} from "../../../utils/project-buttons.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
+import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 
 /**
  * A component of main page that contains list of created projects and buttons for itself creation
@@ -51,6 +52,7 @@ export default function MainPage() {
     const current_group = mainPageStore(state => state.current_group);
     const set_current_project = () => projectStore.getState().set_current_project
     const openProject = () => pageStore.getState().openProject
+
     /**
      * load recent projects
      */
@@ -115,6 +117,51 @@ export default function MainPage() {
     const recent_by_group = recent.filter(el =>
         el.meta.group == (groups.find(el => el.id == current_group)?.name ?? ""))
 
+    const [currentPath, setCurrentPath] = useState("");
+
+    const [showContext, setShowContext] = useState(false)
+    const context_buttons: IContextMenuButton[] = [
+        {
+            cb: async () => {
+                try {
+                    await invoke("remove_project", {path: currentPath});
+                } catch (e) {
+                    console.error(e)
+                }
+            },
+            hotkeys: "",
+            title: "Delete"
+
+        }
+    ]
+    const [cords, setCords] = useState<[number, number]>([0, 0]);
+
+    function show_context(e: React.MouseEvent, path: string) {
+        setCords([e.clientX, e.clientY]);
+        setShowContext(true);
+        setCurrentPath(path);
+
+    }
+
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            const tg = ref.current;
+            if (!tg) return;
+            const elem = e.target as Element
+            if (!(tg.contains(elem) || tg == elem)) {
+                setShowContext(false)
+            }
+
+        }
+
+        window.addEventListener("click", handler)
+        return () => {
+            window.removeEventListener("click", handler)
+        }
+    }, [cords]);
+
     return (
         <div className={"page"} id={"main-page"}>
             <div id={"main-page-left"}>
@@ -149,7 +196,7 @@ export default function MainPage() {
                     <div id={"main-page-projects"}>
                         {recent.length > 0 &&
                             recent_by_group.map((el, i) =>
-                                <Project onClick={setup_project} project={el} key={i}/>
+                                <Project onContext={show_context} onClick={setup_project} project={el} key={i}/>
                             )
                         }
                         {recent.length == 0 && <p
@@ -163,6 +210,7 @@ export default function MainPage() {
                                 justifyContent: "center"
                             }}
                         >Not any recent projects</p>}
+                        <ContextMenu ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]} show={showContext}/>
                     </div>
                 </div>
             </div>

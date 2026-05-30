@@ -278,14 +278,14 @@ impl Section {
 #[ts(export)]
 pub struct Action {
     #[serde(default)]
-    pub id: u32,
-    pub for_: Option<String>,
-    pub callable: Option<bool>,
+    pub id: i32,
+    // pub for_: Option<String>,
+    // pub callable: Option<bool>,
     #[serde(default)]
     pub if_: Vec<Vec<IfStatementPart>>,
     #[serde(default = "t_error")]
     pub on_error: String,
-    pub next: Option<u32>,
+    pub next: Option<i32>,
     #[serde(default)]
     pub command: Vec<ActionCommand>,
 }
@@ -293,8 +293,8 @@ impl Action {
     pub fn new() -> Action {
         Self {
             id: 0,
-            for_: None,
-            callable: None,
+            // for_: None,
+            // callable: None,
             if_: Vec::new(),
             on_error: String::new(),
             next: None,
@@ -318,14 +318,14 @@ impl Action {
             .map_err(|_| ProjectError::IncorrectAddress { address: addr })?;
         Ok((section, parameter))
     }
-    pub fn get_address(&self) -> Result<(i8, String), ProjectError> {
-        if let None = self.for_ {
-            return Err(ProjectError::IncorrectAddress {
-                address: "".to_string(),
-            });
-        }
-        Self::getaddr(self.for_.clone().unwrap())
-    }
+    // pub fn get_address(&self) -> Result<(i8, String), ProjectError> {
+    //     if let None = self.for_ {
+    //         return Err(ProjectError::IncorrectAddress {
+    //             address: "".to_string(),
+    //         });
+    //     }
+    //     Self::getaddr(self.for_.clone().unwrap())
+    // }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]

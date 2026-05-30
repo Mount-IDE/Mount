@@ -281,6 +281,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         let files = get_files();
         for file in files {
             if file.name.len() == 0 {
+                // make dirs
                 let path_ = make_path(vec![
                     dir.get().clone().as_str(),
                     file.path.get().clone().as_str(),
@@ -337,19 +338,28 @@ impl TConfigRecoveryService for ConfigRecoveryService {
 
         for i in files {
             if i.name.len() == 0 {
+                // make dirs
                 let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
                 if !FS_READ_SERVICE.exists(path_.clone()) {
                     FS_WRITE_SERVICE.create_dir(&path_)?;
                 }
             } else {
+                // make files
+
                 let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
                 if !FS_READ_SERVICE.exists(path_.clone()) {
                     FS_WRITE_SERVICE.create_dir(&path_)?;
                 }
                 let path_ = make_path(vec![path_.get().as_str(), i.name.clone().as_str()]);
-                if !FS_READ_SERVICE.exists(path_.clone()) {
-                    FS_WRITE_SERVICE.create_file(&path_)?;
-                    let file = PFile::regular(i.name.clone(), path_);
+                println!("CONTENT {} {}", i.name, i.content);
+                if FS_READ_SERVICE.exists(path_.clone()) {
+                    let file = PFile::from_path_reg(path_.clone());
+                    let text = FS_READ_SERVICE.read_file(&file)?;
+                    if text.len() == 0 {
+                        FS_WRITE_SERVICE.write_file(&file, text, FileWriteAccess::WRITE)?;
+                    }
+                } else {
+                    let file = FS_WRITE_SERVICE.create_file(&path_)?;
                     FS_WRITE_SERVICE.write_file(
                         &file,
                         i.content.clone(),

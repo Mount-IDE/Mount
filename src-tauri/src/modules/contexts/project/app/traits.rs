@@ -11,7 +11,7 @@ use crate::modules::shared::kernel::values::{Path, Val};
 pub trait TProjectService {
     fn create_project(&self, proj: &Project) -> Result<(), ProjectError>;
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError>;
-    fn delete_project(&self, project_path: &Path) -> Result<(), ProjectError>;
+    fn delete_project(&self, project_path: &Path) -> Result<Project, ProjectError>;
     fn get_projects(&self, dir: &Path) -> Result<Vec<Project>, ProjectError>;
     fn get_recent_projects(&self) -> Result<Vec<RecentProject>, ProjectError>;
     fn save_project(&self, project: &Project) -> Result<(), ProjectError>;
