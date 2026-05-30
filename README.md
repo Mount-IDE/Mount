@@ -1,9 +1,9 @@
-![](public/icon.svg)
+<p align="center">
+    <img src="./public/icon.svg" width="200px">
+</p>
 
 # Mount
 An open source Integrated Development Environment
-
---- 
 
 
 # About

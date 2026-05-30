@@ -1,12 +1,13 @@
 use crate::modules::app::utils::project::make_buttons;
 use crate::modules::app::{
-    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PROJECT_SERVICE,
+    ACTION_PROJECT_SERVICE, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE,
+    FS_WRITE_SERVICE, PROJECT_SERVICE,
 };
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::project::app::traits::TProjectService;
+use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
     Project, ProjectPackage, ProjectTag, ProjectTemplate,
 };
@@ -96,7 +97,6 @@ pub fn create_project(
         Val::STRING(val) => val.clone(),
         _ => return Err(ProjectError::PathNotFound.into()),
     };
-    // println!("{}::{}", name, path);
 
     let path_ = make_path(vec![path.as_str(), name.as_str()]);
     let ext = FS_READ_SERVICE.exists(path_.clone());
@@ -106,32 +106,51 @@ pub fn create_project(
 
     let additions = make_meta(meta.get(&-3i8), &tags);
 
-    let vars = template.startup.var;
-    let actions = template.startup.actions;
+    let vars = template.clone().startup.var;
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
     project.meta = additions;
-    project.vars = vars;
+    project.vars = vars.clone();
 
     let buttons = make_buttons();
 
     project.workspace.buttons = buttons;
 
-    let json = serde_json::to_string(&project.clone()).map_err(|e| ProjectError::ParsingError {
-        err: ParsingError::Serialize {
-            path: Path(path.clone()),
-            err: e,
-        },
-    })?;
+    for (i, j) in results.clone() {
+        println!("{i}");
+        for (k, m) in j {
+            println!("\t{k}");
+            for (n, o) in m {
+                println!("\t\t{n} {o:?}");
+            }
+        }
+    }
 
-    let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
-    let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
-    let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
-    let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "project.json"]);
-    let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
-    FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
-    PROJECT_SERVICE.add_to_recents(&project)?;
+    let tasks = ACTION_PROJECT_SERVICE.compile(&template, &results, &vars);
+
+    if let Some(val) = tasks {
+        println!("TASKS: {:?}", val.1);
+
+        let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
+        let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
+        let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
+        let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "project.json"]);
+        let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
+
+        project.vars = val.0.clone();
+        let json =
+            serde_json::to_string(&project.clone()).map_err(|e| ProjectError::ParsingError {
+                err: ParsingError::Serialize {
+                    path: Path(path.clone()),
+                    err: e,
+                },
+            })?;
+        FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
+        PROJECT_SERVICE.add_to_recents(&project)?;
+        let _ = ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1);
+    }
+
     Ok(project)
 }
 

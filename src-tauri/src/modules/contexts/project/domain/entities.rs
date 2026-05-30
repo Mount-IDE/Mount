@@ -1,14 +1,16 @@
 use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
+use super::default::workspace::*;
 use crate::modules::contexts::project::domain::values::{
-    ActionCommand, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
+    ActionCommand, ActionOnError, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
 };
-use crate::modules::shared::kernel::values::{IfStatement, ParameterTyp, Path, Schema, Val};
+use crate::modules::shared::kernel::errors::ProjectError;
+use crate::modules::shared::kernel::values::{
+    IfStatement, IfStatementPart, ParameterTyp, Path, Schema, Val,
+};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-
-use super::default::workspace::*;
 
 ///
 ///
@@ -135,7 +137,30 @@ pub enum ButtonComponentType {
 ///
 ///
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub struct Task {}
+pub struct Task {
+    id: i32,
+    // action: TaskAction
+}
+
+#[derive(Clone, Debug, TS)]
+pub enum _Task {
+    GRAPH {
+        next: Box<_Task>,
+        commands: Vec<TaskCommand>,
+        on_error: ActionOnError,
+    },
+    SINGLE {
+        commands: Vec<TaskCommand>,
+        on_error: ActionOnError,
+    },
+}
+
+#[derive(Debug, Clone, TS)]
+pub struct TaskCommand {
+    pub command: String,
+    pub shell: String,
+    pub env: Option<Vec<(String, String)>>,
+}
 
 ///
 ///
@@ -143,9 +168,9 @@ pub struct Task {}
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct Var {
     #[serde(default)]
-    name: String,
+    pub name: String,
     #[serde(default)]
-    value: Val,
+    pub value: Val,
 }
 impl Var {
     pub fn new(name: String, value: Val) -> Var {
@@ -185,7 +210,7 @@ impl Default for ProjectTemplate {
             id: "opie.empty".to_string(),
             name: "Empty Project".to_string(),
             schema: Schema(1),
-            meta: None,
+            meta: Some(TemplateMeta::default()),
             startup: TemplateStartup::new(),
             packages_id: vec![],
         }
@@ -257,7 +282,7 @@ pub struct Action {
     pub for_: Option<String>,
     pub callable: Option<bool>,
     #[serde(default)]
-    pub if_: Vec<IfStatement>,
+    pub if_: Vec<Vec<IfStatementPart>>,
     #[serde(default = "t_error")]
     pub on_error: String,
     pub next: Option<u32>,
@@ -275,6 +300,31 @@ impl Action {
             next: None,
             command: Vec::new(),
         }
+    }
+
+    pub fn getaddr(addr: String) -> Result<(i8, String), ProjectError> {
+        let point = addr.find(".");
+        if let None = point {
+            return Err(ProjectError::IncorrectAddress { address: addr });
+        }
+        let point = point.unwrap();
+        if point == addr.len() {
+            return Err(ProjectError::IncorrectAddress { address: addr });
+        }
+        let section = addr[..point].to_string().clone();
+        let parameter = addr[point..].to_string().clone();
+        let section = section
+            .parse::<i8>()
+            .map_err(|_| ProjectError::IncorrectAddress { address: addr })?;
+        Ok((section, parameter))
+    }
+    pub fn get_address(&self) -> Result<(i8, String), ProjectError> {
+        if let None = self.for_ {
+            return Err(ProjectError::IncorrectAddress {
+                address: "".to_string(),
+            });
+        }
+        Self::getaddr(self.for_.clone().unwrap())
     }
 }
 

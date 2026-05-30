@@ -31,3 +31,4 @@ portable-pty = "0.9.0"
 uuid = { version = "1.23.1", features = ["v4"] }
 which = "8.0.2"
 async-trait = "0.1.89"
+regex = "1.12.3"

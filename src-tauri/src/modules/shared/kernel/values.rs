@@ -49,13 +49,24 @@ impl Default for Schema {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS, PartialEq, PartialOrd)]
 #[serde(untagged)]
 pub enum Val {
     NUMBER(f64),
     STRING(String),
     BOOL(bool),
     ARRAY(Vec<String>),
+}
+
+impl Val {
+    pub fn to_str(&self) -> String {
+        match &self {
+            Val::STRING(val) => val.clone(),
+            Val::NUMBER(val) => val.to_string(),
+            Val::BOOL(val) => val.to_string(),
+            Val::ARRAY(val) => val.join("::"),
+        }
+    }
 }
 
 impl Default for Val {
@@ -126,15 +137,15 @@ impl Serialize for ParameterTyp {
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatement {
-    or: Option<Vec<IfStatementPart>>,
-    all: Option<Vec<IfStatementPart>>,
+    pub or: Option<Vec<IfStatementPart>>,
+    pub all: Option<Vec<IfStatementPart>>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatementPart {
-    from: String,
-    oper: String,
-    value: Val,
+    pub from: String,
+    pub oper: String,
+    pub value: Val,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

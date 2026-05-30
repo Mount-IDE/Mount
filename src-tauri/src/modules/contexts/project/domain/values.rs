@@ -1,10 +1,17 @@
 use super::default::action::*;
 use super::default::template::t_meta_icon;
 use crate::modules::shared::kernel::values::Val;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use ts_rs::TS;
+
+#[derive(Clone, TS, Debug)]
+pub enum ActionOnError {
+    CONTINUE,
+    StopAll,
+    StopGraph,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectMeta {
@@ -75,6 +82,16 @@ pub struct TemplateMeta {
     pub icon: String,
 }
 
+impl Default for TemplateMeta {
+    fn default() -> Self {
+        Self {
+            authors: vec![],
+            description: String::new(),
+            icon: String::from("empty.svg"),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[serde(untagged)]
 pub enum ParameterLabel {
@@ -91,12 +108,12 @@ impl Default for ParameterLabel {
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ActionCommand {
     #[serde(default = "t_platform_def")]
-    platform: String,
+    pub platform: String,
     #[serde(default = "t_shell_def")]
-    shell: String,
-    env: Option<Vec<(String, String)>>,
+    pub shell: String,
+    pub env: Option<Vec<(String, String)>>,
     #[serde(default)]
-    command: ActionCommandIn,
+    pub command: ActionCommandIn,
 }
 
 impl ActionCommand {
@@ -130,4 +147,5 @@ pub enum ButtonPos {
     RightTop,
 }
 
-pub(crate) type CreateProjectResult = HashMap<String, HashMap<i8, HashMap<String, Val>>>;
+pub(crate) type CreateProjectResult = HashMap<String, CreateProjectTemplate>;
+pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>;

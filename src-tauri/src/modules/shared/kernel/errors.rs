@@ -35,6 +35,8 @@ pub enum ProjectError {
     NameNotFound,
     #[error("failed to get project path")]
     PathNotFound,
+    #[error("failed to parse address in action {address}")]
+    IncorrectAddress { address: String },
 }
 
 #[derive(Error, Debug)]
