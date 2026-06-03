@@ -5,6 +5,9 @@ import list from "../../assets/list.svg"
 import MenuBarSection, {IMenuBarSection} from "./MenuBarSection.tsx";
 import {cacheStore} from "../../stores/cache_store.ts";
 import {projectStore} from "../../stores/project_store.ts";
+import pageStore from "../../stores/page_store.ts";
+import {createProjectStore} from "../../stores/create_project.ts";
+import {invoke} from "@tauri-apps/api/core";
 
 
 interface IMenuButton {
@@ -30,6 +33,8 @@ export default function MenuBar() {
                     label: "New",
                     hotkeys: "sl;k",
                     cb: () => {
+                        pageStore.getState().setFilter(true);
+                        createProjectStore.getState().open();
                     }
                 }, {
                     label: "Open",
@@ -44,7 +49,16 @@ export default function MenuBar() {
                 }, {
                     label: "Close Project",
                     hotkeys: "",
-                    cb: () => {
+                    cb: async () => {
+                        console.log("clicked")
+                        try {
+                            await invoke("unwatch_project");
+                            await invoke("close_window_terminals");
+                            pageStore.getState().openMain();
+                        } catch (e) {
+                            console.error(e)
+                        }
+
                     }
                 },
             ]
@@ -204,7 +218,7 @@ function MenuBarButton(props: Props) {
             </p>
             {props.current && <div className={"menu-bar-menu"}>
                 {obj.options.map((el, i) =>
-                    <div className={"menu-bar-menu-option"} key={i}>
+                    <div className={"menu-bar-menu-option"} onClick={el.cb} key={i}>
                         <p className={"menu-bar-option-name"}>{el.label}</p>
                         <p className={"menu-bar-option-keys"}>{el.hotkeys}</p>
                     </div>

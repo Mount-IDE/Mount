@@ -37,6 +37,7 @@ export default function CreateEntity() {
             if (current?.default_content !== undefined) {
                 copy["content"] = current.default_content
             }
+            copy["path"] = path_to
 
             return copy
         })
@@ -54,13 +55,14 @@ export default function CreateEntity() {
         }
         const name = fields["name"];
         const ext = fields["ext"] ?? "";
+        const path = fields["path"] ?? "";
 
         try {
             const os = await invoke<string>("get_os");
             const sep = os == "windows" ? "\\" : "/";
             let extension = ext.length > 0 ? ext : ""
             extension = extension.length > 0 && extension[0] == "." ? extension.slice(1) : extension;
-            const path_ = `${path_to}${sep}${name}.${extension}`;
+            const path_ = `${path}${sep}${name}.${extension}`;
             if (current!.typ == "file") {
                 if (current.default_content !== undefined) {
                     await invoke(
@@ -121,6 +123,12 @@ export default function CreateEntity() {
                                         return copy
                                     })} placeholder={"Extension"}/>
                                 }
+                                <Field id={"path"} val={fields["path"] ?? ""}
+                                       cb={(val: string) => setFields(prev => {
+                                           const copy = {...prev};
+                                           copy["path"] = val;
+                                           return copy
+                                       })} placeholder={"Path"}/>
                                 {
                                     current.default_content !== undefined && current.default_content != null &&
                                     <Field area id={"content"} val={fields["content"]}

@@ -1,5 +1,5 @@
 import "./styles/code.css"
-import { useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
 type Props = {
@@ -71,6 +71,7 @@ function CodeEditor(props: CodeProps) {
                 width: "100%",
                 height: "100%",
                 overflow: "hidden",
+                padding: "10x"
             }}
             onClick={() => textareaRef.current!.focus()}
         >
@@ -86,6 +87,7 @@ function CodeEditor(props: CodeProps) {
                     position: "absolute",
                     left: 0,
                     top: 0,
+                    padding: "10px",
                     minWidth: "100%",
                     height: "100%",
                     opacity: 1,

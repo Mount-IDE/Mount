@@ -10,7 +10,7 @@ use crate::modules::contexts::project::domain::entities::{
     Action, Project, ProjectTemplate, TaskCommand, Var, _Task,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionCommandIn, ActionOnError, CreateProjectResult, CreateProjectTemplate,
+    ActionCommandArgs, ActionCommandIn, ActionOnError, CreateProjectResult, CreateProjectTemplate,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
@@ -339,10 +339,12 @@ impl TActionProjectService for ActionProjectService {
         let mut tasks = Vec::<_Task>::new();
 
         for action in actions.iter() {
-            let cond = self.precompile_condition(&sections, &vars, &action);
-            // println!("IF RES {cond}");
-            if !cond {
-                continue;
+            if let Some(_) = action.if_ {
+                let cond = self.precompile_condition(&sections, &vars, &action);
+                // println!("IF RES {cond}");
+                if !cond {
+                    continue;
+                }
             }
             let task__ = self.make_task(&action, &actions, &vars, &sections, &os);
             println!("TASK RES {task__:?}");
@@ -363,7 +365,7 @@ impl TActionProjectService for ActionProjectService {
         vars: &Vec<Var>,
         action: &Action,
     ) -> bool {
-        let condition = action.if_.clone();
+        let condition = action.if_.clone().unwrap();
         let mut pass_conditions = true; // check conditions
         'cond: for cond in condition {
             //and
@@ -729,7 +731,7 @@ impl TActionProjectService for ActionProjectService {
             }
             let command_ = match command.command.clone() {
                 ActionCommandIn::Single(cmd) => Some(cmd),
-                ActionCommandIn::WithArgs(cmd, args) => {
+                ActionCommandIn::WithArgs(ActionCommandArgs(cmd, args)) => {
                     let mut command_ = cmd.clone();
                     for arg in args {
                         let res = self.format_string(arg, &vars, &params);

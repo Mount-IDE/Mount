@@ -111,6 +111,7 @@ pub struct ActionCommand {
     pub platform: String,
     #[serde(default = "t_shell_def")]
     pub shell: String,
+    #[serde(default)]
     pub env: Option<Vec<(String, String)>>,
     #[serde(default)]
     pub command: ActionCommandIn,
@@ -128,10 +129,12 @@ impl ActionCommand {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
+pub struct ActionCommandArgs(pub String, pub Vec<String>);
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[serde(untagged)]
 pub enum ActionCommandIn {
     Single(String),
-    WithArgs(String, Vec<String>),
+    WithArgs(ActionCommandArgs),
 }
 
 impl Default for ActionCommandIn {

@@ -9,6 +9,7 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {mapProjectButton} from "../../../utils/project-buttons.tsx";
+import {invoke} from "@tauri-apps/api/core";
 // import {invoke} from "@tauri-apps/api/core";
 
 export default function CreateProject() {
@@ -41,6 +42,12 @@ export default function CreateProject() {
                 asideButtonsStore.getState().load_left(left_top_2);
                 asideButtonsStore.getState().load_bottom(left_bot_2);
                 asideButtonsStore.getState().load_right(right_top_2);
+                try {
+                    await invoke("unwatch_project");
+                    await invoke("close_window_terminals");
+                } catch (e) {
+                    console.error(e)
+                }
             }
         }
     }

@@ -35,7 +35,8 @@ export default function ProjectWorkSpace() {
 
     return (
         <div id={"project-workspace"}>
-            <MiniAside top_button={set_current_left_button} bot_button={set_current_bot_button} is_left={true}
+            <MiniAside state={left} top_button={set_current_left_button} bot_button={set_current_bot_button}
+                       is_left={true}
                        set_top={set_current_left} set_bot={set_current_bot}
                        top={left_top} bottom={left_bot} max_top={3} max_bot={null}/>
             <hr className={"project-hr"}/>
@@ -48,7 +49,7 @@ export default function ProjectWorkSpace() {
                 <Bottom />
             </div>
             <hr className={"project-hr"}/>
-            <MiniAside top_button={set_current_right_button} is_left={false} set_top={set_current_right}
+            <MiniAside state={right} top_button={set_current_right_button} is_left={false} set_top={set_current_right}
                        set_bot={set_current_bot} top={right_top}
                        max_top={3} max_bot={null}/>
         </div>

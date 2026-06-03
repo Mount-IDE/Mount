@@ -12,7 +12,7 @@ use crate::modules::contexts::project::domain::entities::{
     Action, Project, ProjectPackage, ProjectTag, ProjectTemplate, Var,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionCommand, ActionCommandIn, CreateProjectResult, ProjectMeta,
+    ActionCommand, ActionCommandArgs, ActionCommandIn, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
@@ -127,11 +127,11 @@ pub async fn create_project(
         0,
         Action {
             id: -1,
-            if_: vec![vec![IfStatementPart {
+            if_: Some(vec![vec![IfStatementPart {
                 from: "#-2.project-git".to_string(),
                 oper: "==".to_string(),
                 value: Val::BOOL(true),
-            }]],
+            }]]),
             on_error: "continue".to_string(),
             next: None,
             command: vec![ActionCommand {
@@ -146,11 +146,11 @@ pub async fn create_project(
         1,
         Action {
             id: -2,
-            if_: vec![vec![IfStatementPart {
+            if_: Some(vec![vec![IfStatementPart {
                 from: "#-2.project-git-gitignore".to_string(),
                 oper: "==".to_string(),
                 value: Val::BOOL(true),
-            }]],
+            }]]),
             on_error: "continue".to_string(),
             next: None,
             command: vec![
@@ -173,21 +173,21 @@ pub async fn create_project(
         2,
         Action {
             id: -2,
-            if_: vec![vec![IfStatementPart {
+            if_: Some(vec![vec![IfStatementPart {
                 from: "#-2.project-git-remote".to_string(),
                 oper: "!empty".to_string(),
                 value: Val::STRING("".to_string()),
-            }]],
+            }]]),
             on_error: "continue".to_string(),
             next: None,
             command: vec![ActionCommand {
                 platform: "all".to_string(),
                 shell: "@".to_string(),
                 env: None,
-                command: ActionCommandIn::WithArgs(
+                command: ActionCommandIn::WithArgs(ActionCommandArgs(
                     "git remote add origin".to_string(),
                     vec!["#-2.project-git-remote".to_string()],
-                ),
+                )),
             }],
         },
     );

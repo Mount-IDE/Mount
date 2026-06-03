@@ -6,6 +6,7 @@
     top: 30px;
     left: 0;
     overflow: hidden;
+    /*padding: 10px;*/
 
     gap: 5px;
     min-width: 0;
@@ -15,6 +16,7 @@
 }
 
 .project-code-rows{
+    padding-top: 10px;
     min-width: 40px;
     height: 100%;
     border-right: 1px solid var(--border2);

@@ -6,9 +6,7 @@ use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionOnError, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
 };
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{
-    IfStatement, IfStatementPart, ParameterTyp, Path, Schema, Val,
-};
+use crate::modules::shared::kernel::values::{IfStatementPart, ParameterTyp, Path, Schema, Val};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -282,9 +280,10 @@ pub struct Action {
     // pub for_: Option<String>,
     // pub callable: Option<bool>,
     #[serde(default)]
-    pub if_: Vec<Vec<IfStatementPart>>,
+    pub if_: Option<Vec<Vec<IfStatementPart>>>,
     #[serde(default = "t_error")]
     pub on_error: String,
+    #[serde(default)]
     pub next: Option<i32>,
     #[serde(default)]
     pub command: Vec<ActionCommand>,
@@ -295,7 +294,7 @@ impl Action {
             id: 0,
             // for_: None,
             // callable: None,
-            if_: Vec::new(),
+            if_: None,
             on_error: String::new(),
             next: None,
             command: Vec::new(),
@@ -339,6 +338,7 @@ pub struct Parameter {
     pub typ: ParameterTyp,
     #[serde(default)]
     pub def: Val,
+    #[serde(default)]
     pub while_: Option<String>,
 }
 

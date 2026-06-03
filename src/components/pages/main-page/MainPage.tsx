@@ -13,6 +13,8 @@ import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {mapProjectButton} from "../../../utils/project-buttons.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
+import Modal from "../../common/Modal.tsx";
+import {menuStore} from "../../../stores/menu_store.ts";
 
 /**
  * A component of main page that contains list of created projects and buttons for itself creation
@@ -123,27 +125,67 @@ export default function MainPage() {
     const context_buttons: IContextMenuButton[] = [
         {
             cb: async () => {
-                try {
-                    await invoke("remove_project", {path: currentPath});
-                } catch (e) {
-                    console.error(e)
-                }
             },
             hotkeys: "",
-            title: "Delete"
+            title: "Open",
+            icon: "dir.svg"
+
+        }, {
+            cb: async () => {
+            },
+            hotkeys: "",
+            title: "Edit",
+            icon: "edit.svg"
+
+        }, {
+            cb: async () => {
+
+                openModal({
+                    buttons: [{
+                        cb: async (val: string | undefined) => {
+                            try {
+                                await invoke("remove_project", {path: currentPath});
+                                loadRecents();
+                                menuStore.getState().close_modal()
+                            } catch (e) {
+                                console.error(e)
+                            }
+                        },
+                        title: "Remove",
+                        typ: "cancel"
+
+                    }],
+                    title: `Delete project at ${currentPath}?`,
+                    typ: "confirm"
+
+                })
+
+            },
+            hotkeys: "",
+            title: "Delete",
+            icon: "remove.svg"
 
         }
     ]
     const [cords, setCords] = useState<[number, number]>([0, 0]);
 
     function show_context(e: React.MouseEvent, path: string) {
-        setCords([e.clientX, e.clientY]);
+        if (showContext) {
+            setShowContext(false);
+            return;
+        }
+        setCords([e.clientX - 150, e.clientY + 20]);
         setShowContext(true);
         setCurrentPath(path);
 
     }
 
     const ref = useRef<HTMLDivElement>(null)
+
+
+    const modal = menuStore(state => state.modal);
+    const openModal = menuStore(state => state.open_modal);
+    const modalSettings = menuStore(state => state.modal_settings);
 
     useEffect(() => {
         function handler(e: MouseEvent) {
@@ -210,6 +252,7 @@ export default function MainPage() {
                                 justifyContent: "center"
                             }}
                         >Not any recent projects</p>}
+                        {modal && <Modal {...modalSettings!}/>}
                         <ContextMenu ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]} show={showContext}/>
                     </div>
                 </div>
