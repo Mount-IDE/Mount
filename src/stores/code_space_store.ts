@@ -109,6 +109,7 @@ export const codeSpaceStore = create<Type>((set, get) => ({
             return;
         }
         console.log(spaces, space)
+        const file_index = space.opened_files.find(el => el.id == file.id)!;
         const opened = space.opened_files.filter(el => el.id != file.id);
         const i = spaces.indexOf(space);
         space.opened_files = opened;
@@ -118,6 +119,14 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                 spaces: res
             })
         } else {
+            const index = space.opened_files.indexOf(file_index);
+            if (index > 0 && index < space.opened_files.length) {
+                space.current_file = index + 1
+            } else if (index == 0 && space.opened_files.length > 1) {
+                space.current_file = 1
+            } else if (index == space.opened_files.length && index > 0) {
+                space.current_file = index - 1;
+            }
             spaces[i] = space;
             set({
                 spaces: spaces
@@ -138,7 +147,8 @@ export const codeSpaceStore = create<Type>((set, get) => ({
         set({
             spaces: spaces
         })
-    }, get_space(id: number): ICodeSpace | null {
+    },
+    get_space(id: number): ICodeSpace | null {
         const got = get().spaces.find(el=>el.id==id);
         if (!got) {
             return null
