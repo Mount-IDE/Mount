@@ -277,8 +277,6 @@ impl Section {
 pub struct Action {
     #[serde(default)]
     pub id: i32,
-    // pub for_: Option<String>,
-    // pub callable: Option<bool>,
     #[serde(default)]
     pub if_: Option<Vec<Vec<IfStatementPart>>>,
     #[serde(default = "t_error")]

@@ -162,6 +162,7 @@ interface ICodeSpace{
     id: number,
     current_file: number|null // opened file id
     opened_files: Opened[]
+    opened_files_stack: number[]
 }
 
 

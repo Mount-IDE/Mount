@@ -3,6 +3,8 @@ import {fsExtStore} from "../../../stores/fs_ext_store.ts";
 import cross from "../../../assets/title-close.svg"
 import {codeSpaceStore} from "../../../stores/code_space_store.ts";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
+import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
+import {useEffect, useRef, useState} from "react";
 
 type Props = {
     files: Opened[]
@@ -15,6 +17,8 @@ type Props = {
 export default function CodeFiles(props: Props) {
 
     const remove_file = codeSpaceStore(state=>state.remove_file_from_code_space)
+    const add_code_space = codeSpaceStore(state => state.add_code_space)
+    const add_to_space = codeSpaceStore(state => state.add_file_to_code_space)
     function cb(obj_: Opened){
         remove_file(props.id, obj_);
         console.log("deleted")
@@ -24,12 +28,62 @@ export default function CodeFiles(props: Props) {
     }
 
 
+    const [buttons, setButtons] = useState<IContextMenuButton[]>([])
+    const [cords, setCords] = useState<[number, number]>([0, 0])
+    const [showContext, setShowContext] = useState(false)
+
+
+    function onContext(e: React.MouseEvent, obj: Opened) {
+        setCords([e.clientX, e.clientY]);
+        setShowContext(true)
+        setButtons([
+            {
+                cb: () => {
+                    cb(obj)
+                },
+                hotkeys: "",
+                icon: "remove.svg",
+                title: "Close"
+            }, {
+                cb: () => {
+                    const {cache_id} = obj;
+                    const space_id = add_code_space();
+                    add_to_space(space_id, cache_id, obj);
+                },
+                hotkeys: "",
+                title: "Open in Right"
+            },
+        ])
+    }
+
+    const context_ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const cur = context_ref.current;
+        if (!cur) return
+
+        function hide(e: MouseEvent) {
+            if (e.target != cur) {
+                setShowContext(false)
+            }
+        }
+
+        window.addEventListener("click", hide)
+
+        return () => window.removeEventListener("click", hide)
+    }, [showContext]);
+
     return (
-        <div className={"code-space-files"}>
-            {props.files.map(el =>
-                <CodeFile onSelect={onSelect} onRemove={cb} obj={el} selected={props.current[0]==el.id} key={el.id}/>
-            )}
-        </div>
+        <>
+            <div className={"code-space-files"}>
+                {props.files.map(el =>
+                    <CodeFile onContext={onContext} onSelect={onSelect} onRemove={cb} obj={el}
+                              selected={props.current[0] == el.id} key={el.id}/>
+                )}
+            </div>
+            <ContextMenu ref={context_ref} buttons={buttons} x={cords[0]} y={cords[1]} show={showContext}/>
+        </>
+
     )
 }
 
@@ -39,6 +93,7 @@ type FileProps = {
     selected: boolean
     onRemove: (obj: Opened)=>void
     onSelect: (obj: Opened)=>void
+    onContext: (e: React.MouseEvent, obj: Opened) => void
 }
 
 function CodeFile(props: FileProps) {
@@ -53,7 +108,13 @@ function CodeFile(props: FileProps) {
             style={{
                 borderBottom: props.selected? "1px solid var(--border)": "1px solid transparent"
             }}
-            className={"code-space-file"}>
+             className={"code-space-file"}
+             onContextMenu={(e) => {
+                 e.stopPropagation();
+                 e.preventDefault();
+                 props.onContext(e, props.obj)
+             }}
+        >
             <div className={"code-file-img"}>
                 <img src={path_to}/>
             </div>

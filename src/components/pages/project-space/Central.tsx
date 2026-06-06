@@ -4,7 +4,6 @@ import CodeSpace from "./CodeSpace.tsx";
 import logo from "../../../assets/logo_black_white.svg"
 
 
-
 export default function Central() {
 
     const code_spaces = codeSpaceStore(state=>state.spaces)
@@ -12,7 +11,7 @@ export default function Central() {
     return (
         <div id={"project-central"}>
             {code_spaces.map(el=>
-                <CodeSpace key={el.id} obj={el}/>
+                <CodeSpace key={el.id} obj={el} amount={code_spaces.length}/>
             )}
             {
                 code_spaces.length===0 &&
@@ -29,9 +28,6 @@ export default function Central() {
                 >
                     <div
                         style={{
-                            // position:"relative",
-                            // left: "calc(50% - 100px)",
-                            // top:"70px",
                             display:"flex",
                             width:"200px",
                             height:"200px",
