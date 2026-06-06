@@ -57,7 +57,7 @@ jobs:
             fi
             echo "EOF"
           } >> $GITHUB_OUTPUT
-      - uses: tauri-apps/tauri-action@v1
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
