@@ -1,0 +1,8 @@
+#project-code-space{
+    height: 100%;
+    flex: 1;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    overflow: hidden;
+}

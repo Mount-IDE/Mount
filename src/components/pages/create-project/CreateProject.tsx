@@ -7,6 +7,9 @@ import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
+import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
+import {mapProjectButton} from "../../../utils/project-buttons.tsx";
+import {invoke} from "@tauri-apps/api/core";
 // import {invoke} from "@tauri-apps/api/core";
 
 export default function CreateProject() {
@@ -14,23 +17,37 @@ export default function CreateProject() {
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
-    /*const getPath = () =>
-        createProjectStore.getState()
-            .results?.["__meta__"]?.[-4]?.["project_path"];
 
-    const getName = () =>
-        createProjectStore.getState()
-            .results?.["__meta__"]?.[-4]?.["project_name"];
-*/
     async function create_project_() {
-        /*const path = getPath();
-        const name = getName();
-        */
+        console.log(createProjectStore.getState().results)
         if (current_template) {
             let res = await create_project(current_template!);
 
             if (res[0] == 0) {
                 set_current_path(res[1]);
+                createProjectStore.getState().close();
+                const buttons = res[2]!.workspace.buttons;
+                let left_top = buttons.filter(el => el.pos == "LeftTop")
+                let left_bot = buttons.filter(el => el.pos == "LeftBottom")
+                let right_top = buttons.filter(el => el.pos == "RightTop")
+
+                let left_top_2 =
+                    left_top.map<IAsideButton>(mapProjectButton);
+
+                let left_bot_2 =
+                    left_bot.map<IAsideButton>(mapProjectButton);
+
+                let right_top_2 =
+                    right_top.map<IAsideButton>(mapProjectButton);
+                asideButtonsStore.getState().load_left(left_top_2);
+                asideButtonsStore.getState().load_bottom(left_bot_2);
+                asideButtonsStore.getState().load_right(right_top_2);
+                try {
+                    await invoke("unwatch_project");
+                    await invoke("close_window_terminals");
+                } catch (e) {
+                    console.error(e)
+                }
             }
         }
     }

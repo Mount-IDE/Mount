@@ -1,16 +1,53 @@
-.aside-header{
+.aside--header {
     position: absolute;
-    top: 10px;
+    top: 0;
+    /*max-width: 70vw;*/
+    /*min-width: 10vh;*/
     width: 100%;
+    /*flex: 1;*/
     height: 5vh;
+    left: 0;
+    align-items: center;
+    /*justify-content: center;*/
     display: flex;
 
 }
 
-.aside--header-p{
-    width: 80%;
+.aside-header-p {
+    /*width: 80%;*/
     height: 100%;
     margin-left: 10px;
     color: var(--subtitle);
     font: 10pt "JetBrains Mono";
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.aside-header-bt {
+    position: absolute;
+    top: 15%;
+    height: 70%;
+    aspect-ratio: 1/1;
+    right: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+
+    & img {
+        display: block;
+        width: 50%;
+        height: 50%;
+        object-fit: contain;
+    }
+
+    &:hover {
+        background: var(--border3);
+    }
 }

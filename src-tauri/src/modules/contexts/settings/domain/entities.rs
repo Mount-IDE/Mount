@@ -1,7 +1,7 @@
+use crate::modules::contexts::project::domain::values::ProjectMeta;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-use crate::modules::contexts::project::domain::values::ProjectMeta;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[ts(export)]
@@ -10,6 +10,7 @@ pub struct Settings {
     pub version: String,
     pub general: GeneralSettings,
     pub appearance: Appearance,
+    pub run: Run,
 }
 
 impl Settings {
@@ -19,6 +20,26 @@ impl Settings {
             version: String::from("1.0.0"),
             general: GeneralSettings::new(),
             appearance: Appearance::new(),
+            run: Run::default(),
+        }
+    }
+}
+#[derive(Serialize, Deserialize, Debug, Clone, TS)]
+pub struct Run {
+    pub shells: Vec<String>,
+}
+
+impl Default for Run {
+    fn default() -> Self {
+        Self {
+            shells: vec![
+                "bash".to_string(),
+                "sh".to_string(),
+                "zsh".to_string(),
+                "ksh".to_string(),
+                "cmd".to_string(),
+                "powershell".to_string(),
+            ],
         }
     }
 }
@@ -84,6 +105,5 @@ pub struct RecentProject {
     pub path: Path,
     pub last_opened: u64,
     pub meta: ProjectMeta,
-    pub(crate) packages: Vec<String>
-
+    pub(crate) packages: Vec<String>,
 }

@@ -1,18 +1,19 @@
-#main-page{
+#main-page {
     display: flex;
     position: absolute;
 }
-#main-page-left{
+
+#main-page-left {
     width: 40%;
     height: 100%;
 }
 
-#main-page-right{
+#main-page-right {
     width: 60%;
     height: 100%;
 }
 
-#main-page-logo{
+#main-page-logo {
     height: 15%;
     width: 60%;
     /*margin: 10% auto 0;*/
@@ -22,7 +23,8 @@
     /*justify-content: center;*/
     align-items: center;
     gap: 8%;
-    &> #main-page-logo-logo{
+
+    & > #main-page-logo-logo {
         height: 70%;
         aspect-ratio: 1/1;
         display: flex;
@@ -31,19 +33,21 @@
         justify-content: center;
         border-radius: 15px;
         overflow: hidden;
-        &> img{
+
+        & > img {
             width: 100%;
             height: 100%;
         }
     }
-    &>p{
+
+    & > p {
         font: 30pt "JetBrains Mono Medium";
         color: white;
     }
 }
 
 
-#main-page-left-buttons{
+#main-page-left-buttons {
     margin-top: 10%;
     margin-left: 5%;
     width: 45%;
@@ -55,52 +59,54 @@
     gap: 10px;
 }
 
-#main-page-right-dec{
+#main-page-right-dec {
     width: 90%;
     height: 95%;
     margin: 2% 5%;
 }
 
-#main-page-groups{
+#main-page-groups {
     width: 100%;
     height: 5%;
     display: flex;
     overflow-x: scroll;
     overflow-y: hidden;
-    &::-webkit-scrollbar{width: 0;height:0;}
+
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
 }
-.main-page-group{
-    flex-shrink: 0;
-    width: 5vw;
+
+#main-page-groups-list {
     height: 100%;
-    font: 10pt "JetBrains Mono Light";
-    color: var(--subtitle);
+    display: flex;
+    background: transparent;
+
+}
+
+.main-page-group {
+    flex-shrink: 0;
+    /*width: 6vw;*/
+    height: 100%;
     background: transparent;
     display: flex;
-    flex-direction: column;
-    align-items: start;
+    align-items: center;
     justify-content: center;
     transition: color 0.2s;
     overflow-x: scroll;
-    &::-webkit-scrollbar{
-        width: 0;
-        height: 0;
-    }
-    &:hover {
-        color: var(--title);
-    }
+    font: 10pt "JetBrains Mono Light";
+
+
 
 }
 
 
-#main-page-projects{
+#main-page-projects {
     width: 100%;
-    height: calc(95% - 50px);
+    height: calc(85% - 50px);
     overflow: auto;
     margin-top: 10px;
 
-    &::-webkit-scrollbar{
-        width: 0;
-        height: 0;
-    }
+
 }

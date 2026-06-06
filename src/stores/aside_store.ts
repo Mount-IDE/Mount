@@ -19,7 +19,7 @@ interface Type {
     set_current_bottom: (elem: comp) => void
 }
 
-type comp =  (elem:ReactElement|null)=> void
+type comp = (props?: { active?: boolean }) => ReactElement | null
 
 type prev_ = (prev: boolean) => boolean
 

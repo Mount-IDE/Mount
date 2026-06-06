@@ -1,152 +1,102 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import "./App.css";
 import TitleBar from "./components/common/TitleBar.tsx";
-import pageStore from "./stores/page_store.ts";
-import {Window} from "./stores/page_store.ts";
+import pageStore, {Window} from "./stores/page_store.ts";
 import MainPage from "./components/pages/main-page/MainPage.tsx";
 import Blur from "./components/common/Blur.tsx";
 import {createProjectStore} from "./stores/create_project.ts";
 import CreateProject from "./components/pages/create-project/CreateProject.tsx";
+import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
 import {cacheStore} from "./stores/cache_store.ts";
 import {Group, mainPageStore} from "./stores/main_page_store.ts";
-import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
-import {projectStore} from "./stores/project_store.ts";
-import {asideButtonsStore} from "./stores/aside_buttons_store.ts";
+import {fsExtStore} from "./stores/fs_ext_store.ts";
 
 
+/**
+ * Main component
+ * @returns
+ */
 function App() {
+
     const current = pageStore(state => state.current);
     const createProjectOpened = createProjectStore(state => state.page_opened)
-    const current_path = projectStore(state => state.path_to_current_project);
+    const [windowReady, setWindowReady] = useState(false);
 
-    const set_current_project = () => projectStore.getState().set_current_project
-    const openProject = () => pageStore.getState().openProject
-
+    /**
+     * Caching many data while app is opening
+     */
     async function move_to_cache() {
         try {
-            let templates = await invoke<ITemplate[]>("read_templates");
-            if (templates.length > 0) {
-                cacheStore.getState().add_templates_to_cache(templates);
-                let temp = templates[0];
-                cacheStore.getState().set_current_template(temp);
+            const cache = await invoke<Cache>("get_cache");
+            console.log(cache)
+            cacheStore.getState().set_data_dir(cache.data_dir_path);
+            cacheStore.getState().set_file_templates(cache.file_templates);
+            cacheStore.getState().set_os(cache.os);
+            console.log(cache.projects_dir)
+            cacheStore.getState().set_projects_path(cache.projects_dir);
+            mainPageStore.getState().set_groups(cache.groups.map((el, i): Group => ({
+                id: i, name: el
+            })));
+            fsExtStore.getState().set_icons(cache.file_icons);
+            cacheStore.getState().add_packages_to_cache(cache.packages);
+            cacheStore.getState().add_templates_to_cache(cache.templates);
+            if (cache.templates.length > 0) {
+                cacheStore.getState().set_current_template(cache.templates[0])
             }
+
+            cacheStore.getState().set_shells(cache.shells);
         } catch (e) {
-            console.error("error while load templates: ", e)
-        }
-        try {
-            let packages = await invoke<IPackage[]>("read_packages");
-            cacheStore.getState().add_packages_to_cache(packages)
-            // console.log(packages)
-        } catch (e) {
-            console.error("error while load packages: ", e)
+            console.warn(e)
         }
 
-        try {
-            let path = await invoke<string>("get_projects_dir")
-            cacheStore.getState().set_projects_path(path);
-        } catch (e) {
-            console.error("error while load project path: ", e)
-
-        }
-        try {
-            let groups = await invoke<string[]>("get_groups");
-            let id = 0
-            let n_groups: Group[] = groups.map(el => {
-                return {
-                    id: id++,
-                    name: el
-                }
-            });
-            mainPageStore.getState().set_groups(n_groups);
-        } catch (e) {
-            console.error("error while load tags: ", e)
-        }
-
-        try {
-            let res = await invoke<string>("get_data_dir");
-            cacheStore.getState().set_data_dir(res)
-        } catch (e) {
-            console.error(e)
-        }
 
     }
 
     useEffect(() => {
-        setTimeout(() => invoke("show_win").then(), 0)
-        move_to_cache().then();
+        let cancelled = false;
+
+        async function setupWindow() {
+            try {
+                await invoke("close_window_terminals");
+            } catch (e) {
+                console.error(e);
+            }
+
+            if (cancelled) return;
+
+            setWindowReady(true);
+            setTimeout(() => invoke("show_win").then(), 0);
+            move_to_cache().then();
+        }
+
+        setupWindow().then();
+
+        return () => {
+            cancelled = true;
+            invoke("close_window_terminals").catch((e) => console.error(e));
+        };
     }, [])
 
-    async function setup_project() {
-        if (current_path.length > 0) {
-            try {
-                let res = await invoke<IProject>("read_project", {
-                    path: current_path
-                })
-                const set = set_current_project();
-                set(res);
-                const open = openProject()
-                open();
-                const buttons = res.workspace.buttons;
-                let left_top = buttons.filter(el => el.pos == "LeftTop")
-                let left_bot = buttons.filter(el => el.pos == "LeftBottom")
-                let right_top = buttons.filter(el => el.pos == "RightTop")
 
-                let left_top_2 =
-                    left_top.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <></>,
-                        icon: el.icon, keys: el.keys
-                    }));
-
-                let left_bot_2 =
-                    left_bot.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <></>,
-                        icon: el.icon, keys: el.keys
-                    }));
-
-                let right_top_2 =
-                    right_top.map<IAsideButton>(el => ({
-                        id: el.order,
-                        alt: el.alt,
-                        component: () => <></>,
-                        icon: el.icon, keys: el.keys
-                    }));
-                asideButtonsStore.getState().load_left(left_top_2);
-                asideButtonsStore.getState().load_bottom(left_bot_2);
-                asideButtonsStore.getState().load_right(right_top_2);
-            } catch (e) {
-                console.error(e)
-            }
-        } else {
-            console.warn("path is empty")
-        }
-    }
-
-    useEffect(() => {
-        setup_project().then()
-
-    }, [current_path]);
-
-
+    /**
+     * Setups cache and stores while project was selected
+     */
     return (
         <>
             <Blur/>
             <TitleBar/>
             <div id={"main"}>
                 {
-                    createProjectOpened &&
+                    windowReady && createProjectOpened &&
                     <CreateProject/>
                 }
                 {
-                    current == Window.Main &&
+                    windowReady && current == Window.Main &&
                     <MainPage/>
                 }
                 {
-                    current == Window.Project &&
+                    windowReady && current == Window.Project &&
                     <ProjectSpace/>
                 }
             </div>

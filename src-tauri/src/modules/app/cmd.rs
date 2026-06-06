@@ -7,13 +7,15 @@ use crate::modules::shared::kernel::values::Path;
 #[tauri::command]
 pub fn show_win(window: tauri::Window) {
     let res = window.show();
-    match res {
-        Err(e)=>println!("Error: {:?}", e),
-        Ok(e)=>println!("Ok: {:?}", e),
-    }
+    // match res {
+    //     Err(e) => println!("Error: {:?}", e),
+    //     Ok(e) => println!("Ok: {:?}", e),
+    // }
 }
 
 #[tauri::command]
 pub fn get_projects(cwd: String) -> Result<Vec<Project>, ErrorDto> {
-     PROJECT_SERVICE.get_projects(&Path(cwd)).map_err(|e|e.into())
+    PROJECT_SERVICE
+        .get_projects(&Path(cwd))
+        .map_err(|e| e.into())
 }

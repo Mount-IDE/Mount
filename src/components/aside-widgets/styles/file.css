@@ -1,0 +1,6 @@
+.fs-aside-dirty{
+    color: var(--subtitle);
+    font: 10pt "JetBrains Mono Light";
+    height: 100%;
+    margin-left: 5px;
+}

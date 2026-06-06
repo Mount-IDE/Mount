@@ -6,23 +6,31 @@
     position: relative;
     left: 0;
     top: 0;
-    border-bottom: 1px solid #464646;
+    border-bottom: 1px solid var(--border3);
+    z-index: 20;
 }
-#title-bar-buttons{
+
+#title-bar-buttons {
     position: absolute;
-    right:0;
+    right: 0;
     top: 0;
     height: 100%;
     display: flex;
 }
-.title-bar-button{
+
+.title-bar-button {
     height: 100%;
     aspect-ratio: 1/1;
     -webkit-app-region: no-drag;
     background: transparent;
     border: none;
-    &>img{
-        width: 50%;
+
+    & > img {
+        width: 30%;
+    }
+
+    &:hover{
+        filter: brightness(2);
     }
 }
 

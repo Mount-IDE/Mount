@@ -7,6 +7,16 @@ interface Type {
     currentTemplate: ITemplate | null,
     groups: string[],
     data_dir: string,
+    os: string,
+    recent_projects: IRecentProject[]
+    set_recent_projects: (rec: IRecentProject[]) => void
+
+    set_os: (val:string)=>void,
+
+    make_path: (pieces: string[]) => string
+    
+    shells: string[]
+    set_shells: (shells: string[]) => void
     add_template_to_cache: (t: ITemplate) => void
     add_templates_to_cache: (t: ITemplate[]) => void
     add_package_to_cache: (t: IPackage) => void
@@ -14,11 +24,13 @@ interface Type {
     clear_templates: () => void
     clear_packages: () => void
     clear_current_template: () => void
-    set_current_template: (t:ITemplate)=>void,
+    set_current_template: (t: ITemplate) => void,
     projects_path: string
-    set_projects_path:(path: string)=>void
-    load_groups:(groups: string[])=>void
-    set_data_dir: (str: string)=>void
+    set_projects_path: (path: string) => void
+    load_groups: (groups: string[]) => void
+    set_data_dir: (str: string) => void,
+    file_templates: configFsTemplate[],
+    set_file_templates: (temp: configFsTemplate[]) => void
 }
 
 
@@ -26,20 +38,28 @@ export const cacheStore = create<Type>((set, get) => ({
     currentTemplate: null,
     packages: [],
     templates: [],
-    data_dir:"",
+    file_templates: [],
+    data_dir: "",
     projects_path: "",
-    groups: []
-        ,    add_package_to_cache: (t: IPackage) => set(prev => {
+    groups: [], 
+    os: "",
+    set_os(val: string): void {
+        set({
+            os: val
+        })
+    },
+    add_package_to_cache: (t: IPackage) => set(prev => {
         const pack = prev.packages;
-        if (!pack.map(el=>el.id).includes(t.id)){
+        if (!pack.map(el => el.id).includes(t.id)) {
             pack.push(t);
-        }        return {
+        }
+        return {
             packages: pack
         }
     }),
     add_template_to_cache: (t: ITemplate) => set(prev => {
         const temp = prev.templates;
-        if (!temp.map(el=>el.id).includes(t.id)){
+        if (!temp.map(el => el.id).includes(t.id)) {
             temp.push(t);
         }
         return {
@@ -58,11 +78,11 @@ export const cacheStore = create<Type>((set, get) => ({
     add_packages_to_cache: (t: IPackage[]) => set(prev => {
 
         const packs = prev.packages;
-        let id = packs.map(el=>el.id)
-        for (let i of t){
-            if (!id.includes(i.id)){
+        let id = packs.map(el => el.id)
+        for (let i of t) {
+            if (!id.includes(i.id)) {
                 packs.push(i)
-                id = packs.map(el=>el.id)
+                id = packs.map(el => el.id)
             }
         }
         return {
@@ -71,26 +91,50 @@ export const cacheStore = create<Type>((set, get) => ({
     }),
     add_templates_to_cache: (t: ITemplate[]) => set(prev => {
         const temps = prev.templates;
-        let id = temps.map(el=>el.id)
-        for (let i of t){
-            if (!id.includes(i.id)){
+        let id = temps.map(el => el.id)
+        for (let i of t) {
+            if (!id.includes(i.id)) {
                 temps.push(i)
-                id = temps.map(el=>el.id)
+                id = temps.map(el => el.id)
             }
         }
         return {
             templates: temps
         }
     }),
-    set_current_template: (t:ITemplate)=> set({currentTemplate: t}),
-    set_projects_path:(path: string)=> set({projects_path:path}), 
-    load_groups:(groups: string[])=> set({
+    set_current_template: (t: ITemplate) => set({currentTemplate: t}),
+    set_projects_path: (path: string) => set({projects_path: path}),
+    load_groups: (groups: string[]) => set({
         groups
     }),
     set_data_dir(str: string): void {
         set({
             data_dir: str
         })
+    },
+    set_file_templates: async (temp: configFsTemplate[]) => {
+        set({
+            file_templates: temp
+        })
+    }, set_shells(shells: string[]): void {
+        set({shells: shells})
+    },
+    shells: [],
+    recent_projects: [],
+    set_recent_projects(rec: IRecentProject[]): void {
+        set({recent_projects: rec})
+    },
+    make_path(pieces: string[]): string {
+        if (pieces.length == 0) {
+            return ""
+        }
+        let res = "";
+        let os = get().os;
+        for (let i = 0; i < pieces.length - 1; i++) {
+            res += `${pieces[i]}${os == "windows" ? "\\" : "/"}`
+        }
+        res += pieces[pieces.length - 1]
+        return res;
     }
 
 

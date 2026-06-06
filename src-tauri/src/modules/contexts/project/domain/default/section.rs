@@ -1,1 +1,3 @@
-pub fn t_list()->(bool, bool){(true, true)}
+pub fn t_list() -> (bool, bool) {
+    (true, true)
+}

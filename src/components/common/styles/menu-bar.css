@@ -1,0 +1,112 @@
+#menu-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    display: flex;
+    gap: 10px;
+    -webkit-app-region: no-drag
+}
+
+#menu-bar-logo {
+    margin-left: 1px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    aspect-ratio: 1/1;
+
+    & img {
+        display: block;
+        width: 50%;
+        height: 50%;
+        object-fit: contain;
+    }
+}
+
+#menu-bar-buttons {
+    height: 100%;
+    display: flex;
+}
+
+#menu-bar-show-buttons {
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 60%;
+        height: 60%;
+        display: block;
+        object-fit: contain;
+    }
+}
+
+#menu-bar-list {
+    margin-left: 5px;
+    height: 100%;
+    display: flex;
+    transition: all 0.2s;
+    gap: 10px;
+    align-items: center;
+}
+
+.menu-bar-button {
+    position: relative;
+
+    & > p {
+        color: var(--subtitle);
+        font: 9pt "JetBrains Mono Light";
+    }
+
+    &:hover {
+        & > p {
+            color: var(--title);
+        }
+    }
+}
+
+.menu-bar-menu {
+    padding: 5px;
+    position: absolute;
+    top: 20px;
+    width: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+}
+
+.menu-bar-menu-option {
+    width: 100%;
+    height: 20px;
+    position: relative;
+
+    & > p {
+        white-space: nowrap;
+        color: var(--subtitle);
+        font: 8pt "JetBrains Mono Light";
+        width: 50%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        position: absolute;
+        height: 100%;
+    }
+
+    &:hover {
+        background: var(--border3);
+    }
+}
+
+.menu-bar-option-name {
+    top: 0;
+    left: 0;
+}
+
+.menu-bar-option-keys {
+    text-align: right;
+    top: 0;
+    right: 0;
+}

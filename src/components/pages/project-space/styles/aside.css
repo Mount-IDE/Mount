@@ -3,8 +3,10 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    padding: 1rem 0;
+    /*padding: 1rem 0;*/
     max-width: 70vw;
+    min-width: 10vh;
+    overflow: hidden;
 }
 
 .project-aside-dis {
@@ -18,16 +20,60 @@
 
 
 .project-aside-selector{
-    transition: all 0.2s;
+    /*transition: all 0.2s;*/
 }
 
+/*.project-hr {*/
+/*    width: 12px;*/
+/*    border: none;*/
+/*    margin: 0;*/
+/*    cursor: w-resize;*/
+/*    position: relative;*/
+/*    flex-shrink: 0;*/
+/*}*/
+
+/*.project-hr::after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    bottom: 0;*/
+/*    left: 50%;*/
+/*    width: 1px;*/
+/*    transform: translateX(-50%);*/
+/*    background: var(--border3);*/
+/*}*/
 .project-hr{
-    border: 2px solid var(--border2);
+    /*width: 2px;*/
+    /*background: var(--border3);*/
+    border: 1px solid var(--border3);
+    /*border: 1px solid transparent;*/
     cursor: w-resize;
+    /*transition: all 0.2s;*/
+    /*&:hover{*/
+    /*    border: 3px solid #304bd0;*/
+    /*}*/
+    position: relative;
+
+    /*&ma*/
 }
 
-.project-aside-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
+
+/*.project-hr:after {*/
+/*    content: "";*/
+/*    cursor: w-resize;*/
+/*    pointer-events: auto;*/
+/*    !*    position:relative;*!*/
+/*    !*    height: 100%;*!*/
+/*    !*    top: 0;*!*/
+/*    !*    left: -10px;*!*/
+/*    !*    right: -10px;*!*/
+/*    !*}*!*/
+/*    position: absolute;*/
+/*    !*inset: -5px;*!*/
+/*    !*position: absolute;*!*/
+/*    left: -10px;*/
+/*    top: 0;*/
+/*    width: 22px; !* 2 + 5 + 5 *!*/
+/*    height: 100%;*/
+/*    z-index: 20;*/
+/*}*/

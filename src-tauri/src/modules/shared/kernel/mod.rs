@@ -1,8 +1,4 @@
-
-pub mod values;
 pub mod entities;
-pub mod traits;
 pub mod errors;
-
-
-
+pub mod traits;
+pub mod values;

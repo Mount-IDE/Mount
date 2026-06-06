@@ -1,19 +1,25 @@
+use super::default::action::*;
+use super::default::template::t_meta_icon;
+use crate::modules::shared::kernel::values::Val;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::fmt::Debug;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use ts_rs::TS;
-use crate::modules::shared::kernel::values::Val;
-use super::default::template::t_meta_icon;
-use super::default::action::*;
+
+#[derive(Clone, TS, Debug)]
+pub enum ActionOnError {
+    CONTINUE,
+    StopAll,
+    StopGraph,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub struct ProjectMeta{
+pub struct ProjectMeta {
     pub(crate) authors: Vec<String>,
     pub(crate) description: String,
     pub(crate) license: Option<String>,
     pub(crate) group: String,
     pub(crate) tags: Vec<String>,
-    
 }
 
 impl Default for ProjectMeta {
@@ -23,14 +29,13 @@ impl Default for ProjectMeta {
             description: String::new(),
             license: None,
             group: String::from("general"),
-            tags: Vec::new()
+            tags: Vec::new(),
         }
     }
 }
 
-
-impl ProjectMeta{
-    pub fn new()->Self{
+impl ProjectMeta {
+    pub fn new() -> Self {
         Self {
             authors: Vec::new(),
             description: String::new(),
@@ -49,7 +54,7 @@ pub struct PackageMeta {
     description: String,
 }
 
-impl Default for PackageMeta{
+impl Default for PackageMeta {
     fn default() -> Self {
         Self {
             authors: Vec::new(),
@@ -58,8 +63,8 @@ impl Default for PackageMeta{
     }
 }
 
-impl PackageMeta{
-    pub fn new()->Self{
+impl PackageMeta {
+    pub fn new() -> Self {
         Self {
             authors: Vec::new(),
             description: String::new(),
@@ -73,71 +78,77 @@ pub struct TemplateMeta {
     pub authors: Vec<String>,
     #[serde(default)]
     pub description: String,
-    #[serde(default="t_meta_icon")]
-    pub icon: String
+    #[serde(default = "t_meta_icon")]
+    pub icon: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[serde(untagged)]
-pub enum ParameterLabel{
-    STR(String),
-    COUPLE((String, String)),
-}
-
-impl Default for ParameterLabel{
-    fn default()->Self{
-        ParameterLabel::STR("".to_string())
-    }
-}
-
-
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub struct ActionCommand{
-    #[serde(default="t_platform_def")]
-    platform: String,
-    #[serde(default="t_shell_def")]
-    shell: String,
-    env: Option<Vec<(String, String)>>,
-    #[serde(default)]
-    command: ActionCommandIn
-}
-
-
-
-
-
-impl ActionCommand{
-    pub fn new()->ActionCommand{
-        Self{
-            platform: String::new(),
-            shell: String::new(),
-            env: None,
-            command: ActionCommandIn::Single(String::new())
+impl Default for TemplateMeta {
+    fn default() -> Self {
+        Self {
+            authors: vec![],
+            description: String::new(),
+            icon: String::from("empty.svg"),
         }
     }
 }
 
-#[derive(Serialize,Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 #[serde(untagged)]
-pub enum ActionCommandIn{
-    Single(String),
-    WithArgs(String, Vec<String>)
+pub enum ParameterLabel {
+    STR(String),
+    COUPLE((String, String)),
 }
 
-impl Default for ActionCommandIn{
-    fn default()->Self{
+impl Default for ParameterLabel {
+    fn default() -> Self {
+        ParameterLabel::STR("".to_string())
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+pub struct ActionCommand {
+    #[serde(default = "t_platform_def")]
+    pub platform: String,
+    #[serde(default = "t_shell_def")]
+    pub shell: String,
+    #[serde(default)]
+    pub env: Option<Vec<(String, String)>>,
+    #[serde(default)]
+    pub command: ActionCommandIn,
+}
+
+impl ActionCommand {
+    pub fn new() -> ActionCommand {
+        Self {
+            platform: String::new(),
+            shell: String::new(),
+            env: None,
+            command: ActionCommandIn::Single(String::new()),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+pub struct ActionCommandArgs(pub String, pub Vec<String>);
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[serde(untagged)]
+pub enum ActionCommandIn {
+    Single(String),
+    WithArgs(ActionCommandArgs),
+}
+
+impl Default for ActionCommandIn {
+    fn default() -> Self {
         Self::Single(String::new())
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub enum ButtonPos{
+pub enum ButtonPos {
     LeftTop,
     LeftBottom,
     RightTop,
 }
 
-
-
-pub(crate) type CreateProjectResult= HashMap<String, HashMap<i8, HashMap<String, Val>>>;
+pub(crate) type CreateProjectResult = HashMap<String, CreateProjectTemplate>;
+pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>;

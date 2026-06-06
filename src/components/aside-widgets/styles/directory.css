@@ -1,0 +1,83 @@
+.fs-dirx {
+    width: 100%;
+    min-height: 3vh;
+    margin-bottom: 2px;
+
+    &:hover {
+        & > .fs-aside-head > .fs-aside-name {
+            color: var(--title);
+        }
+    }
+
+}
+
+.fs-aside-head {
+    display: flex;
+    /*width: 100%;*/
+    min-height: 3vh;
+    gap: 5px;
+    position: relative;
+    align-items: start;
+    justify-content: start;
+
+    &:hover {
+        & > .fs-aside-name {
+            color: var(--title);
+        }
+    }
+
+    & .fs-aside-icon {
+        height: 100%;
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & img {
+            display: block;
+            width: 12px;
+            height: 12px;
+            object-fit: contain;
+        }
+    }
+
+    & .fs-aside-icon2 {
+
+        height: 100%;
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & img {
+            display: block;
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+        }
+    }
+
+    & .fs-aside-name {
+
+        user-select: none;
+        font: 9pt "JetBrains Mono Light";
+        color: var(--subtitle);
+        white-space: nowrap;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.dirx-body {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 2px;
+    overflow: hidden;
+}

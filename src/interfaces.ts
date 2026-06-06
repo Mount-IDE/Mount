@@ -1,3 +1,5 @@
+//import {RefObject} from "react";
+
 interface IRecentProject {
     name: string,
     path: string
@@ -127,21 +129,108 @@ interface IAsideButton {
     alt: string
     keys: string
     icon: string
-    component: ()=> React.ReactElement
+    widget: string
+    component_type: "Light" | "Heavy"
+    component: (props?: { active?: boolean }) => React.ReactElement
 
 }
 
 interface IAsideButtonExtended {
     pos: string
+    widget: string
     order: number
     alt: string
     keys: string
     icon: string
-    component: ()=> React.ReactElement
+    component_type?: "Light" | "Heavy"
+    component?: () => React.ReactElement
 
 }
 
 interface OpenedFile {
     path: string,
-    cursor: [number, number]
+    cursor: [number, number],
+    name: string
+}
+
+interface Opened extends OpenedFile{
+    id: number;
+    cache_id:number
+}
+
+interface ICodeSpace{
+    id: number,
+    current_file: number|null // opened file id
+    opened_files: Opened[]
+    opened_files_stack: number[]
+}
+
+
+
+
+interface FsDirectory {
+    name: string;
+    typ_: "dir";
+    directories: FsDirectory[]
+    files: FsFile[]
+    path: string;
+}
+
+interface FsFile {
+    name: string;
+    path: string;
+    typ_: "file"
+    modified?: boolean;
+}
+
+
+
+interface FsExtIcon{
+    typ: string,
+    ext: string[] | null,
+    name: string[] | null,
+    icon: string
+}
+interface FsConfigIcons{
+    theme: string,
+    scheme: number,
+    icons:FsExtIcon[]
+}
+
+
+
+interface FileCacheLight{
+    path: string,
+    content: string;
+    is_dirty: boolean
+}
+interface FileCache extends  FileCacheLight{
+    id: number
+
+}
+
+
+interface configFsTemplate{
+    id: string,
+    title: string,
+    typ: "file"|"dir",
+    icon?:string,
+    ext?:string,
+    default_content?:string,
+    inner?:configFsTemplate[],
+    base_name?:string
+}
+
+
+interface Cache {
+    templates: ITemplate[],
+    packages: IPackage[],
+    groups: string[],
+    data_dir_path: string,
+    projects_dir: string,
+    os: string,
+    file_icons: FsConfigIcons[],
+    file_templates: configFsTemplate[]
+    shells: string[]
+
 }

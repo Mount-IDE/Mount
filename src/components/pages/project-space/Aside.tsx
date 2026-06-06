@@ -14,38 +14,43 @@ function Aside(props: Props) {
     const ref = useRef<HTMLDivElement>(null)
     const ref_ = useRef<HTMLHRElement>(null)
     const base_pos = useRef(0);
-    const base_width = useRef(0)
+    const base_width = useRef(10)
     const is_moving = useRef(false)
+    // const ref_?fixed = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         let current_ = ref.current
+
+        // let cur = ref_fixed.current;
         let hr_ = ref_.current
         if (!hr_) return
         if (!current_) return
+        // if (!cur) return
         let current = current_!;
         let hr = hr_!;
 
-        let frame: number | null=null;
+        let frame: number | null = null;
+
         function start_move(e: MouseEvent) {
             is_moving.current = true;
             base_pos.current = e.clientX;
             base_width.current = current.getBoundingClientRect().width;
             document.body.style.userSelect = "none";
-            current.style.transition = "none";
+            // current.style.transition = "none";
         }
 
         function move(e: MouseEvent) {
             if (!is_moving.current) return
 
-            if (frame!=null)return
+            if (frame != null) return
 
             frame = requestAnimationFrame(() => {
-                frame=null;
+                frame = null;
                 const delta = e.clientX - base_pos.current;
                 const next = !props.left ?
                     base_width.current - delta :
                     base_width.current + delta
-                const MIN = 120;
+                const MIN = 50;
                 const MAX = window.innerWidth * 0.8;
 
                 const clamped = Math.max(MIN, Math.min(MAX, next));
@@ -58,7 +63,7 @@ function Aside(props: Props) {
             if (!is_moving.current) return
             is_moving.current = false
             document.body.style.userSelect = "";
-            current.style.transition = "all 0.2s";
+            // current.style.transition = "all 0.2s";
         }
 
         hr.addEventListener("mousedown", start_move);
@@ -71,8 +76,14 @@ function Aside(props: Props) {
             window.removeEventListener("mouseup", stop_move);
         }
 
-    }, [ref_]);
+    }, [ref_, props.state]);
 
+    // useEffect(() => {
+    //         if (props.state) {
+    //           ref_fixed.current!.style.left = ref_.current!.style.left;
+    //         }
+    //     }, [props.state]
+    // )
 
     const current_top = props.left ?
         asideButtonsStore(state => state.current_left) :
@@ -81,17 +92,32 @@ function Aside(props: Props) {
     return (
         <>
             {
-                !props.left &&
-                <hr ref={ref_} className={"project-hr"}/>
+                !props.left && props.state &&
+                <>
+                    <hr ref={ref_} className={"project-hr"}/>
+
+                </>
+
             }
-            <div ref={ref} className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
-                    <Header label={current_top?.alt ?? ""}/>
-                    <div className={"project-aside-body"}></div>
+            <div
+                style={{
+                    width: base_width.current
+                }}
+                ref={ref}
+                className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
+                <Header is_left={props.left ?? false} label={current_top?.alt ?? ""}/>
+                <div className={"project-aside-body"}>
+                    {current_top?.component()}
+                </div>
             </div>
-            {props.left &&
-                <hr ref={ref_} className={"project-hr"}/>}
+            {props.left && props.state &&
+                <>
+                    <hr ref={ref_} className={"project-hr"}/>
+                </>
+            }
         </>
 
     )
 }
+
 export default React.memo(Aside)

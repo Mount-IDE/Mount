@@ -1,0 +1,54 @@
+use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
+use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
+use crate::modules::shared::kernel::values::Path;
+use serde::{Deserialize, Serialize};
+
+///
+///
+///
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct FsIcon {
+    //#[serde(rename="type")]
+    #[serde(default)]
+    typ: String,
+    #[serde(default)]
+    ext: Option<Vec<String>>,
+    #[serde(default)]
+    name: Option<Vec<String>>,
+    #[serde(default)]
+    icon: String,
+}
+
+///
+///
+///
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum FsType {
+    file,
+    dir,
+}
+
+///
+///
+///
+impl Default for FsType {
+    fn default() -> Self {
+        FsType::file
+    }
+}
+
+///
+///
+///
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Cache {
+    pub templates: Vec<ProjectTemplate>,
+    pub packages: Vec<ProjectPackage>,
+    pub groups: Vec<String>,
+    pub projects_dir: Path,
+    pub data_dir_path: Path,
+    pub os: String,
+    pub file_templates: Vec<ConfigFsTemplate>,
+    pub file_icons: Vec<FsConfigIcons>,
+    pub shells: Vec<String>,
+}
