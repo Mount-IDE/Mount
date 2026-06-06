@@ -2,6 +2,10 @@ name: 'release-stable'
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        type: boolean
+        default: false
   push:
     branches:
       - stable
@@ -59,6 +63,7 @@ jobs:
             echo "EOF"
           } >> $GITHUB_OUTPUT
       - uses: tauri-apps/tauri-action@dev
+        if: inputs.publish == true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
