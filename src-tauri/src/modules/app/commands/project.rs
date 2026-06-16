@@ -297,3 +297,9 @@ pub fn read_project(path: Path) -> Result<Project, ErrorDto> {
     // println!("path command {}", path.clone());
     PROJECT_SERVICE.open_project(&path).map_err(|e| e.into())
 }
+
+#[tauri::command]
+pub fn save_project(project: Project) -> Result<(), ErrorDto> {
+    PROJECT_SERVICE.save_project(&project)?;
+    Ok(())
+}

@@ -1,0 +1,77 @@
+#project-settings {
+    position: fixed;
+    width: 60%;
+    height: 60%;
+    top: 20%;
+    left: 20%;
+
+    border-radius: 5px;
+    background: var(--bg2);
+    backdrop-filter: blur(20px);
+    padding: 20px;
+    z-index: 20;
+    opacity: 0.8;
+}
+
+
+#project-settings-top {
+    width: 100%;
+    height: 5%;
+    position: relative;
+    margin-bottom: 10px;
+
+    & p {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--subtitle);
+        font: 10pt "JetBrains Mono"
+    }
+}
+
+#project-settings-main {
+    display: flex;
+    width: 100%;
+    height: calc(90% - 10px);
+}
+
+#project-settings-left {
+    width: 20%;
+    height: 100%;
+
+    & div {
+        width: 90%;
+        font: 10pt "JetBrains Mono Light";
+        margin-top: 5px;
+        color: var(--subtitle);
+        transition: all 0.2s;
+
+        &:hover {
+            color: var(--title);
+        }
+    }
+}
+
+#project-settings-right {
+    height: 100%;
+    width: 80%;
+}
+
+#project-settings-bottom {
+    width: 100%;
+    height: 5%;
+    position: relative;
+
+    & #project-settings-buttons {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        display: flex;
+    }
+}

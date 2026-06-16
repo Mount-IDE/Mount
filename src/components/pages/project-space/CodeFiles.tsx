@@ -4,7 +4,7 @@ import cross from "../../../assets/title-close.svg"
 import {codeSpaceStore} from "../../../stores/code_space_store.ts";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 type Props = {
     files: Opened[]

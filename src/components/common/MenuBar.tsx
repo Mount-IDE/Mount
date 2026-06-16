@@ -5,9 +5,7 @@ import list from "../../assets/list.svg"
 import MenuBarSection, {IMenuBarSection} from "./MenuBarSection.tsx";
 import {cacheStore} from "../../stores/cache_store.ts";
 import {projectStore} from "../../stores/project_store.ts";
-import pageStore from "../../stores/page_store.ts";
-import {createProjectStore} from "../../stores/create_project.ts";
-import {invoke} from "@tauri-apps/api/core";
+import {menuBarStore} from "../../stores/menubar_store.ts";
 
 
 interface IMenuButton {
@@ -32,39 +30,71 @@ export default function MenuBar() {
                 {
                     label: "New",
                     hotkeys: "sl;k",
-                    cb: () => {
-                        pageStore.getState().setFilter(true);
-                        createProjectStore.getState().open();
-                    }
+                    cb: menuBarStore.getState().create_project
                 }, {
                     label: "Open",
                     hotkeys: "",
-                    cb: () => {
-                    }
+                    cb: menuBarStore.getState().open_project
                 }, {
                     label: "Open Recent",
                     hotkeys: "",
-                    cb: () => {
-                    }
+                    cb: menuBarStore.getState().open_recent_project
                 }, {
                     label: "Close Project",
                     hotkeys: "",
-                    cb: async () => {
-                        console.log("clicked")
-                        try {
-                            await invoke("unwatch_project");
-                            await invoke("close_window_terminals");
-                            pageStore.getState().openMain();
-                        } catch (e) {
-                            console.error(e)
-                        }
-
-                    }
+                    cb: menuBarStore.getState().close_project
+                },
+                {
+                    label: "Save Project",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().save_all
+                }, {
+                    label: "Auto-save",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().auto_save
+                }, {
+                    label: "Project Settings",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().project_settings
+                }, {
+                    label: "Exit",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().exit
                 },
             ]
         }, {
             label: "Edit",
-            options: []
+            options: [
+                {
+                    label: "Undo",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().undo
+                }, {
+                    label: "Redo",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().redo
+                }, {
+                    label: "Cut",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().cut
+                }, {
+                    label: "Copy",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().copy
+                }, {
+                    label: "Copy Path",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().copy_path
+                }, {
+                    label: "Paste",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().paste
+                }, {
+                    label: "Duplicate line",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().duplicate_line
+                },
+            ]
         }, {
             label: "View",
             options: []
@@ -76,29 +106,7 @@ export default function MenuBar() {
             options: []
         }, {
             label: "Window",
-            options: [
-                {
-                    label: "New",
-                    hotkeys: "",
-                    cb: () => {
-                    }
-                }, {
-                    label: "Open",
-                    hotkeys: "",
-                    cb: () => {
-                    }
-                }, {
-                    label: "Open Recent",
-                    hotkeys: "",
-                    cb: () => {
-                    }
-                }, {
-                    label: "Close Project",
-                    hotkeys: "",
-                    cb: () => {
-                    }
-                },
-            ]
+            options: []
         },
     ]
 

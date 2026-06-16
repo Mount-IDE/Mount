@@ -200,7 +200,15 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn save_project(&self, _project: &Project) -> Result<(), ProjectError> {
-        todo!()
+        let path = _project.path.clone();
+        let json =
+            serde_json::to_string(&_project.clone()).map_err(|e| ParsingError::Serialize {
+                path: path.clone(),
+                err: e,
+            })?;
+        let file = PFile::from_path_reg(path.clone());
+        FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
+        Ok(())
     }
 
     fn remove_from_recents(&self, _proj: &Project) -> Result<(), ProjectError> {

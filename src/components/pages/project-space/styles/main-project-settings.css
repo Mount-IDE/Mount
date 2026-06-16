@@ -1,0 +1,34 @@
+#main-project-settings {
+    width: 100%;
+    height: 90%;
+    overflow: auto;
+}
+
+
+.project-option {
+    margin-top: 10px;
+    width: 90%;
+
+    & p {
+        font: 15px "JetBrains Mono Light";
+        color: var(--subtitle);
+    }
+
+    & input, & textarea {
+        padding: 5px;
+        width: 100%;
+        background: black;
+        border: none;
+        outline: none;
+        min-height: 3vh;
+        color: var(--subtitle);
+
+        &:focus {
+            color: var(--title)
+        }
+    }
+
+    & textarea {
+        resize: vertical;
+    }
+}

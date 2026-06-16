@@ -86,7 +86,8 @@ pub fn run() {
             resize_terminal,
             close_terminal,
             close_window_terminals,
-            remove_project
+            remove_project,
+            save_project
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

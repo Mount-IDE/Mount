@@ -32,6 +32,7 @@ pub struct Project {
     pub vars: Vec<Var>,
     #[serde(default)]
     pub tasks: Vec<Task>,
+    #[serde(default)]
     pub packages: Vec<String>,
 }
 

@@ -9,31 +9,17 @@ type Props={
     amount: number
 }
 
+/**
+ *
+ * @param props
+ * @constructor
+ */
 export default function CodeSpace(props: Props) {
-
-    // const [current, setCurrent]=
-    //     useState<[number|null, number]>([props.obj.current_file,0]) // id and cache-id
-
     const select_current = codeSpaceStore(state => state.select_current_file)
-
     const current_file = props.obj.opened_files.find(el => el.id == props.obj.current_file);
-
-
     function setCurrent_(current_file: number|null, cache:number){
-        // setCurrent([current_file, cache])
         select_current(props.obj.id, current_file)
     }
-
-    // useEffect(() => {
-    //     setCurrent(prev=>{
-    //         const cache =
-    //             props.obj.opened_files.find(el=>el.id==props.obj.current_file);
-    //         if (!cache){
-    //             return [null, 0];
-    //         }
-    //         return [props.obj.current_file, cache.cache_id]
-    //     })
-    // }, [props.obj.current_file, props.obj.opened_files]);
 
     return (
         <div
