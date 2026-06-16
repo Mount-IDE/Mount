@@ -10,13 +10,13 @@ use serde::{Deserialize, Serialize};
 pub struct FsIcon {
     //#[serde(rename="type")]
     #[serde(default)]
-    typ: String,
+    pub typ: String,
     #[serde(default)]
-    ext: Option<Vec<String>>,
+    pub ext: Option<Vec<String>>,
     #[serde(default)]
-    name: Option<Vec<String>>,
+    pub name: Option<Vec<String>>,
     #[serde(default)]
-    icon: String,
+    pub icon: String,
 }
 
 ///

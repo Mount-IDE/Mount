@@ -17,7 +17,8 @@ type Props={
 export default function CodeSpace(props: Props) {
     const select_current = codeSpaceStore(state => state.select_current_file)
     const current_file = props.obj.opened_files.find(el => el.id == props.obj.current_file);
-    function setCurrent_(current_file: number|null, cache:number){
+
+    function setCurrent_(current_file: number | null, _: number) {
         select_current(props.obj.id, current_file)
     }
 

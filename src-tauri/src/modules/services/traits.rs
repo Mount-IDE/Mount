@@ -1,8 +1,10 @@
 use crate::modules::contexts::config::entities::ConfigFsTemplate;
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::shared::kernel::errors::ConfigError;
+use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
     fn save_settings(&self, settings: &Settings) -> Result<(), ConfigError>;
@@ -27,4 +29,10 @@ pub trait TConfigRecoveryService {
 
     fn add_settings_by_default(&self) -> Result<(), ConfigError>;
     fn add_recents_by_default(&self) -> Result<(), ConfigError>;
+}
+
+pub trait TParsingService {
+    fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError>;
+
+    fn from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError>;
 }

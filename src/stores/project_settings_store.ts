@@ -8,7 +8,7 @@ interface Type {
 }
 
 
-export const projectSettingsStore = create<Type>((set, get) => ({
+export const projectSettingsStore = create<Type>((set, _) => ({
     new_project_data: null,
     set_project: (proj) => set({new_project_data: proj}),
     opened: false,

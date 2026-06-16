@@ -1,16 +1,19 @@
 use crate::modules::app::{
-    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, SETTINGS,
+    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
+    PARSING_SERVICE, SETTINGS,
 };
-use crate::modules::contexts::config::entities::ConfigFsTemplate;
+use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
+use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::string::ToString;
 use tauri::Manager;
 
@@ -35,6 +38,13 @@ impl _File {
             name,
             path: Path(path),
             content,
+        }
+    }
+    pub fn dir(name: String) -> Self {
+        Self {
+            name: "".to_string(),
+            path: Path::new(name.as_str()),
+            content: "".to_string(),
         }
     }
 }
@@ -232,8 +242,11 @@ pub struct ConfigRecoveryService();
 
 fn get_files() -> Vec<_File> {
     vec![
-        _File::content("settings.json".to_string(), "".to_string(),
-                       serde_json::to_string(&Settings::new()).unwrap()),
+        _File::content(
+            "settings.json".to_string(),
+            "".to_string(),
+            PARSING_SERVICE.to_string(Settings::new()).unwrap(),
+        ),
         _File::content(
             "recent-projects.json".to_string(),
             "".to_string(),
@@ -242,25 +255,31 @@ fn get_files() -> Vec<_File> {
         _File::content(
             "templates.json".to_string(),
             "".to_string(),
-            serde_json::to_string(&vec![ProjectTemplate::default().clone()]).unwrap().to_string(),
+            PARSING_SERVICE
+                .to_string(&vec![ProjectTemplate::default().clone()])
+                .unwrap(),
         ),
         _File::content(
             "packages.json".to_string(),
             "".to_string(),
             "[]".to_string(),
         ),
-        _File::new("".to_string(), "icons".to_string()),
-        _File::new("".to_string(), "aside_icons".to_string()),
         _File::content(
             "file_ext_icons.json".to_string(),
             "".to_string(),
-            r#"[{"theme":"_", scheme: 1, "icons": []}]"#.to_string(),
+            PARSING_SERVICE
+                .to_string(vec![FsConfigIcons::default()])
+                .unwrap(),
         ),
         _File::content(
             "file_templates.json".to_string(),
             "".to_string(),
-            r#"[{"id":"empty","title":"Empty File","typ":"file","icon":"any.svg"},{"id":"dir","title":"Directory","typ":"dir","icon":"dir.svg"}]"#.to_string()),
-
+            PARSING_SERVICE
+                .to_string(&vec![ConfigFsTemplate::file(), ConfigFsTemplate::dir()])
+                .unwrap(),
+        ),
+        _File::dir("icons".to_string()),
+        _File::dir("aside_icons".to_string()),
     ]
 }
 
@@ -392,5 +411,27 @@ impl TConfigRecoveryService for ConfigRecoveryService {
         FS_WRITE_SERVICE.create_file(&path.clone())?;
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
         Ok(())
+    }
+}
+
+pub struct ParsingService();
+
+impl TParsingService for ParsingService {
+    fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError> {
+        let res: String = serde_json::to_string(&obj).map_err(|e| ParsingError::Serialize {
+            path: Default::default(),
+            err: e,
+        })?;
+
+        Ok(res)
+    }
+
+    fn from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError> {
+        let res: T = serde_json::from_str(&obj).map_err(|e| ParsingError::Deserialize {
+            path: Path::new(""),
+            json: obj.to_string(),
+            err: e,
+        })?;
+        Ok(res)
     }
 }

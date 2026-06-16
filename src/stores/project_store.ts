@@ -12,7 +12,7 @@ interface Type{
 }
 
 
-export const projectStore=create<Type>((set, get)=>({
+export const projectStore = create<Type>((set, _) => ({
     path_to_current_project: "",
     current_project: null,
     set_path_to_current_project:(path: string)=>set({

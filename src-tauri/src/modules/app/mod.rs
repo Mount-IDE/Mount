@@ -8,7 +8,8 @@ use super::contexts::filesystem::app::services::{
 use crate::modules::contexts::project::app::services::{ActionProjectService, ProjectService};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
-use crate::modules::services::config::{ConfigRecoveryService, ConfigService};
+use crate::modules::services::config::{ConfigRecoveryService, ConfigService, ParsingService};
+use crate::modules::services::traits::TParsingService;
 use std::sync::OnceLock;
 use tauri::AppHandle;
 
@@ -25,3 +26,5 @@ pub static SETTINGS: OnceLock<Settings> = OnceLock::new();
 
 pub static TERMINAL_SERVICE: TerminalService = TerminalService;
 pub static ACTION_PROJECT_SERVICE: ActionProjectService = ActionProjectService();
+
+pub static PARSING_SERVICE: ParsingService = ParsingService();
