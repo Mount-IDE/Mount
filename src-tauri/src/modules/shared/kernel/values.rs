@@ -148,13 +148,14 @@ pub struct IfStatementPart {
     pub value: Val,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct Dependency {
     program: String,
+    platform: Option<String>,
     level: DependencyLevel,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub enum DependencyLevel {
     CRITICAL,
     CONFLICTS,

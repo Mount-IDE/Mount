@@ -2,11 +2,16 @@ use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
 use super::default::workspace::*;
+use crate::modules::contexts::launch::domain::entities::{
+    LaunchObject, LaunchTemplate, LaunchTemplateReference,
+};
 use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionOnError, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
 };
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{IfStatementPart, ParameterTyp, Path, Schema, Val};
+use crate::modules::shared::kernel::values::{
+    Dependency, IfStatementPart, ParameterTyp, Path, Schema, Val,
+};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -63,6 +68,8 @@ pub struct WorkSpace {
     pub widgets: Vec<Widget>,
     pub buttons: Vec<Button>,
     pub opened_files: Vec<OpenedFile>,
+    pub launch_references: Vec<LaunchTemplateReference>,
+    pub launch_objects: Vec<LaunchObject>,
 }
 
 impl Default for WorkSpace {
@@ -74,6 +81,8 @@ impl Default for WorkSpace {
             widgets: Vec::new(),
             buttons: buttons(),
             opened_files: Vec::new(),
+            launch_references: Vec::new(),
+            launch_objects: Vec::new(),
         }
     }
 }
@@ -86,6 +95,8 @@ impl WorkSpace {
             widgets: Vec::new(),
             buttons: Vec::new(),
             opened_files: Vec::new(),
+            launch_objects: Vec::new(),
+            launch_references: Vec::new(),
         }
     }
 }
@@ -201,6 +212,10 @@ pub struct ProjectTemplate {
     pub startup: TemplateStartup,
     #[serde(default)]
     pub packages_id: Vec<String>,
+    #[serde(default)]
+    pub dependencies: Vec<Dependency>,
+    #[serde(default)]
+    pub launches: Vec<LaunchTemplate>,
 }
 
 impl Default for ProjectTemplate {
@@ -212,6 +227,8 @@ impl Default for ProjectTemplate {
             meta: Some(TemplateMeta::default()),
             startup: TemplateStartup::new(),
             packages_id: vec![],
+            dependencies: Vec::new(),
+            launches: Vec::new(),
         }
     }
 }
@@ -224,6 +241,8 @@ impl ProjectTemplate {
             meta: None,
             startup: TemplateStartup::new(),
             packages_id: Vec::new(),
+            dependencies: Vec::new(),
+            launches: Vec::new(),
         }
     }
 }

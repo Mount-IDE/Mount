@@ -1,3 +1,4 @@
+use crate::modules::contexts::launch::domain::entities::{LaunchObject, LaunchTemplate};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use thiserror::Error;
@@ -183,6 +184,23 @@ pub enum TerminalError {
     Close { err: std::io::Error, id: String },
 }
 
+#[derive(Debug, Error)]
+pub enum LaunchError {
+    #[error("Invalid object of launch configuration {0:?}")]
+    InvalidObject(LaunchObject),
+    #[error("Error while launch {0:?}")]
+    ErrorWhileLaunch(LaunchObject),
+    #[error("error while compile template {0:?}")]
+    InvalidTemplate(LaunchTemplate),
+}
+
+impl From<LaunchError> for ErrorDto {
+    fn from(value: LaunchError) -> Self {
+        Self {
+            message: format!("{:?}", value),
+        }
+    }
+}
 impl From<TerminalError> for ErrorDto {
     fn from(value: TerminalError) -> Self {
         Self {
