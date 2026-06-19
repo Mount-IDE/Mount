@@ -70,6 +70,7 @@ pub struct WorkSpace {
     pub opened_files: Vec<OpenedFile>,
     pub launch_references: Vec<LaunchTemplateReference>,
     pub launch_objects: Vec<LaunchObject>,
+    pub launch_templates: Vec<LaunchTemplate>,
 }
 
 impl Default for WorkSpace {
@@ -83,6 +84,7 @@ impl Default for WorkSpace {
             opened_files: Vec::new(),
             launch_references: Vec::new(),
             launch_objects: Vec::new(),
+            launch_templates: Vec::new(),
         }
     }
 }
@@ -97,6 +99,7 @@ impl WorkSpace {
             opened_files: Vec::new(),
             launch_objects: Vec::new(),
             launch_references: Vec::new(),
+            launch_templates: Vec::new(),
         }
     }
 }
@@ -228,7 +231,7 @@ impl Default for ProjectTemplate {
             startup: TemplateStartup::new(),
             packages_id: vec![],
             dependencies: Vec::new(),
-            launches: Vec::new(),
+            launches: vec![LaunchTemplate::default()],
         }
     }
 }

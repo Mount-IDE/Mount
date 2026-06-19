@@ -1,0 +1,20 @@
+.launch-section {
+    width: 90%;
+}
+
+.launch-section-head {
+    width: 100%;
+    height: 2vh;
+
+    & p {
+        width: 100%;
+        height: 100%;
+        color: var(--subtitle);
+        font: 10pt "JetBrains Mono";
+    }
+}
+
+.launch-section-options {
+    width: 100%;
+}
+

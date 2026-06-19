@@ -2,6 +2,7 @@ pub mod cache;
 pub mod config;
 pub mod dialog;
 pub mod fs;
+pub mod launch;
 pub mod project;
 pub mod terminal;
 pub mod utils;

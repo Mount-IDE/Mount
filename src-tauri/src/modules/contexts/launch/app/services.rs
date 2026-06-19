@@ -9,6 +9,7 @@ use crate::modules::contexts::project::app::traits::TActionProjectService;
 use crate::modules::contexts::project::domain::entities::{Action, ProjectTemplate, Var};
 use crate::modules::shared::kernel::values::Val;
 use regex::Regex;
+use std::collections::HashMap;
 
 #[allow(unused)]
 pub struct LaunchCompileService();
@@ -23,24 +24,14 @@ impl TLaunchCompileService for LaunchCompileService {
         &self,
         l_template: &LaunchTemplate,
         template: &ProjectTemplate,
-        results: &LaunchTemplateResult,
     ) -> Option<LaunchTemplateReference> {
-        let meta = results.get(&-1);
-        if let None = meta {
-            return None;
-        }
-        let meta = meta.unwrap();
-        let name = meta.get("name");
-        if let None = name {
-            return None;
-        }
-        let name = name.unwrap();
         let obj = LaunchTemplateReference {
             id: 0,
             template: (template.id.clone(), l_template.id.clone()),
             scheme: Default::default(),
-            name: name.clone(),
-            results: results.clone(),
+            icon: l_template.icon.clone(),
+            name: l_template.title.clone(),
+            results: HashMap::new(),
         };
 
         Some(obj)
@@ -50,8 +41,8 @@ impl TLaunchCompileService for LaunchCompileService {
         &self,
         reference: &LaunchTemplateReference,
         vars: &Vec<Var>,
-        template: LaunchTemplate,
-        results: LaunchTemplateResult,
+        template: &LaunchTemplate,
+        results: &LaunchTemplateResult,
     ) -> Option<LaunchObject> {
         let passed = self.compile_condition(&vars, &template, &results);
         if passed.len() == 0 {

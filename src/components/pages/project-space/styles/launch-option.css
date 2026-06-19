@@ -1,0 +1,39 @@
+.launch-option {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.launch-option-child {
+    width: 100%;
+    display: flex;
+    gap: 5px;
+
+    &.check {
+    }
+
+    &.input {
+        flex-direction: column;
+
+        & p {
+            color: var(--subtitle);
+            font: 10pt "JetBrains Mono Light";
+        }
+
+        & input {
+            border: none;
+            outline: none;
+            width: 90%;
+            background: black;
+            height: 4vh;
+            color: var(--subtitle);
+            padding: 5px;
+            font: 10pt "JetBrains Mono Light";
+
+            &:focus {
+                color: var(--title);
+            }
+        }
+    }
+}

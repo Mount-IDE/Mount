@@ -200,14 +200,24 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn save_project(&self, _project: &Project) -> Result<(), ProjectError> {
+        println!("PROJECT SAVING...");
         let path = _project.path.clone();
         let json =
             serde_json::to_string(&_project.clone()).map_err(|e| ParsingError::Serialize {
                 path: path.clone(),
                 err: e,
             })?;
-        let file = PFile::from_path_reg(path.clone());
+        println!("PROJECT JSON CONSTRUCTED");
+        let path_ = make_path(vec![
+            path.clone().get().as_str(),
+            _project.name.clone().as_str(),
+            ".mount",
+            "project.json",
+        ]);
+        let file = PFile::from_path_reg(path_);
+        println!("FILE {file:?}");
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
+        println!("PROJECT SAVED");
         Ok(())
     }
 

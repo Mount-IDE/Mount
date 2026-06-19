@@ -12,11 +12,46 @@ pub struct LaunchTemplate {
     #[serde(default)]
     pub scheme: Schema,
     #[serde(default)]
+    pub icon: Option<String>,
+    #[serde(default)]
     pub sections: Vec<LaunchSection>,
     #[serde(default)]
     pub actions: Vec<LaunchAction>,
     #[serde(default)]
     pub functions: Vec<LaunchFunction>,
+}
+
+impl Default for LaunchTemplate {
+    fn default() -> Self {
+        Self {
+            id: -1,
+            title: String::from("Basic Configuration"),
+            scheme: Default::default(),
+            icon: None,
+            sections: vec![LaunchSection {
+                id: 0,
+                title: None,
+                options: vec![LaunchOption {
+                    id: "command".to_string(),
+                    title: "Command".to_string(),
+                    typ: Default::default(),
+                    def: Default::default(),
+                }],
+            }],
+            actions: vec![LaunchAction {
+                id: 0,
+                next: None,
+                if_: vec![],
+                command: Some(LaunchActionCommand {
+                    command: "".to_string(),
+                    args: Some(vec!["#0.command".to_string()]),
+                    cwd: None,
+                    env: None,
+                }),
+            }],
+            functions: vec![],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -25,6 +60,8 @@ pub struct LaunchTemplateReference {
     pub id: i8,
     #[serde(default)]
     pub template: (String, i8),
+    #[serde(default)]
+    pub icon: Option<String>,
     #[serde(default)]
     pub scheme: Schema,
     #[serde(default)]
@@ -100,12 +137,13 @@ pub type LaunchTemplateResult = HashMap<i8, HashMap<String, String>>;
 pub struct LaunchOptionType {
     #[serde(default)]
     pub typ: LaunchOptionTyp,
+    pub list_types: Option<Vec<String>>,
+    pub path_type: Option<String>,
     #[serde(default)]
     pub restriction: Option<i8>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[serde(untagged)]
 pub enum LaunchOptionTyp {
     input,
     check,
@@ -123,14 +161,6 @@ pub struct LaunchAction {
     pub if_: Vec<Vec<IfStatementPart>>,
     #[serde(default)]
     pub command: Option<LaunchActionCommand>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-pub struct LaunchActionAction {
-    #[serde(default)]
-    pub function: String,
-    #[serde(default)]
-    pub args: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -190,6 +220,8 @@ impl Default for LaunchOptionType {
         Self {
             typ: Default::default(),
             restriction: None,
+            list_types: None,
+            path_type: None,
         }
     }
 }

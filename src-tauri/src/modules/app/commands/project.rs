@@ -7,6 +7,7 @@ use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWrite
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
     Action, Project, ProjectPackage, ProjectTag, ProjectTemplate, Var,
@@ -77,6 +78,7 @@ pub async fn create_project(
     packages: HashMap<String, ProjectPackage>,
     tags: Vec<ProjectTag>,
 ) -> Result<Project, ErrorDto> {
+    println!("template {:?}", template);
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
         .get(&-4i8)
@@ -221,6 +223,19 @@ pub async fn create_project(
         let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
 
         project.vars = val.0.clone();
+        project.template = template.clone();
+        project.workspace.launch_templates = template.launches.clone();
+        let contains = project
+            .workspace
+            .launch_templates
+            .iter()
+            .find(|e| e.id == -1);
+        if contains.is_none() {
+            project
+                .workspace
+                .launch_templates
+                .insert(0, LaunchTemplate::default());
+        }
         let json =
             serde_json::to_string(&project.clone()).map_err(|e| ProjectError::ParsingError {
                 err: ParsingError::Serialize {

@@ -5,6 +5,7 @@ use crate::modules::contexts::launch::domain::entities::{
     LaunchFunctionArgument, LaunchTemplateResult, LaunchVecType,
 };
 use crate::modules::shared::kernel::values::Path;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 fn get_from(addr: Vec<LaunchVecType>, results: &LaunchTemplateResult) -> Option<String> {
@@ -77,7 +78,8 @@ pub fn read_field(
     None
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum FunctionResult {
     SCALAR(String),
     VEC(Vec<LaunchVecType>),

@@ -1,4 +1,6 @@
-use crate::modules::contexts::launch::domain::entities::{LaunchObject, LaunchTemplate};
+use crate::modules::contexts::launch::domain::entities::{
+    LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
+};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use thiserror::Error;
@@ -192,6 +194,14 @@ pub enum LaunchError {
     ErrorWhileLaunch(LaunchObject),
     #[error("error while compile template {0:?}")]
     InvalidTemplate(LaunchTemplate),
+    #[error("error while compile reference {0:?}")]
+    RefFailed(LaunchTemplate),
+    #[error("error while compile object {0:?}")]
+    ObjFailed(LaunchTemplate),
+    #[error("error while running function {0:?}")]
+    RunFn(LaunchFunction),
+    #[error("not all objects compiled {0:?}")]
+    NotAllObjects(LaunchTemplateReference),
 }
 
 impl From<LaunchError> for ErrorDto {

@@ -2,7 +2,7 @@ use crate::modules::contexts::filesystem::app::utils::split_path;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PFile {
     pub name: String,
     pub path: Path,

@@ -1,0 +1,96 @@
+#launch {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 20%;
+    height: 100%;
+    gap: 10px;
+    -webkit-app-region: no-drag
+}
+
+#launch-list {
+    width: 200px;
+    height: 100%;
+}
+
+#launch-current {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+#launch-current-p {
+    color: var(--title);
+    font: 9pt "JetBrains Mono Light";
+}
+
+.launch-current-img {
+    height: 80%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        display: block;
+    }
+}
+
+.launch-current-img2 {
+    height: 80%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 60%;
+        height: 60%;
+        object-fit: contain;
+        display: block;
+    }
+}
+
+#launch-launch {
+    background: transparent;
+    border: none;
+    height: 80%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        display: block;
+    }
+}
+
+#launch-actions {
+    background: transparent;
+    border: none;
+    height: 80%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        display: block;
+    }
+}

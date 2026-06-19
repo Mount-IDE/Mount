@@ -1,4 +1,3 @@
-//import {RefObject} from "react";
 
 interface IRecentProject {
     name: string,
@@ -25,12 +24,18 @@ interface IProject {
         tags: string[],
         group: string
     },
+    template: ITemplate,
     packages: string[],
     workspace:{
         widgets: {}[],
         buttons: IAsideButtonExtended[],
-        opened_files: OpenedFile[]
-    }
+        opened_files: OpenedFile[],
+        launch_references: LaunchTemplateReference[],
+        launch_objects: LaunchObject[],
+        launch_templates: LaunchTemplate[]
+    },
+    vars: IVar[],
+    tasks: any[],
 }
 
 
@@ -47,9 +52,17 @@ interface ITemplate {
         actions: IAction[],
         sections: ISection[]
     },
-    packages_id: string[]
+    packages_id: string[],
+    dependencies: Dependency[],
+    launches: LaunchTemplate[]
+
 }
 
+interface Dependency {
+    program: string,
+    platform?: string,
+    level: "CRITICAL" | "CONFLICTS" | "OPTIONAL"
+}
 
 interface IVar {
     name: String,
@@ -233,4 +246,88 @@ interface Cache {
     file_templates: configFsTemplate[]
     shells: string[]
 
+}
+
+
+interface LaunchTemplate {
+    id: number,
+    title: string,
+    scheme: number,
+    icon?: string,
+    sections: LaunchSection[],
+    actions: LaunchAction[],
+    functions: LaunchFunction[]
+}
+
+interface LaunchTemplateReference {
+    id: number,
+    template: [string, number],
+    scheme: number,
+    icon?: string,
+    name: string,
+    results: LaunchTemplateResult
+}
+
+type LaunchTemplateResult = Record<number, Record<string, string>>
+
+interface LaunchFunction {
+    id: number,
+    actions: LaunchFunctionAction[]
+}
+
+interface LaunchFunctionAction {
+    function: string,
+    args?: [string, [string, number][]][]
+}
+
+interface LaunchSection {
+    id: number,
+    title?: string,
+    options: LaunchOption[]
+}
+
+interface LaunchOption {
+    id: string,
+    title: string,
+    typ: {
+        typ: "input" | "check" | "path" | "list",
+        restriction?: number,
+        list_types?: string[],
+        path_type?: "file" | "dir" | "all"
+    },
+    def: string | number
+}
+
+interface LaunchAction {
+    id: number,
+    next?: number,
+    if_: IfStatementPart[][],
+    command: {
+        command: string,
+        args?: string,
+        cwd?: string,
+        env?: [string, string][]
+    }[]
+}
+
+interface LaunchObject {
+    id: number,
+    launch_reference: number,
+    scheme: number,
+    tasks: LaunchTask[]
+}
+
+
+interface LaunchTask {
+    SINGLE: {
+        command: string,
+        env?: [string, string][],
+        cwd?: string
+    },
+    GRAPH: {
+        command: string,
+        next: LaunchTask,
+        env?: [string, string][],
+        cwd?: string
+    }
 }

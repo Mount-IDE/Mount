@@ -5,6 +5,7 @@ pub mod utils;
 use super::contexts::filesystem::app::services::{
     FileSystemReadService, FileSystemWatchService, FileSystemWriteService,
 };
+use crate::modules::contexts::launch::app::services::LaunchCompileService;
 use crate::modules::contexts::project::app::services::{ActionProjectService, ProjectService};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
@@ -28,3 +29,4 @@ pub static TERMINAL_SERVICE: TerminalService = TerminalService;
 pub static ACTION_PROJECT_SERVICE: ActionProjectService = ActionProjectService();
 
 pub static PARSING_SERVICE: ParsingService = ParsingService();
+pub static LAUNCH_COMPILE_SERVICE: LaunchCompileService = LaunchCompileService();

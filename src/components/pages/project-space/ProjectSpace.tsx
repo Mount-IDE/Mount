@@ -7,6 +7,8 @@ import Modal from "../../common/Modal.tsx";
 import {useEffect} from "react";
 import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
+import {launchStore} from "../../../stores/launch_store.ts";
+import LaunchPage from "./LaunchPage.tsx";
 
 
 export default function ProjectSpace() {
@@ -15,6 +17,8 @@ export default function ProjectSpace() {
     const modal_settings = menuStore(state=>state.modal_settings);
     const project = projectStore(state => state.current_project)
     const set_project = projectSettingsStore(state => state.set_project)
+    const launch_opened = launchStore(state => state.opened)
+
     useEffect(() => {
         set_project(project)
     }, [project])
@@ -24,6 +28,10 @@ export default function ProjectSpace() {
                 show_modal && modal_settings!=null &&
                 <Modal {...modal_settings}/>
 
+            }
+            {
+                launch_opened &&
+                <LaunchPage/>
             }
             {
                 show_file_creation_menu &&

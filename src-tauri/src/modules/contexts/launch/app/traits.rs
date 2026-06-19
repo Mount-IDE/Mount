@@ -4,7 +4,6 @@ use crate::modules::contexts::launch::domain::entities::{
     LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
-use crate::modules::contexts::project::domain::values::CreateProjectTemplate;
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 
@@ -13,14 +12,13 @@ pub trait TLaunchCompileService {
         &self,
         l_template: &LaunchTemplate,
         template: &ProjectTemplate,
-        results: &LaunchTemplateResult,
     ) -> Option<LaunchTemplateReference>;
     fn compile_object(
         &self,
         reference: &LaunchTemplateReference,
         vars: &Vec<Var>,
-        template: LaunchTemplate,
-        results: LaunchTemplateResult,
+        template: &LaunchTemplate,
+        results: &LaunchTemplateResult,
     ) -> Option<LaunchObject>;
 
     fn get_from_results(&self, results: &LaunchTemplateResult, addr: String) -> Option<Val>;

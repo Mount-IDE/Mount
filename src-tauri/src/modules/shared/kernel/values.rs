@@ -156,6 +156,7 @@ pub struct Dependency {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
+#[serde(untagged)]
 pub enum DependencyLevel {
     CRITICAL,
     CONFLICTS,

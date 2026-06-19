@@ -1,5 +1,5 @@
 import "./styles/context-menu.css"
-import {RefObject} from "react";
+import {RefObject, useEffect, useRef, useState} from "react";
 
 
 export interface IContextMenuButton {
@@ -14,8 +14,9 @@ type Props = {
     buttons: IContextMenuButton[] // array of buttons
     x: number; // x cord of mouse click
     y: number; // y cord of mouse click
-    show: boolean; // if true that component can be visible and hidden otherwise
+    show?: boolean; // if true that component can be visible and hidden otherwise
     ref?: RefObject<HTMLDivElement | null> // reference to manage the component
+    auto?: boolean // if true - component close automatically
 }
 
 
@@ -28,17 +29,57 @@ type Props = {
  */
 export default function ContextMenu(props: Props) {
 
+
+    const ref = useRef<HTMLDivElement>(null)
+
+    const [context, setShowContext] = useState(props.show == undefined ? false : props.show);
+
+
+    useEffect(() => {
+
+        if (!props.auto) return
+
+        function handler(e: MouseEvent) {
+            const tg = ref.current;
+            console.log({
+                target: e.target,
+                current: tg,
+                contains: tg?.contains(e.target as Node)
+            });
+
+            if (!tg) return;
+            console.log("click");
+            const elem = e.target as Element
+            if (!(tg.contains(elem) || tg == elem)) {
+                setShowContext(false)
+
+            }
+
+        }
+
+        window.addEventListener("click", handler);
+        return () => {
+            window.removeEventListener("click", handler);
+        };
+
+    }, [props.auto]);
+
+    useEffect(() => {
+        setShowContext(props.show != undefined ? props.show : false)
+    }, [props.show]);
+
+
     return (
-        <div ref={props.ref}
-            style={{
-                opacity: props.show? 1:0,
-                pointerEvents: props.show?"all": "none",
-                left: `${props.x}px`,
-                top: `${props.y}px`,
-            }}
-            className={"context-menu"}>
+        <div ref={props.auto ? ref : props.ref}
+             style={{
+                 opacity: context ? 1 : 0,
+                 pointerEvents: context ? "all" : "none",
+                 left: `${props.x}px`,
+                 top: `${props.y}px`,
+             }}
+             className={"context-menu"}>
             {
-                props.buttons.map((el,i)=>
+                props.buttons.map((el, i) =>
                     <ContextMenuButton obj={el} key={i}/>
                 )
             }
@@ -62,7 +103,7 @@ function ContextMenuButton(props: ButtonProps) {
         <div
 
             className={"context-menu-button"}
-             onClick={obj.cb}
+            onClick={obj.cb}
         >
             {obj.icon !== undefined &&
                 <div className={"context-menu-button-img"}>
@@ -71,7 +112,7 @@ function ContextMenuButton(props: ButtonProps) {
             }
             <p className={"context-menu-button-p"}>{obj.title}</p>
             {
-                obj.hotkeys !==undefined &&
+                obj.hotkeys !== undefined &&
                 <p className={"context-menu-button-hotkey"}>{obj.hotkeys}</p>
             }
         </div>

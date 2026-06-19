@@ -5,6 +5,7 @@ import close from "../../assets/title-close.svg"
 import {getCurrentWindow} from "@tauri-apps/api/window"
 import pageStore, {Window} from "../../stores/page_store.ts";
 import MenuBar from "./MenuBar.tsx";
+import Launch from "./Launch.tsx";
 
 export default function TitleBar() {
 
@@ -12,22 +13,22 @@ export default function TitleBar() {
     const buttons = [
         {
             icon: wrap,
-            cb: async ()=>{
+            cb: async () => {
                 await appWindow.minimize();
             }
-        },{
+        }, {
             icon: resize,
-            cb: async ()=>{
-                const res=await appWindow.isMaximized();
+            cb: async () => {
+                const res = await appWindow.isMaximized();
                 if (res) {
                     await appWindow.unmaximize()
-                }else{
+                } else {
                     await appWindow.maximize();
                 }
             }
-        },{
+        }, {
             icon: close,
-            cb: async()=>{
+            cb: async () => {
                 await appWindow.close()
             }
         },
@@ -40,10 +41,13 @@ export default function TitleBar() {
         <div id={"title-bar"}>
             {
                 current_page == Window.Project &&
-                <MenuBar/>
+                <>
+                    <MenuBar/>
+                    <Launch/>
+                </>
             }
             <div id={"title-bar-buttons"}>
-                {buttons.map(el=>{
+                {buttons.map(el => {
                     return <TitleBarButton key={el.icon} {...el}/>
                 })}
             </div>
@@ -54,7 +58,7 @@ export default function TitleBar() {
 
 type Props = {
     icon: string;
-    cb: ()=>void;
+    cb: () => void;
 }
 
 function TitleBarButton(props: Props) {

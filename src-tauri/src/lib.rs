@@ -2,6 +2,7 @@ use crate::modules::app::cmd::{get_projects, show_win};
 use crate::modules::app::commands::cache::*;
 use crate::modules::app::commands::config::*;
 use crate::modules::app::commands::fs::*;
+use crate::modules::app::commands::launch::*;
 use crate::modules::app::commands::project::*;
 use crate::modules::app::commands::terminal::*;
 use crate::modules::app::commands::utils::*;
@@ -87,7 +88,12 @@ pub fn run() {
             close_terminal,
             close_window_terminals,
             remove_project,
-            save_project
+            save_project,
+            create_ref,
+            create_object,
+            call_function,
+            create_objects,
+            create_references
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
