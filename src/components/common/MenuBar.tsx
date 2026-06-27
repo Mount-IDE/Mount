@@ -137,8 +137,6 @@ export default function MenuBar() {
     const recent_projects = cacheStore(state => state.recent_projects);
     const current_project = projectStore(state => state.current_project);
 
-    console.log(recent_projects)
-
     const projects: IMenuBarSection = {
         label: `${current_project?.name ?? ""}`,
         buttons: [

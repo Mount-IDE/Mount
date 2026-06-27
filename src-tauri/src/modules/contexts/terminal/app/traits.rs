@@ -13,6 +13,8 @@ pub trait TTerminalService {
         cwd: Path,
         rows: u16,
         cols: u16,
+        is_launch: bool,
+        id: Option<String>,
         state: State<'_, SharedTerminalManager>,
     ) -> Result<String, TerminalError>;
 

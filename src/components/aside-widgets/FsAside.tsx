@@ -131,7 +131,6 @@ export default function FsAside() {
                     title: "Paste"
                 }, {
                     cb(): void {
-                        console.log("saved", path_file)
                         if (path_file) {
                             save_file(path_file!)
                         }
@@ -173,12 +172,10 @@ export default function FsAside() {
                         const buttons: ModalButton[] = [
                             {
                                 cb: (val) => {
-                                    console.log("rename ready", val)
                                     if (val !== undefined) {
                                         const os = cacheStore.getState().os;
                                         const sep = os!=="windows"?"/":"\\"
                                         const path_ = `${path}${sep}${val}`
-                                        console.log("rename: ", obj.path, path_);
                                         try {
                                             invoke("rename_file", {from: obj.path, to: path_}).then();
                                             close_modal();
@@ -273,12 +270,10 @@ export default function FsAside() {
                         const buttons: ModalButton[] = [
                             {
                                 cb: (val) => {
-                                    console.log("rename ready", val)
                                     if (val !== undefined) {
                                         const os = cacheStore.getState().os;
                                         const sep = os !== "windows" ? "/" : "\\"
                                         const path_ = `${path}${sep}${val}`
-                                        console.log("rename: ", obj.path, path_);
                                         try {
                                             invoke("rename_file", {from: obj.path, to: path_}).then();
                                             close_modal();

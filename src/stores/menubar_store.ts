@@ -62,7 +62,6 @@ export const menuBarStore = create<Type>(() => ({
     open_recent_project(): void {
     },
     async close_project(): Promise<void> {
-        console.log("clicked")
         try {
             await invoke("unwatch_project");
             await invoke("close_window_terminals");

@@ -25,7 +25,7 @@ impl TerminalManager {
                 }
             })
             .collect::<Vec<_>>();
-        println!("remove_window_terminals {} count={}", window_id, ids.len());
+        // println!("remove_window_terminals {} count={}", window_id, ids.len());
         ids.into_iter()
             .filter_map(|id| self.terminals.remove(&id))
             .collect()

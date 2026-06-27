@@ -21,7 +21,6 @@ export default function CodeFiles(props: Props) {
     const add_to_space = codeSpaceStore(state => state.add_file_to_code_space)
     function cb(obj_: Opened){
         remove_file(props.id, obj_);
-        console.log("deleted")
     }
     function onSelect(obj_: Opened){
         props.setCurrent(obj_.id, obj_.cache_id);

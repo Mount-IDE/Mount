@@ -189,12 +189,6 @@ impl Var {
     pub fn new(name: String, value: Val) -> Var {
         Self { name, value }
     }
-    pub fn from(_json: String) {
-        todo!()
-    }
-    pub fn to_json(&self) -> String {
-        todo!()
-    }
 }
 
 ///
@@ -283,8 +277,8 @@ pub struct Section {
     pub params: Vec<Parameter>,
 }
 
-#[allow(unused_variables)]
 impl Section {
+    #[allow(unused)]
     pub fn new(id: i32, label: String, list: Option<(bool, bool)>) -> Section {
         Self {
             id: 0,
@@ -310,6 +304,7 @@ pub struct Action {
     pub command: Vec<ActionCommand>,
 }
 impl Action {
+    #[allow(unused)]
     pub fn new() -> Action {
         Self {
             id: 0,
@@ -338,14 +333,6 @@ impl Action {
             .map_err(|_| ProjectError::IncorrectAddress { address: addr })?;
         Ok((section, parameter))
     }
-    // pub fn get_address(&self) -> Result<(i8, String), ProjectError> {
-    //     if let None = self.for_ {
-    //         return Err(ProjectError::IncorrectAddress {
-    //             address: "".to_string(),
-    //         });
-    //     }
-    //     Self::getaddr(self.for_.clone().unwrap())
-    // }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
@@ -364,6 +351,7 @@ pub struct Parameter {
 }
 
 impl Parameter {
+    #[allow(unused)]
     pub fn new() -> Parameter {
         Self {
             out: String::new(),
@@ -389,6 +377,7 @@ pub struct ProjectPackage {
 }
 
 impl ProjectPackage {
+    #[allow(unused)]
     pub fn new() -> ProjectPackage {
         Self {
             id: String::new(),
@@ -421,6 +410,7 @@ impl Default for PackageStartup {
 }
 
 impl PackageStartup {
+    #[allow(unused)]
     pub fn new() -> PackageStartup {
         Self {
             var: Vec::new(),

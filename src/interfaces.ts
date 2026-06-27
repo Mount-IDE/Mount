@@ -319,15 +319,16 @@ interface LaunchObject {
 
 
 interface LaunchTask {
-    SINGLE: {
+    SINGLE?: {
         command: string,
         env?: [string, string][],
         cwd?: string
     },
-    GRAPH: {
+    GRAPH?: {
         command: string,
         next: LaunchTask,
         env?: [string, string][],
         cwd?: string
     }
 }
+

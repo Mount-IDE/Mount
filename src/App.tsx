@@ -33,11 +33,9 @@ function App() {
     async function move_to_cache() {
         try {
             const cache = await invoke<Cache>("get_cache");
-            console.log(cache)
             cacheStore.getState().set_data_dir(cache.data_dir_path);
             cacheStore.getState().set_file_templates(cache.file_templates);
             cacheStore.getState().set_os(cache.os);
-            console.log(cache.projects_dir)
             cacheStore.getState().set_projects_path(cache.projects_dir);
             mainPageStore.getState().set_groups(cache.groups.map((el, i): Group => ({
                 id: i, name: el

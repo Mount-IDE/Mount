@@ -87,7 +87,6 @@ function CodeEditor(props: CodeProps) {
 
     function keyDown(e: React.KeyboardEvent) {
         let cur = textareaRef.current;
-        console.log("down")
         if (e.ctrlKey && e.key == "d") {
             let start = cur!.selectionStart;
             let end = cur!.selectionEnd;

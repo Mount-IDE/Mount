@@ -202,6 +202,8 @@ pub enum LaunchError {
     RunFn(LaunchFunction),
     #[error("not all objects compiled {0:?}")]
     NotAllObjects(LaunchTemplateReference),
+    #[error("error while spawn command")]
+    Spawn,
 }
 
 impl From<LaunchError> for ErrorDto {

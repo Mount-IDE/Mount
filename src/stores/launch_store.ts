@@ -1,6 +1,7 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
 import {projectStore} from "./project_store.ts";
+import {asideLaunchStore} from "./aside_launch_store.ts";
 
 
 interface Type {
@@ -61,7 +62,6 @@ export const launchStore = create<Type>((set, get) => ({
 
     },
     write_temp(section: number, option: string, value: string, ref: number, project: IProject | null): void {
-        console.log("WRITE", section, option, value);
         if (!project) return
 
         let temp = project.workspace.launch_references;
@@ -104,6 +104,10 @@ export const launchStore = create<Type>((set, get) => ({
         set({opened: val})
     },
     run_launch(launch: LaunchObject): void {
+        const project = projectStore.getState().current_project;
+        const reference = project?.workspace.launch_references.find((ref) => ref.id === launch.launch_reference);
+        asideLaunchStore.getState().start_launch(launch, reference?.name ?? `Launch ${launch.launch_reference}`);
+        set({current_obj: launch});
     },
     async compile_to_obj(ref: LaunchTemplateReference,
                          results: LaunchTemplateResult,

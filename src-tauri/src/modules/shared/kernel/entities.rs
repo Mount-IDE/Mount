@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(unused)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Package {}
 

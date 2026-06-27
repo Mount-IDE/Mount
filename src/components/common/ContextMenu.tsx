@@ -41,14 +41,9 @@ export default function ContextMenu(props: Props) {
 
         function handler(e: MouseEvent) {
             const tg = ref.current;
-            console.log({
-                target: e.target,
-                current: tg,
-                contains: tg?.contains(e.target as Node)
-            });
+
 
             if (!tg) return;
-            console.log("click");
             const elem = e.target as Element
             if (!(tg.contains(elem) || tg == elem)) {
                 setShowContext(false)

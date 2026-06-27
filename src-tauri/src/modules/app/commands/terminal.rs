@@ -12,6 +12,7 @@ pub async fn open_terminal(
     rows: u16,
     cols: u16,
     window: WebviewWindow,
+    is_launch: bool,
     state: State<'_, SharedTerminalManager>,
 ) -> Result<String, ErrorDto> {
     let id = TERMINAL_SERVICE
@@ -21,6 +22,8 @@ pub async fn open_terminal(
             Path::new(&cwd),
             rows,
             cols,
+            is_launch,
+            None,
             state,
         )
         .await?;

@@ -85,7 +85,6 @@ export default function ProjectSettings() {
                             )
                         projectSettingsStore.getState().set_opened(false)
                         pageStore.getState().setFilter(false)
-                        console.log(proj)
 
                     }}/>
                 </div>

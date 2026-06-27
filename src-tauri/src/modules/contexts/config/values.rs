@@ -24,7 +24,9 @@ pub struct FsIcon {
 ///
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum FsType {
+    #[allow(non_camel_case_types)]
     file,
+    #[allow(non_camel_case_types)]
     dir,
 }
 

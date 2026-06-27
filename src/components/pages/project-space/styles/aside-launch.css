@@ -1,0 +1,172 @@
+#aside-launch {
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#aside-launch-tabs {
+    width: 100%;
+    height: 32px;
+    display: flex;
+    border-bottom: 1px solid var(--border3);
+    background: var(--bg2);
+}
+
+#aside-launch-label {
+    height: 100%;
+    margin: 0 15px;
+    color: var(--title);
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+#aside-launch-other {
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    overflow: auto hidden;
+}
+
+.aside-launch-tab {
+    min-width: 120px;
+    max-width: 220px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 8px 0 12px;
+    border: 0;
+    border-right: 1px solid var(--border3);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.aside-launch-tab-active {
+    background: #101112;
+    color: #f4f4f5;
+}
+
+.aside-launch-tab span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aside-launch-status {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #71717a;
+}
+
+.aside-launch-status-queued {
+    background: #a1a1aa;
+}
+
+.aside-launch-status-running {
+    background: #22c55e;
+}
+
+.aside-launch-status-exited {
+    background: #64748b;
+}
+
+.aside-launch-status-failed {
+    background: #ef4444;
+}
+
+.aside-launch-tab-close {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+}
+
+.aside-launch-tab-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.aside-launch-tab-close img {
+    display: block;
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+}
+
+#aside-launch-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#aside-launch-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--subtitle);
+    font-size: 12px;
+}
+
+.aside-launch-proc {
+    position: absolute;
+    inset: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.aside-launch-proc-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.aside-launch-proc-fit {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.aside-launch-task-command {
+    flex: 0 0 auto;
+    max-height: 88px;
+    padding: 5px 8px;
+    border-left: 2px solid #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+    color: #e4e4e7;
+    font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.aside-launch-proc .xterm {
+    width: 100%;
+    height: 100%;
+}
+
+.aside-launch-proc .xterm-viewport {
+    background: transparent !important;
+}

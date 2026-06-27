@@ -60,6 +60,8 @@ impl TTerminalService for TerminalService {
         cwd: Path,
         rows: u16,
         cols: u16,
+        is_launch: bool,
+        id: Option<String>,
         state: State<'_, SharedTerminalManager>,
     ) -> Result<String, TerminalError> {
         let app = APP
@@ -70,7 +72,15 @@ impl TTerminalService for TerminalService {
             .clone();
 
         let shell = normalize_shell(shell);
-        let id = Uuid::new_v4().to_string();
+        let id = if let Some(id) = id {
+            id
+        } else {
+            if is_launch {
+                format!("LAUNCH::{}", Uuid::new_v4().to_string())
+            } else {
+                Uuid::new_v4().to_string()
+            }
+        };
         let cwd_str = cwd.get().to_string();
 
         let shell_for_spawn = shell.clone();

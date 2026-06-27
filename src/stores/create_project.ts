@@ -109,13 +109,10 @@ export const createProjectStore = create<Type>((set, get) => ({
             })
             let name = get().results?.["__meta__"]?.[-4]?.["project-name"];
             let path = get().results?.["__meta__"]?.[-4]?.["project-path"];
-            console.log(path, name);
 
-            console.log(get().results)
             let unified = await invoke<string>("make_path_command", {
                 components: [path, name]
             })
-            console.log(project);
             projectStore.getState().set_current_project(project);
             pageStore.getState().openProject();
             pageStore.getState().setFilter(false);

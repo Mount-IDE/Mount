@@ -78,7 +78,7 @@ pub async fn create_project(
     packages: HashMap<String, ProjectPackage>,
     tags: Vec<ProjectTag>,
 ) -> Result<Project, ErrorDto> {
-    println!("template {:?}", template);
+    // println!("template {:?}", template);
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
         .get(&-4i8)
@@ -111,14 +111,16 @@ pub async fn create_project(
     let additions = make_meta(meta.get(&-3i8), &tags);
 
     let mut vars = template.clone().startup.var;
-    vars.push(Var {
-        name: "project-name".to_string(),
-        value: Val::STRING(name.clone()),
-    });
-    vars.push(Var {
-        name: "project-path".to_string(),
-        value: Val::STRING(path.clone()),
-    });
+
+    vars.push(Var::new(
+        "project-name".to_string(),
+        Val::STRING(name.clone()),
+    ));
+    vars.push(Var::new(
+        "project-path".to_string(),
+        Val::STRING(path.clone()),
+    ));
+
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
@@ -198,7 +200,7 @@ pub async fn create_project(
     project.workspace.buttons = buttons;
 
     for (i, j) in results.clone() {
-        println!("{i}");
+        // println!("{i}");
         for (k, m) in j {
             println!("\t{k}");
             for (n, o) in m {
@@ -211,10 +213,10 @@ pub async fn create_project(
 
     if let Some(val) = tasks {
         // println!("TASKS: {:?}", val.1);
-
-        for i in val.1.clone() {
-            println!("TASK {i:?}");
-        }
+        //
+        // for i in val.1.clone() {
+        //     println!("TASK {i:?}");
+        // }
 
         let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
         let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);

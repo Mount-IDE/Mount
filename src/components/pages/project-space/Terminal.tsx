@@ -241,6 +241,7 @@ function TerminalProc({tabKey, cwd, active, shell, onExit, onReady}: TermProps) 
         invoke<string>("open_terminal", {
             shell,
             cwd,
+            isLaunch: false,
             rows: lastSizeRef.current.rows,
             cols: lastSizeRef.current.cols,
         })

@@ -19,7 +19,6 @@ export default function CreateProject() {
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
 
     async function create_project_() {
-        console.log(createProjectStore.getState().results)
         if (current_template) {
             let res = await create_project(current_template!);
 

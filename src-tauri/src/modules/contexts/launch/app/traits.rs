@@ -1,11 +1,13 @@
 use crate::modules::contexts::launch::app::functions::FunctionResult;
+use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchAction, LaunchFunction, LaunchObject, LaunchTask, LaunchTemplate,
+    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTask, LaunchTemplate,
     LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
+use tauri::{AppHandle, State};
 
 pub trait TLaunchCompileService {
     fn compile_reference(
@@ -52,5 +54,21 @@ pub trait TLaunchCompileService {
     ) -> Option<FunctionResult>;
 }
 pub trait TLaunchRunService {
-    fn launch_task(&self, project: &Project, object: LaunchObject) -> Result<(), LaunchError>;
+    async fn launch_task(
+        &self,
+        task: LaunchFlatTask,
+        window_id: String,
+        project: Project,
+        app: AppHandle,
+        state: State<'_, SharedLaunchManager>,
+    ) -> Result<String, LaunchError>;
+
+    async fn write_to_launch(
+        &self,
+        id: String,
+        text: String,
+        state: State<'_, SharedLaunchManager>,
+    );
+
+    async fn close_task(&self, id: String, state: State<'_, SharedLaunchManager>);
 }

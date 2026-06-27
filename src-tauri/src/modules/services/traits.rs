@@ -7,6 +7,8 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
+
+    #[allow(unused)]
     fn save_settings(&self, settings: &Settings) -> Result<(), ConfigError>;
     fn get_data_dir(&self) -> Result<Path, ConfigError>;
     fn make_data_dir(&self) -> Result<(), ConfigError>;
@@ -26,7 +28,7 @@ pub trait TConfigService {
 pub trait TConfigRecoveryService {
     fn check_data_dir(&self) -> Result<(), ConfigError>;
     fn repair_data_dir(&self) -> Result<(), ConfigError>;
-
+    #[allow(unused)]
     fn add_settings_by_default(&self) -> Result<(), ConfigError>;
     fn add_recents_by_default(&self) -> Result<(), ConfigError>;
 }
@@ -34,5 +36,5 @@ pub trait TConfigRecoveryService {
 pub trait TParsingService {
     fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError>;
 
-    fn from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError>;
+    fn _from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError>;
 }

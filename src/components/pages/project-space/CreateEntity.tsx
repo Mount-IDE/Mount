@@ -44,7 +44,6 @@ export default function CreateEntity() {
     }, [current]);
 
     async function create_fs() {
-        console.log(fields)
         if (current == null) {
             console.warn("0")
             return;

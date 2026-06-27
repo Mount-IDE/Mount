@@ -10,14 +10,6 @@ pub struct PFile {
 }
 
 impl PFile {
-    pub fn new() -> PFile {
-        Self {
-            name: String::new(),
-            path: Path(String::new()),
-            typ: FileType::REGULAR,
-        }
-    }
-
     pub fn regular(name: String, path: Path) -> PFile {
         Self {
             name,
@@ -29,7 +21,7 @@ impl PFile {
         Self {
             name,
             path,
-            typ: FileType::REGULAR,
+            typ: FileType::BINARY,
         }
     }
 

@@ -200,14 +200,14 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn save_project(&self, _project: &Project) -> Result<(), ProjectError> {
-        println!("PROJECT SAVING...");
+        // println!("PROJECT SAVING...");
         let path = _project.path.clone();
         let json =
             serde_json::to_string(&_project.clone()).map_err(|e| ParsingError::Serialize {
                 path: path.clone(),
                 err: e,
             })?;
-        println!("PROJECT JSON CONSTRUCTED");
+        // println!("PROJECT JSON CONSTRUCTED");
         let path_ = make_path(vec![
             path.clone().get().as_str(),
             _project.name.clone().as_str(),
@@ -215,9 +215,9 @@ impl TProjectService for ProjectService {
             "project.json",
         ]);
         let file = PFile::from_path_reg(path_);
-        println!("FILE {file:?}");
+        // println!("FILE {file:?}");
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
-        println!("PROJECT SAVED");
+        // println!("PROJECT SAVED");
         Ok(())
     }
 
@@ -245,7 +245,7 @@ impl TProjectService for ProjectService {
                     el.path.get().clone().as_str(),
                     el.name.clone().as_str(),
                 ]);
-                println!("PATH {path1} {path2}");
+                // println!("PATH {path1} {path2}");
                 return path1.get() != path2.get();
             })
             .map(|e| e.clone())
@@ -365,7 +365,7 @@ impl TActionProjectService for ActionProjectService {
                 }
             }
             let task__ = self.make_task(&action, &actions, &vars, &sections, &os);
-            println!("TASK RES {task__:?}");
+            // println!("TASK RES {task__:?}");
             if let Some(task_) = task__ {
                 tasks.push(task_);
             }
@@ -864,17 +864,17 @@ impl TActionProjectService for ActionProjectService {
                     }
                     process.current_dir(path.get().clone());
                     let code = process.status().unwrap();
-                    println!(
-                        "RUN: {} {} {} {}",
-                        if code.code().is_some() {
-                            code.code().unwrap()
-                        } else {
-                            -20
-                        },
-                        command.shell,
-                        key,
-                        command.command
-                    );
+                    // println!(
+                    //     "RUN: {} {} {} {}",
+                    //     if code.code().is_some() {
+                    //         code.code().unwrap()
+                    //     } else {
+                    //         -20
+                    //     },
+                    //     command.shell,
+                    //     key,
+                    //     command.command
+                    // );
                     if !code.success() {
                         res_ = match on_error {
                             ActionOnError::CONTINUE => 0,

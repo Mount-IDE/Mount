@@ -1,13 +1,16 @@
-use crate::modules::app::{LAUNCH_COMPILE_SERVICE, PROJECT_SERVICE};
+use crate::modules::app::{APP, LAUNCH_COMPILE_SERVICE, LAUNCH_RUN_SERVICE, PROJECT_SERVICE};
 use crate::modules::contexts::launch::app::functions::FunctionResult;
-use crate::modules::contexts::launch::app::traits::TLaunchCompileService;
+use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
+use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference, LaunchTemplateResult,
+    LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
+    LaunchTemplateResult,
 };
 use crate::modules::contexts::project::app::traits::TProjectService;
 use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::LaunchError;
+use tauri::{State, Window};
 
 #[tauri::command]
 pub fn create_ref(
@@ -74,7 +77,7 @@ pub fn create_objects(
     }
     if res.len() == references.len() {
         project.workspace.launch_objects = res.clone();
-        println!("{project:?}");
+        // println!("{project:?}");
         PROJECT_SERVICE.save_project(&project)?;
     }
     Ok((project, res))
@@ -96,4 +99,44 @@ pub fn create_references(
     project.workspace.launch_references = res.clone();
     PROJECT_SERVICE.save_project(&project)?;
     Ok((project, res))
+}
+
+#[tauri::command]
+pub async fn launch_task(
+    task: LaunchFlatTask,
+    project: Project,
+    window: Window,
+    state: State<'_, SharedLaunchManager>,
+) -> Result<String, ErrorDto> {
+    let id = window.label();
+    let app = APP.get();
+    println!("APP {}", app.is_some());
+    if let Some(app) = app {
+        LAUNCH_RUN_SERVICE
+            .launch_task(task, id.to_string(), project, app.clone(), state)
+            .await
+            .map_err(|e| e.into())
+    } else {
+        Err(ErrorDto {
+            message: "".to_string(),
+        })
+    }
+}
+
+#[tauri::command]
+pub async fn write_launch(
+    id: String,
+    text: String,
+    state: State<'_, SharedLaunchManager>,
+) -> Result<(), ErrorDto> {
+    LAUNCH_RUN_SERVICE.write_to_launch(id, text, state).await;
+    Ok(())
+}
+#[tauri::command]
+pub async fn close_launch(
+    id: String,
+    state: State<'_, SharedLaunchManager>,
+) -> Result<(), ErrorDto> {
+    LAUNCH_RUN_SERVICE.close_task(id, state).await;
+    Ok(())
 }

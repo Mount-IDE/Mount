@@ -1,6 +1,8 @@
 use crate::modules::shared::kernel::values::{IfStatementPart, Schema};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::process::Command;
+use std::sync::{Arc, Mutex};
 use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -145,9 +147,13 @@ pub struct LaunchOptionType {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub enum LaunchOptionTyp {
+    #[allow(non_camel_case_types)]
     input,
+    #[allow(non_camel_case_types)]
     check,
+    #[allow(non_camel_case_types)]
     path,
+    #[allow(non_camel_case_types)]
     list,
 }
 
@@ -177,6 +183,7 @@ pub struct LaunchActionCommand {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(untagged)]
+#[allow(unused)]
 pub enum LaunchFunctionOutType {
     STRING(String),
     VEC(Vec<String>),
@@ -247,4 +254,20 @@ pub enum LaunchTask {
         env: Option<Vec<(String, String)>>,
         cwd: Option<String>,
     },
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LaunchFlatTask {
+    pub command: String,
+    pub env: Option<Vec<(String, String)>>,
+    pub cwd: Option<String>,
+}
+
+#[derive(Clone, Debug)]
+pub struct LaunchProcess {
+    pub id: u32,
+    pub window_id: String,
+    pub task: LaunchFlatTask,
+    // pub child: Arc<Mutex<dyn portable_pty::Child>>,
+    pub child: Arc<Mutex<Command>>,
 }

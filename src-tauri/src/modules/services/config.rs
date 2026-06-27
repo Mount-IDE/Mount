@@ -26,13 +26,6 @@ struct _File {
 }
 
 impl _File {
-    pub fn new(name: String, path: String) -> Self {
-        Self {
-            name,
-            path: Path(path),
-            content: String::from("{}"),
-        }
-    }
     pub fn content(name: String, path: String, content: String) -> Self {
         Self {
             name,
@@ -88,7 +81,7 @@ impl TConfigService for ConfigService {
             let dir = make_path(vec![dir.get().as_str(), "settings.json"]);
             let file = PFile::from_path_reg(dir.clone());
             FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
-            println!("parsing settings.json was gotten");
+            // println!("parsing settings.json was gotten");
             return Ok(settings_);
         }
         let settings = settings.unwrap();
@@ -109,7 +102,7 @@ impl TConfigService for ConfigService {
                 Ok(Path::new(dir.to_str().unwrap()))
             }
             Err(e) => {
-                println!("{:?}", e);
+                // println!("{:?}", e);
                 Err(ConfigError::GetDataDir { err: e })
             }
         }
@@ -426,7 +419,7 @@ impl TParsingService for ParsingService {
         Ok(res)
     }
 
-    fn from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError> {
+    fn _from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError> {
         let res: T = serde_json::from_str(&obj).map_err(|e| ParsingError::Deserialize {
             path: Path::new(""),
             json: obj.to_string(),

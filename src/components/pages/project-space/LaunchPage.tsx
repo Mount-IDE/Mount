@@ -48,7 +48,6 @@ export default function LaunchPage() {
     const references = project?.workspace.launch_references ?? [];
 
     // const setReferences = launchStore(state => state.set_references);
-    console.log("REFERENCES", references);
 
     useEffect(() => {
         updateReferences(project?.workspace.launch_references ?? []).then()
@@ -135,10 +134,8 @@ export default function LaunchPage() {
                 <div id={"launch-buttons"}>
                     <Button width={100} title={"Ok"} cb={async () => {
                         if (current_launch_template) {
-                            console.log("LAUNCH HAS")
                             updateReferences(references).then();
                             let res = await updateObjects(current_launch_template);
-                            console.log(res)
                             if (!res) {
                                 return
                             }
@@ -154,13 +151,12 @@ export default function LaunchPage() {
                     }}/>
                     <Button width={100} title={"Apply"} cb={async () => {
                         if (current_launch_template) {
-                            console.log("LAUNCH HAS")
                             updateReferences(references).then();
                             const found = references.find(el => el.id == curRef)
                             if (found) {
                                 setCurrentLaunchReference(found!)
                             }
-                            console.log(await updateObjects(current_launch_template));
+                            await updateObjects(current_launch_template);
 
 
                         }

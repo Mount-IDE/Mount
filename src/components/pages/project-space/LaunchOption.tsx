@@ -23,10 +23,7 @@ export default function LaunchOption(props: Props) {
 
     const val_ = find(props.section, obj.id, props.cur_ref, props.project);
     const val = val_ ? val_ : ""
-    console.log("render", props.section, obj.id, val);
     useEffect(() => {
-        console.log("effect", obj.id);
-
         async function handler() {
 
             if (typeof obj.def == "number") {

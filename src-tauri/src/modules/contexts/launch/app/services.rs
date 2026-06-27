@@ -1,15 +1,25 @@
 use crate::modules::app::ACTION_PROJECT_SERVICE;
 use crate::modules::contexts::launch::app::functions::{read_fields, read_from, FunctionResult};
-use crate::modules::contexts::launch::app::traits::TLaunchCompileService;
+use crate::modules::contexts::launch::app::managers::{LaunchSession, SharedLaunchManager};
+use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchAction, LaunchFunction, LaunchFunctionArgument, LaunchObject, LaunchTask, LaunchTemplate,
-    LaunchTemplateReference, LaunchTemplateResult,
+    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchFunctionArgument, LaunchObject, LaunchTask,
+    LaunchTemplate, LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::app::traits::TActionProjectService;
-use crate::modules::contexts::project::domain::entities::{Action, ProjectTemplate, Var};
+use crate::modules::contexts::project::domain::entities::{Action, Project, ProjectTemplate, Var};
+use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 use regex::Regex;
 use std::collections::HashMap;
+use std::path::PathBuf;
+use std::process::Stdio;
+use std::sync::Arc;
+use tauri::{AppHandle, Emitter, State};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::process::Command;
+use tokio::sync::Mutex;
+use uuid::Uuid;
 
 #[allow(unused)]
 pub struct LaunchCompileService();
@@ -379,7 +389,7 @@ impl TLaunchCompileService for LaunchCompileService {
     fn run_function(
         &self,
         function: &LaunchFunction,
-        template: &LaunchTemplate,
+        _template: &LaunchTemplate,
         results: &LaunchTemplateResult,
     ) -> Option<FunctionResult> {
         let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
@@ -442,5 +452,152 @@ impl TLaunchCompileService for LaunchCompileService {
             }
         }
         None
+    }
+}
+
+#[allow(unused)]
+pub struct LaunchRunService();
+
+impl TLaunchRunService for LaunchRunService {
+    async fn launch_task(
+        &self,
+        task: LaunchFlatTask,
+        window_id: String,
+        project: Project,
+        app: AppHandle,
+        state: State<'_, SharedLaunchManager>,
+    ) -> Result<String, LaunchError> {
+        let cmd = task.command;
+
+        let mut path = PathBuf::from(project.path.get());
+        path.push(project.name);
+        if let Some(val) = task.cwd {
+            path.push(val);
+        }
+        let shell = if cfg!(target_os = "windows") {
+            "cmd"
+        } else {
+            "sh"
+        };
+        let key = if shell == "cmd" { "/C" } else { "-c" };
+        println!("LAUNCH ARGS: {cmd} :: {:?}", path.to_str());
+        let mut command = Command::new(shell)
+            .arg(key)
+            .arg(cmd)
+            .current_dir(path)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|_| LaunchError::Spawn)?;
+        let stdin = command.stdin.take().unwrap();
+        let stdout = command.stdout.take().unwrap();
+        let stderr = command.stderr.take().unwrap();
+
+        let app_clone_out = app.clone();
+        let app_clone_ex = app.clone();
+        let app_clone_err = app.clone();
+
+        let child = Arc::new(tokio::sync::Mutex::new(command));
+        let child_clone = child.clone();
+
+        let window_id_out = window_id.clone();
+        let window_id_err = window_id.clone();
+        let window_id_exit = window_id.clone();
+
+        let _ = tokio::spawn(async move {
+            let mut stdout = stdout;
+            let mut buffer = [0u8; 1024];
+            let window = window_id_out.clone();
+            loop {
+                let a = stdout.read(&mut buffer).await;
+                if let Ok(n) = a {
+                    if n == 0 {
+                        break;
+                    } else {
+                        let chunk = String::from_utf8_lossy(&buffer[..n]);
+                        let _ =
+                            app_clone_out.emit_to(window.clone(), "launch-read", chunk.to_string());
+                        println!("READ {}", chunk.to_string());
+                    }
+                } else {
+                    break;
+                }
+            }
+        });
+        let _ = tokio::spawn(async move {
+            let mut stderr = stderr;
+            let mut buffer = [0u8; 1024];
+            let window = window_id_err.clone();
+
+            loop {
+                let a = stderr.read(&mut buffer).await;
+                if let Ok(n) = a {
+                    if n == 0 {
+                        break;
+                    } else {
+                        let chunk = String::from_utf8_lossy(&buffer[..n]);
+                        let _ =
+                            app_clone_err.emit_to(window.clone(), "launch-read", chunk.to_string());
+                        println!("READ {}", chunk.to_string());
+                    }
+                } else {
+                    break;
+                }
+            }
+        });
+        let _ = tokio::spawn(async move {
+            let mut val = child_clone.lock().await;
+            let res = val.wait().await.unwrap();
+            let window = window_id_exit.clone();
+            let _ = app_clone_ex.emit_to(window, "launch-exit", res.code().unwrap());
+        });
+
+        let id = Uuid::new_v4().to_string();
+
+        {
+            let mut ex = state.lock().unwrap();
+            ex.launches.insert(
+                id.clone(),
+                LaunchSession {
+                    window_id,
+                    child,
+                    writer: Arc::new(Mutex::new(stdin.into())),
+                },
+            );
+        }
+
+        println!("LAUNCH {id}: ");
+        Ok(id)
+    }
+
+    async fn write_to_launch(
+        &self,
+        id: String,
+        text: String,
+        state: State<'_, SharedLaunchManager>,
+    ) {
+        let writer = {
+            state
+                .lock()
+                .unwrap()
+                .launches
+                .get(&id)
+                .map(|e| e.writer.clone())
+        };
+        if let Some(found) = writer {
+            let mut writer = found.lock().await;
+            let _ = writer.write_all(text.as_bytes()).await;
+            println!("WRITE {text}");
+        }
+    }
+
+    async fn close_task(&self, id: String, state: State<'_, SharedLaunchManager>) {
+        let ex = { state.lock().unwrap().launches.remove(&id) };
+        if let Some(session) = ex {
+            let mut child = session.child.lock().await;
+            let _ = child.kill().await;
+            let _ = child.wait().await;
+        }
     }
 }

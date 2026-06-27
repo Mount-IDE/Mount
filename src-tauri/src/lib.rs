@@ -10,6 +10,7 @@ use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS
 use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
+use crate::modules::contexts::launch::app::managers::LaunchManager;
 use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use std::fs;
 use std::path::Path;
@@ -93,10 +94,14 @@ pub fn run() {
             create_object,
             call_function,
             create_objects,
-            create_references
+            create_references,
+            launch_task,
+            write_launch,
+            close_launch
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
+        .manage(Arc::new(Mutex::new(LaunchManager::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

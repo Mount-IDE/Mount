@@ -49,7 +49,6 @@ export default function FileX(props: Props) {
             add_file_to_tab(current, res[1], file);
             return;
         }
-        console.log("cache", fileCacheStore.getState().files)
         try {
             const content = await invoke<string>("read_file", {path: path})
             const for_cache: FileCacheLight = {

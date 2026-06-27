@@ -1,5 +1,6 @@
 import FsAside from "../components/aside-widgets/FsAside.tsx";
 import Terminal from "../components/pages/project-space/Terminal.tsx";
+import AsideLaunch from "../components/pages/project-space/AsideLaunch.tsx";
 
 function getComponentType(button: IAsideButtonExtended): "Light" | "Heavy" {
     if (button.component_type) return button.component_type;
@@ -12,6 +13,8 @@ function renderButtonComponent(widget: string, active?: boolean) {
             return <FsAside/>;
         case "TerminalAside":
             return <Terminal active={active}/>;
+        case "AsideLaunch":
+            return <AsideLaunch active={active}/>;
         default:
             return <></>;
     }

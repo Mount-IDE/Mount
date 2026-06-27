@@ -77,7 +77,6 @@ export const fsExtStore = create<Type>((set, get) => ({
 
         let names = cfg.icons.filter(el => el.name !== null && el.typ == "file");
         let extensions = cfg.icons.filter(el => el.ext !== null && el.typ == "file")
-        console.log(names)
         for (let i of names) {
             if (!i.name) break;
             for (let j of i.name!) {
