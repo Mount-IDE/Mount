@@ -14,6 +14,9 @@ interface Type {
     set_current_project(proj: IProject | null): void,
 
     save_project(proj: IProject): void
+
+    set_current_launch: (id: number) => void
+
 }
 
 
@@ -101,6 +104,22 @@ export const projectStore = create<Type>((set, get) => ({
             } catch (e) {
                 console.error(e)
             }
+        }
+    },
+    set_current_launch(id: number): void {
+        let proj = get().current_project;
+        if (proj) {
+
+            set({
+                current_project: {
+                    ...proj,
+                    workspace: {
+                        ...proj.workspace,
+                        current_launch: id
+                    }
+                }
+
+            })
         }
     }
 

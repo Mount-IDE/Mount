@@ -6,6 +6,7 @@ import {getCurrentWindow} from "@tauri-apps/api/window"
 import pageStore, {Window} from "../../stores/page_store.ts";
 import MenuBar from "./MenuBar.tsx";
 import Launch from "./Launch.tsx";
+import SettingsButton from "./SettingsButton.tsx";
 
 export default function TitleBar() {
 
@@ -47,6 +48,7 @@ export default function TitleBar() {
                 </>
             }
             <div id={"title-bar-buttons"}>
+                <SettingsButton/>
                 {buttons.map(el => {
                     return <TitleBarButton key={el.icon} {...el}/>
                 })}

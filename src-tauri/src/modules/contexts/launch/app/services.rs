@@ -11,6 +11,7 @@ use crate::modules::contexts::project::domain::entities::{Action, Project, Proje
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
@@ -23,6 +24,24 @@ use uuid::Uuid;
 
 #[allow(unused)]
 pub struct LaunchCompileService();
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum LaunchOutputType {
+    READ,
+    ERROR,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LaunchTaskOutput {
+    id: String,
+    typ: LaunchOutputType,
+    data: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LaunchExit {
+    id: String,
+    code: i32,
+}
 
 #[allow(unused)]
 const VAR_PREFIX: &str = "@";
@@ -501,6 +520,12 @@ impl TLaunchRunService for LaunchRunService {
         let child = Arc::new(tokio::sync::Mutex::new(command));
         let child_clone = child.clone();
 
+        let id = Uuid::new_v4().to_string();
+
+        let id_out = id.clone();
+        let id_err = id.clone();
+        let id_exit = id.clone();
+
         let window_id_out = window_id.clone();
         let window_id_err = window_id.clone();
         let window_id_exit = window_id.clone();
@@ -516,8 +541,15 @@ impl TLaunchRunService for LaunchRunService {
                         break;
                     } else {
                         let chunk = String::from_utf8_lossy(&buffer[..n]);
-                        let _ =
-                            app_clone_out.emit_to(window.clone(), "launch-read", chunk.to_string());
+                        let _ = app_clone_out.emit_to(
+                            window.clone(),
+                            "launch-read",
+                            LaunchTaskOutput {
+                                id: id_out.clone(),
+                                typ: LaunchOutputType::READ,
+                                data: chunk.to_string(),
+                            },
+                        );
                         println!("READ {}", chunk.to_string());
                     }
                 } else {
@@ -537,8 +569,15 @@ impl TLaunchRunService for LaunchRunService {
                         break;
                     } else {
                         let chunk = String::from_utf8_lossy(&buffer[..n]);
-                        let _ =
-                            app_clone_err.emit_to(window.clone(), "launch-read", chunk.to_string());
+                        let _ = app_clone_err.emit_to(
+                            window.clone(),
+                            "launch-read",
+                            LaunchTaskOutput {
+                                id: id_err.clone(),
+                                typ: LaunchOutputType::ERROR,
+                                data: chunk.to_string(),
+                            },
+                        );
                         println!("READ {}", chunk.to_string());
                     }
                 } else {
@@ -550,10 +589,15 @@ impl TLaunchRunService for LaunchRunService {
             let mut val = child_clone.lock().await;
             let res = val.wait().await.unwrap();
             let window = window_id_exit.clone();
-            let _ = app_clone_ex.emit_to(window, "launch-exit", res.code().unwrap());
+            let _ = app_clone_ex.emit_to(
+                window,
+                "launch-exit",
+                LaunchExit {
+                    id: id_exit,
+                    code: res.code().unwrap(),
+                },
+            );
         });
-
-        let id = Uuid::new_v4().to_string();
 
         {
             let mut ex = state.lock().unwrap();

@@ -13,6 +13,8 @@ import {Group, mainPageStore} from "./stores/main_page_store.ts";
 import {fsExtStore} from "./stores/fs_ext_store.ts";
 import {projectSettingsStore} from "./stores/project_settings_store.ts";
 import ProjectSettings from "./components/pages/project-space/ProjectSettings.tsx";
+import {settingsStore} from "./stores/settings_store.ts";
+import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
 
 
 /**
@@ -26,6 +28,8 @@ function App() {
     const [windowReady, setWindowReady] = useState(false);
 
     const projectSettingsOpened = projectSettingsStore(state => state.opened)
+
+    const settingsFlag = settingsStore(state => state.show_settings)
 
     /**
      * Caching many data while app is opening
@@ -89,6 +93,10 @@ function App() {
             <Blur/>
             <TitleBar/>
             <div id={"main"}>
+                {
+                    windowReady && settingsFlag &&
+                    <SettingsPage/>
+                }
                 {
                     windowReady && projectSettingsOpened &&
                     <ProjectSettings/>

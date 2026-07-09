@@ -4,6 +4,7 @@ import dir from "../../../assets/dir.svg"
 import {useEffect} from "react";
 import {open} from "@tauri-apps/plugin-dialog";
 import {invoke} from "@tauri-apps/api/core";
+import {LOG} from "../../../utils/utils.ts";
 
 type Props = {
     obj: LaunchOption,
@@ -22,6 +23,10 @@ export default function LaunchOption(props: Props) {
     const typ = obj.typ.typ;
 
     const val_ = find(props.section, obj.id, props.cur_ref, props.project);
+    LOG(`VAL LAUNCH ${val_} :: ${props.section} ${props.cur_ref} ${JSON.stringify(props.project?.workspace.launch_references.find(el => el.id == props.cur_ref)!.results)}`)
+    LOG(`TEMPLATE ${JSON.stringify(
+        props.project?.workspace.launch_templates[0].sections
+    )}`)
     const val = val_ ? val_ : ""
     useEffect(() => {
         async function handler() {

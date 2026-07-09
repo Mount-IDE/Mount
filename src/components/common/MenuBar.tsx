@@ -57,6 +57,10 @@ export default function MenuBar() {
                     hotkeys: "",
                     cb: menuBarStore.getState().project_settings
                 }, {
+                    label: "Global Settings",
+                    hotkeys: "",
+                    cb: menuBarStore.getState().global_settings
+                }, {
                     label: "Exit",
                     hotkeys: "",
                     cb: menuBarStore.getState().exit

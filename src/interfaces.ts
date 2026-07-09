@@ -32,7 +32,8 @@ interface IProject {
         opened_files: OpenedFile[],
         launch_references: LaunchTemplateReference[],
         launch_objects: LaunchObject[],
-        launch_templates: LaunchTemplate[]
+        launch_templates: LaunchTemplate[],
+        current_launch: number | null
     },
     vars: IVar[],
     tasks: any[],

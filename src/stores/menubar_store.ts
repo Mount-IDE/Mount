@@ -3,6 +3,7 @@ import {createProjectStore} from "./create_project.ts";
 import pageStore from "./page_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 import {projectSettingsStore} from "./project_settings_store.ts";
+import {settingsStore} from "./settings_store.ts";
 
 interface Type {
 
@@ -20,6 +21,8 @@ interface Type {
     auto_save(): void
 
     project_settings(): void
+
+    global_settings(): void
 
     exit(): void
 
@@ -77,6 +80,11 @@ export const menuBarStore = create<Type>(() => ({
     project_settings(): void {
         projectSettingsStore.getState().set_opened(true)
         pageStore.getState().setFilter(true)
+    },
+
+    global_settings() {
+        pageStore.getState().setFilter(true)
+        settingsStore.getState().set_show_settings(true)
     },
     exit(): void {
     },

@@ -19,7 +19,7 @@ export default function LaunchPage() {
     const opened = launchStore(state => state.set_opened)
 
     const setCurrentLaunchReference = launchStore(state => state.set_current_launch)
-
+    const setCurrentLaunchProject = projectStore(state => state.set_current_launch);
     const [curRef, setCurRef] = useState(-1)
 
     const find = launchStore(state => state.find_temp)
@@ -142,6 +142,7 @@ export default function LaunchPage() {
                             const found = references.find(el => el.id == curRef)
                             if (found) {
                                 setCurrentLaunchReference(found!)
+                                setCurrentLaunchProject(found!.id);
                             }
                             opened(false)
                         }
@@ -155,6 +156,7 @@ export default function LaunchPage() {
                             const found = references.find(el => el.id == curRef)
                             if (found) {
                                 setCurrentLaunchReference(found!)
+                                setCurrentLaunchProject(found!.id);
                             }
                             await updateObjects(current_launch_template);
 

@@ -71,6 +71,7 @@ pub struct WorkSpace {
     pub launch_references: Vec<LaunchTemplateReference>,
     pub launch_objects: Vec<LaunchObject>,
     pub launch_templates: Vec<LaunchTemplate>,
+    pub current_launch: Option<i32>,
 }
 
 impl Default for WorkSpace {
@@ -85,6 +86,7 @@ impl Default for WorkSpace {
             launch_references: Vec::new(),
             launch_objects: Vec::new(),
             launch_templates: Vec::new(),
+            current_launch: None,
         }
     }
 }
@@ -93,14 +95,7 @@ impl WorkSpace {
     ///
     ///
     pub fn new() -> Self {
-        Self {
-            widgets: Vec::new(),
-            buttons: Vec::new(),
-            opened_files: Vec::new(),
-            launch_objects: Vec::new(),
-            launch_references: Vec::new(),
-            launch_templates: Vec::new(),
-        }
+        Self::default()
     }
 }
 

@@ -10,14 +10,21 @@ import {projectStore} from "../../../stores/project_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {mapProjectButton} from "../../../utils/project-buttons.tsx";
 import {invoke} from "@tauri-apps/api/core";
-// import {invoke} from "@tauri-apps/api/core";
 
+
+/**
+ *
+ * @constructor
+ */
 export default function CreateProject() {
 
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
 
+    /**
+     *
+     */
     async function create_project_() {
         if (current_template) {
             let res = await create_project(current_template!);

@@ -2,6 +2,7 @@ import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
 import {projectStore} from "./project_store.ts";
 import {asideLaunchStore} from "./aside_launch_store.ts";
+import {LOG} from "../utils/utils.ts";
 
 
 interface Type {
@@ -9,7 +10,6 @@ interface Type {
     opened: boolean,
 
     current_launch: LaunchTemplateReference | null
-
     set_current_launch: (cur: LaunchTemplateReference | null) => void
     temp_results: LaunchTemplateResult | null,
     set_temp_results: (temp: LaunchTemplateResult) => void
@@ -52,9 +52,12 @@ export const launchStore = create<Type>((set, get) => ({
         if (!found)
             return null
         let results = found.results;
-        if (Object.keys(results).includes(`${section}`)) {
+        //   LOG(`RESULTS ${JSON.stringify(results)} :: SECTION ${section} :: OPTION ${option}`)
+        //  LOG(`BOOL ${section.toString() in results} :: ${option in results[section.toString()]}`)
+        if (`${section}` in results) {
             let sec = results[section];
-            if (Object.keys(sec).includes(option)) {
+            if (option in sec) {
+                //    LOG("OPTION ", sec[option], JSON.stringify(sec))
                 return sec[option]
             }
         }
@@ -62,11 +65,13 @@ export const launchStore = create<Type>((set, get) => ({
 
     },
     write_temp(section: number, option: string, value: string, ref: number, project: IProject | null): void {
+        LOG("WRITING ", section, option, value)
         if (!project) return
 
         let temp = project.workspace.launch_references;
         let found =
             temp.find(el => el.id == ref);
+        LOG("found", found)
         if (!found) return
         let results = found.results;
         if (results[section]?.[option] === value) {
@@ -96,6 +101,7 @@ export const launchStore = create<Type>((set, get) => ({
                 launch_references: result
             }
         }
+        LOG("RESULT AFTER WRITING", JSON.stringify(result))
         projectStore.getState().set_current_project(proj)
 
     },

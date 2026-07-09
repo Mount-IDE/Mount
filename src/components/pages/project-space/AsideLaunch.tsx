@@ -48,7 +48,7 @@ export default function AsideLaunch(props: Props) {
                 {
                     objects.length == references.length &&
                     processes.map((el, i) =>
-                        <LaunchPos key={i} proc={el} ref={references[i]}
+                        <LaunchPos current={i == current} key={i} proc={el} ref={references[i]}
                                    onClose={(proc) => {
                                    }}
                                    onSelect={(proc) => setCurrent(proc.id)}
@@ -75,6 +75,7 @@ export default function AsideLaunch(props: Props) {
 }
 
 type PosProps = {
+    current: boolean
     proc: LaunchProcess
     ref: LaunchTemplateReference
     onClose: (proc: LaunchProcess) => void
@@ -86,7 +87,10 @@ type PosProps = {
 function LaunchPos(props: PosProps) {
 
     return (
-        <div className={"launch-pos"}
+        <div className={`launch-pos`}
+             style={{
+                 background: props.current ? "var(--border3)" : ""
+             }}
              onClick={() => {
                  props.onSelect(props.proc)
              }}
@@ -163,23 +167,31 @@ function LaunchTerminal(props: TermProps) {
         termRef.current = term
         fitAddonRef.current = fitAddon
 
-        const fitAndResize = () => {
-            if (elem.offsetWidth === 0 || elem.offsetHeight === 0) return;
-            try {
-                fitAddon.fit();
-            } catch {
-                return;
-            }
-            lastSizeRef.current = {cols: term.cols, rows: term.rows};
-            if (/*readyRef.current &&*/ backendId.current) {
-                const backend_Id = backendId.current;
-                void invoke("resize_terminal", {id: backend_Id, rows: term.rows, cols: term.cols});
-            }
-        }
+        const fitAndResize = (() => {
+            let raf = 0;
+
+            return () => {
+                cancelAnimationFrame(raf);
+
+                raf = requestAnimationFrame(() => {
+                    if (elem.offsetWidth === 0 || elem.offsetHeight === 0) return;
+
+                    const oldCols = term.cols;
+                    const oldRows = term.rows;
+
+                    fitAddon.fit();
+
+                    if (oldCols === term.cols && oldRows === term.rows) return;
+                });
+            };
+        })();
 
         let outputUnlisten: UnlistenFn | null = null;
         let exitUnlisten: UnlistenFn | null = null;
-        let resizeObserver = new ResizeObserver(fitAndResize);
+        const resizeObserver = new ResizeObserver(() => {
+            if (!backendId.current) return;
+            fitAndResize();
+        });
         resizeObserver.observe(elem);
 
 
@@ -255,15 +267,17 @@ function LaunchTerminal(props: TermProps) {
         }
 
 
-        listen<string>("launch-read", (val) => {
-            //    queueOutput(val.payload)
-            term.write(val.payload)
+        listen<{ id: string, data: string }>("launch-read", (val) => {
+            if (val.payload.id == backendId.current) {
+                queueOutput(val.payload.data)
+            }
+            //term.write(val.payload)
             LOG(val.payload)
         }).then((unlisten) => outputUnlisten = unlisten)
 
         listen<number>("launch-exit", (code) => {
             currenTask.current += 1;
-            term.writeln(`LAUNCH EXITED WITH CODE ${code}`)
+            queueOutput(`LAUNCH EXITED WITH CODE ${code}`)
             backendId.current = null;
             runTask(currenTask.current).then();
         }).then((unlisten) => exitUnlisten = unlisten)
@@ -323,7 +337,7 @@ function LaunchTerminal(props: TermProps) {
     return (
         <div
             style={{
-                opacity: props.selected ? "1" : "0"
+                display: props.selected ? "block" : "none"
             }}
             className={"launch-terminal"}>
             <div ref={ref} className={"launch-term"}>
