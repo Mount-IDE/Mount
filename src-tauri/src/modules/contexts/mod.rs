@@ -1,5 +1,6 @@
 pub mod config;
 pub mod editor;
+pub mod events;
 pub mod filesystem;
 pub mod git;
 pub mod launch;

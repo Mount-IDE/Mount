@@ -7,6 +7,10 @@ import ProjectPackages from "./ProjectPackages.tsx";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
+import {useEffect, useState} from "react";
+import Load from "../../common/Load.tsx";
+import {listen} from "@tauri-apps/api/event";
+import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {mapProjectButton} from "../../../utils/project-buttons.tsx";
 import {invoke} from "@tauri-apps/api/core";
@@ -22,11 +26,15 @@ export default function CreateProject() {
     const current_template = cacheStore(state => state.currentTemplate)
     const set_current_path = projectStore(state=>state.set_path_to_current_project);
 
+    const [isCreating, setIsCreating] = useState(false)
+    const [startEvent, setStartEvent] = useState<string | null>(null)
+    const [endEvent, setEndEvent] = useState<string | null>(null)
     /**
      *
      */
     async function create_project_() {
         if (current_template) {
+            setIsCreating(true)
             let res = await create_project(current_template!);
 
             if (res[0] == 0) {
@@ -54,13 +62,81 @@ export default function CreateProject() {
                 } catch (e) {
                     console.error(e)
                 }
+                noteStore.getState().add_note({
+                    type: NotificationType.NOTE,
+                    text: "Project was created"
+                }, 2000)
             }
+            setIsCreating(false)
         }
     }
+
+    const [pointCount, setPointCount] = useState(0)
+
+    useEffect(() => {
+
+        let clear: number;
+
+        const unlisten = listen<string>("task-start", (d) => {
+            let val = d.payload;
+            setStartEvent(val)
+            setEndEvent(null)
+            clearInterval(clear)
+            clear = setInterval(() => {
+                setPointCount(prev => {
+                    if (prev >= 3) {
+                        return 0;
+                    }
+                    return prev + 1;
+                })
+            }, 500)
+            console.log("event", val)
+        })
+
+        const unlisten2 = listen<string>("task-end", (d) => {
+            let val = d.payload;
+            setEndEvent(val)
+            setStartEvent(null)
+            console.log("event", val)
+        })
+
+        const unlisten3 = listen<string>("task-error", (d) => {
+            setEndEvent(null);
+            setStartEvent(null);
+            console.log("ERROR", d.payload)
+            noteStore.getState().add_note({
+                type: NotificationType.ERR,
+                text: `Error while running task ${d.payload}`
+            })
+        })
+
+        return () => {
+            unlisten.then(fn => fn())
+            unlisten2.then(fn => fn())
+            unlisten3.then(fn => fn())
+            clearInterval(clear)
+        }
+    }, [])
 
     return (
         <div
             id={"create-project"}>
+            {
+                startEvent != null &&
+                <p id={"current-event"}>
+                    Running task {startEvent}{".".repeat(pointCount)}
+                </p>
+            }
+            {
+                endEvent != null &&
+                <p id={"current-event"}>
+                    Ended task {endEvent}
+                </p>
+            }
+            {
+                isCreating &&
+                <Load/>
+            }
             <div id={"create-project-top"}>
                 <div id={"create-project-top-label"}>Create Project</div>
             </div>

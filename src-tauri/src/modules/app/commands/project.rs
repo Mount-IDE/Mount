@@ -77,8 +77,13 @@ pub async fn create_project(
     results: CreateProjectResult,
     packages: HashMap<String, ProjectPackage>,
     tags: Vec<ProjectTag>,
+    window: tauri::Window,
 ) -> Result<Project, ErrorDto> {
     // println!("template {:?}", template);
+
+    println!("PROJECT CREATING");
+
+    /// getting meta info about project
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
         .get(&-4i8)
@@ -105,28 +110,32 @@ pub async fn create_project(
     let path_ = make_path(vec![path.as_str(), name.as_str()]);
     let ext = FS_READ_SERVICE.exists(path_.clone());
     if ext {
+        // if project already exists
         return Err(ProjectError::AlreadyExists.into());
     }
 
     let additions = make_meta(meta.get(&-3i8), &tags);
 
     let mut vars = template.clone().startup.var;
-
+    // adding required variables
     vars.push(Var::new(
         "project-name".to_string(),
         Val::STRING(name.clone()),
     ));
+
     vars.push(Var::new(
         "project-path".to_string(),
         Val::STRING(path.clone()),
     ));
 
+    /// creating project object
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
     project.meta = additions;
     project.vars = vars.clone();
 
+    /// adding git actions
     template.startup.actions.insert(
         0,
         Action {
@@ -209,8 +218,10 @@ pub async fn create_project(
         }
     }
 
+    // making tasks
     let tasks = ACTION_PROJECT_SERVICE.compile(&template, &results, &vars);
 
+    // if tasks running completely
     if let Some(val) = tasks {
         // println!("TASKS: {:?}", val.1);
         //
@@ -248,7 +259,7 @@ pub async fn create_project(
         FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
         PROJECT_SERVICE.add_to_recents(&project)?;
 
-        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1)
+        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string())
     }
 
     Ok(project)

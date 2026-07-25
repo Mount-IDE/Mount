@@ -1,5 +1,6 @@
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
+use crate::modules::contexts::settings::domain::entities::Theme;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 
@@ -53,4 +54,5 @@ pub struct Cache {
     pub file_templates: Vec<ConfigFsTemplate>,
     pub file_icons: Vec<FsConfigIcons>,
     pub shells: Vec<String>,
+    pub themes: Vec<Theme>,
 }

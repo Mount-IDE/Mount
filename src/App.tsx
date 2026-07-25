@@ -15,6 +15,8 @@ import {projectSettingsStore} from "./stores/project_settings_store.ts";
 import ProjectSettings from "./components/pages/project-space/ProjectSettings.tsx";
 import {settingsStore} from "./stores/settings_store.ts";
 import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
+import {themeStore} from "./stores/theme_store.ts";
+import Notifications from "./components/common/Notifications.tsx";
 
 
 /**
@@ -50,8 +52,8 @@ function App() {
             if (cache.templates.length > 0) {
                 cacheStore.getState().set_current_template(cache.templates[0])
             }
-
             cacheStore.getState().set_shells(cache.shells);
+            themeStore.getState().load_themes(cache.themes)
         } catch (e) {
             console.warn(e)
         }
@@ -92,6 +94,7 @@ function App() {
         <>
             <Blur/>
             <TitleBar/>
+            <Notifications/>
             <div id={"main"}>
                 {
                     windowReady && settingsFlag &&
@@ -114,6 +117,7 @@ function App() {
                     <ProjectSpace/>
                 }
             </div>
+
         </>
     );
 }

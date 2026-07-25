@@ -1,5 +1,5 @@
 use crate::modules::app::{
-    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
+    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
 };
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
+use tauri::Emitter;
 
 #[allow(unused)]
 fn get_key(sh: String) -> String {
@@ -800,28 +801,43 @@ impl TActionProjectService for ActionProjectService {
         Some(task)
     }
 
-    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>) {
+    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String) {
+        let app = { APP.get().unwrap() };
+        let _ = app.emit_to(
+            window.clone(),
+            "task-run",
+            format!("Compiled tasks: {}", tasks.len()),
+        );
         let path_to = make_path(vec![
             project.path.clone().get().as_str(),
             project.name.clone().as_str(),
         ]);
-        let proj = project.clone();
-
+        //let proj = project.clone();
+        let mut n = 1;
         for task in tasks {
+            let _ = app.emit_to(window.clone(), "task-start", format!("{n}"));
             let err = self.run_task(&task, &path_to);
+            let _ = app.emit_to(window.clone(), "task-end", format!("{n}"));
+            println!("ERR? {err}");
+            if err >= 0 {
+                println!("ERRR!");
+                let _ = app.emit_to(window.clone(), "task-error", format!("{n}"));
+            }
             if err == 2 {
                 break;
             }
+            n += 1;
         }
     }
     fn run_task(&self, task: &_Task, path: &Path) -> i8 {
+        println!("TYPE TASK {:?}", task);
         match task.clone() {
             _Task::GRAPH {
                 next,
                 commands,
                 on_error,
             } => {
-                let mut res_ = 0i8;
+                let mut res_ = -1i8;
                 for command in commands {
                     let key = get_key(command.shell.clone());
                     let mut process = Command::new(&command.shell);
@@ -835,21 +851,33 @@ impl TActionProjectService for ActionProjectService {
                         process.envs(map.iter());
                     }
                     process.current_dir(path.get().clone());
-                    let code = process.status().unwrap();
-                    if !code.success() {
-                        match on_error {
-                            ActionOnError::CONTINUE => (),
-                            ActionOnError::StopAll => return 2,
-                            ActionOnError::StopGraph => return 1,
+                    let code = process.status();
+                    if let Err(_) = code {
+                        res_ = match on_error {
+                            ActionOnError::CONTINUE => 0,
+                            ActionOnError::StopAll => 2,
+                            ActionOnError::StopGraph => 1,
+                        }
+                    } else {
+                        let code = code.unwrap();
+                        if !code.success() {
+                            res_ = match on_error {
+                                ActionOnError::CONTINUE => 0,
+                                ActionOnError::StopAll => 2,
+                                ActionOnError::StopGraph => 1,
+                            }
                         }
                     }
-                    let new_task = next.deref();
-                    res_ = self.run_task(new_task, path);
+                    if res_ > 0 {
+                        return res_;
+                    }
                 }
+                let new_task = next.deref();
+                res_ = self.run_task(new_task, path);
                 res_
             }
             _Task::SINGLE { commands, on_error } => {
-                let mut res_ = 0i8;
+                let mut res_ = -1i8;
                 for command in commands {
                     let key = get_key(command.shell.clone());
                     let mut process = Command::new(&command.shell);
@@ -863,23 +891,21 @@ impl TActionProjectService for ActionProjectService {
                         process.envs(map.iter());
                     }
                     process.current_dir(path.get().clone());
-                    let code = process.status().unwrap();
-                    // println!(
-                    //     "RUN: {} {} {} {}",
-                    //     if code.code().is_some() {
-                    //         code.code().unwrap()
-                    //     } else {
-                    //         -20
-                    //     },
-                    //     command.shell,
-                    //     key,
-                    //     command.command
-                    // );
-                    if !code.success() {
+                    let code = process.status();
+                    if let Err(_) = code {
                         res_ = match on_error {
                             ActionOnError::CONTINUE => 0,
                             ActionOnError::StopAll => 2,
                             ActionOnError::StopGraph => 1,
+                        }
+                    } else {
+                        let code = code.unwrap();
+                        if !code.success() {
+                            res_ = match on_error {
+                                ActionOnError::CONTINUE => 0,
+                                ActionOnError::StopAll => 2,
+                                ActionOnError::StopGraph => 1,
+                            }
                         }
                     }
                 }

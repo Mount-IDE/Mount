@@ -246,6 +246,7 @@ interface Cache {
     file_icons: FsConfigIcons[],
     file_templates: configFsTemplate[]
     shells: string[]
+    themes: Theme[]
 
 }
 
@@ -333,3 +334,70 @@ interface LaunchTask {
     }
 }
 
+/**
+ *
+ */
+interface Theme {
+    id: string;
+    name: string;
+    meta?: {
+        authors?: string[]
+        version?: string
+        description?: string;
+        source?: string
+    }
+    vars?: {
+        name: string;
+        value: string
+    }[]
+    pages: {
+        id: string;
+        elements: {
+            selector: string
+            color?: string
+            background_color?: string;
+            background_image?: string;
+            background_opacity: string;
+
+            border?: string
+            border_right?: string
+            border_left?: string
+            border_top?: string
+            border_bottom?: string
+            border_x?: string
+            border_y?: string
+
+            border_size?: string
+            border_color?: string
+            border_style?: string
+
+            border_radius?: string
+
+            margin?: string
+            margin_left?: string
+            margin_right?: string
+            margin_top?: string
+            margin_bottom?: string
+            margin_x?: string
+            margin_y?: string
+
+            padding?: string
+            padding_left?: string
+            padding_right?: string
+            padding_top?: string
+            padding_bottom?: string
+            padding_x?: string
+            padding_y?: string
+
+            width?: string
+            height?: string
+
+            opacity?: string
+            font?: string
+            font_family?: string
+            font_weight?: string
+
+
+        }[]
+    }[]
+}

@@ -8,7 +8,7 @@ use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::Settings;
+use crate::modules::contexts::settings::domain::entities::{Settings, Theme};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
@@ -19,13 +19,13 @@ use tauri::Manager;
 
 pub struct ConfigService();
 
-struct _File {
+struct FSEntity {
     pub name: String,
     pub path: Path,
     pub content: String,
 }
 
-impl _File {
+impl FSEntity {
     pub fn content(name: String, path: String, content: String) -> Self {
         Self {
             name,
@@ -233,46 +233,51 @@ impl TConfigService for ConfigService {
 
 pub struct ConfigRecoveryService();
 
-fn get_files() -> Vec<_File> {
+fn get_files() -> Vec<FSEntity> {
     vec![
-        _File::content(
+        FSEntity::content(
             "settings.json".to_string(),
             "".to_string(),
             PARSING_SERVICE.to_string(Settings::new()).unwrap(),
         ),
-        _File::content(
+        FSEntity::content(
             "recent-projects.json".to_string(),
             "".to_string(),
             "[]".to_string(),
         ),
-        _File::content(
+        FSEntity::content(
             "templates.json".to_string(),
             "".to_string(),
             PARSING_SERVICE
                 .to_string(&vec![ProjectTemplate::default().clone()])
                 .unwrap(),
         ),
-        _File::content(
+        FSEntity::content(
             "packages.json".to_string(),
             "".to_string(),
             "[]".to_string(),
         ),
-        _File::content(
+        FSEntity::content(
             "file_ext_icons.json".to_string(),
             "".to_string(),
             PARSING_SERVICE
                 .to_string(vec![FsConfigIcons::default()])
                 .unwrap(),
         ),
-        _File::content(
+        FSEntity::content(
             "file_templates.json".to_string(),
             "".to_string(),
             PARSING_SERVICE
                 .to_string(&vec![ConfigFsTemplate::file(), ConfigFsTemplate::dir()])
                 .unwrap(),
         ),
-        _File::dir("icons".to_string()),
-        _File::dir("aside_icons".to_string()),
+        FSEntity::dir("icons".to_string()),
+        FSEntity::dir("aside_icons".to_string()),
+        FSEntity::content(
+            "themes.json".to_string(),
+            "".to_string(),
+            PARSING_SERVICE.to_string(&vec![Theme::dark()]).unwrap(),
+        ),
     ]
 }
 

@@ -1,0 +1,67 @@
+#notifications {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 30%;
+    height: 30%;
+    z-index: 100;
+    pointer-events: none;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    justify-content: end;
+    gap: 5px;
+}
+
+
+.notification {
+    pointer-events: auto;
+    transition: all 0.2s;
+    width: 100%;
+    height: 30%;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & > p {
+        width: 100%;
+        height: 80%;
+        text-overflow: ellipsis;
+        color: var(--title);
+    }
+}
+
+.notification-header {
+    display: flex;
+    justify-content: end;
+    width: 100%;
+    height: 20%;
+
+    & button {
+        height: 100%;
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0);
+        border-radius: 5px;
+        transition: all 0.2s;
+
+        & img {
+            width: 80%;
+            height: 80%;
+            display: block;
+            object-fit: contain;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+}
+

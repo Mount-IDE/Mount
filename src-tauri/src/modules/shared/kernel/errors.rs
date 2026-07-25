@@ -206,8 +206,40 @@ pub enum LaunchError {
     Spawn,
 }
 
+#[derive(Debug, Error)]
+pub enum SettingsError {
+    #[error("Themes config not found")]
+    ThemesFileNotFound,
+    #[error("Config Error")]
+    Config(
+        #[source]
+        #[from]
+        ConfigError,
+    ),
+    #[error("FS Error")]
+    FS(
+        #[source]
+        #[from]
+        FileSystemError,
+    ),
+    #[error("Parsing Error")]
+    Parsing(
+        #[source]
+        #[from]
+        ParsingError,
+    ),
+}
+
 impl From<LaunchError> for ErrorDto {
     fn from(value: LaunchError) -> Self {
+        Self {
+            message: format!("{:?}", value),
+        }
+    }
+}
+
+impl From<SettingsError> for ErrorDto {
+    fn from(value: SettingsError) -> Self {
         Self {
             message: format!("{:?}", value),
         }

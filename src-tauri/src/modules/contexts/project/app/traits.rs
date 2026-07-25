@@ -58,7 +58,7 @@ pub trait TActionProjectService {
         os: &String,
     ) -> Option<_Task>;
 
-    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>);
+    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String);
 
     fn run_task(&self, task: &_Task, path: &Path) -> i8;
 }
