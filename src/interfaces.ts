@@ -1,4 +1,3 @@
-
 interface IRecentProject {
     name: string,
     path: string
@@ -26,7 +25,7 @@ interface IProject {
     },
     template: ITemplate,
     packages: string[],
-    workspace:{
+    workspace: {
         widgets: {}[],
         buttons: IAsideButtonExtended[],
         opened_files: OpenedFile[],
@@ -167,19 +166,17 @@ interface OpenedFile {
     name: string
 }
 
-interface Opened extends OpenedFile{
+interface Opened extends OpenedFile {
     id: number;
-    cache_id:number
+    cache_id: number
 }
 
-interface ICodeSpace{
+interface ICodeSpace {
     id: number,
-    current_file: number|null // opened file id
+    current_file: number | null // opened file id
     opened_files: Opened[]
     opened_files_stack: number[]
 }
-
-
 
 
 interface FsDirectory {
@@ -198,45 +195,46 @@ interface FsFile {
 }
 
 
-
-interface FsExtIcon{
+interface FsExtIcon {
     typ: string,
     ext: string[] | null,
     name: string[] | null,
     icon: string
 }
-interface FsConfigIcons{
+
+interface FsConfigIcons {
     theme: string,
     scheme: number,
-    icons:FsExtIcon[]
+    icons: FsExtIcon[]
 }
 
 
-
-interface FileCacheLight{
+interface FileCacheLight {
     path: string,
     content: string;
     is_dirty: boolean
 }
-interface FileCache extends  FileCacheLight{
+
+interface FileCache extends FileCacheLight {
     id: number
 
 }
 
 
-interface configFsTemplate{
+interface configFsTemplate {
     id: string,
     title: string,
-    typ: "file"|"dir",
-    icon?:string,
-    ext?:string,
-    default_content?:string,
-    inner?:configFsTemplate[],
-    base_name?:string
+    typ: "file" | "dir",
+    icon?: string,
+    ext?: string,
+    default_content?: string,
+    inner?: configFsTemplate[],
+    base_name?: string
 }
 
 
 interface Cache {
+    settings: Settings,
     templates: ITemplate[],
     packages: IPackage[],
     groups: string[],
@@ -400,4 +398,57 @@ interface Theme {
 
         }[]
     }[]
+}
+
+
+interface SettingsElement {
+    id: number;
+    title: string;
+    sections?: ISettingsSection[]
+    list?: SettingsList
+}
+
+
+interface SettingsList {
+    window: string;
+    list: SettingsListElement[]
+}
+
+
+type SettingsListElement = Record<string, string>
+
+
+interface ISettingsSection {
+    id: number;
+    title?: string;
+    parameters: ISettingsParameter[]
+}
+
+interface ISettingsParameter {
+    id: number;
+    title: string;
+    type: "input" | "area" | "check" | "file" | "dir" | "fs" | "list" | "gen"
+    list?: string[]
+    def?: string | boolean | string[]
+    readonly?: boolean;
+    required?: boolean;
+}
+
+
+interface Settings {
+    doctype: string;
+    version: string;
+    general: {
+        path_to_projects: string,
+        project_groups: string[]
+    },
+    appearance: {
+        theme: string,
+        lang: string,
+        font: string,
+        font_size: number
+    },
+    run: {
+        shells: string[]
+    }
 }

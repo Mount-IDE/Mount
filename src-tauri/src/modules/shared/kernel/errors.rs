@@ -123,6 +123,8 @@ pub enum ConfigError {
         #[source]
         err: tauri::Error,
     },
+    #[error("failed to save settings")]
+    SavingSettings,
     #[error("Cannot get app")]
     App,
     #[error("global settings not found")]

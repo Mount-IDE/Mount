@@ -28,6 +28,7 @@
 #settings-main {
     width: 100%;
     height: 90%;
+    display: flex;
 }
 
 #settings-footer {
@@ -41,4 +42,32 @@
     right: 0;
     display: flex;
     width: 30%;
+}
+
+#settings-aside {
+    width: 15%;
+    height: 100%;
+    overflow: auto;
+}
+
+.settings-group {
+    width: 100%;
+    height: 20px;
+    transition: all 0.2s;
+
+    & p {
+        color: var(--subtitle);
+    }
+
+    &:hover {
+        & p {
+            color: var(--title);
+        }
+    }
+}
+
+#settings-content {
+    width: 85%;
+    height: 100%;
+    overflow: auto;
 }

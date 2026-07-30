@@ -78,7 +78,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     let data_dir_path = get_data_dir()?;
     let settings = CONFIG_SERVICE.get_settings()?;
 
-    let groups = settings.general.project_groups;
+    let groups = settings.general.project_groups.clone();
 
     let os = if cfg!(target_os = "windows") {
         "windows"
@@ -87,7 +87,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     } else {
         "linux"
     };
-    let mut projects_dir = settings.general.path_to_projects;
+    let mut projects_dir = settings.general.path_to_projects.clone();
     // println!("PROJECT DIR {projects_dir}");
     if projects_dir.get().len() == 0 {
         projects_dir = CONFIG_SERVICE.get_projects_dir()?;
@@ -95,7 +95,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     let icons = get_fs_ext_icons()?;
     let f_templates = get_file_templates()?;
 
-    let shells = settings.run.shells;
+    let shells = settings.run.shells.clone();
 
     let exists = |e: String| {
         if cfg!(target_os = "windows") && e == "bash".to_string() {
@@ -112,6 +112,7 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     let themes = read_themes()?;
 
     let res = Cache {
+        settings,
         templates,
         packages,
         data_dir_path,

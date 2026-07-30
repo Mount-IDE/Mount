@@ -12,6 +12,7 @@ use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
 use crate::modules::contexts::launch::app::managers::LaunchManager;
 use crate::modules::contexts::terminal::app::managers::TerminalManager;
+use crate::modules::shared::kernel::values::Path as MPath;
 use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -33,8 +34,28 @@ pub fn run() {
             CONFIG_RECOVERY_SERVICE
                 .check_data_dir()
                 .expect("TODO: panic message");
-            let settings = CONFIG_SERVICE.read_settings()?;
-            SETTINGS.set(settings).expect("Unable to sert settings");
+            let mut settings = CONFIG_SERVICE.read_settings()?;
+            let mut is_edited = false;
+            if settings.general.path_to_projects.get().len() == 0 {
+                let dir = app.path().home_dir();
+                if let Ok(mut dir) = dir {
+                    dir.push("MountProjects");
+                    let str_ = dir.to_str();
+                    if let Some(s) = str_ {
+                        settings.general.path_to_projects = MPath::new(s);
+                        is_edited = true;
+                    }
+                }
+            }
+            if settings.general.project_groups.len() == 0 {
+                settings.general.project_groups = vec!["general".to_string()];
+                is_edited = true;
+            }
+            if is_edited {
+                let _ = CONFIG_SERVICE.save_settings(&settings.clone());
+            }
+
+            SETTINGS.set(settings).expect("Unable to set settings");
             Ok(())
         })
         .on_window_event(|window, event| {

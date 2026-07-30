@@ -90,7 +90,14 @@ impl TConfigService for ConfigService {
     }
 
     fn save_settings(&self, _settings: &Settings) -> Result<(), ConfigError> {
-        todo!()
+        let dir = self.get_data_dir()?;
+        let json = PARSING_SERVICE.to_string(_settings)?;
+        let path = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let file = PFile::from_path_reg(path.clone());
+        FS_WRITE_SERVICE
+            .write_file(&file, json, FileWriteAccess::WRITE)
+            .map_err(|_| ConfigError::SavingSettings)?;
+        Ok(())
     }
 
     fn get_data_dir(&self) -> Result<Path, ConfigError> {

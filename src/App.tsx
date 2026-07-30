@@ -53,6 +53,7 @@ function App() {
                 cacheStore.getState().set_current_template(cache.templates[0])
             }
             cacheStore.getState().set_shells(cache.shells);
+            settingsStore.getState().set_settings(cache.settings)
             themeStore.getState().load_themes(cache.themes)
         } catch (e) {
             console.warn(e)

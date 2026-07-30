@@ -1,0 +1,10 @@
+.settings-section {
+    width: 100%;
+    padding: 10px;
+    overflow-x: hidden;
+
+    & > hr {
+        border: 1px solid var(--border2);
+    }
+}
+
