@@ -119,7 +119,8 @@ pub fn run() {
             launch_task,
             write_launch,
             close_launch,
-            read_themes
+            read_themes,
+            save_settings
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

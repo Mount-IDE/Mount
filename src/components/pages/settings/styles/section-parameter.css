@@ -19,8 +19,18 @@
         background: #000;
         resize: vertical;
 
-        &:focus {
+        &:not([readonly]):focus {
             color: var(--title)
+        }
+
+        &[readonly] {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        &[readonly="false"] {
+            pointer-events: auto;
+            user-select: auto;
         }
     }
 

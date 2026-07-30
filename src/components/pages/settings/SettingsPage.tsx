@@ -4,6 +4,7 @@ import {settingsStore} from "../../../stores/settings_store.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {useEffect, useMemo, useState} from "react";
 import SettingsSection from "./SettingsSection.tsx";
+import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 
 
 function useSettings(settings: Settings | null) {
@@ -87,6 +88,26 @@ export default function SettingsPage() {
         close_blur(false)
     }
 
+    async function ok() {
+
+        let set = await settingsStore.getState().save_settings();
+        if (set) {
+            settingsStore.getState().set_settings(set)
+            noteStore.getState().add_note({
+                text: "Settings has been saved",
+                type: NotificationType.NOTE
+            })
+            settingsStore.getState().update_from_settings()
+            return 0
+        } else {
+            noteStore.getState().add_note({
+                text: "Cannot save settings",
+                type: NotificationType.ERR
+            })
+            return 1
+        }
+    }
+
     return (
         <div id={"settings-page"}>
             <div id={"settings-head"}>
@@ -97,7 +118,7 @@ export default function SettingsPage() {
                     {
                         baseSettings.map((el, i) =>
                             <div
-                                className={"settings-group"} key={i}
+                                className={["settings-group", i == currentSettings ? "selected" : ""].join(" ")} key={i}
                                 onClick={() => setCurrentSettings(i)}
                                 style={{
                                     color: i == currentSettings ? "var(--title) !important" : "none",
@@ -121,8 +142,14 @@ export default function SettingsPage() {
                 <div id={"settings-buttons"}>
                     <Button title={"Close"} cb={close}/>
                     <Button title={"Ok"} cb={() => {
+                        ok().then()
                     }}/>
-                    <Button title={"Apply"} cb={() => {
+                    <Button title={"Apply"} cb={async () => {
+                        let k = await ok()
+                        if (k == 0) {
+                            close_settings(false)
+                            close_blur(false)
+                        }
                     }}/>
                 </div>
             </div>

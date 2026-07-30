@@ -5,6 +5,7 @@ import * as api from "@tauri-apps/plugin-dialog"
 import add from "../../../assets/plus.svg"
 import close from "../../../assets/title-close.svg"
 import {useEffect, useState} from "react";
+import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 
 type Props = {
     obj: ISettingsParameter
@@ -42,6 +43,9 @@ export default function SettingsParameter(props: Props) {
 
     useEffect(() => {
         console.log(val, obj)
+        if (val != null) {
+            write_res(val, props.cat, props.i, props.obj.id)
+        }
     }, [val]);
 
     return (
@@ -50,6 +54,7 @@ export default function SettingsParameter(props: Props) {
                 flexDirection: ["check", "list"].includes(obj.type) ? "row" : "column",
                 alignItems: ["check", "list"].includes(obj.title) ? "center" : "start",
                 justifyContent: ["check", "list"].includes(obj.title) ? "center" : "start",
+                opacity: obj.readonly ? "0.5" : "1"
             }}
             className={"settings-parameter"}>
             {
@@ -91,13 +96,14 @@ function ParameterInput(props: InnerProps) {
 
     return (
         <>
-            <p>{props.obj.title}</p>
+            <p>{props.obj.title} {props.obj.readonly}</p>
             {
                 props.obj.type == "input"
                 && <input
-                    readOnly={props.obj.readonly}
+                    readOnly={!!props.obj.readonly}
                     value={props.val.toString()}
-                    onInput={(e) => props.write((e.target as HTMLInputElement).value)}
+                    onInput={(e) =>
+                        props.write((e.target as HTMLInputElement).value)}
                 />
             }
             {
@@ -163,8 +169,8 @@ function ParameterList(props: InnerProps) {
     return (
         <>
             <select
-
-                onChange={(e) => props.write((e.target as HTMLSelectElement).value)}>
+                onChange={(e) =>
+                    props.write((e.target as HTMLSelectElement).value)}>
                 {
                     props.obj.list?.map((el, i) =>
                         <option value={el} key={i} selected={props.val == el}>
@@ -194,7 +200,6 @@ function ParameterGen(props: InnerProps) {
         //props.write(list)
     }
 
-
     function add_() {
         let res = [...list]
         res.push("group")
@@ -204,6 +209,10 @@ function ParameterGen(props: InnerProps) {
 
     function remove(i: number) {
         if (props.obj.required && list.length <= 1) {
+            noteStore.getState().add_note({
+                text: "Cannot delete last element",
+                type: NotificationType.WARN
+            }, 2_000)
             return;
         }
         let res = [...list]

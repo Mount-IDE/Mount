@@ -116,8 +116,9 @@ export default function MainPage() {
     }
 
 
-    const recent_by_group = recent.filter(el =>
+    const recentByGroup = recent.filter(el =>
         el.meta.group == (groups.find(el => el.id == current_group)?.name ?? ""))
+
 
     const [currentPath, setCurrentPath] = useState("");
 
@@ -142,7 +143,7 @@ export default function MainPage() {
 
                 openModal({
                     buttons: [{
-                        cb: async (val: string | undefined) => {
+                        cb: async (_: string | undefined) => {
                             try {
                                 await invoke("remove_project", {path: currentPath});
                                 loadRecents();
@@ -168,6 +169,12 @@ export default function MainPage() {
         }
     ]
     const [cords, setCords] = useState<[number, number]>([0, 0]);
+    const ref = useRef<HTMLDivElement>(null)
+
+    const modal = menuStore(state => state.modal);
+    const openModal = menuStore(state => state.open_modal);
+    const modalSettings = menuStore(state => state.modal_settings);
+
 
     function show_context(e: React.MouseEvent, path: string) {
         if (showContext) {
@@ -180,12 +187,6 @@ export default function MainPage() {
 
     }
 
-    const ref = useRef<HTMLDivElement>(null)
-
-
-    const modal = menuStore(state => state.modal);
-    const openModal = menuStore(state => state.open_modal);
-    const modalSettings = menuStore(state => state.modal_settings);
 
     useEffect(() => {
         function handler(e: MouseEvent) {
@@ -237,7 +238,7 @@ export default function MainPage() {
                     </div>
                     <div id={"main-page-projects"}>
                         {recent.length > 0 &&
-                            recent_by_group.map((el, i) =>
+                            recentByGroup.map((el, i) =>
                                 <Project onContext={show_context} onClick={setup_project} project={el} key={i}/>
                             )
                         }

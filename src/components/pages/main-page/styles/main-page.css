@@ -81,6 +81,7 @@
 #main-page-groups-list {
     height: 100%;
     display: flex;
+    gap: 10px;
     background: transparent;
 
 }
@@ -97,7 +98,7 @@
     overflow-x: scroll;
     font: 10pt "JetBrains Mono Light";
 
-
+    cursor: pointer;
 
 }
 

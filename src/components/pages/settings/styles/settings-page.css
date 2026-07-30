@@ -29,6 +29,7 @@
     width: 100%;
     height: 90%;
     display: flex;
+    gap: 20px;
 }
 
 #settings-footer {
@@ -52,8 +53,15 @@
 
 .settings-group {
     width: 100%;
-    height: 20px;
+    height: 25px;
     transition: all 0.2s;
+
+    &.selected {
+        & p {
+            color: var(--title) !important;
+        }
+    }
+
 
     & p {
         color: var(--subtitle);

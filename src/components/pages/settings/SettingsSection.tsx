@@ -13,8 +13,13 @@ export default function SettingsSection(props: Props) {
     return (
         <div className={"settings-section"}>
             {
+                props.obj.title != undefined
+                &&
+                <p className={"settings-section-p"}>{props.obj.title}</p>
+            }
+            {
                 props.obj.parameters.map((el, i) =>
-                    <SettingsParameter key={i} obj={el} i={i} cat={props.cat}/>
+                    <SettingsParameter key={i} obj={el} i={props.obj.id} cat={props.cat}/>
                 )
             }
             <hr/>

@@ -3,6 +3,7 @@ use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::make_path;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
+use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::ParsingError;
@@ -64,4 +65,10 @@ pub fn get_os() -> String {
     } else {
         "linux".to_string()
     }
+}
+
+#[tauri::command]
+pub fn save_settings(settings: Settings) -> Result<(), ErrorDto> {
+    CONFIG_SERVICE.save_settings(&settings)?;
+    Ok(())
 }

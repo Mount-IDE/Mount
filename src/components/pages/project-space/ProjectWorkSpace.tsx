@@ -51,7 +51,8 @@ export default function ProjectWorkSpace() {
             <hr className={"project-hr"}/>
             <MiniAside state={right} top_button={set_current_right_button} is_left={false} set_top={set_current_right}
                        set_bot={set_current_bot} top={right_top}
-                       max_top={3} max_bot={null}/>
+                       max_top={3} max_bot={null}
+            />
         </div>
     )
 }

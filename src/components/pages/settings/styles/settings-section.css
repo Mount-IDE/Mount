@@ -8,3 +8,8 @@
     }
 }
 
+.settings-section-p {
+    color: var(--subtitle);
+    font: 15pt "JetBrains Mono Medium";
+    margin-bottom: 10px;
+}
