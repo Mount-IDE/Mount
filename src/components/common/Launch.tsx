@@ -76,6 +76,7 @@ export default function Launch() {
 
                     if (!object) return;
                     runLaunch(object);
+
                     openAsideLaunch();
                 }}
             >

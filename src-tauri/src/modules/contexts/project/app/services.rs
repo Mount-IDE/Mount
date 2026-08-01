@@ -818,9 +818,9 @@ impl TActionProjectService for ActionProjectService {
             let _ = app.emit_to(window.clone(), "task-start", format!("{n}"));
             let err = self.run_task(&task, &path_to);
             let _ = app.emit_to(window.clone(), "task-end", format!("{n}"));
-            println!("ERR? {err}");
+            //println!("ERR? {err}");
             if err >= 0 {
-                println!("ERRR!");
+                //println!("ERRR!");
                 let _ = app.emit_to(window.clone(), "task-error", format!("{n}"));
             }
             if err == 2 {
@@ -830,7 +830,7 @@ impl TActionProjectService for ActionProjectService {
         }
     }
     fn run_task(&self, task: &_Task, path: &Path) -> i8 {
-        println!("TYPE TASK {:?}", task);
+        // println!("TYPE TASK {:?}", task);
         match task.clone() {
             _Task::GRAPH {
                 next,

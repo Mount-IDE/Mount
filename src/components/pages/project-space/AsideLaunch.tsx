@@ -8,6 +8,7 @@ import {FitAddon} from "@xterm/addon-fit";
 import {listen, UnlistenFn} from "@tauri-apps/api/event";
 import {invoke} from "@tauri-apps/api/core";
 import {LOG} from "../../../utils/utils.ts";
+import {launchStore} from "../../../stores/launch_store.ts";
 
 type Props = { active?: boolean };
 
@@ -30,26 +31,27 @@ type LaunchProcess = {
 export default function AsideLaunch(props: Props) {
 
     let project = projectStore(state => state.current_project);
-    let objects = project?.workspace.launch_objects ?? [];
+    //   let objects = project?.workspace.launch_objects ?? [];
     let references = project?.workspace.launch_references ?? [];
 
-    let [processes, setProcesses] = useState<LaunchProcess[]>(objects.map((el, i) => ({id: i, obj: el})))
+    let objects = launchStore(state => state.active_objects);
 
-    /*useEffect(() => {
-        let id = 0;
-        setProcesses(objects.map(el => ({id: id++, obj: el})))
-    }, [objects])
-*/
+    let processes: LaunchProcess[] = [...objects].map((el, i) => ({id: i, obj: el}))
+
+
     let [current, setCurrent] = useState(0)
+    console.log("LAUNCH OBJECTS", objects)
+    console.log(processes)
 
     return (
         <div id={"aside-launch"}>
             <div id={"aside-launch-header"}>
                 {
-                    objects.length == references.length &&
+                    //  objects.length == references.length &&
                     processes.map((el, i) =>
                         <LaunchPos current={i == current} key={i} proc={el} ref={references[i]}
                                    onClose={(proc) => {
+                                       launchStore.getState().remove_active_object(proc.obj)
                                    }}
                                    onSelect={(proc) => setCurrent(proc.id)}
                                    selected={current == el.id}
@@ -58,7 +60,8 @@ export default function AsideLaunch(props: Props) {
                 }
             </div>
             <div id={"aside-launch-terminal"}>
-                {objects.length == references.length &&
+                {
+                    //objects.length == references.length &&
                     processes.map((el, i) =>
                         <LaunchTerminal proc={el} key={i} selected={current == el.id}/>
                     )}

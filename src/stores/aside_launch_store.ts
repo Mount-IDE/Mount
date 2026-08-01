@@ -1,3 +1,7 @@
+/**
+ * @deprecated
+ */
+
 import {create} from "zustand";
 
 export type LaunchRunStatus = "queued" | "running" | "exited" | "failed";
@@ -19,7 +23,7 @@ interface Type {
     set_status: (runId: string, status: LaunchRunStatus) => void;
 }
 
-export const asideLaunchStore = create<Type>((set, get) => ({
+const asideLaunchStore = create<Type>((set, get) => ({
     windows: [],
     activeRunId: null,
     start_launch(object: LaunchObject, title: string): void {

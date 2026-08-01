@@ -105,7 +105,7 @@ impl TConfigService for ConfigService {
 
         match dir {
             Ok(dir) => {
-                println!("{:?}", dir);
+                //println!("{:?}", dir);
                 Ok(Path::new(dir.to_str().unwrap()))
             }
             Err(e) => {

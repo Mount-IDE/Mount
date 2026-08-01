@@ -10,6 +10,7 @@ use crate::modules::contexts::project::app::traits::TActionProjectService;
 use crate::modules::contexts::project::domain::entities::{Action, Project, ProjectTemplate, Var};
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
+use rand::RngExt;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -77,8 +78,10 @@ impl TLaunchCompileService for LaunchCompileService {
         if passed.len() == 0 {
             return None;
         }
+        let mut rng = rand::rng();
+        let num: i32 = rng.random();
         let mut obj = LaunchObject {
-            id: 0,
+            id: num,
             launch_reference: reference.id,
             scheme: Default::default(),
             tasks: vec![],
@@ -486,6 +489,7 @@ impl TLaunchRunService for LaunchRunService {
         app: AppHandle,
         state: State<'_, SharedLaunchManager>,
     ) -> Result<String, LaunchError> {
+        println!("TASK {task:?}");
         let cmd = task.command;
 
         let mut path = PathBuf::from(project.path.get());

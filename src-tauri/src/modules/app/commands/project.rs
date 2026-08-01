@@ -81,7 +81,7 @@ pub async fn create_project(
 ) -> Result<Project, ErrorDto> {
     // println!("template {:?}", template);
 
-    println!("PROJECT CREATING");
+    //println!("PROJECT CREATING");
 
     /// getting meta info about project
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
@@ -128,14 +128,14 @@ pub async fn create_project(
         Val::STRING(path.clone()),
     ));
 
-    /// creating project object
+    // creating project object
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
     project.meta = additions;
     project.vars = vars.clone();
 
-    /// adding git actions
+    // adding git actions
     template.startup.actions.insert(
         0,
         Action {
@@ -207,16 +207,6 @@ pub async fn create_project(
     let buttons = make_buttons();
 
     project.workspace.buttons = buttons;
-
-    for (i, j) in results.clone() {
-        // println!("{i}");
-        for (k, m) in j {
-            println!("\t{k}");
-            for (n, o) in m {
-                println!("\t\t{n} {o:?}");
-            }
-        }
-    }
 
     // making tasks
     let tasks = ACTION_PROJECT_SERVICE.compile(&template, &results, &vars);

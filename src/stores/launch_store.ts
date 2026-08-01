@@ -1,7 +1,7 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
 import {projectStore} from "./project_store.ts";
-import {asideLaunchStore} from "./aside_launch_store.ts";
+//import {asideLaunchStore} from "./aside_launch_store.ts";
 import {LOG} from "../utils/utils.ts";
 
 
@@ -23,6 +23,11 @@ interface Type {
     compile_to_obj: (ref: LaunchTemplateReference, results: LaunchTemplateResult, template: LaunchTemplate) => Promise<LaunchObject | null>,
     run_launch: (launch: LaunchObject) => void
     compile_to_ref: (temp: LaunchTemplate, results: LaunchTemplateResult) => Promise<LaunchTemplateReference | null>
+
+    active_objects: Set<LaunchObject>,
+
+    add_active_object: (obj: LaunchObject) => void
+    remove_active_object: (obj: LaunchObject) => void
 }
 
 
@@ -32,6 +37,22 @@ export const launchStore = create<Type>((set, get) => ({
     opened: false,
     temp_results: null,
     current_launch: null,
+    active_objects: new Set(),
+    remove_active_object: (obj) => set(prev => {
+        let other = new Set([...prev.active_objects])
+        other.delete(obj)
+        return {
+            active_objects: other
+        }
+    }),
+    add_active_object: (obj) => set(prev => {
+        let other = new Set([...prev.active_objects])
+        other.add(obj);
+        return {
+            active_objects: other
+        }
+    }),
+
     set_current_launch(cur: LaunchTemplateReference | null): void {
         set({current_launch: cur})
     },
@@ -111,9 +132,19 @@ export const launchStore = create<Type>((set, get) => ({
     },
     run_launch(launch: LaunchObject): void {
         const project = projectStore.getState().current_project;
-        const reference = project?.workspace.launch_references.find((ref) => ref.id === launch.launch_reference);
-        asideLaunchStore.getState().start_launch(launch, reference?.name ?? `Launch ${launch.launch_reference}`);
+        const reference =
+            project?.workspace.launch_references.find((ref) => ref.id === launch.launch_reference);
+        // asideLaunchStore.getState().start_launch(launch, reference?.name ?? `Launch ${launch.launch_reference}`);
         set({current_obj: launch});
+        let objs = [...get().active_objects];
+        let found = objs.find(el => el.id == launch.id);
+        console.log('BEBE', found, objs)
+        if (!found) {
+            objs.push(launch);
+            set({active_objects: new Set(objs)})
+        }
+
+
     },
     async compile_to_obj(ref: LaunchTemplateReference,
                          results: LaunchTemplateResult,

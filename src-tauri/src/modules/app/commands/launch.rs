@@ -110,7 +110,7 @@ pub async fn launch_task(
 ) -> Result<String, ErrorDto> {
     let id = window.label();
     let app = APP.get();
-    println!("APP {}", app.is_some());
+    //println!("APP {}", app.is_some());
     if let Some(app) = app {
         LAUNCH_RUN_SERVICE
             .launch_task(task, id.to_string(), project, app.clone(), state)

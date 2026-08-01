@@ -79,8 +79,8 @@ pub fn get_cache() -> Result<Cache, ErrorDto> {
     let settings = CONFIG_SERVICE.get_settings()?;
 
     let groups = settings.general.project_groups.clone();
-    println!("SETTINGS {settings:?}");
-    println!("GROUPS {groups:?}");
+    //println!("SETTINGS {settings:?}");
+    // println!("GROUPS {groups:?}");
     let os = if cfg!(target_os = "windows") {
         "windows"
     } else if cfg!(target_os = "macos") {
