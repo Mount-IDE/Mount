@@ -33,13 +33,13 @@ export default function AsideLaunch(props: Props) {
     let objects = project?.workspace.launch_objects ?? [];
     let references = project?.workspace.launch_references ?? [];
 
-    let [processes, setProcesses] = useState<LaunchProcess[]>([])
+    let [processes, setProcesses] = useState<LaunchProcess[]>(objects.map((el, i) => ({id: i, obj: el})))
 
-    useEffect(() => {
+    /*useEffect(() => {
         let id = 0;
         setProcesses(objects.map(el => ({id: id++, obj: el})))
     }, [objects])
-
+*/
     let [current, setCurrent] = useState(0)
 
     return (

@@ -144,7 +144,7 @@ interface IAsideButton {
     icon: string
     widget: string
     component_type: "Light" | "Heavy"
-    component: (props?: { active?: boolean }) => React.ReactElement
+    component: React.ComponentType<{ active?: boolean }>
 
 }
 
@@ -156,7 +156,7 @@ interface IAsideButtonExtended {
     keys: string
     icon: string
     component_type?: "Light" | "Heavy"
-    component?: () => React.ReactElement
+    component?: React.ComponentType<{ active?: boolean }>
 
 }
 

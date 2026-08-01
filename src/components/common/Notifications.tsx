@@ -1,6 +1,7 @@
 import "./styles/notifications.css"
 import {noteStore} from "../../stores/note_store.ts";
 import image from "../../assets/title-close.svg"
+import {AnimatePresence, motion} from "motion/react";
 
 export default function Notifications() {
 
@@ -15,31 +16,55 @@ export default function Notifications() {
 
     const notifications = noteStore(state => state.notification_bus)
 
-    const notes = notifications.length > 3 ? notifications.slice(3) : notifications;
+    const notes = notifications.length > 3 ? notifications.slice(notifications.length - 3) : notifications;
 
     const rem = noteStore(state => state.rem_note)
     return (
         <div id={"notifications"}>
-            {
-                notes.map((el, i) =>
-                    <div
-                        key={i}
-                        style={{
-                            background: `rgb(from ${bg[el.type]} r g b / 0.5)`,
-                            border: `1px solid ${bg[el.type]}`
-                        }}
-                        className={"notification"}>
-                        <div className={"notification-header"}>
-                            <button
-                                onClick={() => rem(el.id)}
-                            >
-                                <img src={image}/>
-                            </button>
-                        </div>
-                        <p>{el.text}</p>
-                    </div>
-                )
-            }
+            <AnimatePresence>
+                {
+                    notes.map((el, i) =>
+                        <motion.div
+                            key={el.id}
+                            layout
+                            initial={{
+                                opacity: 0,
+                                y: 50,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: 50
+                            }}
+                            transition={{
+                                duration: 0.25,
+
+                            }}
+                        >
+                            <div
+                                key={i}
+                                style={{
+                                    background: `rgb(from ${bg[el.type]} r g b / 0.5)`,
+                                    border: `1px solid ${bg[el.type]}`
+                                }}
+                                className={"notification"}>
+                                <div className={"notification-header"}>
+                                    <button
+                                        onClick={() => rem(el.id)}
+                                    >
+                                        <img src={image}/>
+                                    </button>
+                                </div>
+                                <p>{el.text}</p>
+                            </div>
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence>
+
         </div>
     )
 }

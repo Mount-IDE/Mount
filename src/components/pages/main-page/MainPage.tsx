@@ -2,7 +2,7 @@ import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
 import logo from "../../../assets/icon.svg"
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
 import {open_project} from "../../../services/create-project.ts";
@@ -10,7 +10,7 @@ import {mainPageStore} from "../../../stores/main_page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {mapProjectButton} from "../../../utils/project-buttons.tsx";
+import {mapProjectButton} from "../../../utils/project-buttons.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 import Modal from "../../common/Modal.tsx";
@@ -146,7 +146,7 @@ export default function MainPage() {
                         cb: async (_: string | undefined) => {
                             try {
                                 await invoke("remove_project", {path: currentPath});
-                                loadRecents();
+                                await loadRecents();
                                 menuStore.getState().close_modal()
                             } catch (e) {
                                 console.error(e)
@@ -253,7 +253,11 @@ export default function MainPage() {
                                 justifyContent: "center"
                             }}
                         >Not any recent projects</p>}
-                        {modal && <Modal {...modalSettings!}/>}
+                        {
+                            modal
+                            &&
+                            <Modal {...modalSettings!} />
+                        }
                         <ContextMenu ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]} show={showContext}/>
                     </div>
                 </div>

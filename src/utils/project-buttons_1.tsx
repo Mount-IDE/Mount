@@ -1,22 +1,22 @@
 import FsAside from "../components/aside-widgets/FsAside.tsx";
 import Terminal from "../components/pages/project-space/Terminal.tsx";
-import AsideLaunch from "../components/pages/project-space/AsideLaunch.tsx";
+import {ReactElement} from "react";
 
 function getComponentType(button: IAsideButtonExtended): "Light" | "Heavy" {
     if (button.component_type) return button.component_type;
     return button.widget === "TerminalAside" ? "Heavy" : "Light";
 }
 
-function renderButtonComponent(widget: string, active?: boolean) {
+function renderButtonComponent(widget: string, active?: boolean): () => ReactElement {
     switch (widget) {
         case "FsAside":
-            return <FsAside/>;
+            return () => FsAside();
         case "TerminalAside":
-            return <Terminal active={active}/>;
+            return () => Terminal({active: active});
         case "AsideLaunch":
-            return <AsideLaunch active={active}/>;
+            return () => <></>
         default:
-            return <></>;
+            return () => <></>;
     }
 }
 
@@ -26,7 +26,7 @@ export function mapProjectButton(button: IAsideButtonExtended): IAsideButton {
         alt: button.alt,
         widget: button.widget,
         component_type: getComponentType(button),
-        component: ({active} = {}) => renderButtonComponent(button.widget, active),
+        component: ({active} = {}) => renderButtonComponent(button.widget, active)(),
         icon: button.icon,
         keys: button.keys,
     };

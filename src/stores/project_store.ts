@@ -26,6 +26,7 @@ export const projectStore = create<Type>((set, get) => ({
         if (project) {
             let refs = project.workspace.launch_references;
             try {
+                console.log("40", refs, template)
                 let res = await invoke<[IProject, LaunchObject[]]>("create_objects", {
                     references: refs,
                     template: template,
@@ -99,6 +100,7 @@ export const projectStore = create<Type>((set, get) => ({
 
             }
             try {
+                console.log("TYP", typeof proj, proj)
                 await invoke("save_project", {project: proj});
                 set({current_project: proj})
             } catch (e) {

@@ -89,6 +89,7 @@ function Aside(props: Props) {
         asideButtonsStore(state => state.current_left) :
         asideButtonsStore(state => state.current_right)
 
+    const Component = current_top?.component
     return (
         <>
             {
@@ -107,7 +108,9 @@ function Aside(props: Props) {
                 className={props.state ? "project-aside-selector project-aside" : "project-aside-selector project-aside-dis"}>
                 <Header is_left={props.left ?? false} label={current_top?.alt ?? ""}/>
                 <div className={"project-aside-body"}>
-                    {current_top?.component()}
+                    {
+                        Component && <Component/>
+                    }
                 </div>
             </div>
             {props.left && props.state &&

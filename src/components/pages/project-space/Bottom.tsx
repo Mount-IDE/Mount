@@ -81,9 +81,10 @@ export default function Bottom(_: Props) {
 
     }, [ref_, state]);
 
-    const lightComponent =
-        current?.component_type === "Light" && state ? current.component({active: true}) : null;
-
+    /* const lightComponent =
+         current?.component_type === "Light" && state ? current.component({active: true}) : null;
+ */
+    const Light = current?.component_type === "Light" && state ? current.component : null;
 
     return (
         <>
@@ -98,16 +99,23 @@ export default function Bottom(_: Props) {
                 <div id={"project-bottom-in"}>
                     {heavyButtons.map(button => {
                         const active = state && current?.id === button.id;
+                        const Component = button.component;
                         return (
                             <div
                                 key={`${button.widget}-${button.id}`}
                                 className={active ? "project-bottom-panel" : "project-bottom-panel project-bottom-panel-hidden"}
                             >
-                                {button.component({active})}
+                                {
+                                    //  button.component({active})
+                                    Component && <Component active={active}/>
+                                }
                             </div>
                         );
                     })}
-                    {lightComponent}
+                    {
+                        Light &&
+                        <Light active={true}/>
+                    }
                 </div>
             </div>
         </>

@@ -6,28 +6,38 @@ import {projectStore} from "../../../stores/project_store.ts";
 import plus from "../../../assets/plus.svg"
 import minus from "../../../assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
+import {LOG} from "../../../utils/utils.ts";
 
 
 export default function LaunchPage() {
-
     const current_launch_template = launchStore(state => state.current_template)
     const project = projectStore(state => state.current_project);
     const template = project?.template;
     const set_current_template = launchStore(state => state.set_current_template)
     const set_current_template_by_ref = launchStore(state => state.set_current_temp_by_ref)
-    const opened = launchStore(state => state.set_opened)
 
+    const opened = launchStore(state => state.set_opened)
     const setCurrentLaunchReference = launchStore(state => state.set_current_launch)
     const setCurrentLaunchProject = projectStore(state => state.set_current_launch);
-    const [curRef, setCurRef] = useState(-1)
 
+    const [curRef, setCurRef] = useState(-1)
     const find = launchStore(state => state.find_temp)
-    let meta: LaunchSection = {
+
+    const templates = project?.workspace.launch_templates ?? [];
+    const references = project?.workspace.launch_references ?? [];
+
+    let meta = useMemo<LaunchSection>(() => ({
         id: -1,
         options: [
             {
-                def: find(-1, "name", curRef, project) ?? "",
+                def:
+                    find(
+                        -1,
+                        "name",
+                        curRef,
+                        project)
+                    ?? templates.find(e => e.id == (references[curRef]?.template?.[1] ?? -1))?.title ?? "",
                 id: "name",
                 title: "Name",
                 typ: {
@@ -36,16 +46,16 @@ export default function LaunchPage() {
             }
         ],
 
-    }
+    }), [curRef, project])
+    useEffect(() => {
+        LOG(`META ${JSON.stringify(meta)}`)
+    }, [meta]);
 
-    const templates = project?.workspace.launch_templates ?? [];
+
     const [showContext, setShowContext] = useState(false)
 
-
     const updateReferences = projectStore(state => state.update_launch_references);
-
     const updateObjects = projectStore(state => state.update_launch_objects)
-    const references = project?.workspace.launch_references ?? [];
 
     // const setReferences = launchStore(state => state.set_references);
 
@@ -170,6 +180,7 @@ export default function LaunchPage() {
     )
 }
 
+
 type RefProps = {
     obj: LaunchTemplateReference
     cb: (obj: LaunchTemplateReference) => void
@@ -177,6 +188,7 @@ type RefProps = {
 }
 
 function LaunchRef(props: RefProps) {
+    LOG(props.obj)
     const path = props.obj.icon ? `/builtin/fs-icons/${props.obj.icon}` : "/builtin/fs-icons/any.svg"
     return (
         <div onClick={() => props.cb(props.obj)}

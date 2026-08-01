@@ -517,7 +517,7 @@ impl TLaunchRunService for LaunchRunService {
         let app_clone_ex = app.clone();
         let app_clone_err = app.clone();
 
-        let child = Arc::new(tokio::sync::Mutex::new(command));
+        let child = Arc::new(Mutex::new(command));
         let child_clone = child.clone();
 
         let id = Uuid::new_v4().to_string();

@@ -12,7 +12,7 @@ import Load from "../../common/Load.tsx";
 import {listen} from "@tauri-apps/api/event";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {mapProjectButton} from "../../../utils/project-buttons.tsx";
+import {mapProjectButton} from "../../../utils/project-buttons.ts";
 import {invoke} from "@tauri-apps/api/core";
 
 

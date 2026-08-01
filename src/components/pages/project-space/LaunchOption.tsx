@@ -1,7 +1,7 @@
 import "./styles/launch-option.css"
 import {launchStore} from "../../../stores/launch_store.ts";
 import dir from "../../../assets/dir.svg"
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {open} from "@tauri-apps/plugin-dialog";
 import {invoke} from "@tauri-apps/api/core";
 import {LOG} from "../../../utils/utils.ts";
@@ -22,15 +22,22 @@ export default function LaunchOption(props: Props) {
     const write = launchStore(state => state.write_temp);
     const typ = obj.typ.typ;
 
-    const val_ = find(props.section, obj.id, props.cur_ref, props.project);
-    LOG(`VAL LAUNCH ${val_} :: ${props.section} ${props.cur_ref} ${JSON.stringify(props.project?.workspace.launch_references.find(el => el.id == props.cur_ref)!.results)}`)
-    LOG(`TEMPLATE ${JSON.stringify(
-        props.project?.workspace.launch_templates[0].sections
-    )}`)
-    const val = val_ ? val_ : ""
+    const [val, setVal] = useState(() => find(
+            props.section,
+            obj.id,
+            props.cur_ref,
+            props.project
+        ) ?? ""
+    );
+    LOG(`VAL LAUNCH ${val} :: ${props.section} ${props.cur_ref} ${JSON.stringify(props.project?.workspace.launch_references.find(el => el.id == props.cur_ref)?.results)}`)
+    LOG(`TEMPLATE ${JSON.stringify(props.project?.workspace.launch_templates[0].sections)}`)
+
     useEffect(() => {
         async function handler() {
-
+            let res = find(props.section, obj.id, props.cur_ref, props.project)
+            if (res != null) {
+                return;
+            }
             if (typeof obj.def == "number") {
                 try {
                     let fn = props.functions.find(el => el.id == obj.def)
@@ -44,24 +51,34 @@ export default function LaunchOption(props: Props) {
                     })
                     if (Array.isArray(res)) {
                         write(props.section, obj.id, res[0], props.cur_ref, props.project);
+                        //setVal(res[0])
                     } else {
                         write(props.section, obj.id, res, props.cur_ref, props.project);
+                        // setVal(res)
                     }
                 } catch (e) {
                     console.error(e)
                 }
             } else {
                 write(props.section, obj.id, obj.def, props.cur_ref, props.project);
+                // setVal(obj.def)
             }
         }
 
         handler().then()
 
-    }, [obj.def]);
+        },
+        [obj.def,
+            obj.id,
+            props.section,
+            props.cur_ref,
+            props.functions,
+            write]);
 
 
     function write_(val_: string) {
         write(props.section, obj.id, val_, props.cur_ref, props.project)
+        setVal(val_)
     }
 
     return (
