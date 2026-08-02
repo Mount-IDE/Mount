@@ -24,7 +24,7 @@ mod modules;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let out_dir = Path::new("../src/types");
-    fs::create_dir_all(out_dir).unwrap();
+    let _ = fs::create_dir_all(out_dir);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())

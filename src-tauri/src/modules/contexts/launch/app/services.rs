@@ -23,6 +23,7 @@ use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use process_wrap::tokio::*;
+#[cfg(windows)]
 use windows::Win32::System::Threading::CREATE_NO_WINDOW;
 
 #[allow(unused)]
