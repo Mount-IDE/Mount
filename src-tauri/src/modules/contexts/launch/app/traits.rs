@@ -70,5 +70,10 @@ pub trait TLaunchRunService {
         state: State<'_, SharedLaunchManager>,
     );
 
-    async fn close_task(&self, id: String, state: State<'_, SharedLaunchManager>);
+    async fn close_task(
+        &self,
+        id: String,
+        state: State<'_, SharedLaunchManager>,
+        label: &str,
+    ) -> Result<(), ()>;
 }

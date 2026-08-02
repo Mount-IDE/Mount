@@ -108,6 +108,7 @@ pub async fn launch_task(
     window: Window,
     state: State<'_, SharedLaunchManager>,
 ) -> Result<String, ErrorDto> {
+    println!("start task");
     let id = window.label();
     let app = APP.get();
     //println!("APP {}", app.is_some());
@@ -136,7 +137,16 @@ pub async fn write_launch(
 pub async fn close_launch(
     id: String,
     state: State<'_, SharedLaunchManager>,
+    window: Window,
 ) -> Result<(), ErrorDto> {
-    LAUNCH_RUN_SERVICE.close_task(id, state).await;
+    println!("close task");
+    let res = LAUNCH_RUN_SERVICE
+        .close_task(id, state, window.label())
+        .await;
+    if let Err(_) = res {
+        return Err(ErrorDto {
+            message: "".to_string(),
+        });
+    }
     Ok(())
 }

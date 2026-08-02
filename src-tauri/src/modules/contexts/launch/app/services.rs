@@ -1,4 +1,4 @@
-use crate::modules::app::ACTION_PROJECT_SERVICE;
+use crate::modules::app::{ACTION_PROJECT_SERVICE, APP};
 use crate::modules::contexts::launch::app::functions::{read_fields, read_from, FunctionResult};
 use crate::modules::contexts::launch::app::managers::{LaunchSession, SharedLaunchManager};
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
@@ -22,6 +22,9 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
 use tokio::sync::Mutex;
 use uuid::Uuid;
+
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 
 #[allow(unused)]
 pub struct LaunchCompileService();
@@ -502,15 +505,20 @@ impl TLaunchRunService for LaunchRunService {
             "sh"
         };
         let key = if shell == "cmd" { "/C" } else { "-c" };
-        let mut command = Command::new(shell)
+        let mut command = Command::new(shell);
+
+        command
             .arg(key)
             .arg(cmd)
             .current_dir(path)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|_| LaunchError::Spawn)?;
+            .stderr(Stdio::piped());
+        #[cfg(target_os = "windows")]
+        command.creation_flags(0x08000000);
+
+        let mut command = command.spawn().map_err(|_| LaunchError::Spawn)?;
+
         let stdin = command.stdin.take().unwrap();
         let stdout = command.stdout.take().unwrap();
         let stderr = command.stderr.take().unwrap();
@@ -586,15 +594,31 @@ impl TLaunchRunService for LaunchRunService {
             }
         });
         let _ = tokio::spawn(async move {
-            let mut val = child_clone.lock().await;
-            let res = val.wait().await.unwrap();
+            let status;
+            loop {
+                {
+                    let mut val = child_clone.lock().await;
+                    match val.try_wait() {
+                        Ok(Some(exit_status)) => {
+                            status = exit_status;
+                            break;
+                        }
+                        Ok(None) => {}
+                        Err(_) => {
+                            return;
+                        }
+                    }
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            }
+
             let window = window_id_exit.clone();
             let _ = app_clone_ex.emit_to(
                 window,
                 "launch-exit",
                 LaunchExit {
                     id: id_exit,
-                    code: res.code().unwrap(),
+                    code: status.code().unwrap_or(-1),
                 },
             );
         });
@@ -634,12 +658,36 @@ impl TLaunchRunService for LaunchRunService {
         }
     }
 
-    async fn close_task(&self, id: String, state: State<'_, SharedLaunchManager>) {
+    async fn close_task(
+        &self,
+        id: String,
+        state: State<'_, SharedLaunchManager>,
+        label: &str,
+    ) -> Result<(), ()> {
+        let app = APP.get();
+        if let None = app {
+            return Err(());
+        }
+
         let ex = { state.lock().unwrap().launches.remove(&id) };
         if let Some(session) = ex {
+            println!("close task 22");
             let mut child = session.child.lock().await;
+            println!("get child");
             let _ = child.kill().await;
-            let _ = child.wait().await;
+            println!("kill");
+            let code = child.wait().await;
+            println!("close task 222");
+            let mut writter = session.writer.lock().await;
+            let _ = writter.flush();
+            /*if let Ok(code)=code{
+                let _ = app.unwrap().emit_to(label, "launch-exit", LaunchExit {
+                    id,
+                    code: code.code().unwrap()
+                });
+            }*/
         }
+        println!("close task2");
+        Ok(())
     }
 }

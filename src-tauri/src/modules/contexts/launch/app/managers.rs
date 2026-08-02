@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use tokio::io::AsyncWriteExt;
 
 pub struct LaunchSession {
     pub window_id: String,
@@ -8,12 +9,14 @@ pub struct LaunchSession {
 }
 
 impl LaunchSession {
-    pub async fn kill(self) {
+    pub async fn kill(&self) {
         let mut child = self.child.lock().await;
         if child.try_wait().ok().flatten().is_none() {
             let _ = child.kill().await;
             let _ = child.wait().await;
         }
+        let mut writter = self.writer.lock().await;
+        let _ = writter.flush().await;
     }
 }
 

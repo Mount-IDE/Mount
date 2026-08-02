@@ -72,6 +72,15 @@ pub fn run() {
                 for session in sessions {
                     session.join();
                 }
+
+                let launches = window.state::<Arc<Mutex<LaunchManager>>>();
+                let sessions = {
+                    let mut manager = launches.lock().unwrap();
+                    manager.remove_window_sessions(window.label())
+                };
+                for session in sessions {
+                    let _ = session.kill();
+                }
             }
         })
         .invoke_handler(generate_handler![

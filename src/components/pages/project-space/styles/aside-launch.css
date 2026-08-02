@@ -26,9 +26,15 @@
     height: 25px;
     margin: auto 0;
     border-radius: 5px;
-    gap: 5px;
+    gap: 12px;
+
+    & p {
+        height: 100%;
+    }
 
     & button {
+        height: 50%;
+        aspect-ratio: 1/1;
         border: none;
         background: transparent;
         display: flex;
@@ -51,6 +57,40 @@
     border-bottom: 1px solid var(--border3);
     /*background: var(--bg2);*/
 }
+
+#aside-launch-manage {
+    width: 100%;
+    height: 7%;
+    border-bottom: 1px solid var(--border3);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-left: 10px;
+}
+
+.aside-launch-manage-button {
+    height: 60%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+
+    & img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    &.undo {
+        border-radius: 5px;
+        border: 1px solid red;
+        background: rgba(200, 0, 0, 0.8);
+    }
+}
+
 
 #aside-launch-label {
     height: 100%;

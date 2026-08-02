@@ -1,18 +1,19 @@
 import "./styles/mini-aside.css"
 import more2 from "../../../assets/more2.svg"
-import React, {ReactElement, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import AsideButton from "./AsideButton.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
-import {asideStore} from "../../../stores/aside_store.ts";
 // import aside from "./Aside.tsx";
+import {asideStore, comp} from "../../../stores/aside_store.ts";
+
 
 type Props = {
     top: IAsideButton[],
     bottom?: IAsideButton[],
     max_top: number | null
     max_bot: number | null
-    set_top?: (elem: (props?: { active?: boolean }) => ReactElement | null) => void
-    set_bot?: (elem: (props?: { active?: boolean }) => ReactElement | null) => void
+    set_top?: (elem: comp) => void
+    set_bot?: (elem: comp) => void
     is_left: boolean
     top_button: (el: IAsideButton | null) => void
     bot_button?: (el: IAsideButton | null) => void

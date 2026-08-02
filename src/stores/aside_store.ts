@@ -1,4 +1,4 @@
-import {ReactElement} from "react";
+import React from "react";
 import {create} from "zustand";
 
 interface Type {
@@ -19,8 +19,8 @@ interface Type {
     set_current_bottom: (elem: comp) => void
 }
 
-type comp = (props?: { active?: boolean }) => ReactElement | null
-
+// type comp = (props?: { active?: boolean }) => ReactElement | null
+export type comp = React.ComponentType<{ active?: boolean }>
 type prev_ = (prev: boolean) => boolean
 
 export type toggleCallback = ((prev?: prev_) => void)
