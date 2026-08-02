@@ -60,7 +60,7 @@
 
 #aside-launch-manage {
     width: 100%;
-    height: 7%;
+    height: 40px;
     border-bottom: 1px solid var(--border3);
     display: flex;
     gap: 10px;

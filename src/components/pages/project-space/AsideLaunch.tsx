@@ -204,7 +204,6 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
             }
         }))
 
-        const restarted = useRef(false)
 
         const ref = useRef<HTMLDivElement>(null)
 

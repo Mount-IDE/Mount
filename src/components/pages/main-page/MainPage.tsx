@@ -2,7 +2,7 @@ import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
 import logo from "../../../assets/icon.svg"
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
 import {open_project} from "../../../services/create-project.ts";
@@ -16,37 +16,41 @@ import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 import Modal from "../../common/Modal.tsx";
 import {menuStore} from "../../../stores/menu_store.ts";
 
+
+/**
+ * buttons for creating project
+ * @var buttons
+ */
+const buttons = [
+    {
+        title: "New Project",
+        cb: () => {
+            open_project();
+        },
+        is_main: true
+    }, {
+        title: "Open Project",
+        cb: () => {
+        }
+    }, {
+        title: "Import from VCS",
+        cb: () => {
+        }
+    }, {
+        title: "Connect to",
+        cb: () => {
+        }
+    }
+]
+
+
 /**
  * A component of main page that contains list of created projects and buttons for itself creation
  * @constructor
  */
 export default function MainPage() {
 
-    /**
-     * buttons for creating project
-     * @var buttons
-     */
-    const buttons = [
-        {
-            title: "New Project",
-            cb: () => {
-                open_project();
-            },
-            is_main: true
-        }, {
-            title: "Open Project",
-            cb: () => {
-            }
-        }, {
-            title: "Import from VCS",
-            cb: () => {
-            }
-        }, {
-            title: "Connect to",
-            cb: () => {
-            }
-        }
-    ]
+
     const [recent, setRecent] = useState<IRecentProject[]>([]);
 
     const groups = mainPageStore(state => state.groups);
@@ -123,7 +127,7 @@ export default function MainPage() {
     const [currentPath, setCurrentPath] = useState("");
 
     const [showContext, setShowContext] = useState(false)
-    const context_buttons: IContextMenuButton[] = [
+    const context_buttons: IContextMenuButton[] = useMemo(() => ([
         {
             cb: async () => {
             },
@@ -167,7 +171,7 @@ export default function MainPage() {
             icon: "remove.svg"
 
         }
-    ]
+    ]), [currentPath])
     const [cords, setCords] = useState<[number, number]>([0, 0]);
     const ref = useRef<HTMLDivElement>(null)
 

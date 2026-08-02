@@ -19,12 +19,11 @@ use std::process::Stdio;
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, State};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::process::Command;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
+use process_wrap::tokio::*;
+use windows::Win32::System::Threading::CREATE_NO_WINDOW;
 
 #[allow(unused)]
 pub struct LaunchCompileService();
@@ -505,23 +504,36 @@ impl TLaunchRunService for LaunchRunService {
             "sh"
         };
         let key = if shell == "cmd" { "/C" } else { "-c" };
-        let mut command = Command::new(shell);
+        // let mut command = Command::new(shell);
 
-        command
-            .arg(key)
-            .arg(cmd)
-            .current_dir(path)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
-        #[cfg(target_os = "windows")]
-        command.creation_flags(0x08000000);
+        let mut command = CommandWrap::with_new(shell, |command| {
+            command
+                .arg(key)
+                .arg(cmd)
+                .current_dir(path)
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
+        });
+
+        command.wrap(KillOnDrop);
+
+        #[cfg(unix)]
+        {
+            command.wrap(ProcessGroup::leader());
+        }
+
+        #[cfg(windows)]
+        {
+            command.wrap(CreationFlags(CREATE_NO_WINDOW));
+            command.wrap(JobObject);
+        }
 
         let mut command = command.spawn().map_err(|_| LaunchError::Spawn)?;
 
-        let stdin = command.stdin.take().unwrap();
-        let stdout = command.stdout.take().unwrap();
-        let stderr = command.stderr.take().unwrap();
+        let stdin = command.stdin().take().unwrap();
+        let stdout = command.stdout().take().unwrap();
+        let stderr = command.stderr().take().unwrap();
 
         let app_clone_out = app.clone();
         let app_clone_ex = app.clone();
@@ -674,7 +686,7 @@ impl TLaunchRunService for LaunchRunService {
             println!("close task 22");
             let mut child = session.child.lock().await;
             println!("get child");
-            let _ = child.kill().await;
+            let a = child.start_kill();
             println!("kill");
             let code = child.wait().await;
             println!("close task 222");
