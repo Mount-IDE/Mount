@@ -119,7 +119,7 @@ export const createProjectStore = create<Type>((set, get) => ({
 
             return [0, unified, project]
         } catch (e) {
-            console.error(e)
+            console.warn(e)
             return [2, "", null] //error while create project
         }
 

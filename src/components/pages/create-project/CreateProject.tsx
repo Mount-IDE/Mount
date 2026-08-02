@@ -66,6 +66,11 @@ export default function CreateProject() {
                     type: NotificationType.NOTE,
                     text: "Project was created"
                 }, 2000)
+            } else {
+                noteStore.getState().add_note({
+                    type: NotificationType.ERR,
+                    text: "Error while creating project"
+                })
             }
             setIsCreating(false)
         }
@@ -76,7 +81,7 @@ export default function CreateProject() {
     useEffect(() => {
 
         let clear: number;
-
+        console.log("RERENDER")
         const unlisten = listen<string>("task-start", (d) => {
             let val = d.payload;
             setStartEvent(val)
@@ -108,10 +113,39 @@ export default function CreateProject() {
             })
         })
 
+
+        const unlisten4 = listen<string>("project", (d) => {
+            console.log("ZWRITE")
+            let parsed = JSON.parse(d.payload);
+            console.log(parsed);
+            let obj = JSON.parse(parsed.data) as Dependency[];
+            let conflicts = obj.filter(el => el.level == "CONFLICTS");
+            let optional = obj.filter(el => el.level == "OPTIONAL");
+            let critical = obj.filter(el => el.level == "CRITICAL");
+            let text = `Failed to check dependencies.\n
+conflicts:\n
+\toptional - ${optional.length}\n
+\tcritical - ${critical.length}\n
+\tconflicts - ${conflicts.length}
+            `
+
+            let type = critical.length > 0 || conflicts.length > 0 ? NotificationType.ERR : NotificationType.WARN
+
+            noteStore.getState().add_note({
+                text,
+                type
+            })
+
+            setStartEvent(null)
+            setEndEvent(null)
+        })
+
+
         return () => {
             unlisten.then(fn => fn())
             unlisten2.then(fn => fn())
             unlisten3.then(fn => fn())
+            unlisten4.then(fn => fn())
             clearInterval(clear)
         }
     }, [])

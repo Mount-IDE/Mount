@@ -1,7 +1,9 @@
 import "./styles/notifications.css"
-import {noteStore} from "../../stores/note_store.ts";
+import {noteStore, NotificationType} from "../../stores/note_store.ts";
 import image from "../../assets/title-close.svg"
 import {AnimatePresence, motion} from "motion/react";
+import {useEffect} from "react";
+import {listen} from "@tauri-apps/api/event";
 
 export default function Notifications() {
 
@@ -19,6 +21,50 @@ export default function Notifications() {
     const notes = notifications.length > 3 ? notifications.slice(notifications.length - 3) : notifications;
 
     const rem = noteStore(state => state.rem_note)
+
+    useEffect(() => {
+
+        let note = listen<string>("NOTE", (d) => {
+            let parsed = JSON.parse(d.payload).data;
+            noteStore.getState().add_note({
+                text: parsed,
+                type: NotificationType.NOTE
+            })
+        })
+        let warn = listen<string>("WARN", (d) => {
+            let parsed = JSON.parse(d.payload).data;
+            noteStore.getState().add_note({
+                text: parsed,
+                type: NotificationType.WARN
+            })
+        })
+        let err = listen<string>("ERROR", (d) => {
+            let parsed = JSON.parse(d.payload).data;
+            noteStore.getState().add_note({
+                text: parsed,
+                type: NotificationType.ERR
+            })
+        })
+        let fatal = listen<string>("FATAL", (d) => {
+            let parsed = JSON.parse(d.payload).data;
+            noteStore.getState().add_note({
+                text: parsed,
+                type: NotificationType.FATAL
+            })
+        })
+
+
+        return () => {
+            note.then(fn => fn())
+            warn.then(fn => fn())
+            err.then(fn => fn())
+            fatal.then(fn => fn())
+        }
+
+
+    }, []);
+
+
     return (
         <div id={"notifications"}>
             <AnimatePresence>
@@ -43,14 +89,15 @@ export default function Notifications() {
                                 duration: 0.25,
 
                             }}
+                            className={"notification"}
                         >
                             <div
                                 key={i}
                                 style={{
-                                    background: `rgb(from ${bg[el.type]} r g b / 0.5)`,
+                                    background: `rgb(from ${bg[el.type]} r g b / 0.65)`,
                                     border: `1px solid ${bg[el.type]}`
                                 }}
-                                className={"notification"}>
+                                className={"notification child"}>
                                 <div className={"notification-header"}>
                                     <button
                                         onClick={() => rem(el.id)}

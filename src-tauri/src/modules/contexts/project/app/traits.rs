@@ -6,7 +6,7 @@ use crate::modules::contexts::project::domain::values::{
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{Path, Val};
+use crate::modules::shared::kernel::values::{Dependency, Path, Val};
 
 pub trait TProjectService {
     fn create_project(&self, proj: &Project) -> Result<(), ProjectError>;
@@ -17,6 +17,8 @@ pub trait TProjectService {
     fn save_project(&self, project: &Project) -> Result<(), ProjectError>;
     fn remove_from_recents(&self, proj: &Project) -> Result<(), ProjectError>;
     fn add_to_recents(&self, project: &Project) -> Result<(), ProjectError>;
+
+    fn check_dependencies(&self, dependencies: Vec<Dependency>) -> Vec<Dependency>;
 }
 
 pub trait TActionProjectService {

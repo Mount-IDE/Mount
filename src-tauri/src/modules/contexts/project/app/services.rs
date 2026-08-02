@@ -15,13 +15,15 @@ use crate::modules::contexts::project::domain::values::{
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
-use crate::modules::shared::kernel::values::{Path, Val};
+use crate::modules::shared::kernel::utils::get_os;
+use crate::modules::shared::kernel::values::{Dependency, DependencyLevel, Path, Val};
 use regex::Regex;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
+use which::which;
 
 #[allow(unused)]
 fn get_key(sh: String) -> String {
@@ -314,6 +316,31 @@ impl TProjectService for ProjectService {
         })?;
         FS_WRITE_SERVICE.write_file(&file, text, FileWriteAccess::WRITE)?;
         Ok(())
+    }
+
+    fn check_dependencies(&self, dependencies: Vec<Dependency>) -> Vec<Dependency> {
+        let os = get_os();
+        let mut error: Vec<Dependency> = vec![];
+        for i in dependencies {
+            let prog = i.program.clone();
+            let platform = i.platform.clone();
+            if let Some(plat) = platform {
+                if os != plat {
+                    continue;
+                }
+            }
+            let res = which(prog);
+            if let Err(_) = res {
+                if i.level != DependencyLevel::CONFLICTS {
+                    error.push(i.clone());
+                    continue;
+                }
+            }
+            if let DependencyLevel::CONFLICTS = i.level {
+                error.push(i.clone())
+            }
+        }
+        error
     }
 }
 

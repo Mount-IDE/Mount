@@ -1,8 +1,9 @@
 use crate::modules::app::utils::project::make_buttons;
 use crate::modules::app::{
-    ACTION_PROJECT_SERVICE, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE,
-    FS_WRITE_SERVICE, PROJECT_SERVICE,
+    ACTION_PROJECT_SERVICE, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, EVENT_SERVICE,
+    FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE,
 };
+use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
@@ -16,10 +17,12 @@ use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionCommandArgs, ActionCommandIn, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
-use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
+use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
-use crate::modules::shared::kernel::values::{IfStatementPart, Path, Val};
+use crate::modules::shared::kernel::values::{
+    Dependency, DependencyLevel, IfStatementPart, Path, Val,
+};
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -79,11 +82,50 @@ pub async fn create_project(
     tags: Vec<ProjectTag>,
     window: tauri::Window,
 ) -> Result<Project, ErrorDto> {
-    // println!("template {:?}", template);
+    EVENT_SERVICE.send(
+        window.label().to_string(),
+        "task-start",
+        "Check Dependencies".to_string(),
+    );
+    let dependencies = template.dependencies.clone();
 
-    //println!("PROJECT CREATING");
+    let error_dependency = PROJECT_SERVICE.check_dependencies(dependencies);
+    if error_dependency.len() > 0 {
+        let critical: Vec<Dependency> = error_dependency
+            .iter()
+            .cloned()
+            .filter(|e| e.level == DependencyLevel::CRITICAL)
+            .collect();
+        let conflicts: Vec<Dependency> = error_dependency
+            .iter()
+            .cloned()
+            .filter(|e| e.level == DependencyLevel::CONFLICTS)
+            .collect();
 
-    /// getting meta info about project
+        let json = PARSING_SERVICE.to_string(error_dependency.clone());
+        if let Err(_) = json {
+            println!("not3");
+            return Err(ProjectError::NotAllDependenciesSuplied(error_dependency.clone()).into());
+        }
+
+        EVENT_SERVICE.send(window.label().to_string(), "project", json.unwrap());
+        EVENT_SERVICE.send(
+            window.label().to_string(),
+            "ERROR",
+            "Invalid dependencies".to_string(),
+        );
+
+        if conflicts.len() > 0 || critical.len() > 0 {
+            return Err(ProjectError::NotAllDependenciesSuplied(error_dependency.clone()).into());
+        }
+    }
+    EVENT_SERVICE.send(
+        window.label().to_string(),
+        "task-end",
+        "All dependencies correct".to_string(),
+    );
+
+    // getting meta info about project
     let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
     let name = meta
         .get(&-4i8)
@@ -204,6 +246,7 @@ pub async fn create_project(
             }],
         },
     );
+
     let buttons = make_buttons();
 
     project.workspace.buttons = buttons;

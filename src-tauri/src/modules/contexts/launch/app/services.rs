@@ -489,7 +489,6 @@ impl TLaunchRunService for LaunchRunService {
         app: AppHandle,
         state: State<'_, SharedLaunchManager>,
     ) -> Result<String, LaunchError> {
-        println!("TASK {task:?}");
         let cmd = task.command;
 
         let mut path = PathBuf::from(project.path.get());
@@ -503,7 +502,6 @@ impl TLaunchRunService for LaunchRunService {
             "sh"
         };
         let key = if shell == "cmd" { "/C" } else { "-c" };
-        println!("LAUNCH ARGS: {cmd} :: {:?}", path.to_str());
         let mut command = Command::new(shell)
             .arg(key)
             .arg(cmd)
@@ -554,7 +552,6 @@ impl TLaunchRunService for LaunchRunService {
                                 data: chunk.to_string(),
                             },
                         );
-                        println!("READ {}", chunk.to_string());
                     }
                 } else {
                     break;
@@ -582,7 +579,6 @@ impl TLaunchRunService for LaunchRunService {
                                 data: chunk.to_string(),
                             },
                         );
-                        println!("READ {}", chunk.to_string());
                     }
                 } else {
                     break;
@@ -615,7 +611,6 @@ impl TLaunchRunService for LaunchRunService {
             );
         }
 
-        println!("LAUNCH {id}: ");
         Ok(id)
     }
 
@@ -636,7 +631,6 @@ impl TLaunchRunService for LaunchRunService {
         if let Some(found) = writer {
             let mut writer = found.lock().await;
             let _ = writer.write_all(text.as_bytes()).await;
-            println!("WRITE {text}");
         }
     }
 

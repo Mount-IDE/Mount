@@ -2,7 +2,7 @@ use crate::modules::contexts::launch::domain::entities::{
     LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Dependency, Path};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -40,6 +40,8 @@ pub enum ProjectError {
     PathNotFound,
     #[error("failed to parse address in action {address}")]
     IncorrectAddress { address: String },
+    #[error("not all dependencies suplied")]
+    NotAllDependenciesSuplied(Vec<Dependency>),
 }
 
 #[derive(Error, Debug)]

@@ -5,16 +5,15 @@ pub mod utils;
 use super::contexts::filesystem::app::services::{
     FileSystemReadService, FileSystemWatchService, FileSystemWriteService,
 };
+use crate::modules::contexts::events::services::EventService;
 use crate::modules::contexts::launch::app::services::{LaunchCompileService, LaunchRunService};
 use crate::modules::contexts::project::app::services::{ActionProjectService, ProjectService};
 use crate::modules::contexts::settings::app::services::SettingsService;
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
 use crate::modules::services::config::{ConfigRecoveryService, ConfigService, ParsingService};
-use crate::modules::services::traits::TParsingService;
 use std::sync::OnceLock;
 use tauri::AppHandle;
-
 pub const FS_READ_SERVICE: FileSystemReadService = FileSystemReadService {};
 pub const FS_WRITE_SERVICE: FileSystemWriteService = FileSystemWriteService {};
 pub const FS_WATCH_SERVICE: FileSystemWatchService = FileSystemWatchService {};
@@ -35,3 +34,5 @@ pub static LAUNCH_COMPILE_SERVICE: LaunchCompileService = LaunchCompileService()
 pub static LAUNCH_RUN_SERVICE: LaunchRunService = LaunchRunService();
 
 pub static SETTINGS_SERVICE: SettingsService = SettingsService();
+
+pub static EVENT_SERVICE: EventService = EventService();

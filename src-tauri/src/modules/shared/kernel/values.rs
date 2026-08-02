@@ -16,6 +16,7 @@ impl Path {
         self.0.clone()
     }
 
+    #[allow(unused)]
     pub fn from_fs_path(path_: Vec<FsPath>) -> Self {
         let str_ = path_
             .iter()
@@ -136,12 +137,6 @@ impl Serialize for ParameterTyp {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
-pub struct IfStatement {
-    pub or: Option<Vec<IfStatementPart>>,
-    pub all: Option<Vec<IfStatementPart>>,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct IfStatementPart {
     pub from: String,
     pub oper: String,
@@ -150,13 +145,12 @@ pub struct IfStatementPart {
 
 #[derive(Clone, Serialize, Deserialize, Debug, TS)]
 pub struct Dependency {
-    program: String,
-    platform: Option<String>,
-    level: DependencyLevel,
+    pub program: String,
+    pub platform: Option<String>,
+    pub level: DependencyLevel,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS)]
-#[serde(untagged)]
+#[derive(Clone, Serialize, Deserialize, Debug, TS, PartialEq)]
 pub enum DependencyLevel {
     CRITICAL,
     CONFLICTS,
