@@ -3,8 +3,6 @@ import {launchStore} from "../../../stores/launch_store.ts";
 import dir from "../../../assets/dir.svg"
 import {useEffect, useState} from "react";
 import {open} from "@tauri-apps/plugin-dialog";
-import {invoke} from "@tauri-apps/api/core";
-import {LOG} from "../../../utils/utils.ts";
 
 type Props = {
     obj: LaunchOption,
@@ -23,61 +21,33 @@ export default function LaunchOption(props: Props) {
     const typ = obj.typ.typ;
 
     const [val, setVal] = useState(() => find(
-            props.section,
-            obj.id,
-            props.cur_ref,
-            props.project
-        ) ?? ""
+        props.section,
+        obj.id,
+        props.cur_ref) ?? props.obj.def.toString()
     );
-    LOG(`VAL LAUNCH ${val} :: ${props.section} ${props.cur_ref} ${JSON.stringify(props.project?.workspace.launch_references.find(el => el.id == props.cur_ref)?.results)}`)
-    LOG(`TEMPLATE ${JSON.stringify(props.project?.workspace.launch_templates[0].sections)}`)
 
     useEffect(() => {
-        async function handler() {
-            let res = find(props.section, obj.id, props.cur_ref, props.project)
-            if (res != null) {
-                return;
-            }
-            if (typeof obj.def == "number") {
-                try {
-                    let fn = props.functions.find(el => el.id == obj.def)
-                    if (!fn) {
-                        return
-                    }
-                    const res = await invoke<string | string[]>("call_function", {
-                        func: fn!,
-                        temp: launchStore.getState().current_template ?? {},
-                        results: launchStore.getState().temp_results ?? {}
-                    })
-                    if (Array.isArray(res)) {
-                        write(props.section, obj.id, res[0], props.cur_ref, props.project);
-                        //setVal(res[0])
-                    } else {
-                        write(props.section, obj.id, res, props.cur_ref, props.project);
-                        // setVal(res)
-                    }
-                } catch (e) {
-                    console.error(e)
-                }
-            } else {
-                write(props.section, obj.id, obj.def, props.cur_ref, props.project);
-                // setVal(obj.def)
-            }
+        let found = find(props.section, obj.id, props.cur_ref)
+        console.log("FOUND", found, launchStore.getState().references)
+        if (found) {
+            setVal(found)
         }
+    }, []);
 
-        handler().then()
-
+    /*
+    useEffect(() => {
+            write(props.section, obj.id, obj.def.toString(), props.cur_ref);
         },
         [obj.def,
             obj.id,
             props.section,
             props.cur_ref,
-            props.functions,
-            write]);
+            props.functions]);
+            */
 
 
     function write_(val_: string) {
-        write(props.section, obj.id, val_, props.cur_ref, props.project)
+        write(props.section, obj.id, val_, props.cur_ref)
         setVal(val_)
     }
 
@@ -140,13 +110,15 @@ function LaunchOptionList(props: ChildProps) {
         <div className={"launch-option-child list"}>
             {
                 props.obj.typ.list_types &&
-                <select>
+                <select
+                    onChange={(e) => props.write(e.currentTarget.value)}
+                >
                     {
                         props.obj.typ.list_types!.map((el, i) =>
                             <option
                                 key={i}
                                 value={el}
-                                selected={el == props.obj.def}>
+                                selected={el == props.val}>
                                 {el}
                             </option>
                         )

@@ -10,6 +10,7 @@
     z-index: 10;
     border-radius: 10px;
     padding: 10px;
+    border: 1px solid var(--border2);
 }
 
 #launch-top {

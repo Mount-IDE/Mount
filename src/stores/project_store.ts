@@ -7,7 +7,7 @@ interface Type {
     current_project: IProject | null,
     add_launch_reference: (temp: LaunchTemplate, temp2: ITemplate) => number
     update_launch_references: (refs: LaunchTemplateReference[]) => Promise<void>
-    update_launch_objects: (template: LaunchTemplate) => Promise<boolean>
+    update_launch_objects: (template: LaunchTemplate) => Promise<[boolean, IProject | null]>
 
     set_path_to_current_project(path: string): void,
 
@@ -21,12 +21,11 @@ interface Type {
 
 
 export const projectStore = create<Type>((set, get) => ({
-    async update_launch_objects(template: LaunchTemplate): Promise<boolean> {
+    async update_launch_objects(template: LaunchTemplate): Promise<[boolean, IProject | null]> {
         let project = get().current_project;
         if (project) {
             let refs = project.workspace.launch_references;
             try {
-                console.log("40", refs, template)
                 let res = await invoke<[IProject, LaunchObject[]]>("create_objects", {
                     references: refs,
                     template: template,
@@ -36,12 +35,12 @@ export const projectStore = create<Type>((set, get) => ({
                 set({
                     current_project: res[0]
                 })
-                return true
+                return [true, res[0]]
             } catch (e) {
                 console.error(e)
             }
         }
-        return false
+        return [false, null]
     },
     path_to_current_project: "",
     current_project: null,
@@ -100,7 +99,6 @@ export const projectStore = create<Type>((set, get) => ({
 
             }
             try {
-                console.log("TYP", typeof proj, proj)
                 await invoke("save_project", {project: proj});
                 set({current_project: proj})
             } catch (e) {

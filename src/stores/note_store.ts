@@ -42,7 +42,6 @@ export const noteStore = create<Type>((set, get) => ({
             }, time)
         }
         id++;
-        console.log("ADD NOTE")
         set({
             notification_bus: notes
         })

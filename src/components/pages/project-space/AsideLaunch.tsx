@@ -7,7 +7,6 @@ import {Terminal} from "@xterm/xterm";
 import {FitAddon} from "@xterm/addon-fit";
 import {listen, UnlistenFn} from "@tauri-apps/api/event";
 import {invoke} from "@tauri-apps/api/core";
-import {LOG} from "../../../utils/utils.ts";
 import {launchStore} from "../../../stores/launch_store.ts";
 
 type Props = { active?: boolean };
@@ -28,7 +27,7 @@ type LaunchProcess = {
     obj: LaunchObject
 }
 
-export default function AsideLaunch(props: Props) {
+export default function AsideLaunch(_: Props) {
 
     let project = projectStore(state => state.current_project);
     //   let objects = project?.workspace.launch_objects ?? [];
@@ -40,8 +39,7 @@ export default function AsideLaunch(props: Props) {
 
 
     let [current, setCurrent] = useState(0)
-    console.log("LAUNCH OBJECTS", objects)
-    console.log(processes)
+
 
     return (
         <div id={"aside-launch"}>
@@ -128,21 +126,20 @@ function LaunchTerminal(props: TermProps) {
 
     const termRef = useRef<Terminal>(null)
 
-    const allowRef = useRef(false)
+    //  const allowRef = useRef(false)
 
     const backendId = useRef<string>(null)
 
     const project = projectStore(state => state.current_project);
 
-    const lastSizeRef = useRef({
-        rows: 0,
-        cols: 0
-    })
+    /*  const lastSizeRef = useRef({
+          rows: 0,
+          cols: 0
+      })*/
 
     const currenTask = useRef(0)
 
     useEffect(() => {
-        LOG(`PROJECT: ${project}`)
         if (!project) {
             return;
         }
@@ -211,7 +208,6 @@ function LaunchTerminal(props: TermProps) {
             let frame: number | null = null;
             const flush = () => {
                 frame = null;
-                // if (disposedRef.current) return;
                 term.write(buffer);
                 buffer = "";
             };
@@ -221,41 +217,15 @@ function LaunchTerminal(props: TermProps) {
             };
         })();
 
-        /*listen<TerminalOutput>("terminal-output",
-            (e) => {
-            if (allowRef.current) {
-                if (e.payload.id === backendId.current) {
-                    queueOutput(e.payload.data)
-                }
-            }
-        }).then(unlisten => {
-            outputUnlisten = unlisten
-        })
 
-        listen<TerminalExit>("terminal-exit",
-            (e) => {
-            if (e.payload.id === backendId.current) {
-                // readyRef.current = false;
-                // onExit(tabKey);
-                // term.writeln("\r\n[process exited]");
-                void invoke("close_terminal", {id: e.payload.id});
-            }
-        }).then((unlisten) => {
-            exitUnlisten = unlisten;
-        });*/
-
-        // let os = cacheStore.getState().os
         let tasks = flatTasks(props.proc.obj.tasks);
 
-        LOG(tasks);
 
         async function runTask(index: number) {
-            LOG("index", index);
             if (index >= tasks.length) {
                 return;
             }
             let task = tasks[index];
-            LOG("TASK ", task);
             try {
                 let id = await invoke<string>("launch_task", {
                     task,
@@ -263,7 +233,6 @@ function LaunchTerminal(props: TermProps) {
                 });
                 //  fitAndResize();
                 backendId.current = id;
-                LOG(backendId.current)
             } catch (e) {
                 console.error(e)
             }
@@ -274,8 +243,6 @@ function LaunchTerminal(props: TermProps) {
             if (val.payload.id == backendId.current) {
                 queueOutput(val.payload.data)
             }
-            //term.write(val.payload)
-            LOG(val.payload)
         }).then((unlisten) => outputUnlisten = unlisten)
 
         listen<number>("launch-exit", (code) => {
@@ -286,43 +253,6 @@ function LaunchTerminal(props: TermProps) {
         }).then((unlisten) => exitUnlisten = unlisten)
 
         runTask(0).then();
-        /*
-
-                    invoke<string>("open_terminal", {
-                        shell: os == "windows" ? "cmd" : "shell",
-                        cwd: ".",
-                        isLaunch: true,
-                        rows: lastSizeRef.current.rows,
-                        cols: lastSizeRef.current.cols
-                    }).then(res=> {
-                            backendId.current = res;
-                            fitAndResize()
-
-                            let tasks = props.proc.obj.tasks;
-                            for (let task_ of tasks) {
-                                if (Object.keys(task_).includes("SINGLE")) {
-                                    let task = task_.SINGLE;
-                                    let cmd = task.command;
-                                    invoke("write_terminal", {id: res, data: cmd})
-                                        .then()
-                                        .catch(e=>{
-                                            term.writeln(`Error while executing ${cmd}: ${e}`)
-                                            invoke("close_terminal", {id: res})
-                                        })
-                                } else {
-
-                                }
-                            }
-                            invoke("close_terminal", {id: res})
-                        })
-                        .catch(
-                            (e) => {
-                                invoke("close_terminal", {id: backendId.current}).then()
-                                console.error(e)
-                            })
-
-        */
-
         return () => {
             term.dispose()
             resizeObserver.disconnect()

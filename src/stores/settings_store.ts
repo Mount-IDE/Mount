@@ -78,10 +78,8 @@ export const settingsStore = create<Type>((set, get) => ({
         if (!settings) {
             return settings;
         }
-        console.log("RES", results)
         for (let i of handlers) {
             i(settings, results)
-            console.log("SETTINGS", settings)
         }
         try {
             await invoke("save_settings", {

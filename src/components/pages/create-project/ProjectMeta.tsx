@@ -2,11 +2,13 @@ import "./styles/project-meta.css"
 import Section from "./Section.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import Tags from "./Tags.tsx";
+import {settingsStore} from "../../../stores/settings_store.ts";
 
 
 export default function ProjectMeta() {
 
     const project_path = cacheStore(state => state.projects_path);
+    const settings = settingsStore(state => state.settings)
     const base_meta: ISection[] = [
         {
             id: -4,
@@ -51,7 +53,7 @@ export default function ProjectMeta() {
                     def: "general",
                     label: ["Group", ""],
                     out: "project-group",
-                    typ: ["list", "general"],
+                    typ: ["list", ...[...settings?.general.project_groups ?? "general"]],
                 },
             ]
         }, {

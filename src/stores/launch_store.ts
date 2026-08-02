@@ -1,9 +1,6 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
 import {projectStore} from "./project_store.ts";
-//import {asideLaunchStore} from "./aside_launch_store.ts";
-import {LOG} from "../utils/utils.ts";
-
 
 interface Type {
     current_obj: LaunchObject | null,
@@ -11,23 +8,33 @@ interface Type {
 
     current_launch: LaunchTemplateReference | null
     set_current_launch: (cur: LaunchTemplateReference | null) => void
-    temp_results: LaunchTemplateResult | null,
-    set_temp_results: (temp: LaunchTemplateResult) => void
-    write_temp: (section: number, option: string, value: string, ref: number, project: IProject | null) => void
-    find_temp: (section: number, option: string, ref: number, project: IProject | null) => string | null
+    write_temp: (section: number, option: string, value: string, ref: number) => void
+    find_temp: (section: number, option: string, ref: number) => string | null
+
     set_opened: (val: boolean) => void,
+
     current_template: LaunchTemplate | null,
     set_current_template: (obj: LaunchTemplate | null) => void
 
     set_current_temp_by_ref: (obj: LaunchTemplateReference, templates: LaunchTemplate[]) => void
+
     compile_to_obj: (ref: LaunchTemplateReference, results: LaunchTemplateResult, template: LaunchTemplate) => Promise<LaunchObject | null>,
+
     run_launch: (launch: LaunchObject) => void
+
     compile_to_ref: (temp: LaunchTemplate, results: LaunchTemplateResult) => Promise<LaunchTemplateReference | null>
 
     active_objects: Set<LaunchObject>,
 
     add_active_object: (obj: LaunchObject) => void
     remove_active_object: (obj: LaunchObject) => void
+
+    references: LaunchTemplateReference[]
+
+    add_reference: (ref: LaunchTemplateReference) => void;
+    rem_reference: (i: number) => void
+
+    add_references: (refs: LaunchTemplateReference[]) => void;
 }
 
 
@@ -35,9 +42,25 @@ export const launchStore = create<Type>((set, get) => ({
     current_obj: null,
     current_template: null,
     opened: false,
-    temp_results: null,
     current_launch: null,
     active_objects: new Set(),
+    references: [],
+    add_reference: (ref) => set({
+        references: [...get().references, ref]
+    }),
+    rem_reference: (i) => {
+        let ref = [...get().references]
+            .filter(el => el.id != i)
+        ;
+        set({
+            references: ref
+        })
+    },
+    add_references: (refs) => {
+        set({references: refs})
+    },
+
+
     remove_active_object: (obj) => set(prev => {
         let other = new Set([...prev.active_objects])
         other.delete(obj)
@@ -62,10 +85,9 @@ export const launchStore = create<Type>((set, get) => ({
         set({current_template: obj})
     },
 
-    set_temp_results: (temp) => set({temp_results: temp}),
-    find_temp(section: number, option: string, ref: number, project: IProject | null): string | null {
-        if (!project) return null
-        let temp = project.workspace.launch_references ?? [];
+
+    find_temp(section: number, option: string, ref: number): string | null {
+        let temp = get().references;
         if (temp.length == 0) {
             return null
         }
@@ -73,26 +95,20 @@ export const launchStore = create<Type>((set, get) => ({
         if (!found)
             return null
         let results = found.results;
-        //   LOG(`RESULTS ${JSON.stringify(results)} :: SECTION ${section} :: OPTION ${option}`)
-        //  LOG(`BOOL ${section.toString() in results} :: ${option in results[section.toString()]}`)
         if (`${section}` in results) {
             let sec = results[section];
             if (option in sec) {
-                //    LOG("OPTION ", sec[option], JSON.stringify(sec))
                 return sec[option]
             }
         }
         return null
 
     },
-    write_temp(section: number, option: string, value: string, ref: number, project: IProject | null): void {
-        LOG("WRITING ", section, option, value)
-        if (!project) return
+    write_temp(section: number, option: string, value: string, ref: number): void {
 
-        let temp = project.workspace.launch_references;
+        let temp = get().references;
         let found =
             temp.find(el => el.id == ref);
-        LOG("found", found)
         if (!found) return
         let results = found.results;
         if (results[section]?.[option] === value) {
@@ -115,15 +131,8 @@ export const launchStore = create<Type>((set, get) => ({
                 return el
             }
         })
-        const proj: IProject = {
-            ...project,
-            workspace: {
-                ...project.workspace,
-                launch_references: result
-            }
-        }
-        LOG("RESULT AFTER WRITING", JSON.stringify(result))
-        projectStore.getState().set_current_project(proj)
+        set({references: result})
+
 
     },
 
@@ -131,20 +140,13 @@ export const launchStore = create<Type>((set, get) => ({
         set({opened: val})
     },
     run_launch(launch: LaunchObject): void {
-        const project = projectStore.getState().current_project;
-        const reference =
-            project?.workspace.launch_references.find((ref) => ref.id === launch.launch_reference);
-        // asideLaunchStore.getState().start_launch(launch, reference?.name ?? `Launch ${launch.launch_reference}`);
         set({current_obj: launch});
         let objs = [...get().active_objects];
         let found = objs.find(el => el.id == launch.id);
-        console.log('BEBE', found, objs)
         if (!found) {
             objs.push(launch);
             set({active_objects: new Set(objs)})
         }
-
-
     },
     async compile_to_obj(ref: LaunchTemplateReference,
                          results: LaunchTemplateResult,

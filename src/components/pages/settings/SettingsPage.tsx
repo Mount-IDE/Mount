@@ -2,7 +2,7 @@ import "./styles/settings-page.css"
 import Button from "../../common/Button.tsx";
 import {settingsStore} from "../../../stores/settings_store.ts";
 import pageStore from "../../../stores/page_store.ts";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import SettingsSection from "./SettingsSection.tsx";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 
@@ -73,15 +73,6 @@ export default function SettingsPage() {
 
 
     const [currentSettings, setCurrentSettings] = useState<number>(0)
-
-    useEffect(() => {
-        console.log("SETTINGS", settings, settingsStore.getState().settings_results)
-    }, [settings]);
-
-    useEffect(() => {
-        console.log(baseSettings)
-    }, [baseSettings]);
-
 
     function close() {
         close_settings(false)

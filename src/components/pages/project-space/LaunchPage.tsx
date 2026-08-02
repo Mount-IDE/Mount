@@ -7,37 +7,58 @@ import plus from "../../../assets/plus.svg"
 import minus from "../../../assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
 import {useEffect, useMemo, useState} from "react";
-import {LOG} from "../../../utils/utils.ts";
+import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 
 
 export default function LaunchPage() {
+
     const current_launch_template = launchStore(state => state.current_template)
+
     const project = projectStore(state => state.current_project);
     const template = project?.template;
+
+    const [curRef, setCurRef] = useState<number | null>(null)
+
+    // fn
     const set_current_template = launchStore(state => state.set_current_template)
     const set_current_template_by_ref = launchStore(state => state.set_current_temp_by_ref)
-
     const opened = launchStore(state => state.set_opened)
     const setCurrentLaunchReference = launchStore(state => state.set_current_launch)
     const setCurrentLaunchProject = projectStore(state => state.set_current_launch);
-
-    const [curRef, setCurRef] = useState(-1)
     const find = launchStore(state => state.find_temp)
 
     const templates = project?.workspace.launch_templates ?? [];
-    const references = project?.workspace.launch_references ?? [];
+    const references = launchStore(state => state.references)
 
-    let meta = useMemo<LaunchSection>(() => ({
+    useEffect(() => {
+        if (references.length == 0) {
+            launchStore.getState().add_references(project?.workspace.launch_references ?? [])
+        }
+    }, [project]);
+
+    console.log("BASE", curRef, references)
+
+    let meta = useMemo<LaunchSection>(() => {
+
+        let val = find(-1, "name", curRef ?? -1)
+        if (!val) {
+            let ref = references.find(el => el.id == curRef)
+            if (ref) {
+                let needed_temp = templates.find(el => el.id == ref?.template[1])
+                if (needed_temp) {
+                    val = needed_temp.title
+                } else {
+                    val = "Not Found"
+                }
+            } else {
+                val = "Not found"
+            }
+        }
+        return ({
         id: -1,
         options: [
             {
-                def:
-                    find(
-                        -1,
-                        "name",
-                        curRef,
-                        project)
-                    ?? templates.find(e => e.id == (references[curRef]?.template?.[1] ?? -1))?.title ?? "",
+                def: val,
                 id: "name",
                 title: "Name",
                 typ: {
@@ -46,25 +67,74 @@ export default function LaunchPage() {
             }
         ],
 
-    }), [curRef, project])
-    useEffect(() => {
-        LOG(`META ${JSON.stringify(meta)}`)
-    }, [meta]);
-
+        })
+    }, [curRef, references, templates])
 
     const [showContext, setShowContext] = useState(false)
 
     const updateReferences = projectStore(state => state.update_launch_references);
     const updateObjects = projectStore(state => state.update_launch_objects)
 
-    // const setReferences = launchStore(state => state.set_references);
+
+    /**
+     *
+     */
+    async function apply(): Promise<boolean> {
+        if (current_launch_template) {
+            await updateReferences(references);
+            const found =
+                references.find(el => el.id == curRef)
+            if (found) {
+                setCurrentLaunchReference(found!)
+                setCurrentLaunchProject(found!.id);
+            }
+            let res = await updateObjects(current_launch_template);
+            if (!res) {
+                return false
+            }
+
+            if (res[1] != null) {
+                projectStore.getState().save_project(res[1])
+            }
+            return true;
+        }
+        return true; // no matter, selected template, or not
+    }
+
+    /**
+     *
+     * @param el
+     * @param ref
+     */
+    function addReference(el: LaunchTemplate, ref: LaunchTemplateReference) {
+        launchStore.getState().add_reference(ref)
+        setCurRef(ref.id)
+        set_current_template(el)
+    }
+
+    /**
+     *
+     */
+    function removeReference() {
+        launchStore.getState().rem_reference(curRef ?? -1)
+    }
+
+
+    function selectReference(ref: LaunchTemplateReference) {
+        set_current_template_by_ref(ref, templates)
+        setCurRef(ref.id)
+    }
 
     useEffect(() => {
-        updateReferences(project?.workspace.launch_references ?? []).then()
-    }, [project?.workspace.launch_references]);
+        console.log("TEMP", current_launch_template)
+    }, [current_launch_template]);
+
+    useEffect(() => {
+        console.log(references[curRef ?? -1])
+    }, [curRef, references]);
+
 
     return (
-
         <div id={"launch-page"}>
             <div id={"launch-top"}>
                 <div id={"launch-label"}>
@@ -79,24 +149,17 @@ export default function LaunchPage() {
                         }}>
                             <img src={plus}/>
                         </button>
-                        <button className={"launch-head-bt"} onClick={() => {
-                            let new_ref = references.filter(el => el.id != curRef);
-                            updateReferences(new_ref).then();
-                        }}>
+                        <button className={"launch-head-bt"} onClick={removeReference}>
                             <img src={minus}/>
                         </button>
                         {
                             showContext &&
                             <div id={"launch-template-select"}>
                                 {templates.map((el, i) =>
-                                    <LaunchSelect references={references} add_ref={(ref) => {
-                                        let copy = [...references]
-                                        copy.push(ref);
-                                        updateReferences(copy).then()
-                                        setCurRef(ref.id)
-                                        set_current_template(el)
-
-                                    }} obj={el} key={i} temp={template}/>
+                                    <LaunchSelect references={references}
+                                                  add_ref={(r) => addReference(el, r)}
+                                                  obj={el} key={i} temp={template}
+                                    />
                                 )}
                             </div>
                         }
@@ -105,10 +168,7 @@ export default function LaunchPage() {
                         {
                             references.map((el, key) =>
                                 <LaunchRef current={curRef == el.id} key={key} obj={el}
-                                           cb={(obj) => {
-                                               set_current_template_by_ref(obj, templates)
-                                               setCurRef(el.id)
-                                           }}/>
+                                           cb={selectReference}/>
                             )
                         }
                     </div>
@@ -116,7 +176,7 @@ export default function LaunchPage() {
                 <div id={"launch-right"}>
                     <div id={"launch-sections"}>
                         {
-                            current_launch_template !== null &&
+                            current_launch_template !== null && curRef != null &&
                             <>
                                 <LaunchSection cur_ref={curRef}
                                                obj={meta}
@@ -136,41 +196,32 @@ export default function LaunchPage() {
                             </>
                         }
                     </div>
-                    {/*<hr/>*/}
                     <div id={"launch-before"}></div>
                 </div>
             </div>
             <div id={"launch-bottom"}>
                 <div id={"launch-buttons"}>
                     <Button width={100} title={"Ok"} cb={async () => {
-                        if (current_launch_template) {
-                            updateReferences(references).then();
-                            let res = await updateObjects(current_launch_template);
-                            if (!res) {
-                                return
-                            }
-                            const found = references.find(el => el.id == curRef)
-                            if (found) {
-                                setCurrentLaunchReference(found!)
-                                setCurrentLaunchProject(found!.id);
-                            }
+                        let res = await apply()
+                        if (res) {
                             opened(false)
+                        } else {
+                            noteStore.getState().add_note({
+                                text: "Cannot apply launch configuration",
+                                type: NotificationType.WARN
+                            })
                         }
                     }}/>
                     <Button width={100} title={"Cancel"} cb={() => {
                         opened(false)
                     }}/>
                     <Button width={100} title={"Apply"} cb={async () => {
-                        if (current_launch_template) {
-                            updateReferences(references).then();
-                            const found = references.find(el => el.id == curRef)
-                            if (found) {
-                                setCurrentLaunchReference(found!)
-                                setCurrentLaunchProject(found!.id);
-                            }
-                            await updateObjects(current_launch_template);
-
-
+                        let res = await apply()
+                        if (!res) {
+                            noteStore.getState().add_note({
+                                text: "Cannot apply launch configuration",
+                                type: NotificationType.WARN
+                            })
                         }
                     }}/>
                 </div>
@@ -187,8 +238,13 @@ type RefProps = {
     current: boolean
 }
 
+
+/**
+ *
+ * @param props
+ * @constructor
+ */
 function LaunchRef(props: RefProps) {
-    LOG(props.obj)
     const path = props.obj.icon ? `/builtin/fs-icons/${props.obj.icon}` : "/builtin/fs-icons/any.svg"
     return (
         <div onClick={() => props.cb(props.obj)}
@@ -202,6 +258,7 @@ function LaunchRef(props: RefProps) {
     )
 }
 
+
 type SelectProps = {
     references: LaunchTemplateReference[],
     add_ref: (ref: LaunchTemplateReference) => void
@@ -209,6 +266,11 @@ type SelectProps = {
     temp: ITemplate | undefined
 }
 
+/**
+ *
+ * @param props
+ * @constructor
+ */
 function LaunchSelect(props: SelectProps) {
     const path = props.obj.icon ? `/builtin/fs-icons/${props.obj.icon}` : "/builtin/fs-icons/any.svg"
     return (

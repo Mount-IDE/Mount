@@ -42,7 +42,6 @@ export default function SettingsParameter(props: Props) {
     }
 
     useEffect(() => {
-        console.log(val, obj)
         if (val != null) {
             write_res(val, props.cat, props.i, props.obj.id)
         }

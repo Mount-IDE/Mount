@@ -90,20 +90,18 @@ export default function CreateProject() {
                     return prev + 1;
                 })
             }, 500)
-            console.log("event", val)
         })
 
         const unlisten2 = listen<string>("task-end", (d) => {
             let val = d.payload;
             setEndEvent(val)
             setStartEvent(null)
-            console.log("event", val)
         })
 
         const unlisten3 = listen<string>("task-error", (d) => {
             setEndEvent(null);
             setStartEvent(null);
-            console.log("ERROR", d.payload)
+
             noteStore.getState().add_note({
                 type: NotificationType.ERR,
                 text: `Error while running task ${d.payload}`
