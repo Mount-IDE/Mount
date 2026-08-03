@@ -143,6 +143,7 @@ export default function MenuBar() {
 
     const projects: IMenuBarSection = {
         label: `${current_project?.name ?? ""}`,
+        icon: current_project?.meta.icon,
         buttons: [
             {
                 cb: () => {

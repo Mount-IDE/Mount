@@ -23,6 +23,7 @@ use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementPart, Path, Val,
 };
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[tauri::command]
@@ -321,6 +322,11 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
         .unwrap_or(&Val::STRING("".to_string()))
         .clone();
 
+    let image = add
+        .get("image")
+        .unwrap_or(&Val::STRING("".to_string()))
+        .clone();
+
     if let Val::STRING(val) = authors {
         let splited = val.split(":").collect::<Vec<&str>>();
         meta_.authors = splited.iter().map(|s| s.to_string()).collect();
@@ -337,12 +343,34 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
     } else {
         meta_.group = "general".to_string();
     }
+
+    if let Val::STRING(val) = image {
+        #[derive(Serialize, Deserialize, Clone, Debug)]
+        struct Image {
+            typ: String,
+            image: Option<String>,
+            color: String,
+        };
+
+        let json = PARSING_SERVICE._from_string::<Image>(val);
+        if let Ok(json) = json {
+            meta_.icon = match json.typ.as_str() {
+                "color" => Some(json.color),
+                _ => json.image,
+            }
+        } else {
+            meta_.icon = None;
+        }
+    } else {
+        meta_.icon = None
+    }
+
     let _tags_ = tags
         .iter()
         .map(|el| el.name.clone())
         .collect::<Vec<String>>();
     meta_.tags = _tags_.clone();
-
+    println!("{meta_:?}");
     meta_
 }
 

@@ -4,6 +4,16 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import Tags from "./Tags.tsx";
 import {settingsStore} from "../../../stores/settings_store.ts";
 
+import img_ from "../../../assets/img.svg"
+import close_ from "../../../assets/title-close.svg"
+import {useEffect, useState} from "react";
+
+import {SketchPicker} from 'react-color';
+import {open} from "@tauri-apps/plugin-dialog";
+import {ToggleGroup} from "radix-ui"
+import {motion} from "motion/react";
+import {invoke} from "@tauri-apps/api/core";
+import {createProjectStore} from "../../../stores/create_project.ts";
 
 export default function ProjectMeta() {
 
@@ -86,8 +96,146 @@ export default function ProjectMeta() {
     const template = cacheStore(state => state.currentTemplate);
     const other_sections = template ? template.startup.sections : []
 
+    const [imageShow, setImageShow] = useState(false)
+    const [color, setColor] = useState("")
+
+    const [typ, setTyp] = useState("color")
+    const [image, setImage] = useState<string | null>(null)
+
+    useEffect(() => {
+        createProjectStore.getState().add_result(
+            "__meta__", -3, "image", JSON.stringify({
+                typ, image, color
+            })
+        )
+    }, [typ, image, color]);
+
+
     return (
         <div id={"create-project-meta"}>
+            <div id={"create-project-img"}>
+
+                {
+                    !imageShow &&
+                    <div onClick={() => setImageShow(true)}
+                         id={"img"}
+                         style={{
+                             background: typ === "color" ? `${color}` : "#fff"
+                         }}
+                    >
+                        {(typ == "color" || image == null) && <img src={img_}/>}
+                        {typ == "image" && image != null && <img src={image}/>}
+                    </div>
+                }
+                {
+                    imageShow &&
+                    <div id={"img-click"}>
+                        <div id={"img-click-close"}
+                             onClick={() => setImageShow(false)}
+                        >
+                            <img src={close_}/>
+                        </div>
+                        <ToggleGroup.Root
+                            id={"image-click-toggle"}
+                            type={"single"}
+                            value={typ}
+                            onValueChange={(e) => {
+                                if (e == "color" || e == "image")
+                                    setTyp(e)
+                            }}
+                        >
+                            <ToggleGroup.Item value={"color"}>
+                                <div
+                                    className={"toggle-elem"}
+                                    style={{
+                                        color: typ == "color" ? "#000" : "var(--title)",
+                                        background: typ == "color" ? "var(--grad)" : "transparent"
+                                    }}
+                                >
+                                    color
+                                </div>
+                            </ToggleGroup.Item>
+                            <ToggleGroup.Item value={"image"}>
+                                <div className={"toggle-elem"}
+                                     style={{
+                                         color: typ == "image" ? "#000" : "var(--title)",
+                                         background: typ == "image" ? "var(--grad)" : "transparent"
+                                     }}
+                                >image
+                                </div>
+                            </ToggleGroup.Item>
+
+                        </ToggleGroup.Root>
+                        <div id={"img-click-variants"}
+                        >
+                            {typ == "color" &&
+                                <motion.div
+                                    initial={{
+                                        opacity: 0
+                                    }}
+                                    animate={{
+                                        opacity: 1
+                                    }}
+                                    exit={{
+                                        opacity: 0
+                                    }}
+                                    transition={{
+                                        duration: 0.5
+                                    }}
+                                >
+                                    <SketchPicker
+                                        color={color}
+                                        onChange={(e) => {
+                                            console.log("changed")
+                                            setColor(e.hex)
+                                        }}
+                                    />
+                                </motion.div>
+
+                            }
+                            {
+                                typ == "image" &&
+                                <motion.div
+                                    initial={{
+                                        opacity: 0
+                                    }}
+                                    animate={{
+                                        opacity: 1
+                                    }}
+                                    exit={{
+                                        opacity: 0
+                                    }}
+                                    transition={{
+                                        duration: 0.5
+                                    }}
+                                    id={"img-click-photo"}
+                                    onClick={async () => {
+                                        let res = await open({
+                                            directory: false,
+                                            title: "",
+                                            filters: [{
+                                                name: "image",
+                                                extensions: ["png", "svg", "jpeg", "jpg", "gif"]
+                                            }]
+                                        })
+                                        if (res != null) {
+                                            let res2 = await invoke<string>("make_base64", {src: res})
+                                            setImage(res2)
+                                        } else {
+                                            setImage(null)
+                                        }
+                                    }}
+                                >
+                                    {!image && <img src={img_} id={"image-logo"}/>}
+                                    {image &&
+                                        <img src={image} id={"image-back"}/>
+                                    }
+                                </motion.div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
             {base_meta.map(
                 (el, i) =>
                     <Section is_main section={el} key={`base-${i}`}/>

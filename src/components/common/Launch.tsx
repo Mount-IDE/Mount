@@ -9,6 +9,7 @@ import {launchStore} from "../../stores/launch_store.ts";
 import {projectStore} from "../../stores/project_store.ts";
 import {asideButtonsStore} from "../../stores/aside_buttons_store.ts";
 import {asideStore} from "../../stores/aside_store.ts";
+import pageStore from "../../stores/page_store.ts";
 
 export default function Launch() {
 
@@ -26,6 +27,7 @@ export default function Launch() {
         {
             cb: () => {
                 open_launch(true)
+                pageStore.getState().setFilter(true)
             },
             hotkeys: "",
             title: "Edit"

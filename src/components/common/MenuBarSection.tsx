@@ -57,14 +57,24 @@ export default function MenuBarSection(props: Props) {
     return (
         <div className={"menu-bar-section"}>
             <div className={"menu-bar-section-header"} onClick={() => setOpened(prev => !prev)}>
-                {props.obj.icon &&
+                {props.obj.icon && !props.obj.icon.includes("#") &&
                     <div className={"menu-bar-section-logo"}>
                         <img src={props.obj.icon!}/>
                     </div>
                 }
                 {
+                    props.obj.icon && props.obj.icon.includes("#") &&
+                    <div className={"menu-bar-section-cover"}
+                         style={{
+                             background: props.obj.icon
+                         }}
+                    >
+                        <p>{props.obj.label.slice(0, 1).toUpperCase()}</p>
+                    </div>
+                }{
                     !props.obj.icon &&
-                    <div className={"menu-bar-section-cover"}>
+                <div className={"menu-bar-section-cover"}
+                >
                         <p>{props.obj.label.slice(0, 1).toUpperCase()}</p>
                     </div>
                 }

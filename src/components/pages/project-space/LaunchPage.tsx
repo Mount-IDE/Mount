@@ -8,6 +8,7 @@ import minus from "../../../assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
 import {useEffect, useMemo, useState} from "react";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import pageStore from "../../../stores/page_store.ts";
 
 
 export default function LaunchPage() {
@@ -205,6 +206,7 @@ export default function LaunchPage() {
                         let res = await apply()
                         if (res) {
                             opened(false)
+                            pageStore.getState().setFilter(false)
                         } else {
                             noteStore.getState().add_note({
                                 text: "Cannot apply launch configuration",
@@ -214,6 +216,7 @@ export default function LaunchPage() {
                     }}/>
                     <Button width={100} title={"Cancel"} cb={() => {
                         opened(false)
+                        pageStore.getState().setFilter(false)
                     }}/>
                     <Button width={100} title={"Apply"} cb={async () => {
                         let res = await apply()

@@ -20,6 +20,7 @@ pub struct ProjectMeta {
     pub(crate) license: Option<String>,
     pub(crate) group: String,
     pub(crate) tags: Vec<String>,
+    pub(crate) icon: Option<String>,
 }
 
 impl Default for ProjectMeta {
@@ -30,6 +31,7 @@ impl Default for ProjectMeta {
             license: None,
             group: String::from("general"),
             tags: Vec::new(),
+            icon: None,
         }
     }
 }
@@ -42,6 +44,7 @@ impl ProjectMeta {
             license: None,
             group: String::new(),
             tags: Vec::new(),
+            icon: None,
         }
     }
 }

@@ -6,7 +6,8 @@ interface IRecentProject {
         description: string,
         license: string,
         group: string,
-        tags: string[]
+        tags: string[],
+        icon?: string
     },
     packages: string[],
     last_opened: number
@@ -21,7 +22,8 @@ interface IProject {
         description: string,
         license: string,
         tags: string[],
-        group: string
+        group: string,
+        icon?: string
     },
     template: ITemplate,
     packages: string[],
