@@ -37,7 +37,6 @@ export default function LaunchPage() {
         }
     }, [project]);
 
-    console.log("BASE", curRef, references)
 
     let meta = useMemo<LaunchSection>(() => {
 
@@ -126,13 +125,7 @@ export default function LaunchPage() {
         setCurRef(ref.id)
     }
 
-    useEffect(() => {
-        console.log("TEMP", current_launch_template)
-    }, [current_launch_template]);
 
-    useEffect(() => {
-        console.log(references[curRef ?? -1])
-    }, [curRef, references]);
 
 
     return (

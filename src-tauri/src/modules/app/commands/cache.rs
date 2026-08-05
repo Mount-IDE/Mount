@@ -68,7 +68,9 @@ pub fn get_data_dir() -> Result<Path, ErrorDto> {
 
 #[tauri::command]
 pub fn read_themes() -> Result<Vec<Theme>, ErrorDto> {
-    SETTINGS_SERVICE.read_themes().map_err(|e| e.into())
+    // SETTINGS_SERVICE.read_themes().map_err(|e| e.into())
+
+    Ok(vec![])
 }
 
 #[tauri::command]

@@ -4,40 +4,170 @@ use crate::modules::app::{
 };
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::{make_path, path_from};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::{Settings, Theme};
+use crate::modules::contexts::settings::domain::entities::{ITheme, Settings, Theme};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
-use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
+use crate::modules::shared::kernel::errors::{ConfigError, FileSystemError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::fmt::{Display, Formatter};
 use std::string::ToString;
 use tauri::Manager;
 
 pub struct ConfigService();
 
+#[deprecated]
 struct FSEntity {
     pub name: String,
     pub path: Path,
     pub content: String,
 }
 
-impl FSEntity {
-    pub fn content(name: String, path: String, content: String) -> Self {
-        Self {
-            name,
-            path: Path(path),
-            content,
+#[derive(Clone, Debug)]
+struct FSFile {
+    pub name: String,
+    pub path: Path,
+    pub content: Option<String>,
+}
+
+impl FSFile {
+    pub fn to_pfile(&self) -> PFile {
+        PFile {
+            name: self.name.clone(),
+            path: self.path.clone(),
+            typ: FileType::REGULAR,
         }
     }
-    pub fn dir(name: String) -> Self {
-        Self {
-            name: "".to_string(),
-            path: Path::new(name.as_str()),
-            content: "".to_string(),
+}
+#[derive(Clone, Debug)]
+struct FSDir {
+    pub name: String,
+    pub path: Path,
+    pub entities: Option<Vec<FsEntity_>>,
+}
+
+impl FSDir {
+    pub fn get_path(&self) -> Path {
+        if self.path.get().len() == 0 {
+            return Path(self.name.clone());
+        }
+        self.path.clone()
+    }
+}
+#[derive(Clone, Debug)]
+enum FsEntity_ {
+    FILE(FSFile),
+    DIR(FSDir),
+}
+
+trait TFsEntity<T> {
+    type F;
+    fn file(name: T, path: Path) -> Self;
+    fn file_content(name: T, path: Path, content: T) -> Self;
+
+    fn dir(name: T) -> Self;
+    fn dir_in(name: T, path: Path) -> Self;
+    fn dir_entities(name: T, entities: Vec<Self::F>) -> Self;
+
+    fn file_s(name: T) -> Self;
+    fn file_s_content(name: T, content: T) -> Self;
+}
+
+impl TFsEntity<&str> for FsEntity_ {
+    type F = FsEntity_;
+
+    fn file(name: &str, path: Path) -> Self {
+        Self::FILE(FSFile {
+            name: String::from(name),
+            path,
+            content: None,
+        })
+    }
+
+    fn file_content(name: &str, path: Path, content: &str) -> Self {
+        Self::FILE(FSFile {
+            name: String::from(name),
+            path,
+            content: Some(content.to_string()),
+        })
+    }
+
+    fn dir(name: &str) -> Self {
+        Self::DIR(FSDir {
+            name: name.to_string(),
+            path: Path::empty(),
+            entities: None,
+        })
+    }
+
+    fn dir_in(name: &str, path: Path) -> Self {
+        Self::DIR(FSDir {
+            name: name.to_string(),
+            path,
+            entities: None,
+        })
+    }
+
+    fn dir_entities(name: &str, entities: Vec<Self::F>) -> Self {
+        Self::DIR(FSDir {
+            name: name.to_string(),
+            entities: Some(entities),
+            path: Path::empty(),
+        })
+    }
+
+    fn file_s(name: &str) -> Self {
+        Self::FILE(FSFile {
+            name: name.to_string(),
+            path: Path::empty(),
+            content: None,
+        })
+    }
+
+    fn file_s_content(name: &str, content: &str) -> Self {
+        Self::FILE(FSFile {
+            name: name.to_string(),
+            path: Path::empty(),
+            content: Some(content.to_string()),
+        })
+    }
+}
+
+impl FsEntity_ {
+    #[allow(unused)]
+    pub fn get_path(&self) -> Path {
+        match self {
+            Self::DIR(dir) => {
+                if dir.path.get().len() == 0 {
+                    Path(dir.name.clone())
+                } else {
+                    dir.path.clone()
+                }
+            }
+            Self::FILE(file) => file.path.clone(),
+        }
+    }
+}
+
+impl Display for FsEntity_ {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FILE(file) => {
+                write!(f, "FILE {} :: {}", file.name, file.path)
+            }
+            Self::DIR(dir) => {
+                write!(
+                    f,
+                    "DIR {} :: {} :: {}",
+                    dir.name,
+                    dir.path,
+                    dir.entities.clone().unwrap_or(vec![]).len()
+                )
+            }
         }
     }
 }
@@ -240,52 +370,90 @@ impl TConfigService for ConfigService {
 
 pub struct ConfigRecoveryService();
 
-fn get_files() -> Vec<FSEntity> {
+fn get_files_new() -> Vec<FsEntity_> {
     vec![
-        FSEntity::content(
-            "settings.json".to_string(),
-            "".to_string(),
-            PARSING_SERVICE.to_string(Settings::new()).unwrap(),
+        FsEntity_::file_s_content(
+            "settings.json",
+            PARSING_SERVICE.to_string(Settings::new()).unwrap().as_str(),
         ),
-        FSEntity::content(
-            "recent-projects.json".to_string(),
-            "".to_string(),
-            "[]".to_string(),
-        ),
-        FSEntity::content(
-            "templates.json".to_string(),
-            "".to_string(),
+        FsEntity_::file_s_content("recent-projects.json", "[]"),
+        FsEntity_::file_s_content(
+            "templates.json",
             PARSING_SERVICE
                 .to_string(&vec![ProjectTemplate::default().clone()])
-                .unwrap(),
+                .unwrap()
+                .as_str(),
         ),
-        FSEntity::content(
-            "packages.json".to_string(),
-            "".to_string(),
-            "[]".to_string(),
-        ),
-        FSEntity::content(
-            "file_ext_icons.json".to_string(),
-            "".to_string(),
+        FsEntity_::file_s_content("packages.json", "[]"),
+        FsEntity_::file_s_content(
+            "file_ext_icons.json",
             PARSING_SERVICE
                 .to_string(vec![FsConfigIcons::default()])
-                .unwrap(),
+                .unwrap()
+                .as_str(),
         ),
-        FSEntity::content(
-            "file_templates.json".to_string(),
-            "".to_string(),
+        FsEntity_::file_s_content(
+            "file_templates.json",
             PARSING_SERVICE
                 .to_string(&vec![ConfigFsTemplate::file(), ConfigFsTemplate::dir()])
-                .unwrap(),
+                .unwrap()
+                .as_str(),
         ),
-        FSEntity::dir("icons".to_string()),
-        FSEntity::dir("aside_icons".to_string()),
-        FSEntity::content(
-            "themes.json".to_string(),
-            "".to_string(),
-            PARSING_SERVICE.to_string(&vec![Theme::dark()]).unwrap(),
+        FsEntity_::dir("icons"),
+        FsEntity_::dir("aside_icons"),
+        FsEntity_::dir_entities(
+            "themes",
+            vec![
+                FsEntity_::dir_entities(
+                    "dark",
+                    vec![FsEntity_::file_s_content(
+                        "theme.json",
+                        PARSING_SERVICE
+                            .to_string(ITheme::default())
+                            .unwrap()
+                            .as_str(),
+                    )],
+                ),
+                FsEntity_::dir_entities(
+                    "light",
+                    vec![FsEntity_::file_s_content(
+                        "theme.json",
+                        PARSING_SERVICE.to_string(ITheme::light()).unwrap().as_str(),
+                    )],
+                ),
+            ],
         ),
     ]
+}
+
+fn create_dir(dir: FSDir, path: Path) -> Result<(), FileSystemError> {
+    let path = path_from![path.get(), dir.get_path().get()];
+    println!("PATH {path}");
+    FS_WRITE_SERVICE.create_dir(&path)?;
+    if let Some(entities) = dir.entities {
+        let mut n = 0;
+        for i in entities.iter() {
+            println!("entity {n} :: {}", dir.name);
+            n += 1;
+            match i {
+                FsEntity_::FILE(file) => {
+                    let path_ = file.path.clone();
+                    let path_ = path_from![path.get(), path_.get(), file.name.clone()];
+                    println!("FILE {} '{}'", file.name, path_.get());
+                    let file_ = FS_WRITE_SERVICE.create_file(&path_)?;
+                    if let Some(content) = file.content.clone() {
+                        FS_WRITE_SERVICE.write_file(&file_, content, FileWriteAccess::WRITE)?;
+                    }
+                }
+                FsEntity_::DIR(dir) => {
+                    println!("DIR {}", dir.name);
+                    create_dir(dir.clone(), path.clone())?;
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
 
 impl TConfigRecoveryService for ConfigRecoveryService {
@@ -302,47 +470,33 @@ impl TConfigRecoveryService for ConfigRecoveryService {
             self.repair_data_dir()?;
             return Ok(());
         }
-        let files = get_files();
+        let files = get_files_new();
         for file in files {
-            if file.name.len() == 0 {
-                // make dirs
-                let path_ = make_path(vec![
-                    dir.get().clone().as_str(),
-                    file.path.get().clone().as_str(),
-                ]);
-                let exists = FS_READ_SERVICE.exists(path_.clone());
-                if !exists {
-                    self.repair_data_dir()?;
-                    return Ok(());
+            println!("ENTRY {file}");
+            match file {
+                FsEntity_::DIR(dir_) => {
+                    let path_ = path_from![dir.get(), dir_.get_path().get()];
+                    if !FS_READ_SERVICE.exists(path_.clone()) {
+                        self.repair_data_dir()?;
+                        return Ok(());
+                    }
                 }
-            } else {
-                let path_ = make_path(vec![
-                    dir.get().clone().as_str(),
-                    file.path.get().clone().as_str(),
-                    file.name.clone().as_str(),
-                ]);
-                let exists = FS_READ_SERVICE.exists(path_.clone());
-                if !exists {
-                    self.repair_data_dir()?;
-                    return Ok(());
-                }
-                let file = PFile::regular(file.name.clone(), path_.clone());
-                let content = FS_READ_SERVICE.read_file(&file)?;
-                if content.len() == 0 {
-                    self.repair_data_dir()?;
-                    return Ok(());
+                FsEntity_::FILE(file_) => {
+                    let path = path_from![dir.get(), file_.path.get(), file_.name];
+                    if !FS_READ_SERVICE.exists(path.clone()) {
+                        self.repair_data_dir()?;
+                        return Ok(());
+                    }
                 }
             }
         }
-
         Ok(())
     }
 
     fn repair_data_dir(&self) -> Result<(), ConfigError> {
-        let dir = CONFIG_SERVICE.get_data_dir()?;
-        let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir));
+        let dir__ = CONFIG_SERVICE.get_data_dir()?;
+        let path_ = FS_READ_SERVICE.exist_dir(&PDirectory::from_path(&dir__.clone()));
         if !path_ {
-            // println!("repair");
             let data = APP
                 .get()
                 .unwrap()
@@ -351,44 +505,43 @@ impl TConfigRecoveryService for ConfigRecoveryService {
                 .map_err(|e| ConfigError::GetDataDir { err: e })?;
             let _ = FS_WRITE_SERVICE.create_dir(&Path(data.to_str().unwrap().to_string()));
         }
-        let dir = dir.get();
+        let dir = dir__.get();
         println!("dir {dir}");
 
         let projects = CONFIG_SERVICE.get_projects_dir();
         if projects.is_err() {
             CONFIG_SERVICE.make_projects_dir()?;
         }
-        let files = get_files();
+        let files = get_files_new();
 
         for i in files {
-            if i.name.len() == 0 {
-                // make dirs
-                let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
-                if !FS_READ_SERVICE.exists(path_.clone()) {
-                    FS_WRITE_SERVICE.create_dir(&path_)?;
-                }
-            } else {
-                // make files
-
-                let path_ = make_path(vec![dir.clone().as_str(), i.path.get().as_str()]);
-                if !FS_READ_SERVICE.exists(path_.clone()) {
-                    FS_WRITE_SERVICE.create_dir(&path_)?;
-                }
-                let path_ = make_path(vec![path_.get().as_str(), i.name.clone().as_str()]);
-                println!("CONTENT {} {}", i.name, i.content);
-                if FS_READ_SERVICE.exists(path_.clone()) {
-                    let file = PFile::from_path_reg(path_.clone());
-                    let text = FS_READ_SERVICE.read_file(&file)?;
-                    if text.len() == 0 {
-                        FS_WRITE_SERVICE.write_file(&file, text, FileWriteAccess::WRITE)?;
+            println!("ENTRY2 {i}");
+            match i {
+                FsEntity_::DIR(dir_) => create_dir(dir_, dir__.clone())?,
+                FsEntity_::FILE(file) => {
+                    let path_ = path_from![dir.clone(), file.path.get()];
+                    if !FS_READ_SERVICE.exists(path_.clone()) {
+                        FS_WRITE_SERVICE.create_dir(&path_.clone())?;
                     }
-                } else {
-                    let file = FS_WRITE_SERVICE.create_file(&path_)?;
-                    FS_WRITE_SERVICE.write_file(
-                        &file,
-                        i.content.clone(),
-                        FileWriteAccess::APPEND,
-                    )?;
+                    let path_ = path_from![path_.get(), file.name];
+                    if FS_READ_SERVICE.exists(path_.clone()) {
+                        let file_ = PFile::from_path_reg(path_.clone());
+                        let text = FS_READ_SERVICE.read_file(&file_)?;
+                        if text.len() == 0 {
+                            if let Some(content) = file.content.clone() {
+                                FS_WRITE_SERVICE.write_file(
+                                    &file_,
+                                    content,
+                                    FileWriteAccess::WRITE,
+                                )?;
+                            }
+                        }
+                    } else {
+                        let file_ = FS_WRITE_SERVICE.create_file(&path_)?;
+                        if let Some(content) = file.content.clone() {
+                            FS_WRITE_SERVICE.write_file(&file_, content, FileWriteAccess::WRITE)?;
+                        }
+                    }
                 }
             }
         }

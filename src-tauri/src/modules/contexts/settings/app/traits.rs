@@ -1,6 +1,6 @@
-use crate::modules::contexts::settings::domain::entities::Theme;
+use crate::modules::contexts::settings::domain::entities::ITheme;
 use crate::modules::shared::kernel::errors::SettingsError;
 
 pub trait TSettingsService {
-    fn read_themes(&self) -> Result<Vec<Theme>, SettingsError>;
+    fn read_themes(&self) -> Result<Vec<ITheme>, SettingsError>;
 }

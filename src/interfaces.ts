@@ -454,3 +454,424 @@ interface Settings {
         shells: string[]
     }
 }
+
+type IThemeInner = string | {
+    self?: string
+    right?: string
+    left?: string
+    top?: string
+    bottom?: string
+}
+
+interface IThemeProjectInner {
+    color?: string
+    underscore?: string
+    hover?: {
+        color?: string
+        underscore?: string
+    }
+}
+
+interface IThemeTitleBar {
+    self?: {
+        background?: string
+        border?: IThemeInner
+    },
+    button?: {
+        background?: string
+        border?: IThemeInner
+        hover?: {
+            id: "wrap" | "resize" | "close" | "other",
+            background?: string,
+            border?: IThemeInner
+        }[] | {
+            background?: string
+            border: IThemeInner
+        }
+    }
+
+}
+
+interface ITheme {
+    id: string
+    name: string
+    schema: number
+    meta?: {
+        authors?: string[]
+        description?: string
+        tags?: string[]
+    }
+    colors?: { name: string, value: string }[]
+    elements?: {
+        common?: {
+            input?: {
+                self?: {
+                    background?: string
+                    rounded?: string
+                    border?: IThemeInner
+                }
+                field?: {
+                    background?: string
+                    border?: IThemeInner
+                    rounded?: string
+                    color?: string
+                    placeholder_color?: string
+                    hover?: {
+                        background?: string
+                        border?: IThemeInner
+                        rounded?: string
+                        color?: string
+                        placeholder_color?: string
+                    }
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                        color?: string
+                        placeholder_color?: string
+                    }
+                }
+                label?: {
+                    color?: string
+                }
+            }
+            check?: {
+                self?: {
+                    background: string
+                    rounded: string
+                    border?: IThemeInner
+                }
+                field?: {
+                    background?: string
+                    border?: IThemeInner
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                }
+                label?: {
+                    color?: string
+                }
+            }
+            list?: {
+                self?: {
+                    background?: string
+                    rounded?: string
+                    border?: IThemeInner
+                }
+                field?: {
+                    background?: string
+                    border?: IThemeInner
+                    color?: string
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                        color?: string
+                    }
+                    hover?: {
+                        background?: string
+                        border?: IThemeInner
+                        color?: string
+                    }
+                }
+                label?: {
+                    color?: string
+                }
+            }
+            gen?: {
+                self?: {
+                    background?: string
+                    border?: IThemeInner
+                    hover?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                }
+                element?: {
+                    self?: {
+                        background?: string
+                        rounded?: string
+                        hover?: {
+                            background?: string
+                            color?: string
+                            rounded?: string
+                        }
+                        focus?: {
+                            background?: string
+                            color?: string
+                            rounded?: string
+                        }
+                    }
+                    label?: {
+                        color?: string
+                        placeholder_color?: string
+                        hover?: {
+                            color?: string
+                            placeholder_color?: string
+                        }
+                        focus?: {
+                            color?: string
+                            placeholder_color?: string
+                        }
+                    }
+                    button?: {
+                        background?: string
+                        rounded?: string
+                        border?: IThemeInner
+                        hover?: {
+                            background?: string
+                            border?: IThemeInner
+                        }
+                        focus?: {
+                            background?: string
+                            border?: IThemeInner
+                        }
+                    }
+                }
+
+                button?: {
+                    background?: string
+                    rounded?: string
+                    border?: IThemeInner
+                    hover?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                }
+            }
+
+            button?: {
+                background?: string
+                rounded?: string
+                border?: IThemeInner
+                hover?: {
+                    background?: string
+                    border?: IThemeInner
+                }
+                focus?: {
+                    background?: string
+                    border?: IThemeInner
+                }
+            }
+
+            main_button?: {
+                background?: string
+                rounded?: string
+                border?: IThemeInner
+                hover?: {
+                    background?: string
+                    border?: IThemeInner
+                }
+                focus?: {
+                    background?: string
+                    border?: IThemeInner
+                }
+            }
+
+        }
+        mainpage?: {
+            left?: {
+                background?: string
+                rounded?: string
+                padding?: IThemeInner
+                border?: IThemeInner
+            },
+            right?: {
+                rounded?: string
+                padding?: IThemeInner
+                border?: IThemeInner
+                background?: string
+            },
+            filters?: {
+                border: IThemeInner
+            },
+            project?: {
+                self?: {
+                    background?: string
+                    padding?: IThemeInner
+                    rounded?: string,
+                    hover?: {
+                        background?: string
+                        rounded?: string
+                    }
+                }
+
+                icon?: {
+                    rounded?: string
+                    border?: IThemeInner
+                }
+
+                name?: IThemeProjectInner
+                path?: IThemeProjectInner
+                packages?: IThemeProjectInner
+                tags?: IThemeProjectInner
+                more?: {
+                    img?: string
+                }
+            }
+            title_bar?: IThemeTitleBar
+        }
+
+        project_space?: {
+            self?: {
+                background?: string
+            }
+            mini_aside?: {
+                right?: {
+                    border?: IThemeInner
+                    background?: string
+                },
+                left?: {
+                    border?: IThemeInner
+                    background?: string
+                }
+            }
+            aside?: {
+                left?: {
+                    border?: IThemeInner
+                    rounded?: string
+                    background?: string
+                    padding?: IThemeInner
+                }
+                right?: {
+                    border?: IThemeInner
+                    rounded?: string
+                    background?: string
+                    padding?: IThemeInner
+                }
+            }
+            center?: {
+                self?: {
+                    border?: IThemeInner
+                    background?: string
+                    rounded?: string
+                    padding?: IThemeInner
+                }
+                file_list?: {
+                    self?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+
+                    element?: {
+                        background?: string
+                        border?: IThemeInner
+                        rounded?: string
+                        hover?: {
+                            background?: string
+                            border?: IThemeInner
+                        }
+                        focus?: {
+                            background?: string
+                            border?: IThemeInner
+                        }
+                    }
+                }
+            }
+
+            bottom?: {
+                background?: string
+                border?: IThemeInner
+                rounded?: string
+                padding?: IThemeInner
+            }
+
+            footer?: {
+                border?: IThemeInner
+                background?: string
+                rounded?: string
+                padding?: IThemeInner
+            }
+
+
+            title_bar?: IThemeTitleBar
+        }
+
+        launch?: {
+            self?: {
+                background?: string
+                border?: IThemeInner
+                rounded?: string
+                padding?: IThemeInner
+            }
+            left?: {
+                self?: {
+                    background?: string
+                    border?: IThemeInner
+                    rounded?: string
+                    padding?: IThemeInner
+                }
+                list?: {
+                    background?: string
+                    border?: IThemeInner
+                    padding?: IThemeInner
+                    rounded?: string
+                    hover?: {
+                        border?: IThemeInner
+                        background?: string
+                    }
+                    focus?: {
+                        border?: IThemeInner
+                        background?: string
+                    }
+                }
+            }
+            right?: {
+                background?: string
+                border?: IThemeInner
+                padding?: IThemeInner
+                rounded?: string
+            }
+        }
+
+        settings?: {
+            self?: {
+                background?: string
+                border?: IThemeInner
+                rounded?: string
+                padding?: IThemeInner
+            }
+            left?: {
+                self?: {
+                    background?: string
+                    rounded?: string
+                    border?: IThemeInner
+                    padding?: IThemeInner
+                }
+                list?: {
+                    background?: string
+                    border?: IThemeInner
+                    rounded?: string
+                    hover?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                    focus?: {
+                        background?: string
+                        border?: IThemeInner
+                    }
+                }
+
+            }
+
+            right?: {
+                background?: string
+                border?: IThemeInner
+                rounded?: string
+                padding?: IThemeInner
+            }
+        }
+    }
+
+}
+
+
+
+

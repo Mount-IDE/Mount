@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "mount",
+  "productName": "mount ide",
   "version": "0.1.0",
   "identifier": "github.opie.mount",
   "build": {

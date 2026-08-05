@@ -23,7 +23,6 @@ export default function Project(props: Props) {
         }
     }
 
-    console.log("project", project)
     return (
         <div className={"main-page-project"} onClick={loadProject}>
             <div className={"main-page-project-logo"}>

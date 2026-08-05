@@ -27,6 +27,10 @@ impl Path {
         let path = make_path(str_);
         path
     }
+
+    pub fn empty() -> Self {
+        Self("".to_string())
+    }
 }
 
 impl Default for Path {

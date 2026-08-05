@@ -1,5 +1,5 @@
 use crate::modules::contexts::project::domain::values::ProjectMeta;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Path, Schema};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -270,5 +270,317 @@ impl Theme {
     }
     pub fn islands_light() -> Self {
         todo!()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ITheme {
+    pub id: String,
+    pub name: String,
+    pub schema: Schema,
+    pub meta: Option<IThemeMeta>,
+    pub colors: Option<Vec<ThemeColor>>,
+    pub elements: Option<ThemeElements>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeColor {
+    pub name: String,
+    pub value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
+pub struct IThemeMeta {
+    pub authors: Option<Vec<String>>,
+    pub description: Option<String>,
+    pub tags: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum ThemeInner {
+    SINGLE(String),
+    STRUCT(_ThemeInner),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct _ThemeInner {
+    pub this: Option<String>,
+    pub top: Option<String>,
+    pub bottom: Option<String>,
+    pub left: Option<String>,
+    pub right: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeTitleBar {
+    pub this: Option<ThemeTitleBarThis>,
+    pub button: Option<ThemeTitleBarButton>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeTitleBarThis {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeTitleBarButton {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub hover: Option<ThemeTitleBarButtonHover>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum ThemeTitleBarButtonHover {
+    SINGLE(_ThemeTitleBarButtonHoverSingle),
+    ARRAY(_ThemeTitleBarButtonHoverArray),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct _ThemeTitleBarButtonHoverSingle {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct _ThemeTitleBarButtonHoverArray {
+    pub id: _ThemeTitleBarVariant,
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum _ThemeTitleBarVariant {
+    Wrap,
+    Resize,
+    Close,
+    Other,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectInner {
+    pub color: Option<String>,
+    pub underscore: Option<String>,
+    pub hover: Option<ThemeProjectInnerHover>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectInnerHover {
+    pub color: Option<String>,
+    pub underscore: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemePageInner {
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub padding: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeElements {
+    pub mainpage: Option<ThemeMainPage>,
+    pub project_space: Option<ThemeProjectSpace>,
+    pub launch: Option<ThemeLaunch>,
+    pub settings: Option<ThemeSettings>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeMainPage {
+    pub left: Option<ThemePageInner>,
+    pub right: Option<ThemePageInner>,
+    pub filters: Option<ThemeFilters>,
+    pub project: Option<ThemeProject>,
+    pub title_bar: Option<ThemeTitleBar>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProject {
+    pub this: Option<ThemeProjectThis>,
+    pub icon: Option<ThemeProjectIcon>,
+    pub name: Option<ThemeProjectInner>,
+    pub path: Option<ThemeProjectInner>,
+    pub packages: Option<ThemeProjectInner>,
+    pub tags: Option<ThemeProjectInner>,
+    pub more: Option<ThemeProjectMore>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectMore {
+    pub img: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectIcon {
+    pub rounded: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectThis {
+    pub background: Option<String>,
+    pub padding: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub hover: Option<ThemeProjectThisHover>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectThisHover {
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeFilters {
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectSpace {
+    pub this: Option<ThemeProjectSpaceThis>,
+    pub mini_aside: Option<ThemeMiniAside>,
+    pub aside: Option<ThemeAside>,
+    pub center: Option<ThemeCenter>,
+    pub bottom: Option<ThemePage>,
+    pub footer: Option<ThemePage>,
+    pub title_bar: Option<ThemeTitleBar>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeAside {
+    pub left: Option<ThemePage>,
+    pub right: Option<ThemePage>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCenter {
+    pub this: Option<ThemePage>,
+    pub file_list: Option<ThemeFileList>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeFileList {
+    pub this: Option<ThemeFileListThis>,
+    pub element: Option<ThemeFileListElement>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeFileListThis {
+    pub border: Option<ThemeInner>,
+    pub background: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeFileListElement {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub hover: Option<ThemeHF>,
+    pub focus: Option<ThemeHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeHF {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeMiniAside {
+    pub right: Option<ThemeMiniAsideIn>,
+    pub left: Option<ThemeMiniAsideIn>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeMiniAsideIn {
+    pub border: Option<ThemeInner>,
+    pub background: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeProjectSpaceThis {
+    pub background: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeLaunch {
+    pub this: Option<ThemePage>,
+    pub left: Option<ThemeLaunchLeft>,
+    pub right: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeLaunchLeft {
+    pub this: Option<ThemePage>,
+    pub list: Option<ThemeLaunchList>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeLaunchList {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub padding: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub hover: Option<ThemeHF>,
+    pub focus: Option<ThemeHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeSettings {
+    pub this: Option<ThemePage>,
+    pub left: Option<ThemeSettingsLeft>,
+    pub right: Option<ThemePage>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeSettingsLeft {
+    pub this: Option<ThemePage>,
+    pub list: Option<ThemeSettingsLeftList>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeSettingsLeftList {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub hover: Option<ThemeHF>,
+    pub focus: Option<ThemeHF>,
+}
+
+impl Default for ITheme {
+    fn default() -> Self {
+        Self {
+            id: String::from("opie.dark"),
+            name: "Dark".to_string(),
+            meta: None,
+            colors: None,
+            schema: Schema(1),
+            elements: None,
+        }
+    }
+}
+
+impl ITheme {
+    pub fn light() -> Self {
+        Self {
+            id: "opie.light".to_string(),
+            name: "Light".to_string(),
+            meta: None,
+            colors: Some(vec![
+                ThemeColor {
+                    name: "bg".to_string(),
+                    value: "#fff".to_string(),
+                },
+                ThemeColor {
+                    name: "title".to_string(),
+                    value: "#000".to_string(),
+                },
+                ThemeColor {
+                    name: "subtitle".to_string(),
+                    value: "#d9d9d9".to_string(),
+                },
+            ]),
+            elements: None,
+            schema: Schema(1),
+        }
     }
 }

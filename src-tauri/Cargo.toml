@@ -1,5 +1,5 @@
 [package]
-name = "mount"
+name = "mount-ide"
 version = "0.1.0"
 description = "Mount ide"
 authors = ["Opie"]
