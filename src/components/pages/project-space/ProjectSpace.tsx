@@ -9,6 +9,7 @@ import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import {launchStore} from "../../../stores/launch_store.ts";
 import LaunchPage from "./LaunchPage.tsx";
+import {themeStore} from "../../../stores/theme_store.ts";
 
 
 export default function ProjectSpace() {
@@ -22,8 +23,15 @@ export default function ProjectSpace() {
     useEffect(() => {
         set_project(project)
     }, [project])
+
+
+    const theme = themeStore(state => state.current_theme?.elements?.project_space);
     return (
-        <div id={"project-space"}>
+        <div
+            style={{
+                background: theme?.this?.background,
+            }}
+            id={"project-space"}>
             {
                 show_modal && modal_settings!=null &&
                 <Modal {...modal_settings}/>

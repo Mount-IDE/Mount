@@ -8,8 +8,8 @@
     top: 12.5%;
     background: var(--bg-t);
     /*display: flex;*/
-    padding: 20px 30px;
-    border-radius: 20px;
+    padding: var(--padding);
+    border-radius: var(--rounded);
     overflow: hidden;
     border: 1px solid var(--border3)
 

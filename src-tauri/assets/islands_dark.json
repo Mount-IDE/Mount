@@ -1,0 +1,77 @@
+{
+    "id": "opie.islands_dark",
+    "name": "Islands Dark",
+    "schema": 1,
+    "colors": [
+        {
+            "name": "bg",
+            "value": "#131313"
+        },
+        {
+            "name": "bg2",
+            "value": "#131313"
+        }
+    ],
+    "elements": {
+        "project_space": {
+            "title_bar": {
+                "this": {
+                    "background": "#191919",
+                    "border": "none"
+                }
+            },
+            "this": {
+                "background": "#191919"
+            },
+            "mini_aside": {
+                "right": {
+                    "background": "transparent",
+                    "hr": {
+                        "border": "1px solid transparent"
+                    }
+                },
+                "left": {
+                    "background": "transparent",
+                    "hr": {
+                        "border": "1px solid transparent"
+                    }
+                }
+            },
+            "aside": {
+                "left": {
+                    "rounded": "var(--rounded)",
+                    "background": "var(--bg2)",
+                    "padding": "20px",
+                    "hr": {
+                        "border": "3px solid transparent"
+                    }
+                },
+                "right": {
+                    "rounded": "var(--rounded)",
+                    "background": "var(--bg2)",
+                    "padding": "20px",
+                    "hr": {
+                        "border": "3px solid transparent"
+                    }
+                }
+            },
+            "center": {
+                "this": {
+                    "rounded": "var(--rounded)",
+                    "padding": "10px"
+                }
+            },
+            "bottom": {
+                "rounded": "var(--rounded)",
+                "background": "var(--bg2)",
+                "hr": {
+                    "border": "1px solid transparent",
+                    "active_border": "3px solid transparent"
+                }
+            },
+            "footer": {
+                "background": "#191919"
+            }
+        }
+    }
+}

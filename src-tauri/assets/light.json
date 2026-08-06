@@ -1,0 +1,39 @@
+{
+    "id": "opie.light",
+    "name": "Light",
+    "schema": 1,
+    "colors": [
+        {
+            "name": "bg",
+            "value": "#fff"
+        },
+        {
+            "name": "title",
+            "value": "#000"
+        },
+        {
+            "name": "subtitle",
+            "value": "#454545"
+        },
+        {
+            "name": "proj-hover",
+            "value": "#bababa"
+        },
+        {
+            "name": "bg-t",
+            "value": "#dddddd90"
+        },
+        {
+            "name": "bg1",
+            "value": "#fff"
+        },
+        {
+            "name": "bg2",
+            "value": "#fdfdfd"
+        },
+        {
+            "name": "placeholder",
+            "value": "#676767"
+        }
+    ]
+}

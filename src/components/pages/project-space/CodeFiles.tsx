@@ -5,6 +5,7 @@ import {codeSpaceStore} from "../../../stores/code_space_store.ts";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 import React, {useEffect, useRef, useState} from "react";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 type Props = {
     files: Opened[]
@@ -26,6 +27,7 @@ export default function CodeFiles(props: Props) {
         props.setCurrent(obj_.id, obj_.cache_id);
     }
 
+    const theme = themeStore(state => state.current_theme?.elements?.project_space?.center?.file_list)
 
     const [buttons, setButtons] = useState<IContextMenuButton[]>([])
     const [cords, setCords] = useState<[number, number]>([0, 0])
@@ -74,7 +76,12 @@ export default function CodeFiles(props: Props) {
 
     return (
         <>
-            <div className={"code-space-files"}>
+            <div className={"code-space-files"}
+                 style={{
+                     ...computeBP(theme?.this?.border, "border"),
+                     background: theme?.this?.background
+                 }}
+            >
                 {props.files.map(el =>
                     <CodeFile onContext={onContext} onSelect={onSelect} onRemove={cb} obj={el}
                               selected={props.current[0] == el.id} key={el.id}/>
@@ -102,10 +109,21 @@ function CodeFile(props: FileProps) {
     const path_to = `/builtin/fs-icons/${get[1]}`
     const from_cache = fileCacheStore(state=>state.get_by_id(props.obj.cache_id));
 
+    const theme = themeStore(state => state.current_theme?.elements?.project_space?.center?.file_list?.element)
+
+    const border = props.selected ? (
+        theme?.focus?.border ?
+            computeBP(theme.focus.border, "border") :
+            {borderBottom: "1px solid var(--border)"}
+    ) : {borderBottom: "1px solid transparent"}
+
     return (
         <div onClick={()=>props.onSelect(props.obj)}
             style={{
-                borderBottom: props.selected? "1px solid var(--border)": "1px solid transparent"
+                ...border,
+                borderRadius: theme?.rounded,
+                background: theme?.background,
+
             }}
              className={"code-space-file"}
              onContextMenu={(e) => {

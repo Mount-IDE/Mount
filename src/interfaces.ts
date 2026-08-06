@@ -246,7 +246,7 @@ interface Cache {
     file_icons: FsConfigIcons[],
     file_templates: configFsTemplate[]
     shells: string[]
-    themes: Theme[]
+    themes: string[]
 
 }
 
@@ -334,74 +334,6 @@ interface LaunchTask {
     }
 }
 
-/**
- *
- */
-interface Theme {
-    id: string;
-    name: string;
-    meta?: {
-        authors?: string[]
-        version?: string
-        description?: string;
-        source?: string
-    }
-    vars?: {
-        name: string;
-        value: string
-    }[]
-    pages: {
-        id: string;
-        elements: {
-            selector: string
-            color?: string
-            background_color?: string;
-            background_image?: string;
-            background_opacity: string;
-
-            border?: string
-            border_right?: string
-            border_left?: string
-            border_top?: string
-            border_bottom?: string
-            border_x?: string
-            border_y?: string
-
-            border_size?: string
-            border_color?: string
-            border_style?: string
-
-            border_radius?: string
-
-            margin?: string
-            margin_left?: string
-            margin_right?: string
-            margin_top?: string
-            margin_bottom?: string
-            margin_x?: string
-            margin_y?: string
-
-            padding?: string
-            padding_left?: string
-            padding_right?: string
-            padding_top?: string
-            padding_bottom?: string
-            padding_x?: string
-            padding_y?: string
-
-            width?: string
-            height?: string
-
-            opacity?: string
-            font?: string
-            font_family?: string
-            font_weight?: string
-
-
-        }[]
-    }[]
-}
-
 
 interface SettingsElement {
     id: number;
@@ -473,7 +405,7 @@ interface IThemeProjectInner {
 }
 
 interface IThemeTitleBar {
-    self?: {
+    this?: {
         background?: string
         border?: IThemeInner
     },
@@ -505,7 +437,7 @@ interface ITheme {
     elements?: {
         common?: {
             input?: {
-                self?: {
+                this?: {
                     background?: string
                     rounded?: string
                     border?: IThemeInner
@@ -535,7 +467,7 @@ interface ITheme {
                 }
             }
             check?: {
-                self?: {
+                this?: {
                     background: string
                     rounded: string
                     border?: IThemeInner
@@ -553,7 +485,7 @@ interface ITheme {
                 }
             }
             list?: {
-                self?: {
+                this?: {
                     background?: string
                     rounded?: string
                     border?: IThemeInner
@@ -578,30 +510,21 @@ interface ITheme {
                 }
             }
             gen?: {
-                self?: {
+                this?: {
                     background?: string
                     border?: IThemeInner
-                    hover?: {
-                        background?: string
-                        border?: IThemeInner
-                    }
-                    focus?: {
-                        background?: string
-                        border?: IThemeInner
-                    }
+
                 }
                 element?: {
-                    self?: {
+                    this?: {
                         background?: string
                         rounded?: string
                         hover?: {
                             background?: string
-                            color?: string
                             rounded?: string
                         }
                         focus?: {
                             background?: string
-                            color?: string
                             rounded?: string
                         }
                     }
@@ -673,6 +596,10 @@ interface ITheme {
                     background?: string
                     border?: IThemeInner
                 }
+            },
+            title_bar?: IThemeTitleBar,
+            icons?: {
+                color?: string
             }
 
         }
@@ -693,7 +620,7 @@ interface ITheme {
                 border: IThemeInner
             },
             project?: {
-                self?: {
+                this?: {
                     background?: string
                     padding?: IThemeInner
                     rounded?: string,
@@ -720,17 +647,23 @@ interface ITheme {
         }
 
         project_space?: {
-            self?: {
+            this?: {
                 background?: string
             }
             mini_aside?: {
                 right?: {
                     border?: IThemeInner
-                    background?: string
+                    background?: string,
+                    hr?: {
+                        border?: string
+                    }
                 },
                 left?: {
                     border?: IThemeInner
-                    background?: string
+                    background?: string,
+                    hr?: {
+                        border?: string
+                    }
                 }
             }
             aside?: {
@@ -739,23 +672,29 @@ interface ITheme {
                     rounded?: string
                     background?: string
                     padding?: IThemeInner
+                    hr?: {
+                        border?: string
+                    }
                 }
                 right?: {
                     border?: IThemeInner
                     rounded?: string
                     background?: string
                     padding?: IThemeInner
+                    hr?: {
+                        border?: string
+                    }
                 }
             }
             center?: {
-                self?: {
+                this?: {
                     border?: IThemeInner
                     background?: string
                     rounded?: string
                     padding?: IThemeInner
                 }
                 file_list?: {
-                    self?: {
+                    this?: {
                         background?: string
                         border?: IThemeInner
                     }
@@ -781,6 +720,10 @@ interface ITheme {
                 border?: IThemeInner
                 rounded?: string
                 padding?: IThemeInner
+                hr?: {
+                    border?: string
+                    active_border?: string
+                }
             }
 
             footer?: {
@@ -795,14 +738,14 @@ interface ITheme {
         }
 
         launch?: {
-            self?: {
+            this?: {
                 background?: string
                 border?: IThemeInner
                 rounded?: string
                 padding?: IThemeInner
             }
             left?: {
-                self?: {
+                this?: {
                     background?: string
                     border?: IThemeInner
                     rounded?: string
@@ -832,14 +775,14 @@ interface ITheme {
         }
 
         settings?: {
-            self?: {
+            this?: {
                 background?: string
                 border?: IThemeInner
                 rounded?: string
                 padding?: IThemeInner
             }
             left?: {
-                self?: {
+                this?: {
                     background?: string
                     rounded?: string
                     border?: IThemeInner
@@ -866,6 +809,74 @@ interface ITheme {
                 border?: IThemeInner
                 rounded?: string
                 padding?: IThemeInner
+            }
+        },
+
+        create_project?: {
+            this?: {
+                padding?: IThemeInner,
+                border?: IThemeInner,
+                background?: string
+                rounded?: string
+            },
+            left?: {
+                padding?: IThemeInner,
+                border?: IThemeInner,
+                background?: string
+                rounded?: string
+            },
+            right?: {
+                padding?: IThemeInner,
+                border?: IThemeInner,
+                background?: string
+                rounded?: string
+            },
+
+        }
+
+
+        create_entities?: {
+            this?: {
+                padding?: IThemeInner,
+                border?: IThemeInner,
+                background?: string
+                rounded?: string
+            },
+            left?: {
+                this?: {
+                    padding?: IThemeInner,
+                    border?: IThemeInner,
+                    background?: string
+                    rounded?: string
+                },
+                field?: {
+                    padding?: IThemeInner,
+                    border?: IThemeInner,
+                    background?: string
+                    rounded?: string
+                    color?: string,
+                    hover?: {
+                        padding?: IThemeInner,
+                        border?: IThemeInner,
+                        background?: string
+                        rounded?: string
+                        color?: string
+                    },
+                    focus?: {
+                        padding?: IThemeInner,
+                        border?: IThemeInner,
+                        background?: string
+                        rounded?: string
+                        color?: string
+                    }
+                }
+            }
+
+            right?: {
+                padding?: IThemeInner,
+                border?: IThemeInner,
+                background?: string
+                rounded?: string
             }
         }
     }

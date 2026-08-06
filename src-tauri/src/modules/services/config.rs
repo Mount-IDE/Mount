@@ -16,9 +16,10 @@ use crate::modules::shared::kernel::values::Path;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::{Display, Formatter};
+use std::ops::Deref;
 use std::string::ToString;
 use std::sync::Mutex;
-use tauri::Manager;
+use tauri::{include_image, Manager};
 
 pub struct ConfigService();
 
@@ -54,6 +55,8 @@ trait TFsEntity<T> {
     type F;
     #[allow(unused)]
     fn file(name: T, path: Path) -> Self;
+
+    #[allow(unused)]
     fn file_content(name: T, path: Path, content: T) -> Self;
 
     fn dir(name: T) -> Self;
@@ -406,17 +409,21 @@ fn get_files_new() -> Vec<FsEntity_> {
                     "opie.dark",
                     vec![FsEntity_::file_s_content(
                         "theme.json",
-                        PARSING_SERVICE
-                            .to_string(ITheme::default())
-                            .unwrap()
-                            .as_str(),
+                        include_str!("../../../assets/dark.json"),
                     )],
                 ),
                 FsEntity_::dir_entities(
                     "opie.light",
                     vec![FsEntity_::file_s_content(
                         "theme.json",
-                        PARSING_SERVICE.to_string(ITheme::light()).unwrap().as_str(),
+                        include_str!("../../../assets/light.json"),
+                    )],
+                ),
+                FsEntity_::dir_entities(
+                    "opie.islands_dark",
+                    vec![FsEntity_::file_s_content(
+                        "theme.json",
+                        include_str!("../../../assets/islands_dark.json"),
                     )],
                 ),
             ],

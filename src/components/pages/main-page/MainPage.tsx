@@ -15,6 +15,7 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 import Modal from "../../common/Modal.tsx";
 import {menuStore} from "../../../stores/menu_store.ts";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 
 /**
@@ -209,9 +210,18 @@ export default function MainPage() {
         }
     }, [cords]);
 
+    const theme = themeStore(state => state.current_theme?.elements?.mainpage)
+
     return (
         <div className={"page"} id={"main-page"}>
-            <div id={"main-page-left"}>
+            <div
+                style={{
+                    background: theme?.left?.background,
+                    borderRadius: theme?.left?.rounded,
+                    ...computeBP(theme?.left?.border, "border"),
+                    ...computeBP(theme?.left?.padding, "padding"),
+                }}
+                id={"main-page-left"}>
                 <div id={"main-page-logo"}>
                     <div id={"main-page-logo-logo"}>
                         <img src={logo}/>
@@ -224,7 +234,14 @@ export default function MainPage() {
                     )}
                 </div>
             </div>
-            <div id={"main-page-right"}>
+            <div id={"main-page-right"}
+                 style={{
+                     background: theme?.right?.background,
+                     borderRadius: theme?.right?.rounded,
+                     ...computeBP(theme?.right?.border, "border"),
+                     ...computeBP(theme?.right?.padding, "padding"),
+                 }}
+            >
                 <div id={"main-page-right-dec"}>
                     <Filters/>
                     <div id={"main-page-groups"}>

@@ -1,3 +1,4 @@
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::project::domain::values::ProjectMeta;
 use crate::modules::shared::kernel::values::{Path, Schema};
 use serde::{Deserialize, Serialize};
@@ -158,6 +159,7 @@ pub struct IThemeMeta {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum ThemeInner {
     SINGLE(String),
     STRUCT(_ThemeInner),
@@ -192,6 +194,7 @@ pub struct ThemeTitleBarButton {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum ThemeTitleBarButtonHover {
     SINGLE(_ThemeTitleBarButtonHoverSingle),
     ARRAY(_ThemeTitleBarButtonHoverArray),
@@ -211,6 +214,7 @@ pub struct _ThemeTitleBarButtonHoverArray {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum _ThemeTitleBarVariant {
     Wrap,
     Resize,
@@ -245,8 +249,211 @@ pub struct ThemeElements {
     pub project_space: Option<ThemeProjectSpace>,
     pub launch: Option<ThemeLaunch>,
     pub settings: Option<ThemeSettings>,
+    pub common: Option<ThemeCommon>,
+    pub create_project: Option<ThemeCreateProject>,
+    pub create_entities: Option<ThemeCreateEntity>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCreateEntity {
+    pub this: Option<ThemePage>,
+    pub right: Option<ThemePage>,
+    pub left: Option<ThemeCreateEntityLeft>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCreateEntityLeft {
+    pub this: Option<ThemePage>,
+    pub field: Option<ThemeCreateEntityLeftField>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCreateEntityLeftField {
+    pub padding: Option<ThemeInner>,
+    pub border: Option<ThemeInner>,
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+    pub color: Option<String>,
+    pub hover: Option<ThemeCreateEntityLeftFieldHF>,
+    pub focus: Option<ThemeCreateEntityLeftFieldHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCreateEntityLeftFieldHF {
+    pub padding: Option<ThemeInner>,
+    pub border: Option<ThemeInner>,
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+    pub color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCreateProject {
+    pub inline: Option<bool>,
+    pub left: Option<ThemePage>,
+    pub right: Option<ThemePage>,
+    pub this: Option<ThemePage>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCommon {
+    pub input: Option<ThemeInput>,
+    pub check: Option<ThemeCheck>,
+    pub list: Option<ThemeList>,
+    pub gen: Option<ThemeGen>,
+    pub button: Option<ThemeGenElementButton>,
+    pub main_button: Option<ThemeGenElementButton>,
+    pub title_bar: Option<ThemeTitleBar>,
+    pub icons: Option<ThemeIcon>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeIcon {
+    pub color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGen {
+    pub this: Option<ThemeGenThis>,
+    pub element: Option<ThemeGenElement>,
+    pub button: Option<ThemeGenElementButton>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElement {
+    pub this: Option<ThemeGenElementThis>,
+    pub label: Option<ThemeGenElementLabel>,
+    pub button: Option<ThemeGenElementButton>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementButton {
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub hover: Option<ThemeGenElementButtonHF>,
+    pub focus: Option<ThemeGenElementButtonHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementButtonHF {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenThis {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementLabel {
+    pub color: Option<String>,
+    pub placeholder_color: Option<String>,
+    pub hover: Option<ThemeGenElementLabelHF>,
+    pub focus: Option<ThemeGenElementLabelHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementLabelHF {
+    pub color: Option<String>,
+    pub placeholder_color: Option<String>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementThis {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub hover: Option<ThemeGenElementThisHF>,
+    pub focus: Option<ThemeGenElementThisHF>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeGenElementThisHF {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeList {
+    pub this: Option<ThemeInputThis>,
+    pub field: Option<ThemeListField>,
+    pub label: Option<ThemeInputLabel>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeListField {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub color: Option<String>,
+    pub hover: Option<ThemeListHF>,
+    pub focus: Option<ThemeListHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeListHF {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCheck {
+    pub this: Option<ThemeInputThis>,
+    pub field: Option<ThemeCheckField>,
+    pub label: Option<ThemeInputLabel>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCheckField {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub focus: Option<ThemeCheckFocus>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeCheckFocus {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeInput {
+    pub this: Option<ThemeInputThis>,
+    pub field: Option<ThemeInputField>,
+    pub label: Option<ThemeInputLabel>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeInputThis {
+    pub background: Option<String>,
+    pub rounded: Option<String>,
+    pub border: Option<ThemeInner>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeInputField {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub color: Option<String>,
+    pub placeholder_color: Option<String>,
+    pub hover: Option<ThemeInputHF>,
+    pub focus: Option<ThemeInputHF>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeInputLabel {
+    pub color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeInputHF {
+    pub background: Option<String>,
+    pub border: Option<ThemeInner>,
+    pub rounded: Option<String>,
+    pub color: Option<String>,
+    pub placeholder_color: Option<String>,
+}
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ThemeMainPage {
     pub left: Option<ThemePage>,
@@ -365,6 +572,7 @@ pub struct ThemeProjectSpaceThis {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ThemeLaunch {
+    pub inline: Option<bool>,
     pub this: Option<ThemePage>,
     pub left: Option<ThemeLaunchLeft>,
     pub right: Option<ThemeInner>,
@@ -387,6 +595,7 @@ pub struct ThemeLaunchList {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ThemeSettings {
+    pub inline: Option<bool>,
     pub this: Option<ThemePage>,
     pub left: Option<ThemeSettingsLeft>,
     pub right: Option<ThemePage>,
@@ -405,43 +614,4 @@ pub struct ThemeSettingsLeftList {
     pub rounded: Option<String>,
     pub hover: Option<ThemeHF>,
     pub focus: Option<ThemeHF>,
-}
-
-impl Default for ITheme {
-    fn default() -> Self {
-        Self {
-            id: String::from("opie.dark"),
-            name: "Dark".to_string(),
-            meta: None,
-            colors: None,
-            schema: Schema(1),
-            elements: None,
-        }
-    }
-}
-
-impl ITheme {
-    pub fn light() -> Self {
-        Self {
-            id: "opie.light".to_string(),
-            name: "Light".to_string(),
-            meta: None,
-            colors: Some(vec![
-                ThemeColor {
-                    name: "bg".to_string(),
-                    value: "#fff".to_string(),
-                },
-                ThemeColor {
-                    name: "title".to_string(),
-                    value: "#000".to_string(),
-                },
-                ThemeColor {
-                    name: "subtitle".to_string(),
-                    value: "#d9d9d9".to_string(),
-                },
-            ]),
-            elements: None,
-            schema: Schema(1),
-        }
-    }
 }

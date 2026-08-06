@@ -45,7 +45,8 @@
 .project-hr{
     /*width: 2px;*/
     /*background: var(--border3);*/
-    border: 1px solid var(--border3);
+    /*border: 1px solid var(--border3);*/
+    background: transparent;
     /*border: 1px solid transparent;*/
     cursor: w-resize;
     /*transition: all 0.2s;*/

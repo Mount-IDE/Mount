@@ -16,7 +16,7 @@
         border: none;
         outline: none;
         color: var(--subtitle);
-        background: #000;
+        background: var(--input);
         resize: vertical;
 
         &:not([readonly]):focus {

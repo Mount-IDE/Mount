@@ -54,7 +54,7 @@ function App() {
             }
             cacheStore.getState().set_shells(cache.shells);
             settingsStore.getState().set_settings(cache.settings)
-            themeStore.getState().load_themes(cache.themes, cache.settings)
+            themeStore.getState().load_themes(cache.themes.map(e => JSON.parse(e) as ITheme), cache.settings)
         } catch (e) {
             console.warn(e)
         }
@@ -88,6 +88,46 @@ function App() {
     }, [])
 
 
+    let currentTheme = themeStore(state => state.current_theme)
+
+
+    useEffect(() => {
+        console.log("THEME", currentTheme)
+        if (currentTheme) {
+            let vars = [
+                "bg",
+                "bg1",
+                "bg2",
+                "title",
+                "subtitle",
+                "border",
+                "border2",
+                "border3",
+                "proj-hover",
+                "bg-t",
+                "input",
+                "placeholder",
+            ];
+            let root = document.querySelector(":root") as HTMLElement;
+            if (root) {
+                for (let i of vars) {
+                    root.style.removeProperty(`--${i}`)
+                }
+                if (currentTheme.colors) {
+
+                    for (let i of currentTheme.colors) {
+                        console.log("\ttheme", i.name)
+                        if (vars.includes(i.name)) {
+                            root.style.setProperty(`--${i.name}`, i.value)
+                        }
+                    }
+                }
+            }
+            // location.reload()
+        }
+
+
+    }, [currentTheme]);
     /**
      * Setups cache and stores while project was selected
      */

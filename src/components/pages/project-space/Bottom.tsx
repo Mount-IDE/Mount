@@ -2,6 +2,7 @@ import "./styles/bottom.css"
 import {asideStore} from "../../../stores/aside_store.ts";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {useEffect, useMemo, useRef} from "react";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 
 type Props = {
@@ -86,13 +87,20 @@ export default function Bottom(_: Props) {
  */
     const Light = current?.component_type === "Light" && state ? current.component : null;
 
+    const theme = themeStore(state => state.current_theme?.elements?.project_space)
+
     return (
         <>
-            <hr ref={ref_} style={{cursor: "s-resize"}} className={"project-hr"}/>
+            <hr ref={ref_} style={{
+                cursor: "s-resize",
+                border: (state ? theme?.bottom?.hr?.active_border : theme?.bottom?.hr?.border) ?? "1px solid var(--border3)"
+            }} className={"project-hr"}/>
             <div
                 style={{
-                    // position: "absolute",
-                    // bottom:0,
+                    background: theme?.bottom?.background,
+                    borderRadius: theme?.bottom?.rounded,
+                    ...computeBP(theme?.bottom?.border, "border"),
+                    ...computeBP(theme?.bottom?.padding, "padding"),
                 }}
                 ref={ref} id={"project-bottom"} className={state?"project-bottom":"project-bottom-dis"}>
                 {/*<BottomHeader ref={head_ref} title={current?.alt??"Not Found"}/>*/}

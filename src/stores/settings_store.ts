@@ -97,7 +97,6 @@ export const settingsStore = create<Type>((set, get) => ({
             return null;
         }
         set({settings: settings})
-        console.log("SAVED", settings)
         return settings;
 
     },

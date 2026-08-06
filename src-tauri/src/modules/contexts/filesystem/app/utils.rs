@@ -66,10 +66,6 @@ pub fn make_path<T: PathPart>(path: Vec<T>) -> Path {
     Path(make_path_string(path))
 }
 
-/*pub fn make_path__(path: Vec<Box<dyn PathPart>>)->Path{
-
-}
-*/
 macro_rules! path_from {
     () => {
         Path::empty()

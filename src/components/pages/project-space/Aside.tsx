@@ -2,6 +2,7 @@ import "./styles/aside.css"
 import React, {useEffect, useRef} from "react";
 import Header from "../../aside-widgets/Header.tsx";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 
 type Props = {
@@ -78,12 +79,8 @@ function Aside(props: Props) {
 
     }, [ref_, props.state]);
 
-    // useEffect(() => {
-    //         if (props.state) {
-    //           ref_fixed.current!.style.left = ref_.current!.style.left;
-    //         }
-    //     }, [props.state]
-    // )
+    const theme = themeStore(state => state.current_theme?.elements?.project_space?.aside)
+    const current = props.left ? theme?.left : theme?.right
 
     const current_top = props.left ?
         asideButtonsStore(state => state.current_left) :
@@ -95,13 +92,21 @@ function Aside(props: Props) {
             {
                 !props.left && props.state &&
                 <>
-                    <hr ref={ref_} className={"project-hr"}/>
+                    <hr ref={ref_} className={"project-hr"}
+                        style={{
+                            border: current?.hr?.border ?? "1px solid var(--border3)"
+                        }}
+                    />
 
                 </>
 
             }
             <div
                 style={{
+                    background: current?.background,
+                    borderRadius: current?.rounded,
+                    ...computeBP(current?.border, "border"),
+                    ...(props.state ? computeBP(current?.padding, "padding") : {}),
                     width: base_width.current
                 }}
                 ref={ref}
@@ -115,7 +120,11 @@ function Aside(props: Props) {
             </div>
             {props.left && props.state &&
                 <>
-                    <hr ref={ref_} className={"project-hr"}/>
+                    <hr ref={ref_} className={"project-hr"}
+                        style={{
+                            border: current?.hr?.border ?? "1px solid var(--border3)"
+                        }}
+                    />
                 </>
             }
         </>

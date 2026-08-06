@@ -6,6 +6,7 @@ import React from "react";
 import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
 import {asideStore} from "../../../stores/aside_store.ts";
 import Bottom from "./Bottom.tsx";
+import {themeStore} from "../../../stores/theme_store.ts";
 
 
 export default function ProjectWorkSpace() {
@@ -32,6 +33,9 @@ export default function ProjectWorkSpace() {
     const set_current_bot_button =
         asideButtonsStore(state => state.set_current_bottom_button)
 
+    const theme = themeStore(state => state.current_theme?.elements?.project_space)
+
+
 
     return (
         <div id={"project-workspace"}>
@@ -39,7 +43,11 @@ export default function ProjectWorkSpace() {
                        is_left={true}
                        set_top={set_current_left} set_bot={set_current_bot}
                        top={left_top} bottom={left_bot} max_top={3} max_bot={null}/>
-            <hr className={"project-hr"}/>
+            <hr className={"project-hr"}
+                style={{
+                    border: theme?.mini_aside?.left?.hr?.border ?? "1px solid var(--border3)"
+                }}
+            />
             <div id={"project-center"}>
                 <div id={"project-top"}>
                     <Aside state={left} left={true}/>
@@ -48,7 +56,11 @@ export default function ProjectWorkSpace() {
                 </div>
                 <Bottom />
             </div>
-            <hr className={"project-hr"}/>
+            <hr
+                style={{
+                    border: theme?.mini_aside?.right?.hr?.border ?? "1px solid var(--border3)"
+                }}
+                className={"project-hr"}/>
             <MiniAside state={right} top_button={set_current_right_button} is_left={false} set_top={set_current_right}
                        set_bot={set_current_bot} top={right_top}
                        max_top={3} max_bot={null}

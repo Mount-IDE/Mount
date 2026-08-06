@@ -1,20 +1,17 @@
-use crate::modules::app::{
-    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PARSING_SERVICE,
-};
+use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::settings::app::traits::TSettingsService;
-use crate::modules::contexts::settings::domain::entities::ITheme;
-use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
+use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::errors::SettingsError;
 use crate::modules::shared::kernel::values::Path;
 
 pub struct SettingsService();
 
 impl TSettingsService for SettingsService {
-    fn read_themes(&self) -> Result<Vec<ITheme>, SettingsError> {
+    fn read_themes(&self) -> Result<Vec<String>, SettingsError> {
         let dir = CONFIG_SERVICE.get_data_dir();
         if let Err(_) = dir {
             CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
@@ -24,7 +21,7 @@ impl TSettingsService for SettingsService {
         let dir_ = PDirectory::from_path(&themes);
         let content = FS_READ_SERVICE.read_dir(&dir_)?;
 
-        let mut res: Vec<ITheme> = vec![];
+        let mut res: Vec<String> = vec![];
 
         for i in content.directories {
             let config = path_from![i.path, "theme.json"];
@@ -33,8 +30,7 @@ impl TSettingsService for SettingsService {
             }
             let file = PFile::from_path_reg(config);
             let text = FS_READ_SERVICE.read_file(&file)?;
-            let json = PARSING_SERVICE._from_string::<ITheme>(text)?;
-            res.push(json);
+            res.push(text);
         }
         Ok(res)
     }

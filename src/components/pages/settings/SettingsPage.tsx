@@ -8,11 +8,10 @@ import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import {themeStore} from "../../../stores/theme_store.ts";
 
 
-function useSettings(settings: Settings | null, themes: Theme[]) {
+function useSettings(settings: Settings | null, themes: ITheme[]) {
 
 
     let needed = themes.find(el => el.id == settings?.appearance.theme)
-    console.log("USESETTINGS", needed, settings)
     return useMemo<SettingsElement[]>(() => [
         {
             id: 0,
@@ -91,7 +90,6 @@ export default function SettingsPage() {
         let results = settingsStore.getState().settings_results
         let set = await settingsStore.getState().save_settings();
         if (set) {
-            console.log("FROM", set)
             settingsStore.getState().set_settings(set)
             settingsStore.getState().update_from_settings()
             let found = results[1][0][0]
@@ -101,7 +99,7 @@ export default function SettingsPage() {
                 noteStore.getState().add_note({
                     text: "Settings has been saved",
                     type: NotificationType.NOTE
-                })
+                }, 2_000)
                 return 0
             }
             noteStore.getState().add_note({

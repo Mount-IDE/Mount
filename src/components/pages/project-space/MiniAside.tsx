@@ -5,6 +5,7 @@ import AsideButton from "./AsideButton.tsx";
 import {cacheStore} from "../../../stores/cache_store.ts";
 // import aside from "./Aside.tsx";
 import {asideStore, comp} from "../../../stores/aside_store.ts";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 
 type Props = {
@@ -37,6 +38,8 @@ function MiniAside(props: Props) {
     const [currentTop, setCurrentTop] = useState<number | null>(null)
     const [currentBot, setCurrentBot] = useState<number | null>(null)
 
+    const theme = themeStore(state => state.current_theme?.elements?.project_space)
+    const current = props.is_left ? theme?.mini_aside?.left : theme?.mini_aside?.right
 
     useEffect(() => {
         if (!props.state) {
@@ -86,7 +89,12 @@ function MiniAside(props: Props) {
 
 
     return (
-        <div className={"project-mini-aside"}>
+        <div className={"project-mini-aside"}
+             style={{
+                 background: current?.background,
+                 ...computeBP(current?.border, "border")
+             }}
+        >
             <div className={"project-mini-aside-top"}>
                 <div className={"project-mini-aside-buttons"}>
                     {top.map((el) =>

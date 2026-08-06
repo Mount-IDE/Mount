@@ -2,6 +2,7 @@ import "./styles/project.css"
 import more from "../../../assets/more.svg"
 import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../../../stores/cache_store.ts";
+import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 
 type Props = {
     project: IRecentProject
@@ -23,9 +24,24 @@ export default function Project(props: Props) {
         }
     }
 
+
+    const theme = themeStore(state => state.current_theme?.elements?.mainpage?.project)
+
     return (
-        <div className={"main-page-project"} onClick={loadProject}>
-            <div className={"main-page-project-logo"}>
+        <div className={"main-page-project"} onClick={loadProject}
+
+             style={{
+                 background: theme?.this?.background,
+                 ...computeBP(theme?.this?.padding, "padding"),
+                 borderRadius: theme?.this?.rounded
+             }}
+        >
+            <div className={"main-page-project-logo"}
+                 style={{
+                     borderRadius: theme?.icon?.rounded,
+                     ...computeBP(theme?.icon?.border, "border")
+                 }}
+            >
                 {
                     project.meta.icon && project.meta.icon?.includes("#") &&
                     <div style={{
@@ -60,14 +76,34 @@ export default function Project(props: Props) {
                 }
             </div>
             <div className={"main-page-project-left"}>
-                <p className={"main-page-project-name"}>{project.name}</p>
-                <p className={"main-page-project-path"}>{project.path}</p>
+                <p className={"main-page-project-name"}
+                   style={{
+                       color: theme?.name?.color,
+                       textDecoration: theme?.name?.underscore
+                   }}
+                >{project.name}</p>
+                <p className={"main-page-project-path"}
+                   style={{
+                       color: theme?.path?.color,
+                       textDecoration: theme?.path?.underscore
+                   }}
+                >{project.path}</p>
             </div>
             <div className={"main-page-project-right-"}>
-                <p className={"main-page-project-packages"}>{
+                <p className={"main-page-project-packages"}
+                   style={{
+                       color: theme?.path?.color,
+                       textDecoration: theme?.path?.underscore
+                   }}
+                >{
                     project.packages.length > 0 ? project.packages.slice(0, 3).join(", ") : "no packages"
                 }</p>
-                <p className={"main-page-project-tags"}>{
+                <p className={"main-page-project-tags"}
+                   style={{
+                       color: theme?.path?.color,
+                       textDecoration: theme?.path?.underscore
+                   }}
+                >{
                     project.meta.tags.length > 0 ? project.meta.tags.slice(0, 5).join(" ") : "no tags"
                 }</p>
             </div>
