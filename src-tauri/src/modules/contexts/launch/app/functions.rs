@@ -47,6 +47,7 @@ pub fn read_from(
     None
 }
 
+#[allow(unused)]
 pub fn read_field(
     option: LaunchFunctionArgument,
     fields: Vec<LaunchVecType>,

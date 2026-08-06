@@ -8,7 +8,7 @@ use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_stri
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
 use crate::modules::contexts::settings::app::traits::TSettingsService;
-use crate::modules::contexts::settings::domain::entities::Theme;
+use crate::modules::contexts::settings::domain::entities::ITheme;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
@@ -67,10 +67,8 @@ pub fn get_data_dir() -> Result<Path, ErrorDto> {
 }
 
 #[tauri::command]
-pub fn read_themes() -> Result<Vec<Theme>, ErrorDto> {
-    // SETTINGS_SERVICE.read_themes().map_err(|e| e.into())
-
-    Ok(vec![])
+pub fn read_themes() -> Result<Vec<ITheme>, ErrorDto> {
+    SETTINGS_SERVICE.read_themes().map_err(|e| e.into())
 }
 
 #[tauri::command]

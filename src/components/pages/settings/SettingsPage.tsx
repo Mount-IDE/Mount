@@ -5,9 +5,14 @@ import pageStore from "../../../stores/page_store.ts";
 import {useMemo, useState} from "react";
 import SettingsSection from "./SettingsSection.tsx";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import {themeStore} from "../../../stores/theme_store.ts";
 
 
-function useSettings(settings: Settings | null) {
+function useSettings(settings: Settings | null, themes: Theme[]) {
+
+
+    let needed = themes.find(el => el.id == settings?.appearance.theme)
+    console.log("USESETTINGS", needed, settings)
     return useMemo<SettingsElement[]>(() => [
         {
             id: 0,
@@ -52,6 +57,8 @@ function useSettings(settings: Settings | null) {
                             id: 0,
                             title: "Current Theme",
                             type: "list",
+                            def: needed ? needed.name : settings?.appearance.theme,
+                            list: themes.map(el => el.name)
                         },
                     ],
                 },
@@ -68,8 +75,8 @@ export default function SettingsPage() {
 
     const settings = settingsStore(state => state.settings)
 
-
-    const baseSettings = useSettings(settings);
+    const themes = themeStore(state => state.themes)
+    const baseSettings = useSettings(settings, themes);
 
 
     const [currentSettings, setCurrentSettings] = useState<number>(0)
@@ -81,15 +88,27 @@ export default function SettingsPage() {
 
     async function ok() {
 
+        let results = settingsStore.getState().settings_results
         let set = await settingsStore.getState().save_settings();
         if (set) {
+            console.log("FROM", set)
             settingsStore.getState().set_settings(set)
-            noteStore.getState().add_note({
-                text: "Settings has been saved",
-                type: NotificationType.NOTE
-            })
             settingsStore.getState().update_from_settings()
-            return 0
+            let found = results[1][0][0]
+            let needed_theme = themes.find(el => el.name == found || el.id == found)
+            if (needed_theme) {
+                themeStore.getState().set_theme(needed_theme)
+                noteStore.getState().add_note({
+                    text: "Settings has been saved",
+                    type: NotificationType.NOTE
+                })
+                return 0
+            }
+            noteStore.getState().add_note({
+                text: "Cannot set theme",
+                type: NotificationType.ERR
+            })
+            return 1
         } else {
             noteStore.getState().add_note({
                 text: "Cannot save settings",
@@ -132,16 +151,14 @@ export default function SettingsPage() {
             <div id={"settings-footer"}>
                 <div id={"settings-buttons"}>
                     <Button title={"Close"} cb={close}/>
-                    <Button title={"Ok"} cb={() => {
-                        ok().then()
-                    }}/>
-                    <Button title={"Apply"} cb={async () => {
+                    <Button title={"Ok"} cb={async () => {
                         let k = await ok()
                         if (k == 0) {
                             close_settings(false)
                             close_blur(false)
                         }
                     }}/>
+                    <Button title={"Apply"} cb={ok}/>
                 </div>
             </div>
         </div>

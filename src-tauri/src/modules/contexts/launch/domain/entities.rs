@@ -1,8 +1,6 @@
 use crate::modules::shared::kernel::values::{IfStatementPart, Schema};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::process::Command;
-use std::sync::{Arc, Mutex};
 use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -261,13 +259,4 @@ pub struct LaunchFlatTask {
     pub command: String,
     pub env: Option<Vec<(String, String)>>,
     pub cwd: Option<String>,
-}
-
-#[derive(Clone, Debug)]
-pub struct LaunchProcess {
-    pub id: u32,
-    pub window_id: String,
-    pub task: LaunchFlatTask,
-    // pub child: Arc<Mutex<dyn portable_pty::Child>>,
-    pub child: Arc<Mutex<Command>>,
 }

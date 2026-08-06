@@ -350,7 +350,7 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
             typ: String,
             image: Option<String>,
             color: String,
-        };
+        }
 
         let json = PARSING_SERVICE._from_string::<Image>(val);
         if let Ok(json) = json {

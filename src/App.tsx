@@ -54,7 +54,7 @@ function App() {
             }
             cacheStore.getState().set_shells(cache.shells);
             settingsStore.getState().set_settings(cache.settings)
-            themeStore.getState().load_themes(cache.themes)
+            themeStore.getState().load_themes(cache.themes, cache.settings)
         } catch (e) {
             console.warn(e)
         }

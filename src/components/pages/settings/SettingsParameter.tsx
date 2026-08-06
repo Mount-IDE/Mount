@@ -168,11 +168,12 @@ function ParameterList(props: InnerProps) {
     return (
         <>
             <select
+                value={props.val as string}
                 onChange={(e) =>
                     props.write((e.target as HTMLSelectElement).value)}>
                 {
                     props.obj.list?.map((el, i) =>
-                        <option value={el} key={i} selected={props.val == el}>
+                        <option value={el} key={i}>
                             {el}
                         </option>
                     )

@@ -37,6 +37,9 @@ const handlers: Handler[] = [
     (s, res) => {
         s.general.project_groups = res[0][0][1] as string[]
     },
+    (s, res) => {
+        s.appearance.theme = res[1][0][0] as string
+    }
 
 ]
 
@@ -94,6 +97,7 @@ export const settingsStore = create<Type>((set, get) => ({
             return null;
         }
         set({settings: settings})
+        console.log("SAVED", settings)
         return settings;
 
     },

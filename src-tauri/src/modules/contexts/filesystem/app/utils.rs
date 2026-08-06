@@ -34,6 +34,12 @@ impl PathPart for String {
     }
 }
 
+impl PathPart for Path {
+    fn __get(&self) -> String {
+        self.get().clone()
+    }
+}
+
 pub fn make_path_string<T: PathPart>(paths: Vec<T>) -> String {
     if paths.len() == 0 {
         return "".to_string();
@@ -60,12 +66,24 @@ pub fn make_path<T: PathPart>(path: Vec<T>) -> Path {
     Path(make_path_string(path))
 }
 
+/*pub fn make_path__(path: Vec<Box<dyn PathPart>>)->Path{
+
+}
+*/
 macro_rules! path_from {
     () => {
         Path::empty()
     };
     ( $($x:expr), * $(,)?)=>{
-        make_path( vec![$($x),*])
+       {
+           let a= vec![$($x.__get() ),*];
+            if cfg!(target_os = "windows") {
+               Path(a.join("\\"))
+            } else {
+                Path(a.join("/"))
+            }
+
+       }
     };
 }
 

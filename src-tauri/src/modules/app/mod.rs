@@ -12,7 +12,7 @@ use crate::modules::contexts::settings::app::services::SettingsService;
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
 use crate::modules::services::config::{ConfigRecoveryService, ConfigService, ParsingService};
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
 pub const FS_READ_SERVICE: FileSystemReadService = FileSystemReadService {};
 pub const FS_WRITE_SERVICE: FileSystemWriteService = FileSystemWriteService {};
@@ -23,7 +23,7 @@ pub const CONFIG_RECOVERY_SERVICE: ConfigRecoveryService = ConfigRecoveryService
 
 pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
-pub static SETTINGS: OnceLock<Settings> = OnceLock::new();
+pub static SETTINGS: OnceLock<Mutex<Settings>> = OnceLock::new();
 
 pub static TERMINAL_SERVICE: TerminalService = TerminalService;
 pub static ACTION_PROJECT_SERVICE: ActionProjectService = ActionProjectService();

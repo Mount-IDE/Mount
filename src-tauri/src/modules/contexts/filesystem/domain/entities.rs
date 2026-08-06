@@ -17,6 +17,7 @@ impl PFile {
             typ: FileType::REGULAR,
         }
     }
+    #[allow(unused)]
     pub fn binary(name: String, path: Path) -> PFile {
         Self {
             name,

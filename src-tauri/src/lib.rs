@@ -55,7 +55,9 @@ pub fn run() {
                 let _ = CONFIG_SERVICE.save_settings(&settings.clone());
             }
 
-            SETTINGS.set(settings).expect("Unable to set settings");
+            SETTINGS
+                .set(Mutex::new(settings))
+                .expect("Unable to set settings");
             Ok(())
         })
         .on_window_event(|window, event| {

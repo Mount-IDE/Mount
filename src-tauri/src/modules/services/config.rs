@@ -4,11 +4,12 @@ use crate::modules::app::{
 };
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::app::utils::{make_path, path_from};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::{ITheme, Settings, Theme};
+use crate::modules::contexts::settings::domain::entities::{ITheme, Settings};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ConfigError, FileSystemError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
@@ -16,16 +17,10 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::{Display, Formatter};
 use std::string::ToString;
+use std::sync::Mutex;
 use tauri::Manager;
 
 pub struct ConfigService();
-
-#[deprecated]
-struct FSEntity {
-    pub name: String,
-    pub path: Path,
-    pub content: String,
-}
 
 #[derive(Clone, Debug)]
 struct FSFile {
@@ -34,15 +29,6 @@ struct FSFile {
     pub content: Option<String>,
 }
 
-impl FSFile {
-    pub fn to_pfile(&self) -> PFile {
-        PFile {
-            name: self.name.clone(),
-            path: self.path.clone(),
-            typ: FileType::REGULAR,
-        }
-    }
-}
 #[derive(Clone, Debug)]
 struct FSDir {
     pub name: String,
@@ -66,6 +52,7 @@ enum FsEntity_ {
 
 trait TFsEntity<T> {
     type F;
+    #[allow(unused)]
     fn file(name: T, path: Path) -> Self;
     fn file_content(name: T, path: Path, content: T) -> Self;
 
@@ -177,7 +164,7 @@ impl TConfigService for ConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError> {
         let dir = self.get_data_dir()?;
         println!("dir was gotten");
-        let path_to_settings = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let path_to_settings = path_from![dir, "settings.json"];
         let file = PFile::from_path_reg(path_to_settings.clone());
         let ext = FS_READ_SERVICE.exist_file(&file);
         if !ext {
@@ -194,21 +181,18 @@ impl TConfigService for ConfigService {
             .read_file(&file_)
             .map_err(|e| ConfigError::SettingsNotFound { err: e })?;
         // println!("read settings.json was gotten");
-        let settings = serde_json::from_str::<Settings>(file.as_str()).map_err(|e| {
-            ParsingError::Deserialize {
-                path: file_.path,
-                json: file,
-                err: e,
-            }
-        });
+
+        let settings = PARSING_SERVICE._from_string::<Settings>(file);
+        println!("SETTINGS {settings:?}");
         if settings.is_err() {
             let dir = self.get_data_dir()?;
             let settings_ = Settings::new();
+            let json = PARSING_SERVICE.to_string(&settings_)?;
             let json = serde_json::to_string(&settings_).map_err(|e| ParsingError::Serialize {
                 path: dir.clone(),
                 err: e,
             })?;
-            let dir = make_path(vec![dir.get().as_str(), "settings.json"]);
+            let dir = path_from![dir.get(), "settings.json"];
             let file = PFile::from_path_reg(dir.clone());
             FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
             // println!("parsing settings.json was gotten");
@@ -339,16 +323,30 @@ impl TConfigService for ConfigService {
     }
 
     fn get_settings(&self) -> Result<Settings, ConfigError> {
+        let dir = self.get_data_dir()?;
+        let path = path_from![dir, "settings.json"];
+        let file = PFile::from_path_reg(path);
+        let text = FS_READ_SERVICE.read_file(&file)?;
+        let settings = PARSING_SERVICE._from_string::<Settings>(text)?;
         let settings = SETTINGS.get();
         if settings.is_none() {
             let settings_ = self.read_settings()?;
             SETTINGS
-                .set(settings_.clone())
+                .set(Mutex::new(settings_.clone()))
                 .map_err(|_| ConfigError::ReadSettingsError)?;
             return Ok(settings_);
         }
+        let settings = settings.unwrap().lock();
+        if settings.is_err() {
+            let settings_ = self.read_settings()?;
+            SETTINGS
+                .set(Mutex::new(settings_.clone()))
+                .map_err(|_| ConfigError::ReadSettingsError)?;
+            return Ok(settings_);
+        }
+        let settings = settings.unwrap().clone();
 
-        Ok(settings.unwrap().clone())
+        Ok(settings)
     }
 
     fn get_file_templates(&self) -> Result<Vec<ConfigFsTemplate>, ConfigError> {
@@ -405,7 +403,7 @@ fn get_files_new() -> Vec<FsEntity_> {
             "themes",
             vec![
                 FsEntity_::dir_entities(
-                    "dark",
+                    "opie.dark",
                     vec![FsEntity_::file_s_content(
                         "theme.json",
                         PARSING_SERVICE
@@ -415,7 +413,7 @@ fn get_files_new() -> Vec<FsEntity_> {
                     )],
                 ),
                 FsEntity_::dir_entities(
-                    "light",
+                    "opie.light",
                     vec![FsEntity_::file_s_content(
                         "theme.json",
                         PARSING_SERVICE.to_string(ITheme::light()).unwrap().as_str(),
