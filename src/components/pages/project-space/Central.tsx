@@ -22,8 +22,8 @@ export default function Central() {
                  ...computeBP(current?.border, "border"),
                  ...computeBP(current?.padding, "padding"),
              }}>
-            {code_spaces.map(el=>
-                <CodeSpace key={el.id} obj={el} amount={code_spaces.length}/>
+            {code_spaces.map((el, i) =>
+                <CodeSpace key={el.id} obj={el} amount={i}/>
             )}
             {
                 code_spaces.length===0 &&
