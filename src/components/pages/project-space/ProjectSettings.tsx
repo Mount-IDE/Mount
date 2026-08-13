@@ -49,6 +49,25 @@ export default function ProjectSettings() {
         },
     ]
 
+
+    function saveSettings() {
+        if (project) {
+            const main_data = projectSettingsStore.getState().main_results;
+            const vars = projectSettingsStore.getState().variables;
+            projectStore.getState().save_project({
+                ...project,
+                vars: vars,
+                meta: {
+                    ...project.meta,
+                    description: main_data[2] as string ?? project.meta.description,
+                    authors: main_data[3] as string[] ?? project.meta.authors,
+                    license: main_data[4] as string ?? project.meta.license,
+                    tags: main_data[5] as string[] ?? project.meta.tags
+                }
+            })
+        }
+    }
+
     const _Widget = labels[current].component
     return (
         <div id={"project-settings"}>
@@ -86,14 +105,13 @@ export default function ProjectSettings() {
                         projectSettingsStore.getState().set_opened(false)
                         pageStore.getState().setFilter(false)
                     }}/>
-                    <Button title={"Confirm"} cb={() => {
-                        if (proj)
-                            projectStore.getState().save_project(
-                                proj
-                            )
+                    <Button title={"Ok"} cb={() => {
+                        saveSettings();
                         projectSettingsStore.getState().set_opened(false)
                         pageStore.getState().setFilter(false)
 
+                    }}/><Button title={"Apply"} cb={() => {
+                    saveSettings()
                     }}/>
                 </div>
             </div>

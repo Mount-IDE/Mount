@@ -12,9 +12,9 @@ interface Type {
     write_var: (var_: IVar) => void,
     write_var_name: (i: number, val: string) => void,
     write_var_val: (i: number, val: IVal) => void,
-    main_results: Record<number, string>,
-    write_main: (option: number, val: string) => void,
-    find_main: (option: number) => string | undefined
+    main_results: Record<number, IVal>,
+    write_main: (option: number, val: IVal) => void,
+    find_main: (option: number) => IVal | undefined
 
     add_variable: (type: "string" | "number" | "boolean") => void;
     rem_variable: (i: number) => void;
@@ -55,10 +55,10 @@ export const projectSettingsStore = create<Type>((set, get) => ({
     },
 
     find_main: (option: number):
-        string | undefined =>
+        IVal | undefined =>
         get().main_results[option],
 
-    write_main(option: number, val: string): void {
+    write_main(option: number, val: IVal): void {
         let res = get().main_results
         set({
             main_results: {

@@ -1,13 +1,13 @@
 import "./styles/main-project-settings.css"
 import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import {useEffect, useRef} from "react";
+import ParameterGen from "../../common/ParameterGen.tsx";
 
 
 interface Option {
     label: string,
-    cb: (val: string) => void
-    def: string
-    type: "input" | "area" | "select" | "list"
+    def: IVal
+    type: "input" | "area" | "select" | "list" | "gen"
     disabled?: boolean
     placeholder?: string
 }
@@ -25,12 +25,9 @@ const licenses = [
 
 export default function MainProjectSettings() {
     const project = projectSettingsStore(state => state.new_project_data)
-    const setProject = projectSettingsStore(state => state.set_project)
 
     const options: Option[] = [
         {
-            cb: (_) => {
-            },
             def: `${project?.name}`,
             label: "Project Name",
             type: "input",
@@ -38,8 +35,7 @@ export default function MainProjectSettings() {
             placeholder: "Project Name"
         },
         {
-            cb: (_) => {
-            },
+
             def: `${project?.path}`,
             label: "Project Path",
             type: "input",
@@ -47,64 +43,26 @@ export default function MainProjectSettings() {
             placeholder: "Project Path"
         },
         {
-            cb: (val) => {
-                if (project)
-                    setProject({
-                        ...project!, meta: {
-                            ...project!.meta,
-                            description: val
-                        }
-                    })
-            },
             def: `${project?.meta.description}`,
             label: "Description",
             type: "area",
         },
         {
-            cb: (val) => {
-                if (project)
-                    setProject({
-                        ...project!, meta: {
-                            ...project!.meta,
-                            authors: val.split(":")
-                        }
-                    })
-            },
-            def: `${project?.meta.authors.join(":")}`,
+            def: project?.meta.authors ?? [],
             label: "Authors",
-            type: "input",
+            type: "gen",
             placeholder: "author1:author2"
-
         },
         {
-            cb: (val) => {
-                if (project)
-                    setProject({
-                        ...project!, meta: {
-                            ...project!.meta,
-                            license: val
-                        }
-                    })
-            },
             def: `${project?.meta.license}`,
             label: "License",
             type: "select",
         },
         {
-            cb: (val) => {
-                if (project)
-                    setProject({
-                        ...project!, meta: {
-                            ...project!.meta,
-                            tags: val.split(":")
-                        }
-                    })
-            },
-            def: `${project?.meta.tags.join(":")}`,
+            def: project?.meta.tags ?? [],
             label: "Tags",
-            type: "input",
+            type: "gen",
             placeholder: "tag1:tag2"
-
         },
 
 
@@ -113,7 +71,7 @@ export default function MainProjectSettings() {
     return (
         <div id={"main-project-settings"}>
             {options.map((el, i) =>
-                <ProjectOption obj={el} key={i}/>
+                <ProjectOption obj={el} opt={i} key={i}/>
             )}
         </div>
     )
@@ -121,12 +79,14 @@ export default function MainProjectSettings() {
 
 type OptionProps = {
     obj: Option
+    opt: number
 }
 
 function ProjectOption(props: OptionProps) {
 
     const ref = useRef<HTMLTextAreaElement>(null)
 
+    const val = projectSettingsStore(state => state.find_main(props.opt) ?? props.obj.def)
     useEffect(() => {
         const cur = ref.current
         if (!cur) return
@@ -143,16 +103,22 @@ function ProjectOption(props: OptionProps) {
             cur.removeEventListener("input", resize)
         }
     }, []);
+
+    function write(val_: IVal) {
+        projectSettingsStore.getState().write_main(props.opt, val_);
+    }
+
+
     return (
         <div className={"project-option"}>
-            <p>{props.obj.label}</p>
+            {props.obj.type != "gen" && <p>{props.obj.label}</p>}
             {props.obj.type == "input" &&
                 <input
                     placeholder={props.obj.placeholder}
                     disabled={props.obj.disabled}
-                    value={props.obj.def}
+                    value={val.toString()}
                     onInput={
-                        (e) => props.obj.cb(e.currentTarget.value)}
+                        (e) => write(e.currentTarget.value)}
                 />
             }
             {
@@ -161,19 +127,26 @@ function ProjectOption(props: OptionProps) {
                           placeholder={props.obj.placeholder}
 
                           disabled={props.obj.disabled}
-                          value={props.obj.def}
+                          value={val.toString()}
                           onInput={
-                              (e) => props.obj.cb(e.currentTarget.value)}
+                              (e) => write(e.currentTarget.value)}
 
                 />
-            }{
-            props.obj.type == "select" &&
-            <select value={props.obj.label} onChange={(e) => props.obj.cb(e.currentTarget.value)}>
-                {licenses.map((el, key) =>
-                    <option key={key} value={el}>{el}</option>
-                )}
-            </select>
-        }
+            }
+            {
+                props.obj.type == "select" &&
+                <select value={val.toString()} onChange={(e) => write(e.currentTarget.value)}>
+                    {
+                        licenses.map((el, key) =>
+                            <option key={key} value={el}>{el}</option>
+                        )
+                    }
+                </select>
+            }
+            {
+                props.obj.type == "gen" &&
+                <ParameterGen title={props.obj.label} val={val as string[]} write={write}/>
+            }
         </div>
     )
 }

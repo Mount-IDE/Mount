@@ -31,4 +31,15 @@
     & textarea {
         resize: vertical;
     }
+
+    & select {
+        background: transparent;
+        outline: none;
+        border: none;
+        color: var(--subtitle);
+    }
+
+    & option {
+        background: var(--bg2);
+    }
 }
