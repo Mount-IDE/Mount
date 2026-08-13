@@ -150,7 +150,7 @@ function ProjectOption(props: OptionProps) {
                 <input
                     placeholder={props.obj.placeholder}
                     disabled={props.obj.disabled}
-                    defaultValue={props.obj.def}
+                    value={props.obj.def}
                     onInput={
                         (e) => props.obj.cb(e.currentTarget.value)}
                 />
@@ -161,16 +161,16 @@ function ProjectOption(props: OptionProps) {
                           placeholder={props.obj.placeholder}
 
                           disabled={props.obj.disabled}
-                          defaultValue={props.obj.def}
+                          value={props.obj.def}
                           onInput={
                               (e) => props.obj.cb(e.currentTarget.value)}
 
                 />
             }{
             props.obj.type == "select" &&
-            <select defaultValue={props.obj.label} onChange={(e) => props.obj.cb(e.currentTarget.value)}>
+            <select value={props.obj.label} onChange={(e) => props.obj.cb(e.currentTarget.value)}>
                 {licenses.map((el, key) =>
-                    <option selected={el == props.obj.label} key={key} value={el}>{el}</option>
+                    <option key={key} value={el}>{el}</option>
                 )}
             </select>
         }

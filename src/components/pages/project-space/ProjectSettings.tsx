@@ -1,10 +1,11 @@
 import "./styles/project-settings.css"
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useState} from "react";
 import MainProjectSettings from "./MainProjectSettings.tsx";
 import Button from "../../common/Button.tsx";
 import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
+import ProjectSettingsVariables from "./ProjectSettingsVariables.tsx";
 
 
 interface ProjectOption {
@@ -17,6 +18,13 @@ export default function ProjectSettings() {
 
 
     const proj = projectSettingsStore(state => state.new_project_data)
+    const project = projectStore(state => state.current_project)
+
+    useEffect(() => {
+        if (project) {
+            projectSettingsStore.getState().set_variables(project.vars)
+        }
+    }, [project])
     const [current, setCurrent] = useState(0);
     const labels: ProjectOption[] = [
         {
@@ -25,7 +33,7 @@ export default function ProjectSettings() {
         },
         {
             label: "Variables",
-            component: () => <></>
+            component: ProjectSettingsVariables
         },
         {
             label: "Tasks",

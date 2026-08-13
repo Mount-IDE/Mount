@@ -1,0 +1,116 @@
+#project-settings-var {
+    width: 100%;
+    height: 100%;
+
+}
+
+#var-header {
+    width: 100%;
+    height: 30px;
+    margin-bottom: 10px;
+    display: flex;
+    position: relative;
+}
+
+#var-header-label {
+    width: 70%;
+    display: flex;
+    align-items: center;
+    gap: 10%;
+    padding: 0 10%;
+
+    & p {
+        color: var(--subtitle)
+    }
+}
+
+#var-bt {
+    height: 100%;
+    position: absolute;
+    right: 10%;
+    top: 0;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & img {
+        width: 50%;
+        height: 50%;
+        display: block;
+    }
+}
+
+#var-bt-variants {
+    position: absolute;
+    width: 30%;
+    right: 10%;
+    top: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    z-index: 20;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    & div {
+        color: var(--subtitle);
+        width: 100%;
+        height: 20px;
+
+        &:hover {
+            color: var(--title);
+            background: var(--hover);
+        }
+    }
+}
+
+#var-body {
+    width: 100%;
+    overflow: auto;
+    padding: 0 10%;
+}
+
+.variable {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    height: 20px;
+    margin: 5px 0;
+    position: relative;
+
+    & span {
+        color: var(--subtitle);
+    }
+
+    & input {
+        width: 30%;
+        height: 100%;
+        background: transparent;
+        color: var(--subtitle);
+        border: none;
+        /*outline: none;*/
+    }
+
+
+    & .var-delete {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & img {
+            width: 50%;
+            height: 50%;
+            display: block;
+        }
+    }
+}
+

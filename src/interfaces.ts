@@ -67,8 +67,8 @@ interface Dependency {
 }
 
 interface IVar {
-    name: String,
-    val: IVal
+    name: string,
+    value: IVal
 }
 
 type IVal = string | boolean | number | string[]
