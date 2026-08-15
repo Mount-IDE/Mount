@@ -88,6 +88,7 @@ interface IParameter {
     def: IVal,
     typ: string[]
     while_?: string
+    req?: boolean
 }
 
 
@@ -366,6 +367,7 @@ interface ISettingsParameter {
     def?: string | boolean | string[]
     readonly?: boolean;
     required?: boolean;
+    gen_def?: string
 }
 
 

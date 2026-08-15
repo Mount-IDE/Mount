@@ -4,6 +4,7 @@ import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {contextStore} from "../../../stores/context_store.ts";
 import {menuStore} from "../../../stores/menu_store.ts";
+import Input from "../../common/Input.tsx";
 
 /**
  *
@@ -45,11 +46,9 @@ export default function CreateEntity() {
 
     async function create_fs() {
         if (current == null) {
-            console.warn("0")
             return;
         }
         if ("name" in Object.keys(fields)) {
-            console.warn("1")
             return;
         }
         const name = fields["name"];
@@ -76,8 +75,7 @@ export default function CreateEntity() {
             } else {
                 await invoke("create_dir", {path: path_})
             }
-        } catch
-            (e) {
+        } catch (e) {
             console.error(e)
         } finally {
             close_window()
@@ -234,16 +232,20 @@ function Field(props: FieldProps) {
 
     return (
         <div className={"create-entity-field"}>
-            <p className={"create-entity-field-p"}>{props.placeholder}</p>
-            {props.area &&
+            {/*<p className={"create-entity-field-p"}>{props.placeholder}</p>*/}
+            {/*{props.area &&
                 <textarea ref={ref} placeholder={props.placeholder} value={props.val}
                           onInput={(e) => props.cb(e.currentTarget.value)}/>
             }
             {!props.area &&
                 <input placeholder={props.placeholder} value={props.val}
                        onInput={(e) => props.cb(e.currentTarget.value)}/>
-            }
-
+            }*/}
+            <Input typ={props.area ? "area" : "input"}
+                   value={props.val}
+                   title={props.placeholder ?? ""}
+                   write={props.cb}
+                   placeholder={props.placeholder ?? ""}/>
         </div>
     )
 }

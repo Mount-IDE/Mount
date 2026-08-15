@@ -184,7 +184,7 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
                     currenTask.current = 0;
                     // termRef.current?.clear()
                     console.log("RESTART3")
-                    runTask(0, tasks)
+                    await runTask(0, tasks)
                 } catch (e) {
                     console.warn(e)
                 }

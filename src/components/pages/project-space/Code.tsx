@@ -1,5 +1,5 @@
 import "./styles/code.css"
-import {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
 type Props = {

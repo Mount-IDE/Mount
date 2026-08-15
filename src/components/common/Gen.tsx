@@ -1,4 +1,4 @@
-import "./styles/parameter-gen.css"
+import "./styles/common-parameters.css"
 import {noteStore, NotificationType} from "../../stores/note_store.ts";
 import add from "../../assets/plus.svg";
 import close from "../../assets/title-close.svg";
@@ -6,18 +6,20 @@ import close from "../../assets/title-close.svg";
 
 type Props = {
     title: string;
-    val: string[];
+    value: string[];
     write: (val: string[]) => void;
     required?: boolean
+    show?: boolean;
+    def?: string
 }
 
-export default function ParameterGen(props: Props) {
+export default function Gen(props: Props) {
 
-    const list = props.val
+    const list = props.value
 
     function add_() {
         let res = [...list]
-        res.push("group")
+        res.push(props.def ?? "")
         props.write(res)
 
     }
@@ -46,7 +48,12 @@ export default function ParameterGen(props: Props) {
 
 
     return (
-        <>
+        <div className={"gen"}
+             style={props.show == false ? {
+                 opacity: 0.5,
+                 pointerEvents: "none"
+             } : {}}
+        >
             <p>{props.title}</p>
             <div className={"parameter-gen"}>
                 <button className={"parameter-gen-bt"} onClick={add_}>
@@ -75,6 +82,6 @@ export default function ParameterGen(props: Props) {
                 }
             </div>
 
-        </>
+        </div>
     )
 }

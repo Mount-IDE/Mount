@@ -115,9 +115,9 @@ export default function CreateProject() {
 
 
         const unlisten4 = listen<string>("project", (d) => {
-            console.log("ZWRITE")
+            //console.log("ZWRITE")
             let parsed = JSON.parse(d.payload);
-            console.log(parsed);
+            // console.log(parsed);
             let obj = JSON.parse(parsed.data) as Dependency[];
             let conflicts = obj.filter(el => el.level == "CONFLICTS");
             let optional = obj.filter(el => el.level == "OPTIONAL");

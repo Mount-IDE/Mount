@@ -1,31 +1,26 @@
 import "./styles/main-project-settings.css"
 import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import {useEffect, useRef} from "react";
-import ParameterGen from "../../common/ParameterGen.tsx";
+import Gen from "../../common/Gen.tsx";
+import Input from "../../common/Input.tsx";
+import List from "../../common/List.tsx";
+import {settingsStore} from "../../../stores/settings_store.ts";
 
 
 interface Option {
     label: string,
     def: IVal
     type: "input" | "area" | "select" | "list" | "gen"
+    variants?: string[]
     disabled?: boolean
     placeholder?: string
+    def_?: string
 }
 
-const licenses = [
-    "MIT",
-    "Apache 2.0",
-    "BSD",
-    "LGPL-3.0",
-    "GPL-3.0",
-    "AGPL-3.0",
-    "CC0",
-    "Nonlicense",
-]
 
 export default function MainProjectSettings() {
     const project = projectSettingsStore(state => state.new_project_data)
-
+    const settings = settingsStore(state => state.settings);
     const options: Option[] = [
         {
             def: `${project?.name}`,
@@ -48,21 +43,39 @@ export default function MainProjectSettings() {
             type: "area",
         },
         {
+            def: `${project?.meta.license}`,
+            label: "License",
+            variants: [
+                "MIT",
+                "Apache 2.0",
+                "BSD",
+                "LGPL-3.0",
+                "GPL-3.0",
+                "AGPL-3.0",
+                "CC0",
+                "Nonlicense",
+            ],
+            type: "select",
+        },
+        {
+            type: "select",
+            def: project?.meta.group ?? "",
+            label: "Group",
+            variants: settings?.general.project_groups ?? ["general"]
+        },
+        {
             def: project?.meta.authors ?? [],
             label: "Authors",
             type: "gen",
-            placeholder: "author1:author2"
-        },
-        {
-            def: `${project?.meta.license}`,
-            label: "License",
-            type: "select",
+            placeholder: "author1:author2",
+            def_: "author"
         },
         {
             def: project?.meta.tags ?? [],
             label: "Tags",
             type: "gen",
-            placeholder: "tag1:tag2"
+            placeholder: "tag1:tag2",
+            def_: "tag"
         },
 
 
@@ -110,43 +123,37 @@ function ProjectOption(props: OptionProps) {
 
 
     return (
-        <div className={"project-option"}>
-            {props.obj.type != "gen" && <p>{props.obj.label}</p>}
-            {props.obj.type == "input" &&
-                <input
-                    placeholder={props.obj.placeholder}
-                    disabled={props.obj.disabled}
-                    value={val.toString()}
-                    onInput={
-                        (e) => write(e.currentTarget.value)}
-                />
-            }
+        <>
             {
-                props.obj.type == "area" &&
-                <textarea ref={ref}
-                          placeholder={props.obj.placeholder}
-
-                          disabled={props.obj.disabled}
-                          value={val.toString()}
-                          onInput={
-                              (e) => write(e.currentTarget.value)}
+                (props.obj.type == "input" || props.obj.type == "area") &&
+                <Input
+                    placeholder={props.obj.placeholder ?? ""}
+                    show={!props.obj.disabled}
+                    value={val.toString()}
+                    write={write}
+                    typ={props.obj.type}
+                    title={props.obj.label}
 
                 />
             }
             {
                 props.obj.type == "select" &&
-                <select value={val.toString()} onChange={(e) => write(e.currentTarget.value)}>
-                    {
-                        licenses.map((el, key) =>
-                            <option key={key} value={el}>{el}</option>
-                        )
-                    }
-                </select>
+                <List
+                    value={val.toString()}
+                    write={write}
+                    title={props.obj.label}
+                    variants={props.obj.variants ?? []}
+                />
             }
             {
                 props.obj.type == "gen" &&
-                <ParameterGen title={props.obj.label} val={val as string[]} write={write}/>
+                <Gen
+                    def={props.obj.def_ ?? ""}
+                    title={props.obj.label}
+                    value={val as string[]}
+                    write={write}
+                />
             }
-        </div>
+        </>
     )
 }

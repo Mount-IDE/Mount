@@ -17,7 +17,6 @@ interface ProjectOption {
 export default function ProjectSettings() {
 
 
-    const proj = projectSettingsStore(state => state.new_project_data)
     const project = projectStore(state => state.current_project)
 
     useEffect(() => {
@@ -60,9 +59,10 @@ export default function ProjectSettings() {
                 meta: {
                     ...project.meta,
                     description: main_data[2] as string ?? project.meta.description,
-                    authors: main_data[3] as string[] ?? project.meta.authors,
-                    license: main_data[4] as string ?? project.meta.license,
-                    tags: main_data[5] as string[] ?? project.meta.tags
+                    authors: main_data[5] as string[] ?? project.meta.authors,
+                    license: main_data[3] as string ?? project.meta.license,
+                    tags: main_data[6] as string[] ?? project.meta.tags,
+                    group: main_data[4] as string ?? project.meta.group
                 }
             })
         }

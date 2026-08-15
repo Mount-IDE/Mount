@@ -3,6 +3,7 @@ import more from "../../../assets/more.svg"
 import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import React from "react";
 
 type Props = {
     project: IRecentProject

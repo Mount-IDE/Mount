@@ -17,8 +17,6 @@ export default function ProjectSettingsVariables() {
     const addVar_ = projectSettingsStore(state => state.add_variable)
     const remVar = projectSettingsStore(state => state.rem_variable)
     useEffect(() => {
-        console.log("click")
-        //   if (show){
         let cur = ref.current;
 
         let bt = ref2.current
@@ -47,7 +45,6 @@ export default function ProjectSettingsVariables() {
         return () => {
             window.removeEventListener("click", handler)
         }
-        //}
     }, [show])
 
 

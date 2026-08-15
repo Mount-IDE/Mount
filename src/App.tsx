@@ -92,7 +92,7 @@ function App() {
 
 
     useEffect(() => {
-        console.log("THEME", currentTheme)
+        //console.log("THEME", currentTheme)
         if (currentTheme) {
             let vars = [
                 "bg",
@@ -116,7 +116,7 @@ function App() {
                 if (currentTheme.colors) {
 
                     for (let i of currentTheme.colors) {
-                        console.log("\ttheme", i.name)
+                        //console.log("\ttheme", i.name)
                         if (vars.includes(i.name)) {
                             root.style.setProperty(`--${i.name}`, i.value)
                         }

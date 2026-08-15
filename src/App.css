@@ -21,11 +21,11 @@
   --title: #FFFFFF;
   --subtitle: #A4A4A4;
   --border: #A9A9A9;
-  --input: #0B0B0B;
+    --input: #000;
   --border2:#464646;
   --proj-hover: #353535;
     --hover: #353535;
-  --placeholder: #171717;
+    --placeholder: #505050;
   --bg1: #1E1F22;
   --bg2: #181818;
 

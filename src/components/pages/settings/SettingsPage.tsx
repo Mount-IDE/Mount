@@ -9,8 +9,6 @@ import {themeStore} from "../../../stores/theme_store.ts";
 
 
 function useSettings(settings: Settings | null, themes: ITheme[]) {
-
-
     let needed = themes.find(el => el.id == settings?.appearance.theme)
     return useMemo<SettingsElement[]>(() => [
         {
@@ -39,7 +37,8 @@ function useSettings(settings: Settings | null, themes: ITheme[]) {
                             title: "Project groups",
                             type: "gen",
                             def: settings?.general.project_groups ?? [],
-                            required: true
+                            required: true,
+                            gen_def: "group"
                         },
                     ],
                 },

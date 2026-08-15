@@ -98,14 +98,14 @@ export const themeStore = create<Type>((set, get) => ({
     get_titlebar(page: Window): IThemeTitleBar | undefined {
         let theme = get().current_theme;
         let common = theme?.elements?.common?.title_bar
-        console.log(page)
+        //  console.log(page)
         if (page == Window.Project) {
             let proj = theme?.elements?.project_space?.title_bar
-            console.log(proj ? Object.keys(proj) : undefined)
+            //   console.log(proj ? Object.keys(proj) : undefined)
             return proj ?? common
         }
         let main = theme?.elements?.mainpage?.title_bar;
-        console.log(main ? Object.keys(main) : undefined)
+        // console.log(main ? Object.keys(main) : undefined)
         return main ?? common
     }
 

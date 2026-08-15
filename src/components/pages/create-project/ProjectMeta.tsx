@@ -30,11 +30,13 @@ export default function ProjectMeta() {
                     label: ["Project Name", "Enter a project name"],
                     out: "project-name",
                     typ: ["input", "base"],
+                    req: true
                 }, {
                     def: project_path,
                     label: ["Project Path", "Enter a project path"],
                     out: "project-path",
                     typ: ["file", "dir"],
+                    req: true
                 }
             ]
         }, {

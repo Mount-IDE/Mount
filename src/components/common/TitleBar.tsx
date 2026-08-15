@@ -43,7 +43,7 @@ export default function TitleBar() {
     let page = pageStore(state => state.current)
 
     const theme = themeStore(state => state.get_titlebar(page));
-    console.log(theme)
+    //console.log(theme)
 
     const buttonThemes = useMemo(() => {
 

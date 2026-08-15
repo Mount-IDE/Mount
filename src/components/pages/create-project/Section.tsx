@@ -22,59 +22,106 @@ export default function Section(props: Props) {
 
     const body_ref = useRef<HTMLDivElement>(null)
 
-    function toggle(_: React.MouseEvent<HTMLDivElement>) {
-        const body = body_ref.current!;
-        if (!collapsible) return
-        if (body.classList.contains("project-section-in-open")) {
-            body.style.maxHeight = body.scrollHeight + "px";
+    /* function toggle(_: React.MouseEvent<HTMLDivElement>) {
+         const body = body_ref.current!;
+         if (!collapsible) return
+         if (body.classList.contains("project-section-in-open")) {
+             body.style.maxHeight = body.scrollHeight + "px";
 
-            requestAnimationFrame(() => {
-                body.style.maxHeight = "0px";
-            });
+             requestAnimationFrame(() => {
+                 body.style.maxHeight = "0px";
+             });
 
-            body.classList.remove("project-section-in-open");
-            setIsOpened(false);
-        } else {
-            body.classList.add("project-section-in-open");
-            body.style.maxHeight = body.scrollHeight + "px";
-            setIsOpened(true);
-        }
+             body.classList.remove("project-section-in-open");
+             setIsOpened(false);
+         } else {
+             body.classList.add("project-section-in-open");
+             body.style.maxHeight = body.scrollHeight + "px";
+             setIsOpened(true);
+         }
 
-    }
+     }
 
-    useEffect(() => {
-        if (!collapsible){
-            const body = body_ref.current!;
-            body.style.maxHeight = body.scrollHeight + "px";
-        }else {
+     useEffect(() => {
+         if (!collapsible){
+             const body = body_ref.current!;
+             body.style.maxHeight = body.scrollHeight + "px";
+         }
 
-        }
-    }, [props.section]);
+     }, [props.section]);
 
+     useEffect(() => {
+         const body = body_ref.current;
+         if (!body) return;
+
+         const observer = new ResizeObserver(() => {
+             if (isOpened) {
+                 body.style.height = `${body.scrollHeight}px`;
+             }
+         });
+
+         observer.observe(body);
+
+         return () => observer.disconnect();
+     }, [isOpened]);
+
+     useLayoutEffect(() => {
+         const body = body_ref.current;
+         if (!body) return;
+
+         if (isOpened) {
+             body.style.maxHeight = body.scrollHeight + "px";
+         } else {
+             body.style.maxHeight = "0px";
+         }
+     }, [isOpened]);
+
+     useEffect(() => {
+         if (!collapsible) {
+             setIsOpened(true);
+         }
+     }, [collapsible]);
+ */
     useLayoutEffect(() => {
         const body = body_ref.current;
         if (!body) return;
 
-        if (isOpened) {
-            body.style.maxHeight = body.scrollHeight + "px";
-        } else {
+        if (!isOpened) {
             body.style.maxHeight = "0px";
+            return;
         }
+
+        body.style.maxHeight = `${body.scrollHeight}px`;
     }, [isOpened]);
 
     useEffect(() => {
-        if (!collapsible) {
-            setIsOpened(true);
-        }
-    }, [collapsible]);
+        const body = body_ref.current;
+        if (!body) return;
 
+        const observer = new ResizeObserver(() => {
+            if (isOpened) {
+                body.style.maxHeight = `${body.scrollHeight}px`;
+            }
+        });
+
+        observer.observe(body);
+
+        return () => observer.disconnect();
+    }, [isOpened]);
+
+
+    function toggle() {
+        if (!collapsible) return;
+
+        setIsOpened(prev => !prev);
+    }
 
     return (
         <div className={"project-section"}>
             <div className={"project-section-head"}
                  onClick={(e) => {
                      if (collapsible) {
-                         toggle(e)
+                         toggle()
                      }
                  }}
             >
