@@ -125,6 +125,61 @@ function CodeEditor(props: CodeProps) {
         if (e.ctrlKey && e.key == "s") {
             props.save()
         }
+        if (e.ctrlKey && e.key === "x") {
+            e.preventDefault();
+
+            let start = cur!.selectionStart;
+            let end = cur!.selectionEnd;
+            let val = props.text;
+
+            if (start != end) {
+                let before = val.slice(0, start);
+                let after = val.slice(end);
+                let text = before + after;
+                let cutted = val.slice(start, end);
+
+                props.setText(text);
+                navigator.clipboard.writeText(cutted).then();
+                cursor_ref.current = [start, start];
+            } else {
+                let first_n = val.lastIndexOf("\n", start - 1);
+                let last_n = val.indexOf("\n", end);
+
+                const lineStart = first_n === -1 ? 0 : first_n + 1;
+                const lineEndExclusive = last_n === -1 ? val.length : last_n;
+                const lineEndInclusive = last_n === -1 ? val.length : last_n + 1;
+
+                const column = start - lineStart;
+                const line = val.slice(lineStart, lineEndExclusive);
+
+                let before = val.slice(0, lineStart);
+                let after = val.slice(lineEndInclusive);
+                let text = before + after;
+
+                navigator.clipboard.writeText(line + "\n").then();
+
+                const newPos = Math.min(lineStart + column, text.length);
+
+                props.setText(text);
+                cursor_ref.current = [newPos, newPos];
+            }
+        }
+
+        if (e.key === "Tab") {
+            e.preventDefault()
+            e.stopPropagation()
+            let start = cur!.selectionStart;
+            let end = cur!.selectionEnd;
+            let val = props.text;
+            if (start == end) {
+                let before = val.slice(0, start)
+                let after = val.slice(end)
+                props.setText(before + "    " + after)
+                cursor_ref.current = [end + 4, end + 4]
+            } else {
+
+            }
+        }
     }
 
 
