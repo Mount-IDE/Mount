@@ -4,6 +4,24 @@ use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
 use ts_rs::TS;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename = "lowercase")]
+pub enum PlatformType {
+    WINDOWS,
+    MACOS,
+    LINUX,
+    ALL,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Platform {
+    ARRAY(Vec<PlatformType>),
+    SINGLE(PlatformType),
+}
+
+
+
 #[derive(Clone, Serialize, Debug, Deserialize, TS)]
 pub struct Path(pub String);
 impl Path {

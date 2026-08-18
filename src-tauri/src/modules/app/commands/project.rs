@@ -11,7 +11,7 @@ use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAc
 use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
-    Action, Project, ProjectPackage, ProjectTag, ProjectTemplate, Var,
+    Action, Project, ProjectTag, ProjectTemplate, Var,
 };
 use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionCommandArgs, ActionCommandIn, CreateProjectResult, ProjectMeta,
@@ -79,7 +79,7 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
 pub async fn create_project(
     mut template: ProjectTemplate,
     results: CreateProjectResult,
-    packages: HashMap<String, ProjectPackage>,
+    packages: Vec<String>,
     tags: Vec<ProjectTag>,
     window: tauri::Window,
 ) -> Result<Project, ErrorDto> {

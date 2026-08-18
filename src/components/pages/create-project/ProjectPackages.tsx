@@ -3,6 +3,7 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import {useEffect} from "react";
 import Package from "./Package.tsx";
+import {packageStore} from "../../../stores/package_store.ts";
 
 
 
@@ -10,7 +11,7 @@ import Package from "./Package.tsx";
 export default function ProjectPackages(){
 
     const current_template = cacheStore(state=>state.currentTemplate);
-    const packages = cacheStore(state=>state.packages);
+    const packages = packageStore(state => state.packages);
     const res_packages = createProjectStore(state=>state.packages);
     const add_package= createProjectStore(state=>state.add_package)
     const add_packages= createProjectStore(state=>state.add_packages)
@@ -20,11 +21,11 @@ export default function ProjectPackages(){
     useEffect(() => {
         const default_packages = current_template?.packages_id??[];
         const packs = packages.filter(el=>default_packages.includes(el.id))
-        add_packages(packs);
+        add_packages(packs.map(el => el.id));
     }, [current_template]);
 
     const togglePackage = (el: IPackage, val: boolean) => {
-        val ? add_package(el) : rem_package(el);
+        val ? add_package(el.id) : rem_package(el.id);
     };
 
 

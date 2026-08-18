@@ -1,24 +1,23 @@
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::app::commands::config::{get_file_templates, get_fs_ext_icons};
-use crate::modules::app::{
-    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, SETTINGS_SERVICE,
-};
+use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PACKAGE_SERVICE, SETTINGS_SERVICE};
 use crate::modules::contexts::config::values::Cache;
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
+use crate::modules::contexts::filesystem::app::utils::{path_from};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
-use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
 use crate::modules::contexts::settings::app::traits::TSettingsService;
-use crate::modules::contexts::settings::domain::entities::ITheme;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use base64::engine::general_purpose;
 use base64::Engine;
 use which::which;
+use crate::modules::contexts::project::app::traits::TPackageService;
 
 #[tauri::command]
-pub fn read_packages() -> Result<Vec<ProjectPackage>, ErrorDto> {
-    let packs = CONFIG_SERVICE.read_packages()?;
+pub fn read_packages() -> Result<Vec<Package>, ErrorDto> {
+    let packs = PACKAGE_SERVICE.read_packages()?;
     Ok(packs)
 }
 
@@ -26,8 +25,8 @@ pub fn read_packages() -> Result<Vec<ProjectPackage>, ErrorDto> {
 pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
     let mut templates = CONFIG_SERVICE.read_templates()?;
     let dir = CONFIG_SERVICE.get_data_dir()?;
-    let path_ = make_path_string(vec![dir.get().clone().as_str(), "icons"]);
-    if !FS_READ_SERVICE.exists(Path(path_.clone())) {
+    let path_ = path_from![dir, "icons"];
+    if !FS_READ_SERVICE.exists(path_.clone()) {
         CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
     }
 
@@ -37,7 +36,7 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
             continue;
         }
         let icon = meta.unwrap().icon;
-        let path = make_path(vec![path_.clone().as_str(), icon.clone().as_str()]);
+        let path = path_from![path_, icon];
         let ext = FS_READ_SERVICE.exists(path.clone());
         if !ext {
             templates[i].meta.as_mut().unwrap().icon = String::new();
@@ -73,8 +72,8 @@ pub fn read_themes() -> Result<Vec<String>, ErrorDto> {
 
 #[tauri::command]
 pub fn get_cache() -> Result<Cache, ErrorDto> {
-    let packages = read_packages()?;
-    let templates = read_templates()?;
+    let packages = read_packages().unwrap_or(Vec::new());
+    let templates = read_templates().unwrap_or(vec![ProjectTemplate::new()]);
     let data_dir_path = get_data_dir()?;
     let settings = CONFIG_SERVICE.get_settings()?;
 

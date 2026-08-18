@@ -14,6 +14,7 @@ import {ToggleGroup} from "radix-ui"
 import {motion} from "motion/react";
 import {invoke} from "@tauri-apps/api/core";
 import {createProjectStore} from "../../../stores/create_project.ts";
+import PackageSection from "./PackageSection.tsx";
 
 export default function ProjectMeta() {
 
@@ -242,6 +243,7 @@ export default function ProjectMeta() {
                 (el, i) =>
                     <Section is_main section={el} key={`base-${i}`}/>
             )}
+            <PackageSection/>
             {other_sections.map((el, i) =>
                 <Section section={el} key={i}/>
             )}

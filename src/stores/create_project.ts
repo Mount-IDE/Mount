@@ -10,13 +10,13 @@ interface Type {
     close: () => void;
     results: Result,
     tags: {id: number, name: string}[]
-    packages: Map<string, IPackage>
-    add_result:(tid: string, sid:number, pid: string, value: string | boolean)=>void,
+    packages: Set<string>
+    add_result: (tid: string, sid: number, pid: string, value: string | boolean | string[]) => void,
     // get_result:(tid: string, sid:number, pid: string)=>string | boolean | undefined,
     // has_result: (from:string)=>boolean,
-    add_package: (pack: IPackage)=>void
-    add_packages: (pack: IPackage[])=>void
-    remove_package: (pack: IPackage)=>void
+    add_package: (id: string) => void
+    add_packages: (pack: string[]) => void
+    remove_package: (pack: string) => void
     add_tag: (name: string)=>void
     remove_tag: (id: number)=>void
     change_tag: (id: number, to: string)=>void
@@ -28,7 +28,7 @@ interface Type {
 export interface Result {
     [template: string]: {
         [section: number]: {
-            [parameter: string]: string | boolean
+            [parameter: string]: string | boolean | string[]
         }
     }
 }
@@ -40,7 +40,7 @@ export const createProjectStore = create<Type>((set, get) => ({
     void: undefined,
     page_opened: false,
     results: {},
-    packages: new Map(),
+    packages: new Set(),
     tags: [],
     close: () => set({page_opened: false}),
     open: () => set({page_opened: true}),
@@ -60,24 +60,24 @@ export const createProjectStore = create<Type>((set, get) => ({
             }
         }
     }),
-    add_package:(pack: IPackage)=> set(prev=>{
-        const newMap = new Map(prev.packages);
-        newMap.set(pack.id, pack);
+    add_package: (id: string) => set(prev => {
+        const newMap = new Set(prev.packages.values());
+        newMap.add(id);
         return { packages: newMap };
 
     }),
-    add_packages:(pack: IPackage[])=> set(prev=>{
-        const newMap = new Map(prev.packages);
+    add_packages: (pack: string[]) => set(prev => {
+        const newMap = new Set(prev.packages.values());
         for (let i of pack){
-            newMap.set(i.id, i);
+            newMap.add(i);
         }
         return {
             packages: newMap
         }
     }),
-    remove_package:(pack: IPackage)=> set(prev=>{
-        const newMap = new Map(prev.packages);
-        newMap.delete(pack.id);
+    remove_package: (pack: string) => set(prev => {
+        const newMap = new Set(prev.packages.values());
+        newMap.delete(pack);
         return { packages: newMap };
     }),
     add_tag: (name: string)=> set(prev=>{

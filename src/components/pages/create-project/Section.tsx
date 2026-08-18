@@ -92,7 +92,7 @@ export default function Section(props: Props) {
         }
 
         body.style.maxHeight = `${body.scrollHeight}px`;
-    }, [isOpened]);
+    }, [isOpened, props.section.params]);
 
     useEffect(() => {
         const body = body_ref.current;
@@ -119,7 +119,7 @@ export default function Section(props: Props) {
     return (
         <div className={"project-section"}>
             <div className={"project-section-head"}
-                 onClick={(e) => {
+                 onClick={() => {
                      if (collapsible) {
                          toggle()
                      }

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
@@ -6,12 +7,10 @@ use crate::modules::contexts::launch::domain::entities::{
     LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionCommand, ActionOnError, ButtonPos, PackageMeta, ParameterLabel, ProjectMeta, TemplateMeta,
+    ActionCommand, ActionOnError, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta,
 };
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{
-    Dependency, IfStatementPart, ParameterTyp, Path, Schema, Val,
-};
+use crate::modules::shared::kernel::values::{Dependency, IfStatementPart, ParameterTyp, Path, Platform, PlatformType, Schema, Val};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -359,63 +358,6 @@ impl Parameter {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
-pub struct ProjectPackage {
-    #[serde(default)]
-    id: String,
-    #[serde(default)]
-    name: String,
-    #[serde(default)]
-    meta: PackageMeta,
-    #[serde(default)]
-    startup: PackageStartup,
-}
-
-impl ProjectPackage {
-    #[allow(unused)]
-    pub fn new() -> ProjectPackage {
-        Self {
-            id: String::new(),
-            name: String::new(),
-            meta: PackageMeta::new(),
-            startup: PackageStartup::new(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
-pub struct PackageStartup {
-    #[serde(default)]
-    var: Vec<Var>,
-    #[serde(default)]
-    actions: Vec<Action>,
-    #[serde(default)]
-    parameters: Vec<Parameter>,
-}
-
-impl Default for PackageStartup {
-    fn default() -> Self {
-        Self {
-            var: Vec::new(),
-            actions: Vec::new(),
-            parameters: Vec::new(),
-        }
-    }
-}
-
-impl PackageStartup {
-    #[allow(unused)]
-    pub fn new() -> PackageStartup {
-        Self {
-            var: Vec::new(),
-            parameters: Vec::new(),
-            actions: Vec::new(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct ProjectTag {
     #[serde(default)]
     pub id: u32,
@@ -428,6 +370,243 @@ impl Default for ProjectTag {
         Self {
             id: 0,
             name: String::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Package {
+    id: String,
+    name: String,
+    meta: Option<PackageMeta>,
+    scheme: Schema,
+    dependencies: Vec<PackageDependency>,
+    startup: PackageStartup,
+    components: Option<Vec<PackageComponent>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageComponent {
+    id: String,
+    typ: PackageComponentTyp,
+    program: String,
+    platform: Platform,
+    languages: Vec<String>,
+    priority: Option<u8>,
+    arguments: Option<Vec<String>>,
+    builtin_params: PackageComponentBuiltin,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageComponentTyp {
+    COMPILER,
+    TRANSPILER,
+    INTERPRETER,
+    LSP,
+    FORMATTER,
+    DEBUG,
+    BUILD_SYSTEM,
+    PACK_MANAGER,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageComponentBuiltin {
+    is_builtin: bool,
+    url: Option<String>,
+    path: Option<String>,
+    in_path: Option<bool>,
+    min_version: Option<String>,
+    version_check_command: Option<VersionCheckCommand>,
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum VersionCheckCommand {
+    SINGLE(String),
+    OBJ {
+        platform: Platform,
+        command: String,
+    },
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageStartup {
+    options: Option<Vec<PackageOption>>,
+    actions: Option<Vec<PackageAction>>,
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageAction {
+    id: i8,
+    next: Option<Vec<i8>>,
+    if_: Option<Vec<Vec<IfStatementPart>>>,
+    on_error: String,
+    platform: Option<Platform>,
+    command: Option<PackageActionCommand>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageActionCommand {
+    platform: Option<Platform>,
+    cwd: Option<String>,
+    env: Option<HashMap<String, String>>,
+    needed_exit_code: Option<Vec<i64>>,
+    command: String,
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageOption {
+    id: String,
+    title: String,
+    typ: PackageOptionTyp,
+    def: Option<Val>,
+    while_: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageOptionTyp {
+    typ: PackageOptionTypEnum,
+    fs_type: Option<PackageOptionFsType>,
+    list_type: Option<Vec<String>>,
+    placeholder: Option<String>,
+    required: Option<bool>,
+    readonly: Option<bool>,
+    validate: Option<String>,
+    fs_filter: Option<Vec<String>>,
+    gen_min: Option<u8>,
+    gen_max: Option<u8>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageOptionFsType {
+    FILE,
+    DIR,
+    FS,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageOptionTypEnum {
+    INPUT,
+    AREA,
+    LIST,
+    GEN,
+    FILE,
+    CHECK,
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageDependency {
+    typ: PackageDependencyTyp,
+    name: String,
+    version: String,
+    platform: Option<Platform>,
+    version_check_command: Option<String>,
+    level: PackageDependencyLevel,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageDependencyTyp {
+    PACKAGE,
+    PROGRAM,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageDependencyLevel {
+    REQUIRED,
+    CONFLICTS,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageMeta {
+    version: Option<String>,
+    authors: Option<Vec<String>>,
+    description: Option<String>,
+    tags: Option<String>,
+    source: Option<String>,
+    typ: Option<PackageTyp>,
+    icon: Option<String>,
+    license: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageTyp {
+    LANGUAGE,
+    FRAMEWORK,
+    TOOL,
+    BUILD_SYSTEM,
+}
+
+
+impl Package {
+    pub(crate) fn python() -> Self {
+        Self {
+            id: "opie.python".to_string(),
+
+            name: "Python 3.12".to_string(),
+            meta: None,
+            scheme: Default::default(),
+            dependencies: vec![
+                PackageDependency {
+                    typ: PackageDependencyTyp::PROGRAM,
+                    name: "python".to_string(),
+                    version: "3.12".to_string(),
+                    platform: None,
+                    version_check_command: Some("python -v".into()),
+                    level: PackageDependencyLevel::REQUIRED,
+                }
+            ],
+            startup: PackageStartup {
+                options: Some(vec![
+                    PackageOption {
+                        id: "main-py".to_string(),
+                        title: "Add main.py".to_string(),
+                        typ: PackageOptionTyp {
+                            typ: PackageOptionTypEnum::CHECK,
+                            fs_type: None,
+                            list_type: None,
+                            placeholder: None,
+                            required: None,
+                            readonly: None,
+                            validate: None,
+                            fs_filter: None,
+                            gen_min: None,
+                            gen_max: None,
+                        },
+                        def: Some(Val::BOOL(false)),
+                        while_: None,
+                    }
+                ]),
+                actions: None,
+            },
+            components: Some(
+                vec![
+                    PackageComponent {
+                        id: "python".to_string(),
+                        typ: PackageComponentTyp::INTERPRETER,
+                        program: "python".to_string(),
+                        platform: Platform::SINGLE(PlatformType::ALL),
+                        languages: vec![".py".to_string()],
+                        priority: None,
+                        arguments: None,
+                        builtin_params: PackageComponentBuiltin {
+                            is_builtin: true,
+                            url: None,
+                            path: None,
+                            in_path: Some(true),
+                            min_version: None,
+                            version_check_command: None,
+                        },
+                    }
+                ]
+            ),
         }
     }
 }

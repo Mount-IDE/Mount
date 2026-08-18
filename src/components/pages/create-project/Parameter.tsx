@@ -10,7 +10,7 @@ import FSContext from "../../common/FSContext.tsx";
 
 type Props = {
     param: IParameter
-    set: (val: string | boolean) => void,
+    set: (val: string | boolean | string[]) => void,
     section: number,
     allParams: IParameter[]
     is_main: boolean
@@ -29,8 +29,13 @@ export default function Parameter(props: Props) {
         key = current_template ? current_template.id : "__garbage__"
     }
 
-    const dependencyValue = createProjectStore(state =>
-        current_template ? state.results[key]?.[section]?.[param.while_ ?? ""] : undefined
+    const dependencyValue =
+        createProjectStore(state =>
+            current_template ?
+                state.results[key]?.
+                    [section]?.
+                    [param.while_ ?? ""]
+                : undefined
     );
 
     const dependency = param.while_
@@ -60,7 +65,7 @@ export default function Parameter(props: Props) {
     const new_def = value !== undefined ? value : props.param.def;
 
     useEffect(() => {
-        props.set(props.param.def as string | boolean)
+        props.set(props.param.def as string | boolean | string[])
     }, [props.param.def]);
 
     return (

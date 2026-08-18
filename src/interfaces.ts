@@ -84,7 +84,6 @@ interface ISection {
 interface IParameter {
     out: string,
     label: string | [string, string],
-    // val: IVal,
     def: IVal,
     typ: string[]
     while_?: string
@@ -96,7 +95,7 @@ interface IAction {
     id: number,
     for_?: string,
     callable: boolean,
-    if_: IfStatement[],
+    if_: IfStatementPart[][],
     on_error: String,
     next?: number
     command:
@@ -113,30 +112,11 @@ interface IAction {
         }[]
 }
 
-interface IfStatement {
-    or?: IfStatementPart[],
-    all?: IfStatementPart[]
-}
 
 interface IfStatementPart {
     from: string,
     oper: string,
     value: IVal
-}
-
-
-interface IPackage {
-    id: string,
-    name: string,
-    meta: {
-        authors: string[],
-        description: string
-    }
-    startup: {
-        var: IVar[],
-        actions: IAction[],
-        parameters: IParameter[]
-    }
 }
 
 
@@ -886,5 +866,100 @@ interface ITheme {
 }
 
 
+interface IPackage {
+    id: string
+    name: string
+    meta?: {
+        version?: string
+        authors?: string[]
+        description?: string
+        tags?: string[]
+        source?: string
+        typ?: "language" | "framework" | "tool" | "build_system"
+        icon?: string
+        license?: string
+    }
+    scheme: number
+    dependencies: {
+        typ: "package" | "program"
+        name: string
+        version?: string
+        platform?: ("windows" | "macos" | "linux")[] | "all"
+        version_check_command?: string
+        level: "required" | "conflicts"
+    }[]
+    startup: {
+        options?:
+            IPackageParameter[]
+
+        actions?: {
+            id: number
+            next?: number[]
+            if_?: {
+                from?: string,
+                op: "==" | "!=" | ">" | "<" | ">=" | "<=" | "empty" | "!empty" | "in" | "!in" | "regex" | "!regex" | "!already" | "stopped" | "!stopped" | "installed" | "!installed",
+                value?: string | boolean | string[] | number
+            }[][]
+            on_error: "continue" | "stop_graph" | "stop_all"
+
+            platform?: ("windows" | "macos" | "linux")[] | "all"
+            commands?: {
+                platform?: ("windows" | "macos" | "linux")[] | "all"
+                cwd?: string
+                env?: [string, string][]
+                needed_exit_code?: number[]
+                command: string
+            }[]
+
+        }[]
+    }
+    tasks?: []
+    var?: {
+        name: string,
+        value: string | boolean | string[]
+        readonly?: boolean
+    }[]
+    components?:
+        {
+            id: string
+            typ: "compiler" | "transpiler" | "interpreter" | "lsp" | "formatter" | "debugger" | "build_system" | "pack_manager"
+            program: string // имя программы
+            platform: ("windows" | "macos" | "linux")[] | "all"
+            languages: string[]
+            priority?: number
+            arguments?: string[]
+            builtin_params: {
+                is_builtin: boolean
+                url?: string
+                path?: string
+                in_path?: boolean
+                min_version?: string
+                version_check_command?: string | {
+                    platform: string
+                    command: string
+                }[]
+            }
+        }[]
+
+}
 
 
+interface IPackageParameter {
+    id: string
+    title: string
+    typ: {
+        typ: "input" | "area" | "list" | "gen" | "file" | "check",
+        fs_type?: "file" | "dir" | "fs",
+        list_type?: string[]
+        placeholder?: string
+        required?: boolean
+        readonly?: boolean
+        validate?: string
+        fs_filter?: string[]
+        gen_min?: number
+        gen_max?: number
+    }
+    def?: string | boolean | string[]
+    while_?: string
+
+}

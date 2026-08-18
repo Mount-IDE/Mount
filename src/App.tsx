@@ -17,6 +17,7 @@ import {settingsStore} from "./stores/settings_store.ts";
 import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
 import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
+import {packageStore} from "./stores/package_store.ts";
 
 
 /**
@@ -47,7 +48,7 @@ function App() {
                 id: i, name: el
             })));
             fsExtStore.getState().set_icons(cache.file_icons);
-            cacheStore.getState().add_packages_to_cache(cache.packages);
+            packageStore.getState().set_package(cache.packages);
             cacheStore.getState().add_templates_to_cache(cache.templates);
             if (cache.templates.length > 0) {
                 cacheStore.getState().set_current_template(cache.templates[0])

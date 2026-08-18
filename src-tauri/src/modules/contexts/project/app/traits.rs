@@ -1,6 +1,4 @@
-use crate::modules::contexts::project::domain::entities::{
-    Action, Project, ProjectTemplate, Var, _Task,
-};
+use crate::modules::contexts::project::domain::entities::{Action, Package, Project, ProjectTemplate, Task, Var, _Task};
 use crate::modules::contexts::project::domain::values::{
     CreateProjectResult, CreateProjectTemplate,
 };
@@ -63,4 +61,18 @@ pub trait TActionProjectService {
     fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String);
 
     fn run_task(&self, task: &_Task, path: &Path) -> i8;
+}
+
+
+pub trait TPackageService {
+    fn read_packages(&self) -> Result<Vec<Package>, ProjectError>;
+
+    fn add_package(&self, pack: Package) -> Result<(), ProjectError>;
+
+    fn rem_package(&self, pack: Package) -> Result<(), ProjectError>;
+}
+
+
+pub trait TPackageCompileService {
+    fn compile_package_actions(&self, pack: Package) -> Result<(Vec<Var>, Vec<_Task>), ProjectError>;
 }

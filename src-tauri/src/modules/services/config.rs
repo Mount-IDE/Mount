@@ -8,18 +8,17 @@ use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::app::utils::{make_path, path_from};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::{ITheme, Settings};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
+use crate::modules::contexts::settings::domain::entities::{Settings};
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ConfigError, FileSystemError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::{Display, Formatter};
-use std::ops::Deref;
 use std::string::ToString;
 use std::sync::Mutex;
-use tauri::{include_image, Manager};
+use tauri::{Manager};
 
 pub struct ConfigService();
 
@@ -209,7 +208,7 @@ impl TConfigService for ConfigService {
     fn save_settings(&self, _settings: &Settings) -> Result<(), ConfigError> {
         let dir = self.get_data_dir()?;
         let json = PARSING_SERVICE.to_string(_settings)?;
-        let path = make_path(vec![dir.get().as_str(), "settings.json"]);
+        let path = path_from![dir, "settings.json"];
         let file = PFile::from_path_reg(path.clone());
         FS_WRITE_SERVICE
             .write_file(&file, json, FileWriteAccess::WRITE)
@@ -251,14 +250,14 @@ impl TConfigService for ConfigService {
         Ok(())
     }
 
-    fn read_packages(&self) -> Result<Vec<ProjectPackage>, ConfigError> {
+    fn read_packages(&self) -> Result<Vec<Package>, ConfigError> {
         let dir = self.get_data_dir()?;
         let path_ = make_path(vec![dir.get().as_str(), "packages.json"]);
         let file = PFile::from_path_reg(path_.clone());
 
         let content = FS_READ_SERVICE.read_file(&file)?;
 
-        let json = serde_json::from_str::<Vec<ProjectPackage>>(&content).map_err(|e| {
+        let json = serde_json::from_str::<Vec<Package>>(&content).map_err(|e| {
             ConfigError::ParsingError {
                 err: ParsingError::Deserialize {
                     json: content,
@@ -385,7 +384,6 @@ fn get_files_new() -> Vec<FsEntity_> {
                 .unwrap()
                 .as_str(),
         ),
-        FsEntity_::file_s_content("packages.json", "[]"),
         FsEntity_::file_s_content(
             "file_ext_icons.json",
             PARSING_SERVICE
@@ -428,6 +426,15 @@ fn get_files_new() -> Vec<FsEntity_> {
                 ),
             ],
         ),
+        FsEntity_::dir_entities("packages",
+                                vec![
+                                    FsEntity_::dir_entities("opie.py", vec![
+                                        FsEntity_::file_s_content("config.json",
+                                                                  PARSING_SERVICE.to_string(Package::python()).unwrap().as_str()
+                                        )
+                                    ])
+                                ]
+        )
     ]
 }
 

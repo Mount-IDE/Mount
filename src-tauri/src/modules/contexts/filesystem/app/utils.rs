@@ -22,6 +22,12 @@ pub trait PathPart {
     fn __get(&self) -> String;
 }
 
+/*impl PathPart for &'static str {
+    fn __get(&self) -> String {
+        self.to_string()
+    }
+}*/
+
 impl PathPart for &str {
     fn __get(&self) -> String {
         self.to_string()

@@ -1,5 +1,5 @@
 use crate::modules::contexts::config::entities::ConfigFsTemplate;
-use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
@@ -13,7 +13,7 @@ pub trait TConfigService {
     fn get_data_dir(&self) -> Result<Path, ConfigError>;
     fn make_data_dir(&self) -> Result<(), ConfigError>;
 
-    fn read_packages(&self) -> Result<Vec<ProjectPackage>, ConfigError>;
+    fn read_packages(&self) -> Result<Vec<Package>, ConfigError>;
     fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError>;
 
     fn get_home_dir(&self) -> Result<Path, ConfigError>;

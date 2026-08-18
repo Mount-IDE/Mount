@@ -1,13 +1,14 @@
 use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE};
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::{path_from};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::ParsingError;
 use crate::modules::shared::kernel::values::Path;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 
 #[tauri::command]
 pub fn get_home_dir() -> Result<Path, ErrorDto> {
@@ -34,7 +35,7 @@ pub fn get_groups() -> Result<Vec<String>, ErrorDto> {
 #[tauri::command]
 pub fn get_fs_ext_icons() -> Result<Vec<FsConfigIcons>, ErrorDto> {
     let path = CONFIG_SERVICE.get_data_dir()?;
-    let path = make_path(vec![path.get().as_str(), "file_ext_icons.json"]);
+    let path = path_from![path, "file_ext_icons.json"];
     if !FS_READ_SERVICE.exists(path.clone()) {
         CONFIG_RECOVERY_SERVICE.check_data_dir()?;
     }

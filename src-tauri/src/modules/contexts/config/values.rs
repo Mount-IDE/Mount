@@ -1,5 +1,5 @@
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
-use crate::modules::contexts::project::domain::entities::{ProjectPackage, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
@@ -47,7 +47,7 @@ impl Default for FsType {
 pub struct Cache {
     pub settings: Settings,
     pub templates: Vec<ProjectTemplate>,
-    pub packages: Vec<ProjectPackage>,
+    pub packages: Vec<Package>,
     pub groups: Vec<String>,
     pub projects_dir: Path,
     pub data_dir_path: Path,

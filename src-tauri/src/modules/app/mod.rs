@@ -7,7 +7,7 @@ use super::contexts::filesystem::app::services::{
 };
 use crate::modules::contexts::events::services::EventService;
 use crate::modules::contexts::launch::app::services::{LaunchCompileService, LaunchRunService};
-use crate::modules::contexts::project::app::services::{ActionProjectService, ProjectService};
+use crate::modules::contexts::project::app::services::{ActionProjectService, PackageCompileService, PackageService, ProjectService};
 use crate::modules::contexts::settings::app::services::SettingsService;
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
@@ -36,3 +36,7 @@ pub static LAUNCH_RUN_SERVICE: LaunchRunService = LaunchRunService();
 pub static SETTINGS_SERVICE: SettingsService = SettingsService();
 
 pub static EVENT_SERVICE: EventService = EventService();
+
+
+pub static PACKAGE_SERVICE: PackageService = PackageService();
+pub static PACKAGE_COMPILE_SERVICE: PackageCompileService = PackageCompileService();
