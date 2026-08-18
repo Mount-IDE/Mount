@@ -1,23 +1,32 @@
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::app::commands::config::{get_file_templates, get_fs_ext_icons};
-use crate::modules::app::{CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PACKAGE_SERVICE, SETTINGS_SERVICE};
+use crate::modules::app::{
+    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PACKAGE_SERVICE, SETTINGS_SERVICE,
+};
 use crate::modules::contexts::config::values::Cache;
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::app::utils::{path_from};
+use crate::modules::contexts::filesystem::app::utils::path_from;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
-use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
+use crate::modules::contexts::project::app::traits::TPackageService;
+use crate::modules::contexts::project::domain::entities::{
+    Package, ProjectTemplate, SharedPackages,
+};
 use crate::modules::contexts::settings::app::traits::TSettingsService;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use base64::engine::general_purpose;
 use base64::Engine;
+use tauri::State;
 use which::which;
-use crate::modules::contexts::project::app::traits::TPackageService;
 
 #[tauri::command]
-pub fn read_packages() -> Result<Vec<Package>, ErrorDto> {
+pub fn read_packages(state: State<'_, SharedPackages>) -> Result<Vec<Package>, ErrorDto> {
     let packs = PACKAGE_SERVICE.read_packages()?;
+    {
+        let mut list = state.lock().unwrap();
+        *list = Vec::from(packs.clone())
+    }
     Ok(packs)
 }
 
@@ -71,8 +80,8 @@ pub fn read_themes() -> Result<Vec<String>, ErrorDto> {
 }
 
 #[tauri::command]
-pub fn get_cache() -> Result<Cache, ErrorDto> {
-    let packages = read_packages().unwrap_or(Vec::new());
+pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
+    let packages = read_packages(state).unwrap_or(Vec::new());
     let templates = read_templates().unwrap_or(vec![ProjectTemplate::new()]);
     let data_dir_path = get_data_dir()?;
     let settings = CONFIG_SERVICE.get_settings()?;

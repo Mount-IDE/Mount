@@ -11,7 +11,6 @@ use crate::modules::contexts::project::domain::entities::{Action, Project, Proje
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 use rand::RngExt;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -22,6 +21,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use process_wrap::tokio::*;
 #[cfg(windows)]
 use windows::Win32::System::Threading::CREATE_NO_WINDOW;
@@ -140,16 +140,28 @@ impl TLaunchCompileService for LaunchCompileService {
                 'part: for obj in cond.iter() {
                     //or
                     // let from = obj.from;
-                    let mut from = Val::STRING(obj.from.clone());
-                    if obj.from.starts_with(VAR_PREFIX) {
-                        let res = ACTION_PROJECT_SERVICE.get_from_vars(vars, obj.from.clone());
+                    let mut from = Val::STRING(obj.from.clone().unwrap_or("".__get()));
+                    if obj
+                        .from
+                        .clone()
+                        .unwrap_or("".__get())
+                        .starts_with(VAR_PREFIX)
+                    {
+                        let res = ACTION_PROJECT_SERVICE
+                            .get_from_vars(vars, obj.from.clone().unwrap_or("".__get()));
                         if let Some(val) = res {
                             from = val;
                         } else {
                             continue 'part;
                         }
-                    } else if obj.from.starts_with(PARAM_PREFIX) {
-                        let res = self.get_from_results(&results, obj.from.clone());
+                    } else if obj
+                        .from
+                        .clone()
+                        .unwrap_or("".__get())
+                        .starts_with(PARAM_PREFIX)
+                    {
+                        let res =
+                            self.get_from_results(&results, obj.from.clone().unwrap_or("".__get()));
                         if let Some(res) = res {
                             from = res;
                         } else {
@@ -157,80 +169,9 @@ impl TLaunchCompileService for LaunchCompileService {
                         }
                     }
 
-                    let op = match obj.oper.clone().as_str() {
-                        "==" => |a: Val, b: Val| -> bool { a == b },
-                        ">" => |a: Val, b: Val| -> bool { a > b },
-                        "<" => |a: Val, b: Val| -> bool { a < b },
-                        ">=" => |a: Val, b: Val| -> bool { a >= b },
-                        "<=" => |a: Val, b: Val| -> bool { a <= b },
-                        "!=" => |a: Val, b: Val| -> bool { a != b },
-                        "in" => |a: Val, b: Val| -> bool {
-                            if let Val::ARRAY(val) = b {
-                                if let Val::STRING(elem) = a {
-                                    return val.contains(&elem);
-                                }
-                            }
-                            false
-                        },
-                        "reg" => |a: Val, b: Val| -> bool {
-                            if let Val::STRING(reg_) = b {
-                                if let Val::STRING(a) = a {
-                                    let reg = Regex::new(reg_.as_str());
-                                    if let Err(_) = reg {
-                                        return false;
-                                    }
-                                    return reg.unwrap().is_match(a.as_str());
-                                }
-                            }
-                            false
-                        },
-                        "!reg" => |a: Val, b: Val| -> bool {
-                            if let Val::STRING(reg_) = b {
-                                if let Val::STRING(a) = a {
-                                    let reg = Regex::new(reg_.as_str());
-                                    if let Err(_) = reg {
-                                        return false;
-                                    }
-                                    return !reg.unwrap().is_match(a.as_str());
-                                }
-                            }
-                            false
-                        },
-                        "!in" => |a: Val, b: Val| -> bool {
-                            if let Val::ARRAY(val) = b {
-                                if let Val::STRING(elem) = a {
-                                    return !val.contains(&elem);
-                                }
-                            }
-                            false
-                        },
-                        "len" => |a: Val, b: Val| -> bool {
-                            let val = match a {
-                                Val::NUMBER(v) => Val::NUMBER(v),
-                                Val::STRING(v) => Val::NUMBER(v.chars().count() as f64),
-                                Val::BOOL(v) => Val::NUMBER(if v { 1f64 } else { 0f64 }),
-                                Val::ARRAY(v) => Val::NUMBER(v.len() as f64),
-                            };
-                            return val == b;
-                        },
-                        "!empty" => |a: Val, _: Val| -> bool {
-                            match a {
-                                Val::STRING(v) => !v.is_empty(),
-                                Val::ARRAY(v) => !v.is_empty(),
-                                _ => false,
-                            }
-                        },
-                        "empty" => |a: Val, _: Val| -> bool {
-                            match a {
-                                Val::STRING(v) => v.is_empty(),
-                                Val::ARRAY(v) => v.is_empty(),
-                                _ => false,
-                            }
-                        },
-                        _ => |_: Val, _: Val| -> bool { false },
-                    };
+                    let op = obj.oper.get_fn();
 
-                    let mut val = obj.value.clone();
+                    let mut val = obj.value.clone().unwrap_or(Val::STRING("".__get())).clone();
                     if let Val::STRING(val_) = val.clone() {
                         if val_.starts_with(PARAM_PREFIX) {
                             val = self.get_from_results(&results, val_.clone()).unwrap();

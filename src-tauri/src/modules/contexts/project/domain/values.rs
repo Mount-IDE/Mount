@@ -6,11 +6,20 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use ts_rs::TS;
 
-#[derive(Clone, TS, Debug)]
+#[derive(Clone, TS, Debug, Serialize, Deserialize)]
 pub enum ActionOnError {
+    #[serde(rename = "continue")]
     CONTINUE,
+    #[serde(rename = "stop_all")]
     StopAll,
+    #[serde(rename = "stop_graph")]
     StopGraph,
+}
+
+impl Default for ActionOnError {
+    fn default() -> Self {
+        Self::StopAll
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
@@ -153,5 +162,35 @@ pub enum ButtonPos {
     RightTop,
 }
 
-pub(crate) type CreateProjectResult = HashMap<String, CreateProjectTemplate>;
-pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>;
+pub(crate) type CreateProjectResult = HashMap<String, CreateProjectTemplate>; // template -> sections
+pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>; // section id -> paramerer id -> value
+
+pub type CreateProjectPackageResults = HashMap<String, HashMap<String, Val>>; // package_id -> option id -> value
+
+pub type ResultsRecord = HashMap<String, Val>;
+
+pub trait TRes {
+    fn get_value(&self, addr: String) -> Option<Val>;
+}
+
+impl TRes for CreateProjectTemplate {
+    fn get_value(&self, addr: String) -> Option<Val> {
+        let point = addr.find(".")?;
+        let left = &addr[..point]
+            .chars()
+            .filter(|e| e.is_ascii_digit())
+            .collect::<String>();
+        let right = addr[point + 1..].to_string();
+
+        let left = left.parse::<i8>().ok()?;
+        let first = self.get(&left)?;
+        let sec = first.get(right.clone().as_str())?;
+        Some(sec.clone())
+    }
+}
+impl TRes for ResultsRecord {
+    fn get_value(&self, addr: String) -> Option<Val> {
+        let res = self.get(&addr)?;
+        Some(res.clone())
+    }
+}

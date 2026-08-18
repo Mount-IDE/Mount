@@ -5,26 +5,30 @@ use crate::modules::app::{
 };
 use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string};
+use crate::modules::contexts::filesystem::app::utils::PathPart;
+use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string, path_from};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
-    Action, Project, ProjectTag, ProjectTemplate, Var,
+    Package, PackageAction, PackageActionCommand, Project, ProjectTag, ProjectTemplate,
+    SharedPackages, Var,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionCommand, ActionCommandArgs, ActionCommandIn, CreateProjectResult, ProjectMeta,
+    ActionOnError, CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
+use crate::modules::shared::kernel::errors::ProjectError;
 use crate::modules::shared::kernel::values::{
-    Dependency, DependencyLevel, IfStatementPart, Path, Val,
+    Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, Path, Platform,
+    PlatformType, Val,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use tauri::State;
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -81,13 +85,18 @@ pub async fn create_project(
     results: CreateProjectResult,
     packages: Vec<String>,
     tags: Vec<ProjectTag>,
+    pack_results: CreateProjectPackageResults,
     window: tauri::Window,
+    pack_state: State<'_, SharedPackages>,
 ) -> Result<Project, ErrorDto> {
     EVENT_SERVICE.send(
         window.label().to_string(),
         "task-start",
         "Check Dependencies".to_string(),
     );
+
+    let all_packages = { pack_state.lock().unwrap().clone() };
+
     let dependencies = template.dependencies.clone();
 
     let error_dependency = PROJECT_SERVICE.check_dependencies(dependencies);
@@ -160,6 +169,7 @@ pub async fn create_project(
     let additions = make_meta(meta.get(&-3i8), &tags);
 
     let mut vars = template.clone().startup.var;
+
     // adding required variables
     vars.push(Var::new(
         "project-name".to_string(),
@@ -181,93 +191,114 @@ pub async fn create_project(
     // adding git actions
     template.startup.actions.insert(
         0,
-        Action {
+        PackageAction {
             id: -1,
             if_: Some(vec![vec![IfStatementPart {
-                from: "#-2.project-git".to_string(),
-                oper: "==".to_string(),
-                value: Val::BOOL(true),
+                from: Some("#-2.project-git".to_string()),
+                oper: IfStatementOperation::EQ,
+                value: Some(Val::BOOL(true)),
             }]]),
-            on_error: "continue".to_string(),
+            on_error: ActionOnError::CONTINUE,
             next: None,
-            command: vec![ActionCommand {
-                platform: "all".to_string(),
-                shell: "@".to_string(),
+            command: Some(vec![PackageActionCommand {
+                platform: None,
+                shell: Some("@".to_string()),
                 env: None,
-                command: ActionCommandIn::Single("git init".to_string()),
-            }],
+                cwd: None,
+                needed_exit_code: None,
+                command: "".to_string(),
+            }]),
+            platform: None,
         },
     );
     template.startup.actions.insert(
         1,
-        Action {
+        PackageAction {
             id: -2,
             if_: Some(vec![vec![IfStatementPart {
-                from: "#-2.project-git-gitignore".to_string(),
-                oper: "==".to_string(),
-                value: Val::BOOL(true),
+                from: Some("#-2.project-git-gitignore".to_string()),
+                oper: IfStatementOperation::EQ,
+                value: Some(Val::BOOL(true)),
             }]]),
-            on_error: "continue".to_string(),
+            on_error: ActionOnError::CONTINUE,
             next: None,
-            command: vec![
-                ActionCommand {
-                    platform: "windows".to_string(),
-                    shell: "@".to_string(),
+            command: Some(vec![
+                PackageActionCommand {
+                    platform: Some(Platform::windows()),
+                    cwd: None,
+                    shell: None,
                     env: None,
-                    command: ActionCommandIn::Single("echo .> .gitignore".to_string()),
+                    needed_exit_code: None,
+                    command: "echo > .gitignore".to_string(),
                 },
-                ActionCommand {
-                    platform: "!".to_string(),
-                    shell: "@".to_string(),
+                PackageActionCommand {
+                    platform: Some(Platform::arr(vec![
+                        PlatformType::LINUX,
+                        PlatformType::MACOS,
+                    ])),
+                    cwd: None,
+                    shell: None,
                     env: None,
-                    command: ActionCommandIn::Single("touch .gitignore".to_string()),
+                    needed_exit_code: None,
+                    command: "touch .gitignore".to_string(),
                 },
-            ],
+            ]),
+            platform: None,
         },
     );
     template.startup.actions.insert(
         2,
-        Action {
+        PackageAction {
             id: -2,
             if_: Some(vec![vec![IfStatementPart {
-                from: "#-2.project-git-remote".to_string(),
-                oper: "!empty".to_string(),
-                value: Val::STRING("".to_string()),
+                from: Some("#-2.project-git-remote".to_string()),
+                oper: IfStatementOperation::NonEmpty,
+                value: None,
             }]]),
-            on_error: "continue".to_string(),
+            on_error: ActionOnError::CONTINUE,
             next: None,
-            command: vec![ActionCommand {
-                platform: "all".to_string(),
-                shell: "@".to_string(),
+            command: Some(vec![PackageActionCommand {
+                platform: None,
+                cwd: None,
+                shell: None,
                 env: None,
-                command: ActionCommandIn::WithArgs(ActionCommandArgs(
+                needed_exit_code: None,
+                command: "git remote add origin #{-2.project-git-remote}".to_string()
+                /*ActionCommandIn::WithArgs(ActionCommandArgs(
                     "git remote add origin".to_string(),
-                    vec!["#-2.project-git-remote".to_string()],
-                )),
-            }],
+                    vec!["#-2.project-git-remote".to_string()],*/
+            }]),
+            platform: None,
         },
     );
 
     let buttons = make_buttons();
 
     project.workspace.buttons = buttons;
-
+    let packages = {
+        let res = pack_state.lock().unwrap();
+        res.iter()
+            .filter(|e| packages.contains(&e.id))
+            .map(|e| e.clone())
+            .collect::<Vec<Package>>()
+    };
     // making tasks
-    let tasks = ACTION_PROJECT_SERVICE.compile(&template, &results, &vars);
+    let tasks =
+        ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);
 
     // if tasks running completely
     if let Some(val) = tasks {
-        // println!("TASKS: {:?}", val.1);
-        //
-        // for i in val.1.clone() {
-        //     println!("TASK {i:?}");
-        // }
-
         let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
-        let path_to_mount = make_path(vec![path_.get().as_str(), ".mount"]);
+        let path_to_mount = path_from![path_, ".mount"];
+
         let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
-        let path_to_settings = make_path(vec![path_to_mount.get().as_str(), "project.json"]);
+
+        let path_to_settings = path_from![path_to_mount, "project.json"];
+
         let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
+
+        let path_to_packages = path_from![path_to_mount, "packages.json"];
+        let packages_file = FS_WRITE_SERVICE.create_file(&path_to_packages)?;
 
         project.vars = val.0.clone();
         project.template = template.clone();
@@ -283,19 +314,16 @@ pub async fn create_project(
                 .launch_templates
                 .insert(0, LaunchTemplate::default());
         }
-        let json =
-            serde_json::to_string(&project.clone()).map_err(|e| ProjectError::ParsingError {
-                err: ParsingError::Serialize {
-                    path: Path(path.clone()),
-                    err: e,
-                },
-            })?;
+        let json = PARSING_SERVICE.to_string(&project.clone())?;
+
+        let packages_str = PARSING_SERVICE.to_string(&packages.clone())?;
+
+        FS_WRITE_SERVICE.write_file(&packages_file, packages_str, FileWriteAccess::WRITE)?;
         FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
         PROJECT_SERVICE.add_to_recents(&project)?;
 
         ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string())
     }
-
     Ok(project)
 }
 

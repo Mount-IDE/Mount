@@ -1,20 +1,27 @@
-use crate::modules::contexts::filesystem::app::utils::PathPart;
-use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE};
+use crate::modules::app::{
+    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE,
+    PARSING_SERVICE,
+};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::{path_from};
+use crate::modules::contexts::filesystem::app::utils::path_from;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::project::app::traits::{TActionProjectService, TPackageCompileService, TPackageService, TProjectService};
-use crate::modules::contexts::project::domain::entities::{Action, Package, Project, ProjectTemplate, TaskCommand, Var, _Task};
+use crate::modules::contexts::project::app::traits::{
+    TActionProjectService, TPackageService, TProjectService,
+};
+use crate::modules::contexts::project::domain::entities::{
+    Action, Package, PackageAction, Project, ProjectTemplate, TaskCommand, Var, _Task,
+};
 use crate::modules::contexts::project::domain::values::{
-    ActionCommandArgs, ActionCommandIn, ActionOnError, CreateProjectResult, CreateProjectTemplate,
+    ActionOnError, CreateProjectPackageResults, CreateProjectResult, CreateProjectTemplate,
+    ResultsRecord,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ParsingError, ProjectError};
 use crate::modules::shared::kernel::utils::get_os;
 use crate::modules::shared::kernel::values::{Dependency, DependencyLevel, Path, Val};
-use regex::Regex;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::process::{Command, Stdio};
@@ -48,11 +55,7 @@ impl TProjectService for ProjectService {
 
         FS_WRITE_SERVICE.create_dir(&path_to_project)?;
 
-        let path_to_mount = path_from![
-            path_to_project,
-            project.name,
-            ".mount",
-        ];
+        let path_to_mount = path_from![path_to_project, project.name, ".mount",];
         FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
         let str = serde_json::to_string(&project).map_err(|e| ProjectError::ParsingError {
             err: ParsingError::Serialize {
@@ -61,11 +64,7 @@ impl TProjectService for ProjectService {
             },
         })?;
 
-        let path_to_conf = path_from![
-            path_to_project,
-            project.name,
-            "project.json",
-        ];
+        let path_to_conf = path_from![path_to_project, project.name, "project.json",];
         let file = PFile::from_path_reg(path_to_conf);
         FS_WRITE_SERVICE.write_file(&file, str, FileWriteAccess::WRITE)?;
 
@@ -77,11 +76,7 @@ impl TProjectService for ProjectService {
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
         // println!("path open {}", project_path.clone());
-        let path = path_from![
-            project_path,
-            ".mount",
-            "project.json",
-        ];
+        let path = path_from![project_path, ".mount", "project.json",];
         let config = PFile {
             name: "project.json".to_string(),
             path: path.clone(),
@@ -104,11 +99,7 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn delete_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        let path_ = path_from![
-            project_path,
-            ".mount",
-            "project.json",
-        ];
+        let path_ = path_from![project_path, ".mount", "project.json",];
         let file = PFile::from_path_reg(path_.clone());
         let text = FS_READ_SERVICE.read_file(&file)?;
         let json = serde_json::from_str(&text).map_err(|e| ParsingError::Deserialize {
@@ -201,12 +192,7 @@ impl TProjectService for ProjectService {
                 err: e,
             })?;
         // println!("PROJECT JSON CONSTRUCTED");
-        let path_ = path_from![
-            path,
-            _project.name,
-            ".mount",
-            "project.json",
-        ];
+        let path_ = path_from![path, _project.name, ".mount", "project.json",];
         let file = PFile::from_path_reg(path_);
         // println!("FILE {file:?}");
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
@@ -230,14 +216,8 @@ impl TProjectService for ProjectService {
         let new_json = json
             .iter()
             .filter(|el| {
-                let path1 = path_from![
-                    _proj.path,
-                    _proj.name,
-                ];
-                let path2 = path_from![
-                    el.path,
-                    el.name,
-                ];
+                let path1 = path_from![_proj.path, _proj.name,];
+                let path2 = path_from![el.path, el.name,];
                 // println!("PATH {path1} {path2}");
                 return path1.get() != path2.get();
             })
@@ -333,6 +313,8 @@ impl TActionProjectService for ActionProjectService {
         template: &ProjectTemplate,
         values: &CreateProjectResult,
         vars: &Vec<Var>,
+        packages: &Vec<Package>,
+        pack_results: &CreateProjectPackageResults,
     ) -> Option<(Vec<Var>, Vec<_Task>)> {
         let meta = values.get("__meta__").unwrap();
         let mut sections = vec![meta.to_owned()];
@@ -341,35 +323,63 @@ impl TActionProjectService for ActionProjectService {
             sections.push(cur.clone());
         }
         let vars = self.compile_vars(vars, &sections);
-        // println!("VAR {vars:?}");
         if let None = vars.clone() {
             return None;
         }
-        let vars = vars.unwrap();
+        let mut vars = vars.unwrap();
 
-        let os = if cfg!(target_os = "windows") {
-            "windows"
-        } else if cfg!(target_os = "macos") {
-            "macos"
-        } else {
-            "linux"
-        };
-        let os = String::from(os);
         let actions = template.startup.actions.clone();
         let mut tasks = Vec::<_Task>::new();
 
         for action in actions.iter() {
             if let Some(_) = action.if_ {
-                let cond = self.precompile_condition(&sections, &vars, &action);
-                // println!("IF RES {cond}");
+                let cond = self.precompile_condition(
+                    &sections,
+                    &vars,
+                    &action,
+                    false,
+                    &(HashMap::new() as ResultsRecord),
+                );
                 if !cond {
                     continue;
                 }
             }
-            let task__ = self.make_task(&action, &actions, &vars, &sections, &os);
-            // println!("TASK RES {task__:?}");
+            let task__ = self.make_task(
+                &action,
+                &actions,
+                &vars,
+                &sections,
+                false,
+                &(HashMap::new() as ResultsRecord),
+            );
             if let Some(task_) = task__ {
                 tasks.push(task_);
+            }
+        }
+
+        for package in packages {
+            if let None = package.startup.actions.clone() {
+                continue;
+            }
+            let actions = package.startup.actions.clone().unwrap();
+            let vars_ = package.var.clone();
+            if let Some(var) = vars_ {
+                for i in var {
+                    vars.push(i);
+                }
+            }
+            let Some(results) = pack_results.get(&package.id) else {
+                continue;
+            };
+            for action in actions.iter() {
+                let cond = self.precompile_condition(&sections, &vars, &action, true, &results);
+                if !cond {
+                    continue;
+                }
+                let task__ = self.make_task(&action, &actions, &vars, &sections, false, &results);
+                if let Some(task) = task__ {
+                    tasks.push(task);
+                }
             }
         }
 
@@ -383,130 +393,193 @@ impl TActionProjectService for ActionProjectService {
         &self,
         sections: &Vec<CreateProjectTemplate>,
         vars: &Vec<Var>,
-        action: &Action,
+        action: &PackageAction,
+        is_pack: bool,
+        pack_params: &ResultsRecord,
     ) -> bool {
         let condition = action.if_.clone().unwrap();
         let mut pass_conditions = true; // check conditions
         'cond: for cond in condition {
-            //and
-            // println!("-----------------------------------------");
             let mut passed = 0;
             'part: for part in cond {
-                // println!("....................");
-                let mut from = Val::STRING(part.from.clone());
-                if part.from.starts_with(VAR_PREFIX) {
-                    let res = self.get_from_vars(&vars, part.from.clone());
-                    if let Some(val) = res {
-                        from = val;
+                let mut from = Val::NONE;
+                if let Some(from_) = part.from {
+                    if from_.starts_with(VAR_PREFIX) {
+                        let res = self.get_from_vars(&vars, from_);
+                        if let Some(val) = res {
+                            from = val;
+                        } else {
+                            continue 'part;
+                        }
+                    } else if from_.starts_with(PARAM_PREFIX) {
+                        if is_pack {
+                            let res = self.get_from_pack_params(pack_params, from_.clone());
+                            if let Some(v) = res {
+                                from = v;
+                            } else {
+                                let Some(val) = self.get_from_params(&sections, from_.clone())
+                                else {
+                                    continue 'part;
+                                };
+                                from = val;
+                            }
+                        } else {
+                            let Some(val) = self.get_from_params(&sections, from_) else {
+                                continue 'part;
+                            };
+                            from = val;
+                        }
                     } else {
-                        continue 'part;
-                    }
-                } else if part.from.starts_with(PARAM_PREFIX) {
-                    let res = self.get_from_params(&sections, part.from.clone());
-                    // println!("IF PARAM {res:?} {}", part.from.clone());
-                    if let Some(val) = res {
-                        from = val;
-                    } else {
-                        continue 'part;
+                        from = Val::STRING(from_);
                     }
                 }
+                let op = part.oper.get_fn();
 
-                // == != < > <= >= in reg !reg !in len
-                let op = match part.oper.clone().as_str() {
-                    "==" => |a: Val, b: Val| -> bool { a == b },
-                    ">" => |a: Val, b: Val| -> bool { a > b },
-                    "<" => |a: Val, b: Val| -> bool { a < b },
-                    ">=" => |a: Val, b: Val| -> bool { a >= b },
-                    "<=" => |a: Val, b: Val| -> bool { a <= b },
-                    "!=" => |a: Val, b: Val| -> bool { a != b },
-                    "in" => |a: Val, b: Val| -> bool {
-                        if let Val::ARRAY(val) = b {
-                            if let Val::STRING(elem) = a {
-                                return val.contains(&elem);
-                            }
-                        }
-                        false
-                    },
-                    "reg" => |a: Val, b: Val| -> bool {
-                        if let Val::STRING(reg_) = b {
-                            if let Val::STRING(a) = a {
-                                let reg = Regex::new(reg_.as_str());
-                                if let Err(_) = reg {
-                                    return false;
+                let mut val = Val::NONE;
+                if let Some(value) = part.value {
+                    if let Val::STRING(val_) = value.clone() {
+                        if val_.starts_with(PARAM_PREFIX) {
+                            if is_pack {
+                                let res = self.get_from_pack_params(pack_params, val_.clone());
+                                if let Some(res) = res {
+                                    val = res;
+                                } else {
+                                    let Some(res) = self.get_from_params(&sections, val_.clone())
+                                    else {
+                                        continue 'part;
+                                    };
                                 }
-                                return reg.unwrap().is_match(a.as_str());
+                            } else {
+                                let Some(res) = self.get_from_params(&sections, val_.clone())
+                                else {
+                                    continue 'part;
+                                };
+                                val = res
                             }
                         }
-                        false
-                    },
-                    "!reg" => |a: Val, b: Val| -> bool {
-                        if let Val::STRING(reg_) = b {
-                            if let Val::STRING(a) = a {
-                                let reg = Regex::new(reg_.as_str());
-                                if let Err(_) = reg {
-                                    return false;
-                                }
-                                return !reg.unwrap().is_match(a.as_str());
-                            }
+                        if val_.starts_with(VAR_PREFIX) {
+                            val = self.get_from_vars(&vars, val_.clone()).unwrap();
                         }
-                        false
-                    },
-                    "!in" => |a: Val, b: Val| -> bool {
-                        if let Val::ARRAY(val) = b {
-                            if let Val::STRING(elem) = a {
-                                return !val.contains(&elem);
-                            }
-                        }
-                        false
-                    },
-                    "len" => |a: Val, b: Val| -> bool {
-                        let val = match a {
-                            Val::NUMBER(v) => Val::NUMBER(v),
-                            Val::STRING(v) => Val::NUMBER(v.chars().count() as f64),
-                            Val::BOOL(v) => Val::NUMBER(if v { 1f64 } else { 0f64 }),
-                            Val::ARRAY(v) => Val::NUMBER(v.len() as f64),
-                        };
-                        return val == b;
-                    },
-                    "!empty" => |a: Val, b: Val| -> bool {
-                        match a {
-                            Val::STRING(v) => !v.is_empty(),
-                            Val::ARRAY(v) => !v.is_empty(),
-                            _ => false,
-                        }
-                    },
-                    "empty" => |a: Val, b: Val| -> bool {
-                        match a {
-                            Val::STRING(v) => v.is_empty(),
-                            Val::ARRAY(v) => v.is_empty(),
-                            _ => false,
-                        }
-                    },
-                    _ => |_: Val, _: Val| -> bool { false },
-                };
-                let mut val = part.value.clone();
-                if let Val::STRING(val_) = val.clone() {
-                    if val_.starts_with(PARAM_PREFIX) {
-                        val = self.get_from_params(&sections, val_.clone()).unwrap();
-                    }
-                    if val_.starts_with(VAR_PREFIX) {
-                        val = self.get_from_vars(&vars, val_.clone()).unwrap();
+                    } else {
+                        val = value;
                     }
                 }
-                // println!("FROM TO {from:?} {val:?} {}", part.oper.clone());
                 let res = op(from, val);
                 if res {
                     passed += 1;
                     break 'part;
                 }
             }
-            // println!("IF PASS {passed}");
             if passed == 0 {
                 pass_conditions = false;
                 break 'cond;
             }
         }
         pass_conditions // if conditions not passed, then action truncates
+    }
+
+    fn format(
+        &self,
+        string: String,
+        vars: &Vec<Var>,
+        params: &Vec<CreateProjectTemplate>,
+        is_pack: bool,
+        pack_param: &ResultsRecord,
+    ) -> Option<String> {
+        enum Token {
+            Str(String),
+            Var(String),
+            Param(String),
+        }
+
+        let mut tokens = Vec::<Token>::new();
+
+        let mut is_str = true;
+        let mut is_slash = false;
+        let mut is_slash2 = false;
+        let mut buff = String::new();
+        for i in string.chars().peekable() {
+            if is_str {
+                if i.to_string() == PARAM_PREFIX || i.to_string() == VAR_PREFIX {
+                    is_str = false;
+                    tokens.push(Token::Str(buff.clone()));
+                    buff.clear();
+                    buff.push(i)
+                } else {
+                    buff.push(i)
+                }
+            } else {
+                if !is_slash2 && is_slash && i.to_string() == "}" {
+                    if buff.starts_with(PARAM_PREFIX) {
+                        tokens.push(Token::Param(buff.clone()));
+                    } else {
+                        tokens.push(Token::Var(buff.clone()))
+                    }
+                    buff.clear();
+                    is_slash2 = false;
+                    is_slash = false;
+                    continue;
+                }
+                if !is_slash && i.to_string() == " " {
+                    if buff.starts_with(PARAM_PREFIX) {
+                        tokens.push(Token::Param(buff.clone()));
+                    } else {
+                        tokens.push(Token::Var(buff.clone()))
+                    }
+                    buff.clear();
+                    is_slash = false;
+                    is_slash2 = false;
+                    buff.push(i);
+                    continue;
+                }
+                if is_slash2 {
+                    is_slash2 == false;
+                }
+                if !is_slash && i.to_string() == "{" {
+                    is_slash = true;
+                    continue;
+                }
+                if i.to_string() == "\\" && !is_slash2 {
+                    is_slash2 = true
+                }
+
+                buff.push(i)
+            }
+        }
+
+        let mut string = String::new();
+
+        for i in tokens {
+            if let Token::Str(v) = i {
+                string += &v;
+                continue;
+            }
+            if let Token::Var(v) = i {
+                let Some(val) = self.get_from_vars(vars, v) else {
+                    return None;
+                };
+
+                string += val.to_str().as_str();
+            } else if let Token::Param(v) = i {
+                if is_pack {
+                    let val = self.get_from_pack_params(pack_param, v.clone());
+                    if let Some(v) = val {
+                        string += v.to_str().as_str();
+                    } else {
+                        let Some(v) = self.get_from_params(params, v) else {
+                            return None;
+                        };
+                        string += v.to_str().as_str();
+                    }
+                } else {
+                    let Some(val) = self.get_from_params(params, v) else {
+                        return None;
+                    };
+                    string += val.to_str().as_str();
+                }
+            }
+        }
+        Some(string)
     }
 
     ///
@@ -560,110 +633,15 @@ impl TActionProjectService for ActionProjectService {
         None
     }
 
-    ///
-    ///
-    ///
-    fn format_string(
-        &self,
-        input: String,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-    ) -> Option<String> {
-        #[derive(Debug, Clone, Copy)]
-        enum State {
-            Normal,
-            Var,
-            Param,
-        }
+    fn get_from_pack_params(&self, params: &ResultsRecord, addr: String) -> Option<Val> {
+        let addr = if addr.starts_with(PARAM_PREFIX) {
+            addr.chars().skip(PARAM_PREFIX.chars().count()).collect()
+        } else {
+            addr
+        };
 
-        let mut result = String::new();
-        let mut state = State::Normal;
-
-        let mut buf = String::new();
-        let mut brace_mode = false;
-
-        let mut chars = input.chars().peekable();
-
-        while let Some(ch) = chars.next() {
-            match state {
-                State::Normal => {
-                    if ch == VAR_PREFIX.chars().next().unwrap() {
-                        state = State::Var;
-                        buf.clear();
-                        brace_mode = false;
-                    } else if ch == PARAM_PREFIX.chars().next().unwrap() {
-                        state = State::Param;
-                        buf.clear();
-                        brace_mode = false;
-                    } else {
-                        result.push(ch);
-                    }
-                }
-
-                State::Var | State::Param => {
-                    // вход в {token}
-                    if ch == '{' && buf.is_empty() {
-                        brace_mode = true;
-                        continue;
-                    }
-
-                    if brace_mode {
-                        if ch == '}' {
-                            let value = if let State::Var = state {
-                                self.get_from_vars(vars, format!("@{}", buf))?
-                            } else {
-                                self.get_from_params(params, format!("#{}", buf))?
-                            };
-
-                            result.push_str(&value.to_str());
-
-                            state = State::Normal;
-                            buf.clear();
-                            brace_mode = false;
-                            continue;
-                        } else {
-                            buf.push(ch);
-                        }
-                    } else {
-                        // без {} — читаем до разделителя
-                        if ch.is_whitespace() {
-                            let value = if let State::Var = state {
-                                self.get_from_vars(vars, format!("@{}", buf))?
-                            } else {
-                                self.get_from_params(params, format!("#{}", buf))?
-                            };
-
-                            result.push_str(&value.to_str());
-                            result.push(' ');
-
-                            state = State::Normal;
-                            buf.clear();
-                        } else {
-                            buf.push(ch);
-                        }
-                    }
-                }
-            }
-        }
-
-        // flush tail
-        match state {
-            State::Normal => {}
-            State::Var => {
-                if !buf.is_empty() {
-                    let value = self.get_from_vars(vars, format!("@{}", buf))?;
-                    result.push_str(&value.to_str());
-                }
-            }
-            State::Param => {
-                if !buf.is_empty() {
-                    let value = self.get_from_params(params, format!("#{}", buf))?;
-                    result.push_str(&value.to_str());
-                }
-            }
-        }
-
-        Some(result)
+        let got = params.get(&addr)?;
+        Some(got.clone())
     }
 
     ///
@@ -702,11 +680,12 @@ impl TActionProjectService for ActionProjectService {
     ///
     fn make_task(
         &self,
-        action: &Action,
-        actions: &Vec<Action>,
+        action: &PackageAction,
+        actions: &Vec<PackageAction>,
         vars: &Vec<Var>,
         params: &Vec<CreateProjectTemplate>,
-        os: &String,
+        is_pack: bool,
+        pack_params: &ResultsRecord,
     ) -> Option<_Task> {
         let def_ = || {
             if cfg!(target_os = "linux") {
@@ -718,59 +697,36 @@ impl TActionProjectService for ActionProjectService {
             }
         };
 
-        let on_error = match action.on_error.as_str() {
-            "stop-all" => ActionOnError::StopAll,
-            "stop-graph" => ActionOnError::StopGraph,
-            "continue" => ActionOnError::CONTINUE,
-            _ => ActionOnError::CONTINUE,
-        };
         let mut commands = Vec::<TaskCommand>::new();
-        let commands_ = action.command.clone();
+        let commands_ = action.command.clone()?;
 
-        let mut used_platforms = Vec::<String>::new();
-
-        let platforms = vec![
-            "windows".to_string(),
-            "macos".to_string(),
-            "linux".to_string(),
-        ];
+        if let Some(plat) = action.platform.clone() {
+            if !plat.is_correct() {
+                return None;
+            }
+        }
 
         for command in commands_ {
-            let mut platform: String = command.platform.clone();
-            if platform == "!".to_string() {
-                for plat in platforms.iter() {
-                    if !used_platforms.contains(plat) {
-                        platform = plat.clone();
-                    }
+            if let Some(plat) = command.platform {
+                if !plat.is_correct() {
+                    continue;
                 }
             }
-            used_platforms.push(platform.clone());
 
-            if *os != platform && platform != "all".to_string() {
-                continue;
-            }
-            let command_ = match command.command.clone() {
-                ActionCommandIn::Single(cmd) => Some(cmd),
-                ActionCommandIn::WithArgs(ActionCommandArgs(cmd, args)) => {
-                    let mut command_ = cmd.clone();
-                    for arg in args {
-                        let res = self.format_string(arg, &vars, &params);
-                        if let None = res {
-                            return None;
-                        }
-                        command_ = format!("{command_} {}", res.unwrap());
-                    }
-                    Some(command_)
-                }
-            };
+            let command_ = self.format(command.command, vars, params, is_pack, pack_params);
             if let None = command_ {
                 continue;
             }
-            let shell = if command.shell == "@" {
-                def_()
+            let mut shell = if let Some(v) = command.shell {
+                v
             } else {
-                command.shell
+                if cfg!(windows) {
+                    "cmd".to_string()
+                } else {
+                    "sh".to_string()
+                }
             };
+
             let task_command = TaskCommand {
                 shell,
                 command: command_.unwrap(),
@@ -779,26 +735,29 @@ impl TActionProjectService for ActionProjectService {
             commands.push(task_command);
         }
 
-        if let Some(next) = action.next {
+        if let Some(next) = action.next.clone() {
             let act = actions.iter().find(|el| {
-                if let Some(val) = el.next {
+                if let Some(val) = el.next.clone() {
                     return next == val;
                 }
                 false
             });
             if let Some(val) = act {
-                let inner = self.make_task(&val, &actions, &vars, &params, &os);
+                let inner = self.make_task(&val, &actions, &vars, &params, is_pack, &pack_params);
                 if let Some(inner) = inner {
                     let res = _Task::GRAPH {
                         commands,
-                        on_error,
+                        on_error: val.on_error.clone(),
                         next: Box::new(inner),
                     };
                     return Some(res);
                 }
             }
         }
-        let task = _Task::SINGLE { commands, on_error };
+        let task = _Task::SINGLE {
+            commands,
+            on_error: action.on_error.clone(),
+        };
         Some(task)
     }
 
@@ -809,10 +768,7 @@ impl TActionProjectService for ActionProjectService {
             "task-run",
             format!("Compiled tasks: {}", tasks.len()),
         );
-        let path_to = path_from![
-            project.path,
-            project.name,
-        ];
+        let path_to = path_from![project.path, project.name,];
         //let proj = project.clone();
         let mut n = 1;
         for task in tasks {
@@ -916,7 +872,6 @@ impl TActionProjectService for ActionProjectService {
     }
 }
 
-
 pub struct PackageService();
 pub struct PackageCompileService();
 
@@ -932,8 +887,12 @@ impl TPackageService for PackageService {
             let path = path_from![i.path, "config.json"];
             if FS_READ_SERVICE.exists(path.clone()) {
                 let file = PFile::from_path_reg(path);
-                let Ok(text) = FS_READ_SERVICE.read_file(&file) else { continue; };
-                let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(text) else { continue; };
+                let Ok(text) = FS_READ_SERVICE.read_file(&file) else {
+                    continue;
+                };
+                let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(text) else {
+                    continue;
+                };
                 packages.push(parsed);
             }
         }
@@ -949,8 +908,49 @@ impl TPackageService for PackageService {
     }
 }
 
-impl TPackageCompileService for PackageCompileService {
-    fn compile_package_actions(&self, pack: Package) -> Result<(Vec<Var>, Vec<_Task>), ProjectError> {
-        todo!()
+/*impl TPackageCompileService for PackageCompileService {
+    fn compile_package_actions(
+        &self,
+        pack: Package,
+        results: &CreateProjectPackageResults,
+    ) -> Result<(Vec<Var>, Vec<_Task>), ProjectError> {
+        let id = pack.id;
+        let needed = results.get(&id);
+        let actions = pack.startup.actions;
+        if let None = actions {
+            return Ok((pack.var.unwrap_or(vec![]).clone(), vec![]));
+        }
+        let actions = actions.unwrap();
+
+        let mut actions2 = Vec::<PackageAction>::new();
+        for i in actions {
+            if let Some(plat) = i.platform.clone() {
+                if !plat.is_correct() {
+                    continue;
+                }
+            }
+            let if_ = i.if_.clone();
+            if let None = if_ {
+                actions2.push(i.clone());
+                continue;
+            }
+            let if_ = if_.unwrap();
+            let mut results: Vec<bool> = vec![];
+            'or: for or in if_ {
+                let mut all = true;
+                'and: for and in or {
+                    let from = and.from;
+                    let op = and.oper;
+                    let value = and.value;
+
+                    let op = op.get_fn();
+                }
+
+                results.push(all)
+            }
+        }
+
+        Ok((pack.var.unwrap_or(vec![]).clone(), vec![]))
     }
 }
+*/

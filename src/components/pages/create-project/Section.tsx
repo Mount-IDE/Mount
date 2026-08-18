@@ -151,13 +151,13 @@ export default function Section(props: Props) {
                     <Parameter
                         set={(val) => {
                             if (is_main){
-                                set_value("__meta__", props.section.id, el.out, val);
+                                set_value("__meta__", props.section.id, el.id, val);
                             }else {
-                                set_value(current_template.id, props.section.id, el.out, val);
+                                set_value(current_template.id, props.section.id, el.id, val);
                             }
                         }}
                         param={el}
-                        key={`${props.section.id}${el.out}`}
+                        key={`${props.section.id}${el.id}`}
                         section={props.section.id}
                         allParams={props.section.params}
                         is_main={is_main}

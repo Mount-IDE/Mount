@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
 use super::default::workspace::*;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::launch::domain::entities::{
     LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
@@ -10,8 +10,13 @@ use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionOnError, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta,
 };
 use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{Dependency, IfStatementPart, ParameterTyp, Path, Platform, PlatformType, Schema, Val};
+use crate::modules::shared::kernel::values::{
+    Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, ParameterTyp, Path,
+    Platform, PlatformType, Schema, Val,
+};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use ts_rs::TS;
 
 ///
@@ -166,7 +171,7 @@ pub enum _Task {
 pub struct TaskCommand {
     pub command: String,
     pub shell: String,
-    pub env: Option<Vec<(String, String)>>,
+    pub env: Option<HashMap<String, String>>,
 }
 
 ///
@@ -243,7 +248,7 @@ pub struct TemplateStartup {
     #[serde(default)]
     pub sections: Vec<Section>,
     #[serde(default)]
-    pub actions: Vec<Action>,
+    pub actions: Vec<PackageAction>,
     #[serde(default)]
     pub var: Vec<Var>,
 }
@@ -268,7 +273,7 @@ pub struct Section {
     #[serde(default = "t_list")]
     pub list: (bool, bool),
     #[serde(default)]
-    pub params: Vec<Parameter>,
+    pub params: Vec<PackageOption>,
 }
 
 impl Section {
@@ -376,12 +381,13 @@ impl Default for ProjectTag {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Package {
-    id: String,
+    pub(crate) id: String,
     name: String,
     meta: Option<PackageMeta>,
     scheme: Schema,
     dependencies: Vec<PackageDependency>,
-    startup: PackageStartup,
+    pub(crate) startup: PackageStartup,
+    pub(crate) var: Option<Vec<Var>>,
     components: Option<Vec<PackageComponent>>,
 }
 
@@ -420,44 +426,52 @@ pub struct PackageComponentBuiltin {
     version_check_command: Option<VersionCheckCommand>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum VersionCheckCommand {
     SINGLE(String),
-    OBJ {
-        platform: Platform,
-        command: String,
-    },
+    OBJ { platform: Platform, command: String },
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageStartup {
     options: Option<Vec<PackageOption>>,
-    actions: Option<Vec<PackageAction>>,
+    pub(crate) actions: Option<Vec<PackageAction>>,
 }
 
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct PackageAction {
-    id: i8,
-    next: Option<Vec<i8>>,
-    if_: Option<Vec<Vec<IfStatementPart>>>,
-    on_error: String,
-    platform: Option<Platform>,
-    command: Option<PackageActionCommand>,
+    pub id: i8,
+    pub next: Option<Vec<i8>>,
+    pub(crate) if_: Option<Vec<Vec<IfStatementPart>>>,
+    pub on_error: ActionOnError,
+    pub platform: Option<Platform>,
+    pub command: Option<Vec<PackageActionCommand>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl Default for PackageAction {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            next: None,
+            if_: None,
+            on_error: Default::default(),
+            platform: None,
+            command: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct PackageActionCommand {
-    platform: Option<Platform>,
-    cwd: Option<String>,
-    env: Option<HashMap<String, String>>,
-    needed_exit_code: Option<Vec<i64>>,
-    command: String,
+    pub(crate) platform: Option<Platform>,
+    pub(crate) cwd: Option<String>,
+    pub(crate) shell: Option<String>,
+    pub(crate) env: Option<HashMap<String, String>>,
+    pub(crate) needed_exit_code: Option<Vec<i64>>,
+    pub(crate) command: String,
 }
 
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct PackageOption {
     id: String,
     title: String,
@@ -466,7 +480,7 @@ pub struct PackageOption {
     while_: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct PackageOptionTyp {
     typ: PackageOptionTypEnum,
     fs_type: Option<PackageOptionFsType>,
@@ -480,7 +494,7 @@ pub struct PackageOptionTyp {
     gen_max: Option<u8>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "lowercase")]
 pub enum PackageOptionFsType {
     FILE,
@@ -488,7 +502,7 @@ pub enum PackageOptionFsType {
     FS,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(rename_all = "lowercase")]
 pub enum PackageOptionTypEnum {
     INPUT,
@@ -498,7 +512,6 @@ pub enum PackageOptionTypEnum {
     FILE,
     CHECK,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageDependency {
@@ -544,34 +557,118 @@ pub enum PackageTyp {
     BUILD_SYSTEM,
 }
 
-
 impl Package {
     pub(crate) fn python() -> Self {
         Self {
             id: "opie.python".to_string(),
 
+            var: None,
             name: "Python 3.12".to_string(),
             meta: None,
             scheme: Default::default(),
-            dependencies: vec![
-                PackageDependency {
-                    typ: PackageDependencyTyp::PROGRAM,
-                    name: "python".to_string(),
-                    version: "3.12".to_string(),
-                    platform: None,
-                    version_check_command: Some("python -v".into()),
-                    level: PackageDependencyLevel::REQUIRED,
-                }
-            ],
+            dependencies: vec![PackageDependency {
+                typ: PackageDependencyTyp::PROGRAM,
+                name: "python".to_string(),
+                version: "3.12".to_string(),
+                platform: None,
+                version_check_command: Some("python -v".into()),
+                level: PackageDependencyLevel::REQUIRED,
+            }],
             startup: PackageStartup {
-                options: Some(vec![
-                    PackageOption {
-                        id: "main-py".to_string(),
-                        title: "Add main.py".to_string(),
+                options: Some(vec![PackageOption {
+                    id: "main-py".to_string(),
+                    title: "Add main.py".to_string(),
+                    typ: PackageOptionTyp {
+                        typ: PackageOptionTypEnum::CHECK,
+                        fs_type: None,
+                        list_type: None,
+                        placeholder: None,
+                        required: None,
+                        readonly: None,
+                        validate: None,
+                        fs_filter: None,
+                        gen_min: None,
+                        gen_max: None,
+                    },
+                    def: Some(Val::BOOL(false)),
+                    while_: None,
+                }]),
+                actions: Some(vec![PackageAction {
+                    id: 0,
+                    next: None,
+                    if_: Some(vec![vec![IfStatementPart {
+                        from: Some("#main-py".to_string()),
+                        oper: IfStatementOperation::EQ,
+                        value: Some(Val::BOOL(true)),
+                    }]]),
+                    on_error: Default::default(),
+                    platform: None,
+                    command: Some(vec![
+                        PackageActionCommand {
+                            platform: Some(Platform::windows()),
+                            cwd: None,
+                            shell: None,
+                            env: None,
+                            needed_exit_code: None,
+                            command: "echo > main.py".to_string(),
+                        },
+                        PackageActionCommand {
+                            platform: Some(Platform::unix_like()),
+                            cwd: None,
+                            shell: None,
+                            env: None,
+                            needed_exit_code: None,
+                            command: "touch main.py".to_string(),
+                        },
+                    ]),
+                }]),
+            },
+            components: Some(vec![PackageComponent {
+                id: "python".to_string(),
+                typ: PackageComponentTyp::INTERPRETER,
+                program: "python".to_string(),
+                platform: Platform::SINGLE(PlatformType::ALL),
+                languages: vec![".py".to_string()],
+                priority: None,
+                arguments: None,
+                builtin_params: PackageComponentBuiltin {
+                    is_builtin: true,
+                    url: None,
+                    path: None,
+                    in_path: Some(true),
+                    min_version: None,
+                    version_check_command: None,
+                },
+            }]),
+        }
+    }
+}
+
+pub type SharedPackages = Arc<Mutex<Vec<Package>>>;
+
+impl ProjectTemplate {
+    pub fn rust() -> Self {
+        Self {
+            id: "opie.rust".to_string(),
+            name: "Cargo project".to_string(),
+            schema: Default::default(),
+            meta: Some(TemplateMeta {
+                authors: vec!["OPIE".__get()],
+                description: "".to_string(),
+                icon: "rust.svg".to_string(),
+            }),
+            startup: TemplateStartup {
+                sections: vec![Section {
+                    id: 0,
+                    label: "Cargo options".to_string(),
+                    list: (true, true),
+                    params: vec![PackageOption {
+                        id: "type".to_string(),
+                        title: "Crate type".to_string(),
                         typ: PackageOptionTyp {
-                            typ: PackageOptionTypEnum::CHECK,
+                            typ: PackageOptionTypEnum::LIST,
                             fs_type: None,
-                            list_type: None,
+                            list_type: Some(vec!["lib".__get(), "bin".__get()]),
                             placeholder: None,
                             required: None,
                             readonly: None,
@@ -580,33 +677,66 @@ impl Package {
                             gen_min: None,
                             gen_max: None,
                         },
-                        def: Some(Val::BOOL(false)),
+                        def: Some(Val::STRING("bin".to_string())),
                         while_: None,
-                    }
-                ]),
-                actions: None,
+                    }],
+                }],
+                actions: vec![
+                    PackageAction {
+                        id: 0,
+                        next: None,
+                        if_: Some(vec![vec![IfStatementPart {
+                            from: Some("#0.type".__get()),
+                            oper: IfStatementOperation::EQ,
+                            value: Some(Val::STRING("lib".__get())),
+                        }]]),
+                        on_error: Default::default(),
+                        platform: None,
+                        command: Some(vec![PackageActionCommand {
+                            platform: None,
+                            cwd: None,
+                            shell: None,
+                            env: None,
+                            needed_exit_code: None,
+                            command: "cargo new --lib".to_string(),
+                        }]),
+                    },
+                    PackageAction {
+                        id: 0,
+                        next: None,
+                        if_: Some(vec![vec![IfStatementPart {
+                            from: Some("#0.type".__get()),
+                            oper: IfStatementOperation::EQ,
+                            value: Some(Val::STRING("bin".__get())),
+                        }]]),
+                        on_error: Default::default(),
+                        platform: None,
+                        command: Some(vec![PackageActionCommand {
+                            platform: None,
+                            cwd: None,
+                            shell: None,
+                            env: None,
+                            needed_exit_code: None,
+                            command: "cargo new".to_string(),
+                        }]),
+                    },
+                ],
+                var: vec![],
             },
-            components: Some(
-                vec![
-                    PackageComponent {
-                        id: "python".to_string(),
-                        typ: PackageComponentTyp::INTERPRETER,
-                        program: "python".to_string(),
-                        platform: Platform::SINGLE(PlatformType::ALL),
-                        languages: vec![".py".to_string()],
-                        priority: None,
-                        arguments: None,
-                        builtin_params: PackageComponentBuiltin {
-                            is_builtin: true,
-                            url: None,
-                            path: None,
-                            in_path: Some(true),
-                            min_version: None,
-                            version_check_command: None,
-                        },
-                    }
-                ]
-            ),
+            packages_id: vec!["opie.rust".__get()],
+            dependencies: vec![
+                Dependency {
+                    program: "rustc".to_string(),
+                    platform: None,
+                    level: DependencyLevel::CRITICAL,
+                },
+                Dependency {
+                    program: "cargo".to_string(),
+                    platform: None,
+                    level: DependencyLevel::CRITICAL,
+                },
+            ],
+            launches: vec![],
         }
     }
 }

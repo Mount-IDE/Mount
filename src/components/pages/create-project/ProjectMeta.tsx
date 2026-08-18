@@ -28,16 +28,23 @@ export default function ProjectMeta() {
             params: [
                 {
                     def: "Untitled",
-                    label: ["Project Name", "Enter a project name"],
-                    out: "project-name",
-                    typ: ["input", "base"],
-                    req: true
+                    title: "Project Name",
+                    id: "project-name",
+                    typ: {
+                        typ: "input",
+                        placeholder: "Enter a project name",
+                        required: true
+                    },
                 }, {
                     def: project_path,
-                    label: ["Project Path", "Enter a project path"],
-                    out: "project-path",
-                    typ: ["file", "dir"],
-                    req: true
+                    title: "Project Path",
+                    id: "project-path",
+                    typ: {
+                        typ: "file",
+                        fs_type: "dir",
+                        placeholder: "Enter a project path",
+                        required: true
+                    },
                 }
             ]
         }, {
@@ -47,26 +54,37 @@ export default function ProjectMeta() {
             params: [
                 {
                     def: "",
-                    label: ["Authors", "author1 author2"],
-                    out: "project-authors",
-                    typ: ["input", "base"],
+                    title: "Authors",
+                    id: "project-authors",
+                    typ: {
+                        typ: "input",
+                        placeholder: "author1 author2"
+                    },
                 }, {
                     def: "",
-                    label: ["Description", ""],
-                    out: "project-description",
-                    typ: ["input", "resize"],
+                    title: "Description",
+                    id: "project-description",
+                    typ: {
+                        typ: "area"
+                    },
                 },
                 {
                     def: "",
-                    label: ["License", ""],
-                    out: "project-license",
-                    typ: ["list", "NonLicense", "LGPL", "APACHE"],
+                    title: "License",
+                    id: "project-license",
+                    typ: {
+                        typ: "list",
+                        list_type: ["NonLicense", "LGPL", "APACHE"]
+                    },
                 },
                 {
                     def: "general",
-                    label: ["Group", ""],
-                    out: "project-group",
-                    typ: ["list", ...[...settings?.general.project_groups ?? "general"]],
+                    title: "Group",
+                    id: "project-group",
+                    typ: {
+                        typ: "list",
+                        list_type: [...settings?.general.project_groups ?? "general"]
+                    },
                 },
             ]
         }, {
@@ -76,21 +94,27 @@ export default function ProjectMeta() {
             params: [
                 {
                     def: false,
-                    label: "Create git repository",
-                    out: "project-git",
-                    typ: ["check"],
+                    title: "Create git repository",
+                    id: "project-git",
+                    typ: {
+                        typ: "check"
+                    },
                 }, {
                     def: false,
-                    label: "Add .gitignore",
-                    out: "project-git-gitignore",
-                    typ: ["check"],
+                    title: "Add .gitignore",
+                    id: "project-git-gitignore",
+                    typ: {
+                        typ: "check"
+                    },
                     while_: "project-git"
                 },
                 {
                     def: "",
-                    label: ["Git remote origin", ""],
-                    out: "project-git-remote",
-                    typ: ["input", "base"],
+                    title: "Git remote origin",
+                    id: "project-git-remote",
+                    typ: {
+                        typ: "input"
+                    },
                     while_: "project-git"
                 }
             ]

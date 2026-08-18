@@ -51,7 +51,7 @@ interface ITemplate {
     }
     startup: {
         var: IVar[],
-        actions: IAction[],
+        actions: IPackageAction[],
         sections: ISection[]
     },
     packages_id: string[],
@@ -78,7 +78,7 @@ interface ISection {
     id: number,
     label: string,
     list: [boolean, boolean],
-    params: IParameter[]
+    params: IPackageParameter[]
 }
 
 interface IParameter {
@@ -892,26 +892,7 @@ interface IPackage {
         options?:
             IPackageParameter[]
 
-        actions?: {
-            id: number
-            next?: number[]
-            if_?: {
-                from?: string,
-                op: "==" | "!=" | ">" | "<" | ">=" | "<=" | "empty" | "!empty" | "in" | "!in" | "regex" | "!regex" | "!already" | "stopped" | "!stopped" | "installed" | "!installed",
-                value?: string | boolean | string[] | number
-            }[][]
-            on_error: "continue" | "stop_graph" | "stop_all"
-
-            platform?: ("windows" | "macos" | "linux")[] | "all"
-            commands?: {
-                platform?: ("windows" | "macos" | "linux")[] | "all"
-                cwd?: string
-                env?: [string, string][]
-                needed_exit_code?: number[]
-                command: string
-            }[]
-
-        }[]
+        actions?: IPackageAction[]
     }
     tasks?: []
     var?: {
@@ -961,5 +942,26 @@ interface IPackageParameter {
     }
     def?: string | boolean | string[]
     while_?: string
+
+}
+
+interface IPackageAction {
+    id: number
+    next?: number[]
+    if_?: {
+        from?: string,
+        op: "==" | "!=" | ">" | "<" | ">=" | "<=" | "empty" | "!empty" | "in" | "!in" | "regex" | "!regex" | "!already" | "stopped" | "!stopped" | "installed" | "!installed",
+        value?: string | boolean | string[] | number
+    }[][]
+    on_error: "continue" | "stop_graph" | "stop_all"
+
+    platform?: ("windows" | "macos" | "linux")[] | "all"
+    commands?: {
+        platform?: ("windows" | "macos" | "linux")[] | "all"
+        cwd?: string
+        env?: [string, string][]
+        needed_exit_code?: number[]
+        command: string
+    }[]
 
 }

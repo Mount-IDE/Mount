@@ -9,7 +9,7 @@ use crate::modules::contexts::filesystem::app::utils::{make_path, path_from};
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
 use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::{Settings};
+use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::{ConfigError, FileSystemError, ParsingError};
 use crate::modules::shared::kernel::values::Path;
@@ -18,7 +18,7 @@ use serde::Serialize;
 use std::fmt::{Display, Formatter};
 use std::string::ToString;
 use std::sync::Mutex;
-use tauri::{Manager};
+use tauri::Manager;
 
 pub struct ConfigService();
 
@@ -380,7 +380,10 @@ fn get_files_new() -> Vec<FsEntity_> {
         FsEntity_::file_s_content(
             "templates.json",
             PARSING_SERVICE
-                .to_string(&vec![ProjectTemplate::default().clone()])
+                .to_string(&vec![
+                    ProjectTemplate::default().clone(),
+                    ProjectTemplate::rust(),
+                ])
                 .unwrap()
                 .as_str(),
         ),
@@ -426,15 +429,19 @@ fn get_files_new() -> Vec<FsEntity_> {
                 ),
             ],
         ),
-        FsEntity_::dir_entities("packages",
-                                vec![
-                                    FsEntity_::dir_entities("opie.py", vec![
-                                        FsEntity_::file_s_content("config.json",
-                                                                  PARSING_SERVICE.to_string(Package::python()).unwrap().as_str()
-                                        )
-                                    ])
-                                ]
-        )
+        FsEntity_::dir_entities(
+            "packages",
+            vec![FsEntity_::dir_entities(
+                "opie.py",
+                vec![FsEntity_::file_s_content(
+                    "config.json",
+                    PARSING_SERVICE
+                        .to_string(Package::python())
+                        .unwrap()
+                        .as_str(),
+                )],
+            )],
+        ),
     ]
 }
 

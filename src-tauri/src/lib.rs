@@ -11,6 +11,7 @@ use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
 use crate::modules::contexts::launch::app::managers::LaunchManager;
+use crate::modules::contexts::project::domain::entities::Package;
 use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use crate::modules::shared::kernel::values::Path as MPath;
 use std::fs;
@@ -136,6 +137,7 @@ pub fn run() {
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
         .manage(Arc::new(Mutex::new(LaunchManager::new())))
+        .manage(Arc::new(Mutex::new(Vec::<Package>::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

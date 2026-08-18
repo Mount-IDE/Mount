@@ -1,5 +1,4 @@
 import {createProjectStore} from "../../../stores/create_project.ts";
-import {cacheStore} from "../../../stores/cache_store.ts";
 import Input from "../../common/Input.tsx";
 import Check from "../../common/Check.tsx";
 import List from "../../common/List.tsx";
@@ -9,22 +8,18 @@ import Gen from "../../common/Gen.tsx";
 type Props = {
     param: IPackageParameter
     set: (val: string | boolean | string[]) => void
-    allParams: IPackageParameter[]
+    allParams: IPackageParameter[],
+    pack: string
 }
 
 
 export default function PackageParameter(props: Props) {
 
     const param = props.param
-    const current_template = cacheStore(state => state.currentTemplate);
-
     const dependencyValue =
         createProjectStore(state =>
-            current_template ?
-                state.results["__package__"]?.
-                    [-6]?.
-                    [param.while_ ?? ""]
-                : undefined
+            state.package_results[props.pack]?.
+                [param.id] ?? undefined
         );
 
     const dependency = props.param.while_ ?
@@ -49,7 +44,7 @@ export default function PackageParameter(props: Props) {
 
     const value = createProjectStore(
         state =>
-            state.results["__package__"]?.[-6]?.[param.id]
+            state.package_results[props.pack]?.[param.id]
     );
     const new_def = value !== undefined ? value : props.param.def;
 

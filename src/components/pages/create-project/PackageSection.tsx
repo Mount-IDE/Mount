@@ -6,7 +6,7 @@ import PackageParameter from "./PackageParameter.tsx";
 
 export default function PackageSection() {
 
-    const set_value = createProjectStore.getState().add_result;
+    const set_value = createProjectStore.getState().add_pack_result;
     const [isOpened, setIsOpened] = useState<boolean>(true);
 
     const all_packages = packageStore(state => state.packages)
@@ -61,8 +61,8 @@ export default function PackageSection() {
         setIsOpened(prev => !prev);
     }
 
-    function write(val: string | boolean | string[], par: string) {
-        set_value("__package__", -6, par, val);
+    function write(val: string | boolean | string[], par: string, pack: string) {
+        set_value(pack, par, val);
     }
 
 
@@ -102,15 +102,16 @@ export default function PackageSection() {
                  className={"project-section-in"}
             >
                 {
-                    isOpened && packages.map((el) => (
+                    isOpened && packages.map(el => (
 
                         <Fragment key={el.id}>
                             <p style={{color: "var(--subtitle)"}}>{el.name}({el.id})</p>
                             {
                                 (el.startup?.options?.length ?? 0) > 0 &&
-                                el.startup?.options?.map((el_, i_) =>
-                                    <PackageParameter key={`${el.id}:${el_.id}`} param={el_}
-                                                      set={(v) => write(v, el_.id)} allParams={el.startup.options!}
+                                el.startup?.options?.map(el_ =>
+                                    <PackageParameter pack={el.id} key={`${el.id}:${el_.id}`} param={el_}
+                                                      set={(v) => write(v, el_.id, el.id)}
+                                                      allParams={el.startup.options!}
                                     />
                                 )
                             }

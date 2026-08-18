@@ -1,6 +1,8 @@
-use crate::modules::contexts::project::domain::entities::{Action, Package, Project, ProjectTemplate, Task, Var, _Task};
+use crate::modules::contexts::project::domain::entities::{
+    Package, PackageAction, Project, ProjectTemplate, Var, _Task,
+};
 use crate::modules::contexts::project::domain::values::{
-    CreateProjectResult, CreateProjectTemplate,
+    CreateProjectPackageResults, CreateProjectResult, CreateProjectTemplate, ResultsRecord,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::shared::kernel::errors::ProjectError;
@@ -25,23 +27,31 @@ pub trait TActionProjectService {
         template: &ProjectTemplate,
         values: &CreateProjectResult,
         vars: &Vec<Var>,
+        packages: &Vec<Package>,
+        pack_results: &CreateProjectPackageResults,
     ) -> Option<(Vec<Var>, Vec<_Task>)>;
     fn precompile_condition(
         &self,
         sections: &Vec<CreateProjectTemplate>,
         vars: &Vec<Var>,
-        action: &Action,
+        action: &PackageAction,
+        is_pack: bool,
+        pack_params: &ResultsRecord,
     ) -> bool;
 
-    fn get_from_vars(&self, vars: &Vec<Var>, addr: String) -> Option<Val>;
-    fn get_from_params(&self, params: &Vec<CreateProjectTemplate>, addr: String) -> Option<Val>;
-
-    fn format_string(
+    fn format(
         &self,
         string: String,
         vars: &Vec<Var>,
         params: &Vec<CreateProjectTemplate>,
+        is_pack: bool,
+        pack_params: &ResultsRecord,
     ) -> Option<String>;
+
+    fn get_from_vars(&self, vars: &Vec<Var>, addr: String) -> Option<Val>;
+    fn get_from_params(&self, params: &Vec<CreateProjectTemplate>, addr: String) -> Option<Val>;
+
+    fn get_from_pack_params(&self, params: &ResultsRecord, addr: String) -> Option<Val>;
 
     fn compile_vars(
         &self,
@@ -51,18 +61,18 @@ pub trait TActionProjectService {
 
     fn make_task(
         &self,
-        action: &Action,
-        actions: &Vec<Action>,
+        action: &PackageAction,
+        actions: &Vec<PackageAction>,
         vars: &Vec<Var>,
         params: &Vec<CreateProjectTemplate>,
-        os: &String,
+        is_pack: bool,
+        pack_params: &ResultsRecord,
     ) -> Option<_Task>;
 
     fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String);
 
     fn run_task(&self, task: &_Task, path: &Path) -> i8;
 }
-
 
 pub trait TPackageService {
     fn read_packages(&self) -> Result<Vec<Package>, ProjectError>;
@@ -72,7 +82,10 @@ pub trait TPackageService {
     fn rem_package(&self, pack: Package) -> Result<(), ProjectError>;
 }
 
-
 pub trait TPackageCompileService {
-    fn compile_package_actions(&self, pack: Package) -> Result<(Vec<Var>, Vec<_Task>), ProjectError>;
+    fn compile_package_actions(
+        &self,
+        pack: Package,
+        results: CreateProjectResult,
+    ) -> Result<(Vec<Var>, Vec<_Task>), ProjectError>;
 }
