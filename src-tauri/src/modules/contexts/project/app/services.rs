@@ -486,6 +486,7 @@ impl TActionProjectService for ActionProjectService {
         is_pack: bool,
         pack_param: &ResultsRecord,
     ) -> Option<String> {
+        #[derive(Debug)]
         enum Token {
             Str(String),
             Var(String),
@@ -495,8 +496,8 @@ impl TActionProjectService for ActionProjectService {
         let mut tokens = Vec::<Token>::new();
 
         let mut is_str = true;
+        let mut is_brace = false;
         let mut is_slash = false;
-        let mut is_slash2 = false;
         let mut buff = String::new();
         for i in string.chars().peekable() {
             if is_str {
@@ -509,47 +510,64 @@ impl TActionProjectService for ActionProjectService {
                     buff.push(i)
                 }
             } else {
-                if !is_slash2 && is_slash && i.to_string() == "}" {
+                if !is_slash && is_brace && i.to_string() == "}" {
                     if buff.starts_with(PARAM_PREFIX) {
                         tokens.push(Token::Param(buff.clone()));
-                    } else {
+                    } else if buff.starts_with(VAR_PREFIX) {
                         tokens.push(Token::Var(buff.clone()))
+                    } else {
+                        return None;
                     }
                     buff.clear();
-                    is_slash2 = false;
                     is_slash = false;
+                    is_brace = false;
                     continue;
                 }
-                if !is_slash && i.to_string() == " " {
+                if !is_brace && i.to_string() == " " {
                     if buff.starts_with(PARAM_PREFIX) {
                         tokens.push(Token::Param(buff.clone()));
-                    } else {
+                    } else if buff.starts_with(VAR_PREFIX) {
                         tokens.push(Token::Var(buff.clone()))
+                    } else {
+                        return None;
                     }
                     buff.clear();
+                    is_brace = false;
                     is_slash = false;
-                    is_slash2 = false;
                     buff.push(i);
                     continue;
                 }
-                if is_slash2 {
-                    is_slash2 == false;
+                if is_slash {
+                    is_slash = false;
                 }
-                if !is_slash && i.to_string() == "{" {
-                    is_slash = true;
+                if !is_brace && i.to_string() == "{" {
+                    is_brace = true;
                     continue;
                 }
-                if i.to_string() == "\\" && !is_slash2 {
-                    is_slash2 = true
+                if i.to_string() == "\\" && !is_slash {
+                    is_slash = true
                 }
 
                 buff.push(i)
             }
         }
+        if buff.len() > 0 {
+            if is_brace {
+                if buff.starts_with(PARAM_PREFIX) {
+                    tokens.push(Token::Param(buff))
+                } else {
+                    tokens.push(Token::Var(buff));
+                }
+            } else {
+                tokens.push(Token::Str(buff))
+            }
+        }
 
+        println!("TOKENS {tokens:?}");
         let mut string = String::new();
 
         for i in tokens {
+            println!("TOKEN {i:?}");
             if let Token::Str(v) = i {
                 string += &v;
                 continue;
@@ -579,6 +597,7 @@ impl TActionProjectService for ActionProjectService {
                 }
             }
         }
+        println!("RESULT {string}");
         Some(string)
     }
 

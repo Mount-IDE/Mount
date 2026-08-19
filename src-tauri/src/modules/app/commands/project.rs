@@ -206,7 +206,7 @@ pub async fn create_project(
                 env: None,
                 cwd: None,
                 needed_exit_code: None,
-                command: "".to_string(),
+                command: "git init".to_string(),
             }]),
             platform: None,
         },
@@ -288,6 +288,8 @@ pub async fn create_project(
 
     // if tasks running completely
     if let Some(val) = tasks {
+        println!("PACKAGES {:?}", val.1);
+        println!("PACKAGES2 {:?}", pack_results);
         let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
         let path_to_mount = path_from![path_, ".mount"];
 
