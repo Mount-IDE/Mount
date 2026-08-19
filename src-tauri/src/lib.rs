@@ -3,6 +3,7 @@ use crate::modules::app::commands::cache::*;
 use crate::modules::app::commands::config::*;
 use crate::modules::app::commands::fs::*;
 use crate::modules::app::commands::launch::*;
+use crate::modules::app::commands::package::*;
 use crate::modules::app::commands::project::*;
 use crate::modules::app::commands::terminal::*;
 use crate::modules::app::commands::utils::*;
@@ -11,6 +12,7 @@ use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
 
 use crate::modules::contexts::launch::app::managers::LaunchManager;
+use crate::modules::contexts::package::domain::LspManager;
 use crate::modules::contexts::project::domain::entities::Package;
 use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use crate::modules::shared::kernel::values::Path as MPath;
@@ -132,12 +134,16 @@ pub fn run() {
             write_launch,
             close_launch,
             read_themes,
-            save_settings
+            save_settings,
+            start_lsp,
+            stop_lsp,
+            send_to_lsp
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
         .manage(Arc::new(Mutex::new(LaunchManager::new())))
         .manage(Arc::new(Mutex::new(Vec::<Package>::new())))
+        .manage(Arc::new(Mutex::new(LspManager::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

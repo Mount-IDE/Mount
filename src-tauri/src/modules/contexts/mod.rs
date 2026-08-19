@@ -4,6 +4,7 @@ pub mod events;
 pub mod filesystem;
 pub mod git;
 pub mod launch;
+pub mod package;
 pub mod project;
 pub mod settings;
 pub mod terminal;

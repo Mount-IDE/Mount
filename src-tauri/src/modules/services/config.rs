@@ -431,16 +431,25 @@ fn get_files_new() -> Vec<FsEntity_> {
         ),
         FsEntity_::dir_entities(
             "packages",
-            vec![FsEntity_::dir_entities(
-                "opie.py",
-                vec![FsEntity_::file_s_content(
-                    "config.json",
-                    PARSING_SERVICE
-                        .to_string(Package::python())
-                        .unwrap()
-                        .as_str(),
-                )],
-            )],
+            vec![
+                FsEntity_::dir_entities(
+                    "opie.py",
+                    vec![FsEntity_::file_s_content(
+                        "config.json",
+                        PARSING_SERVICE
+                            .to_string(Package::python())
+                            .unwrap()
+                            .as_str(),
+                    )],
+                ),
+                FsEntity_::dir_entities(
+                    "opie.rust",
+                    vec![FsEntity_::file_s_content(
+                        "config.json",
+                        PARSING_SERVICE.to_string(Package::rust()).unwrap().as_str(),
+                    )],
+                ),
+            ],
         ),
     ]
 }

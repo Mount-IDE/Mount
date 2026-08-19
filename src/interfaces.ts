@@ -965,3 +965,27 @@ interface IPackageAction {
     }[]
 
 }
+
+interface PackageConfigMeta {
+    method: string
+    project: IProject
+}
+
+
+interface PackageConfig {
+    id: string
+    methods?: {
+        fileOpened?: string
+        fileClosed?: string
+        fileSaved?: string
+        fileChanged?: string
+        GoToDefinition?: string
+        Hover?: string
+        GoToDeclaration?: string
+        InlayHints?: string
+    }
+    lsp?: {
+        init: ((message: string, meta: PackageConfigMeta) => any | undefined) | null
+        request: ((message: string, meta: PackageConfigMeta) => any | undefined) | null
+    }
+}

@@ -2,13 +2,15 @@ use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
 use super::default::workspace::*;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
+use crate::modules::app::CONFIG_SERVICE;
+use crate::modules::contexts::filesystem::app::utils::{path_from, PathPart};
 use crate::modules::contexts::launch::domain::entities::{
     LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
 use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionOnError, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta,
 };
+use crate::modules::services::traits::TConfigService;
 use crate::modules::shared::kernel::errors::ProjectError;
 use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, ParameterTyp, Path,
@@ -393,14 +395,31 @@ pub struct Package {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageComponent {
-    id: String,
-    typ: PackageComponentTyp,
-    program: String,
-    platform: Platform,
-    languages: Vec<String>,
-    priority: Option<u8>,
-    arguments: Option<Vec<String>>,
-    builtin_params: PackageComponentBuiltin,
+    pub id: String,
+    pub typ: PackageComponentTyp,
+    pub program: String,
+    pub platform: Platform,
+    pub languages: Vec<String>,
+    pub priority: Option<u8>,
+    pub arguments: Option<Vec<String>>,
+    pub builtin_params: PackageComponentBuiltin,
+}
+
+impl PackageComponent {
+    pub fn get_command(&self, package: String) -> String {
+        if let Some(true) = self.builtin_params.in_path {
+            if self.builtin_params.is_builtin {
+                return self.program.clone();
+            }
+        } else {
+            if let Some(p) = self.builtin_params.path.clone() {
+                let dir = CONFIG_SERVICE.get_data_dir().unwrap_or(Path::new(""));
+                let path = path_from![dir, "packages", package, p, self.program];
+                return path.get();
+            }
+        }
+        String::new()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -418,12 +437,12 @@ pub enum PackageComponentTyp {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageComponentBuiltin {
-    is_builtin: bool,
-    url: Option<String>,
-    path: Option<String>,
-    in_path: Option<bool>,
-    min_version: Option<String>,
-    version_check_command: Option<VersionCheckCommand>,
+    pub is_builtin: bool,
+    pub url: Option<String>,
+    pub path: Option<String>,
+    pub in_path: Option<bool>,
+    pub min_version: Option<String>,
+    pub version_check_command: Option<VersionCheckCommand>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -636,6 +655,64 @@ impl Package {
                     url: None,
                     path: None,
                     in_path: Some(true),
+                    min_version: None,
+                    version_check_command: None,
+                },
+            }]),
+        }
+    }
+
+    pub fn rust() -> Self {
+        Self {
+            id: "opie.rust".to_string(),
+            name: "Rust 1.94".to_string(),
+            meta: Some(PackageMeta {
+                version: Some("1.0".__get()),
+                authors: Some(vec!["OPIE".to_string()]),
+                description: None,
+                tags: None,
+                source: None,
+                typ: Some(PackageTyp::LANGUAGE),
+                icon: None,
+                license: None,
+            }),
+            scheme: Default::default(),
+            dependencies: vec![
+                PackageDependency {
+                    typ: PackageDependencyTyp::PROGRAM,
+                    name: "rustc".to_string(),
+                    version: "1.94".to_string(),
+                    platform: None,
+                    version_check_command: None,
+                    level: PackageDependencyLevel::REQUIRED,
+                },
+                PackageDependency {
+                    typ: PackageDependencyTyp::PROGRAM,
+                    name: "cargo".to_string(),
+                    version: "".to_string(),
+                    platform: None,
+                    version_check_command: None,
+                    level: PackageDependencyLevel::REQUIRED,
+                },
+            ],
+            startup: PackageStartup {
+                options: None,
+                actions: None,
+            },
+            var: None,
+            components: Some(vec![PackageComponent {
+                id: "rust.lsp".to_string(),
+                typ: PackageComponentTyp::COMPILER,
+                program: "rust-analuzer".to_string(),
+                platform: Platform::all(),
+                languages: vec![".rs".__get()],
+                priority: None,
+                arguments: None,
+                builtin_params: PackageComponentBuiltin {
+                    is_builtin: true,
+                    url: None,
+                    path: None,
+                    in_path: None,
                     min_version: None,
                     version_check_command: None,
                 },
