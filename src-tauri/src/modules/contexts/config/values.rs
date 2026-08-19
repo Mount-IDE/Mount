@@ -1,6 +1,6 @@
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
-use crate::modules::contexts::settings::domain::entities::Settings;
+use crate::modules::contexts::settings::domain::entities::{RecentProject, Settings};
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 
@@ -45,6 +45,7 @@ impl Default for FsType {
 ///
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Cache {
+    pub(crate) recent_projects: Vec<RecentProject>,
     pub settings: Settings,
     pub templates: Vec<ProjectTemplate>,
     pub packages: Vec<Package>,

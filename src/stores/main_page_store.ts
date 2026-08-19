@@ -5,6 +5,11 @@ interface Type {
     groups: Group[]
     set_current_group: (group: number) => void;
     set_groups: (groups_: Group[]) => void;
+
+
+    filter_string: string
+
+    set_filter_string: (val: string) => void
 }
 
 
@@ -15,6 +20,14 @@ export interface Group {
 
 
 export const mainPageStore = create<Type>((set, get) => ({
+    filter_string: "",
+    set_filter_string(val: string): void {
+        set({
+            filter_string: val
+        })
+    },
+
+
     current_group: 0,
     groups: [],
     set_current_group(group: number): void {

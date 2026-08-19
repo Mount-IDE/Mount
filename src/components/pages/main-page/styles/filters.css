@@ -36,7 +36,12 @@
     width: 95%;
     border: none;
     outline: none;
-    font: 10pt "JetBrains Mono";
+    font: 10pt "Roboto";
+
+
+    &::placeholder {
+        font-family: "JetBrains Mono Medium", monospace;
+    }
 }
 
 #filters-filters {

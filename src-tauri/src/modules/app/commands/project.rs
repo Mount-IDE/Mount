@@ -95,8 +95,6 @@ pub async fn create_project(
         "Check Dependencies".to_string(),
     );
 
-    let all_packages = { pack_state.lock().unwrap().clone() };
-
     let dependencies = template.dependencies.clone();
 
     let error_dependency = PROJECT_SERVICE.check_dependencies(dependencies);
@@ -214,7 +212,7 @@ pub async fn create_project(
     template.startup.actions.insert(
         1,
         PackageAction {
-            id: -2,
+            id: -1,
             if_: Some(vec![vec![IfStatementPart {
                 from: Some("#-2.project-git-gitignore".to_string()),
                 oper: IfStatementOperation::EQ,
@@ -282,6 +280,8 @@ pub async fn create_project(
             .map(|e| e.clone())
             .collect::<Vec<Package>>()
     };
+
+    project.packages = packages.iter().map(|e| e.name.clone()).collect();
     // making tasks
     let tasks =
         ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);

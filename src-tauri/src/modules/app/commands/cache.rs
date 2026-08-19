@@ -1,4 +1,5 @@
 use crate::modules::app::commands::config::{get_file_templates, get_fs_ext_icons};
+use crate::modules::app::commands::project::get_recent_projects;
 use crate::modules::app::{
     CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PACKAGE_SERVICE, SETTINGS_SERVICE,
 };
@@ -120,7 +121,9 @@ pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
 
     let themes = read_themes()?;
 
+    let recent = get_recent_projects().unwrap_or(vec![]);
     let res = Cache {
+        recent_projects: recent,
         settings,
         templates,
         packages,

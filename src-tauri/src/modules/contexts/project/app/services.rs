@@ -177,7 +177,9 @@ impl TProjectService for ProjectService {
         let file = PFile::from_path_reg(path_to);
 
         let text = FS_READ_SERVICE.read_file(&file)?;
-        let projects = PARSING_SERVICE._from_string::<Vec<RecentProject>>(text)?;
+        let mut projects = PARSING_SERVICE._from_string::<Vec<RecentProject>>(text)?;
+
+        projects.sort_by(|a, b| b.last_opened.cmp(&a.last_opened));
         Ok(projects)
     }
     ///
@@ -892,7 +894,7 @@ impl TActionProjectService for ActionProjectService {
 }
 
 pub struct PackageService();
-pub struct PackageCompileService();
+//pub struct PackageCompileService();
 
 impl TPackageService for PackageService {
     fn read_packages(&self) -> Result<Vec<Package>, ProjectError> {

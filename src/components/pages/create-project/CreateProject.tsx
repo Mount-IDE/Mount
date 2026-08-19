@@ -40,6 +40,18 @@ export default function CreateProject() {
             if (res[0] == 0) {
                 set_current_path(res[1]);
                 createProjectStore.getState().close();
+                let recent: IRecentProject = {
+                    last_opened: new Date().getTime(),
+                    meta: structuredClone(res[2]?.meta ?? {
+                        authors: [], description: "", group: "", icon: "", license: "", tags: []
+                    }),
+                    name: `${res[2]?.name}`,
+                    packages: [...res[2]?.packages ?? []],
+                    path: `${res[2]?.path}`
+                }
+                cacheStore.getState().add_recent(recent)
+
+
                 const buttons = res[2]!.workspace.buttons;
                 let left_top = buttons.filter(el => el.pos == "LeftTop")
                 let left_bot = buttons.filter(el => el.pos == "LeftBottom")

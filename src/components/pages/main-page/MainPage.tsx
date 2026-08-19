@@ -52,7 +52,9 @@ const buttons = [
 export default function MainPage() {
 
 
-    const [recent, setRecent] = useState<IRecentProject[]>([]);
+    // const [recent, setRecent] = useState<IRecentProject[]>([]);
+
+    const recents = cacheStore(state => state.recent_projects);
 
     const groups = mainPageStore(state => state.groups);
     const set_current_group = mainPageStore(state => state.set_current_group)
@@ -60,24 +62,39 @@ export default function MainPage() {
     const set_current_project = () => projectStore.getState().set_current_project
     const openProject = () => pageStore.getState().openProject
 
-    /**
-     * load recent projects
-     */
-    async function loadRecents() {
-        try {
-            let recent = await invoke<IRecentProject[]>("get_recent_projects");
-            let res = recent.sort((a, b) => b.last_opened - a.last_opened)
-            setRecent(res);
-            cacheStore.getState().set_recent_projects(res);
-        } catch (e) {
-            console.warn("not loaded", e)
-        }
-    }
+    /* /!**
+      * load recent projects
+      *!/
+     async function loadRecents() {
+         try {
+             let recent = await invoke<IRecentProject[]>("get_recent_projects");
+             let res = recent.sort((a, b) => b.last_opened - a.last_opened)
+             setRecent(res);
+             cacheStore.getState().set_recent_projects(res);
+         } catch (e) {
+             console.warn("not loaded", e)
+         }
+     }
+
+     useEffect(() => {
+         loadRecents().then()
+     }, [])
+ */
+
+    const filter_string = mainPageStore(state => state.filter_string);
+
+    const [recent, setRecent] = useState<IRecentProject[]>([])
+
 
     useEffect(() => {
-        loadRecents().then()
-    }, [])
 
+        let res = filter_string.length > 0 ? recents.filter(el =>
+                el.name.includes(filter_string)
+            )
+            : recents
+        setRecent(res)
+
+    }, [recents, filter_string]);
 
     /**
      * Open project when user selects a project from list
@@ -151,7 +168,7 @@ export default function MainPage() {
                         cb: async (_: string | undefined) => {
                             try {
                                 await invoke("remove_project", {path: currentPath});
-                                await loadRecents();
+                                cacheStore.getState().remove_from_recents(currentPath);
                                 menuStore.getState().close_modal()
                             } catch (e) {
                                 console.error(e)
@@ -258,12 +275,12 @@ export default function MainPage() {
                         </div>
                     </div>
                     <div id={"main-page-projects"}>
-                        {recent.length > 0 &&
+                        {recentByGroup.length > 0 &&
                             recentByGroup.map((el, i) =>
                                 <Project onContext={show_context} onClick={setup_project} project={el} key={i}/>
                             )
                         }
-                        {recent.length == 0 && <p
+                        {recentByGroup.length == 0 && <p
                             style={{
                                 color: "var(--subtitle)",
                                 width: "100%",
@@ -279,7 +296,8 @@ export default function MainPage() {
                             &&
                             <Modal {...modalSettings!} />
                         }
-                        <ContextMenu ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]} show={showContext}/>
+                        <ContextMenu auto={true} ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]}
+                                     show={showContext}/>
                     </div>
                 </div>
             </div>

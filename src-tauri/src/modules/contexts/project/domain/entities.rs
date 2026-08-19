@@ -384,7 +384,7 @@ impl Default for ProjectTag {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Package {
     pub(crate) id: String,
-    name: String,
+    pub(crate) name: String,
     meta: Option<PackageMeta>,
     scheme: Schema,
     dependencies: Vec<PackageDependency>,
@@ -775,7 +775,7 @@ impl ProjectTemplate {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "cargo new --lib".to_string(),
+                            command: "cargo init --lib".to_string(),
                         }]),
                     },
                     PackageAction {
@@ -794,7 +794,7 @@ impl ProjectTemplate {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "cargo new".to_string(),
+                            command: "cargo init".to_string(),
                         }]),
                     },
                 ],

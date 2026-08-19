@@ -217,6 +217,7 @@ interface configFsTemplate {
 
 
 interface Cache {
+    recent_projects: IRecentProject[]
     settings: Settings,
     templates: ITemplate[],
     packages: IPackage[],

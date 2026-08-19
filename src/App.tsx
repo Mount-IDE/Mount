@@ -44,6 +44,7 @@ function App() {
             cacheStore.getState().set_file_templates(cache.file_templates);
             cacheStore.getState().set_os(cache.os);
             cacheStore.getState().set_projects_path(cache.projects_dir);
+            cacheStore.getState().set_recent_projects(cache.recent_projects)
             mainPageStore.getState().set_groups(cache.groups.map((el, i): Group => ({
                 id: i, name: el
             })));

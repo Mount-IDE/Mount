@@ -13,10 +13,10 @@ interface Type {
     recent_projects: IRecentProject[]
     set_recent_projects: (rec: IRecentProject[]) => void
 
-    set_os: (val:string)=>void,
+    set_os: (val: string) => void,
 
     make_path: (pieces: string[]) => string
-    
+
     shells: string[]
     set_shells: (shells: string[]) => void
     add_template_to_cache: (t: ITemplate) => void
@@ -33,6 +33,12 @@ interface Type {
     set_data_dir: (str: string) => void,
     file_templates: configFsTemplate[],
     set_file_templates: (temp: configFsTemplate[]) => void
+
+
+    remove_from_recents: (path: string) => void
+
+
+    add_recent: (rec: IRecentProject) => void
 }
 
 
@@ -45,7 +51,24 @@ export const cacheStore = create<Type>((set, get) => ({
     projects_path: "",
     groups: [],
 
+
     os: "",
+    add_recent(rec: IRecentProject): void {
+        set({
+            recent_projects: [rec, ...get().recent_projects]
+        })
+    },
+
+
+    remove_from_recents(path): void {
+        set({
+            recent_projects: get().recent_projects.filter(el =>
+                path != el.path
+            )
+        })
+    },
+
+
     set_os(val: string): void {
         set({
             os: val
