@@ -2,11 +2,132 @@ import "./styles/code.css"
 import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
+import {themeStore} from "../../../stores/theme_store.ts";
+import {treeStore} from "../../../stores/tree_store.ts";
+import {projectStore} from "../../../stores/project_store.ts";
+import {get_last_entity_of_path} from "../../../utils/utils.ts";
+import {languageStore} from "../../../stores/language_store.ts";
+import {Query, QueryCapture} from "web-tree-sitter";
+
 type Props = {
     current: [number | null, number]
 }
 
 
+const order_types = [
+    // ─────────────────────────────
+    // Base
+    // ─────────────────────────────
+    "unknown",
+    "expression",
+    "identifier",
+    "property",
+    "operator",
+    "punctuation",
+
+    // ─────────────────────────────
+    // Literals
+    // ─────────────────────────────
+
+    "string",
+    "char",
+    "number",
+    "bool",
+    "null",
+    "regex",
+    "template",
+
+    // ─────────────────────────────
+    // Declarations / types
+    // ─────────────────────────────
+
+    "type",
+    "type_builtin",
+    "generic",
+    "param",
+    "argument",
+
+    "const",
+
+    "fn_decl",
+    "fn_call",
+    "fn_b",
+
+    "a_fn_decl",
+    "a_fn_call",
+    "a_fn_b",
+
+    "spec_fn",
+
+    "entity_stat",
+
+    // ─────────────────────────────
+    // Modifiers / keywords
+    // ─────────────────────────────
+
+    "modifier",
+    "visibility",
+    "storage",
+
+    "other_kw_decl",
+    "other_kw_stat",
+
+    // ─────────────────────────────
+    // Control flow
+    // ─────────────────────────────
+
+    "if_stat",
+
+    "while_stat",
+    "for_stat",
+    "loop_stat",
+
+    "match_in",
+    "match_stat",
+
+    "util_stat",
+    "util_decl",
+
+    // ─────────────────────────────
+    // Exceptions
+    // ─────────────────────────────
+
+    "exception",
+    "exception_decl",
+
+    // ─────────────────────────────
+    // Modules
+    // ─────────────────────────────
+
+    "scope",
+    "import",
+    "export",
+
+    // ─────────────────────────────
+    // Special
+    // ─────────────────────────────
+
+    "decorator",
+    "annotation",
+    "attribute",
+    "macro",
+
+    // ─────────────────────────────
+    // Comments / documentation
+    // ─────────────────────────────
+
+    "comment",
+    "doc_comment",
+
+    // ─────────────────────────────
+    // Misc
+    // ─────────────────────────────
+
+    "label",
+    "escape",
+    "error",
+    "other",
+] as const
 export default function Code(props: Props) {
 
     if (props.current[0] == null) {
@@ -18,10 +139,11 @@ export default function Code(props: Props) {
     const save = fileCacheStore(state => state.save);
     if (file === undefined) {
         return (
-            <div className={"project-code"}>Fallback</div>
+            <div className={"project-code"}>File not found</div>
         )
     }
     const [rows, setRows] = useState(file.content.split("\n"))
+
 
     useEffect(() => {
         setRows(file.content.split("\n"))
@@ -60,7 +182,7 @@ export default function Code(props: Props) {
                     }}>{i + 1}</p>
                 )}
             </div>
-            <CodeEditor save={_save} setText={write} text={file.content}/>
+            <CodeEditor cache={file!} save={_save} setText={write} text={file.content}/>
         </div>
     )
 }
@@ -70,6 +192,120 @@ type CodeProps = {
     text: string
     setText: (content: string) => void
     save: () => void
+    cache: FileCache
+}
+
+function contains(regex: string[] | undefined, text: string) {
+    if (!regex) {
+        return true
+    }
+    for (let i of regex) {
+        let reg = new RegExp(i);
+        if (!reg.test(text)) {
+            return false
+        }
+    }
+    return true
+}
+
+
+function get_needed_package(packs: [string, PackageInner][], filename: string): [string, PackageInner] | undefined {
+    return packs.find(el => {
+
+        if (contains(el[1].main.files.ignore_files, filename!) && el[1].main.files.ignore_files != null) {
+            console.log("ignore")
+            return false
+        }
+        if (!contains(el[1].main.files.files, filename!)) {
+            console.log("files")
+            return false
+        }
+        for (let i of el[1].main.files.extentions) {
+            if (filename?.trim().endsWith(i.trim())) {
+                console.log("ext", filename, i)
+                return true
+            }
+        }
+        return false
+    })
+}
+
+function get_needed_highlight(pack: IPackage, filename: string): IPackageHighlight | undefined {
+    return pack.highlight.find(el => {
+        console.log(el)
+        console.log(contains(el.ignore_files, filename))
+        console.log(contains(el.files, filename))
+        if (contains(el.ignore_files, filename) && el.ignore_files != null) {
+            return false
+        }
+        if (!contains(el.files, filename)) {
+            return false
+        }
+        for (let i of el.extentions) {
+            if (filename?.trim().endsWith(i.trim())) {
+                return true
+            }
+        }
+        return false
+    })
+}
+
+async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
+    console.log(last)
+    console.log(languageStore.getState().languages)
+    let lang = languageStore.getState().languages[pack.id]?.[highlight.id];
+    if (!lang) {
+        console.log("lang")
+        let l = await languageStore.getState().add_language(pack.id, highlight.id)
+        if (!l) {
+            console.log("not lang")
+            return null
+        }
+        lang = l!
+    }
+
+    let lang1 = lang.lang;
+    let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
+    if (!tree) {
+        console.log("not tree")
+        return null
+    }
+    let query = new Query(lang1, lang.scm);
+    let captures = query.captures(tree.rootNode);
+
+    console.log("complete")
+    for (let i of captures) {
+        console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
+    }
+
+    return captures
+}
+
+function get_type_from_arr(typ: string, arr: Record<string, string>): typeof order_types[number] {
+    let type_ = arr[typ] as string | undefined;
+    console.log("\t\t\t got", typ, type_)
+    if (typeof type_ == "string" && order_types.includes(type_ as typeof order_types[number])) {
+        return type_ as typeof order_types[number]
+    }
+    return "unknown"
+}
+
+
+function get_order(typ: typeof order_types[number]): number {
+    let index = order_types.indexOf(typ)
+    return index ?? 0
+}
+
+
+interface Token {
+    typ: typeof order_types[number],
+    text: string,
+    start: number,
+    end: number
+}
+
+interface ExtToken extends Token {
+    color: string
 }
 
 function CodeEditor(props: CodeProps) {
@@ -82,6 +318,175 @@ function CodeEditor(props: CodeProps) {
         const [start, end] = cursor_ref.current!;
         textareaRef.current!.setSelectionRange(start, end);
         cursor_ref.current = null
+    }, [props.text]);
+
+
+    const [tokens, setTokens] = useState<ExtToken[] | null>(null)
+
+    const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
+
+    useEffect(() => {
+
+
+        async function a() {
+            let file = get_last_entity_of_path(props.cache.path);
+            if (!file) {
+                console.log("\t not file")
+                setTokens(null)
+                return
+            }
+            let packs = [...projectStore.getState().selected_packages.entries()];
+            console.log(packs)
+            let pack = get_needed_package(packs, file!);
+            if (!pack) {
+                console.log("\t not pack")
+                setTokens(null)
+                return
+            }
+            let highlight = get_needed_highlight(pack[1].main, file);
+            if (!highlight) {
+                console.log("\t not highlight")
+                setTokens(null)
+                return
+            }
+
+
+            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
+            console.log("______________\n||||||||\n", typeof res)
+            if (!res) {
+                setTokens(null)
+                return
+            }
+
+            let dict = highlight.nodes;
+            let map = new Map<string, Token>();
+
+            console.log("ordering", dict)
+            for (let i of res) {
+                let start = i.node.startIndex;
+                let end = i.node.endIndex
+                let key = `${start}:${end}`
+                let typ = get_type_from_arr(i.name, dict);
+                let got = map.get(key);
+                if (!got) {
+                    map.set(key, {
+                        end, start, text: i.node.text, typ: typ
+                    }satisfies Token)
+                    continue;
+                }
+
+                let typ2 = got.typ;
+                let order1 = get_order(typ)
+                let order2 = get_order(typ2)
+                if (order1 > order2) {
+                    map.set(key, {
+                        end, start, text: i.node.text, typ: typ
+                    } satisfies Token)
+                }
+            }
+
+
+            // parsed tokens
+            console.log("parsed", map)
+            console.log("other tokens")
+
+            const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
+            const result: Token[] = [];
+
+            let position = 0;
+
+            for (const token of tokens) {
+                // Если между предыдущим токеном и текущим есть текст
+                if (position < token.start) {
+                    result.push({
+                        start: position,
+                        end: token.start,
+                        text: props.text.slice(position, token.start),
+                        typ: "unknown"
+                    });
+                }
+
+                result.push(token);
+
+                position = Math.max(position, token.end);
+            }
+
+            if (position < props.text.length) {
+                result.push({
+                    start: position,
+                    end: props.text.length,
+                    text: props.text.slice(position),
+                    typ: "unknown"
+                });
+            }
+
+
+            if (result.length == 0) {
+                setTokens(null)
+                return
+            }
+            console.log("res tokens")
+            result.sort((a, b) => a.start - b.start);
+
+            let res_tokens: ExtToken[] = [];
+            let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
+
+            //colors
+            for (let i of result) {
+                let typ = i.typ;
+                let color = colors.tokens?.[typ as string];
+                console.log("col", i.typ, color)
+                if (!color) {
+                    color = colors.base_color;
+                    console.log("\t\t sec col", color)
+                    if (!color) {
+                        color = syntaxTheme?.tokens?.[typ as string];
+                        console.log("\t\t\t 3 col", color)
+                        if (!color) {
+                            color = syntaxTheme?.base_color
+                            console.log("\t\t\t\t 4 col", color)
+                            if (!color) {
+                                color = "inherit"
+                                console.log("\t\t\t\t\t 5 col", color)
+                            }
+                        }
+                    }
+                }
+                if (colors.colors) {
+                    console.log("\tcolors")
+                    if (color in colors.colors) {
+                        color = colors.colors[color]
+                        console.log("\t\t col2", color)
+                    } else if (syntaxTheme?.colors) {
+                        console.log("\tcolors 2")
+                        if (color in syntaxTheme.colors) {
+                            color = syntaxTheme.colors[color]
+                            console.log("\t\t col2", color)
+                        }
+                    }
+                } else if (syntaxTheme?.colors) {
+                    console.log("\tsyntax")
+                    if (color in syntaxTheme.colors) {
+                        color = syntaxTheme.colors[color]
+                        console.log("\t\t col3", color)
+
+                    }
+                }
+                if (!color) {
+                    color = "inherit"
+                    console.log("\tinherit")
+                }
+                console.log("\t\tcolor", color)
+                res_tokens.push({...i, color})
+            }
+
+            console.log("complete 22", res_tokens)
+
+            setTokens(res_tokens)
+
+        }
+
+        a().then()
     }, [props.text]);
 
 
@@ -183,6 +588,7 @@ function CodeEditor(props: CodeProps) {
     }
 
 
+
     return (
         <div
             style={{
@@ -194,7 +600,35 @@ function CodeEditor(props: CodeProps) {
             }}
             onClick={() => textareaRef.current!.focus()}
         >
+            <div className={"code-editor-text"} style={{
+                position: "absolute",
+                zIndex: 10,
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                padding: "10px",
+                pointerEvents: "none",
+                whiteSpace: "pre",
+                lineHeight: "24px",
 
+            }}
+                 onClick={() => textareaRef.current?.focus()}
+            >
+                {
+                    tokens != null &&
+
+                    tokens.map(el =>
+                        <span key={`${el.start}:${el.end}`}
+                              style={{color: el.color}}
+                        >
+                            {el.text}
+                        </span>
+                    )
+                }
+
+
+            </div>
             <textarea
                 ref={textareaRef}
                 onKeyDown={keyDown}
@@ -202,6 +636,7 @@ function CodeEditor(props: CodeProps) {
                 autoCorrect="off"
                 autoCapitalize="off"
                 autoComplete="off"
+                className={"code-editor-text"}
                 style={{
                     zIndex: 11,
                     position: "absolute",
@@ -210,16 +645,16 @@ function CodeEditor(props: CodeProps) {
                     padding: "10px",
                     minWidth: "100%",
                     height: "100%",
-                    opacity: 1,
+                    opacity: "1",
                     border: "none",
                     outline: "none",
                     resize: "none",
                     background: "transparent",
-                    color: "var(--subtitle)",
+                    color: "transparent",
                     caretColor: "var(--subtitle)",
-                    lineHeight: 1.5,
+                    lineHeight: "24px",
                     fontSize: "14px",
-                    fontStyle: "monospace",
+                    fontFamily: "monospace",
                     overflow: "auto",
                     whiteSpace: "nowrap"
                 }}

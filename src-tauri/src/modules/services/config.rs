@@ -613,11 +613,17 @@ impl TParsingService for ParsingService {
     }
 
     fn _from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError> {
-        let res: T = serde_json::from_str(&obj).map_err(|e| ParsingError::Deserialize {
+        let res = serde_json::from_str::<T>(&obj).map_err(|e| ParsingError::Deserialize {
             path: Path::new(""),
             json: obj.to_string(),
             err: e,
-        })?;
-        Ok(res)
+        });
+
+        if let Err(v) = res {
+            println!("___\nerror\n___|||{:?}", v);
+
+            return Err(v);
+        }
+        Ok(res.unwrap())
     }
 }

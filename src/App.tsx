@@ -18,6 +18,7 @@ import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
 import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
 import {packageStore} from "./stores/package_store.ts";
+import {Parser} from "web-tree-sitter";
 
 
 /**
@@ -49,6 +50,7 @@ function App() {
                 id: i, name: el
             })));
             fsExtStore.getState().set_icons(cache.file_icons);
+            console.log(cache)
             packageStore.getState().set_package(cache.packages);
             cacheStore.getState().add_templates_to_cache(cache.templates);
             if (cache.templates.length > 0) {
@@ -56,6 +58,7 @@ function App() {
             }
             cacheStore.getState().set_shells(cache.shells);
             settingsStore.getState().set_settings(cache.settings)
+
             themeStore.getState().load_themes(cache.themes.map(e => JSON.parse(e) as ITheme), cache.settings)
         } catch (e) {
             console.warn(e)
@@ -68,6 +71,11 @@ function App() {
         let cancelled = false;
 
         async function setupWindow() {
+            // noinspection JSUnusedGlobalSymbols
+            await Parser.init({
+
+                locateFile: (path: string) => "/" + path
+            })
             try {
                 await invoke("close_window_terminals");
             } catch (e) {
@@ -82,6 +90,7 @@ function App() {
         }
 
         setupWindow().then();
+
 
         return () => {
             cancelled = true;

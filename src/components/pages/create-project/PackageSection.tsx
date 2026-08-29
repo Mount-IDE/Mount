@@ -9,7 +9,7 @@ export default function PackageSection() {
     const set_value = createProjectStore.getState().add_pack_result;
     const [isOpened, setIsOpened] = useState<boolean>(true);
 
-    const all_packages = packageStore(state => state.packages)
+    const all_packages = packageStore(state => state.packages);
     const selected_packages = createProjectStore(state => state.packages);
 
     const body_ref = useRef<HTMLDivElement>(null)

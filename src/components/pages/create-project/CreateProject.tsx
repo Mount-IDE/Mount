@@ -11,10 +11,6 @@ import {useEffect, useState} from "react";
 import Load from "../../common/Load.tsx";
 import {listen} from "@tauri-apps/api/event";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
-import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {mapProjectButton} from "../../../utils/project-buttons.ts";
-import {invoke} from "@tauri-apps/api/core";
-
 
 /**
  *
@@ -24,8 +20,6 @@ export default function CreateProject() {
 
     const create_project = createProjectStore(state => state.create_project)
     const current_template = cacheStore(state => state.currentTemplate)
-    const set_current_path = projectStore(state=>state.set_path_to_current_project);
-
     const [isCreating, setIsCreating] = useState(false)
     const [startEvent, setStartEvent] = useState<string | null>(null)
     const [endEvent, setEndEvent] = useState<string | null>(null)
@@ -38,46 +32,12 @@ export default function CreateProject() {
             let res = await create_project(current_template!);
 
             if (res[0] == 0) {
-                set_current_path(res[1]);
                 createProjectStore.getState().close();
-                let recent: IRecentProject = {
-                    last_opened: new Date().getTime(),
-                    meta: structuredClone(res[2]?.meta ?? {
-                        authors: [], description: "", group: "", icon: "", license: "", tags: []
-                    }),
-                    name: `${res[2]?.name}`,
-                    packages: [...res[2]?.packages ?? []],
-                    path: `${res[2]?.path}`
-                }
-                cacheStore.getState().add_recent(recent)
-
-
-                const buttons = res[2]!.workspace.buttons;
-                let left_top = buttons.filter(el => el.pos == "LeftTop")
-                let left_bot = buttons.filter(el => el.pos == "LeftBottom")
-                let right_top = buttons.filter(el => el.pos == "RightTop")
-
-                let left_top_2 =
-                    left_top.map<IAsideButton>(mapProjectButton);
-
-                let left_bot_2 =
-                    left_bot.map<IAsideButton>(mapProjectButton);
-
-                let right_top_2 =
-                    right_top.map<IAsideButton>(mapProjectButton);
-                asideButtonsStore.getState().load_left(left_top_2);
-                asideButtonsStore.getState().load_bottom(left_bot_2);
-                asideButtonsStore.getState().load_right(right_top_2);
-                try {
-                    await invoke("unwatch_project");
-                    await invoke("close_window_terminals");
-                } catch (e) {
-                    console.error(e)
-                }
                 noteStore.getState().add_note({
                     type: NotificationType.NOTE,
                     text: "Project was created"
                 }, 2000)
+                await projectStore.getState().open_project(res[2]!)
             } else {
                 noteStore.getState().add_note({
                     type: NotificationType.ERR,
@@ -85,6 +45,7 @@ export default function CreateProject() {
                 })
             }
             setIsCreating(false)
+
         }
     }
 

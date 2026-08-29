@@ -130,8 +130,6 @@ export const createProjectStore = create<Type>((set, get) => ({
             let unified = await invoke<string>("make_path_command", {
                 components: [path, name]
             })
-            projectStore.getState().set_current_project(project);
-            pageStore.getState().openProject();
             pageStore.getState().setFilter(false);
 
             return [0, unified, project]

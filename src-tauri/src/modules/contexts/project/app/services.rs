@@ -7,6 +7,7 @@ use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::package::domain::Grammar;
 use crate::modules::contexts::project::app::traits::{
     TActionProjectService, TPackageService, TProjectService,
 };
@@ -906,17 +907,20 @@ impl TPackageService for PackageService {
 
         for i in dirs.directories {
             let path = path_from![i.path, "config.json"];
+            println!("dir {:?} {path}", i.path);
             if FS_READ_SERVICE.exists(path.clone()) {
                 let file = PFile::from_path_reg(path);
                 let Ok(text) = FS_READ_SERVICE.read_file(&file) else {
                     continue;
                 };
                 let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(text) else {
+                    println!("not parsed");
                     continue;
                 };
                 packages.push(parsed);
             }
         }
+        println!("ok packs pre {packages:?}");
         Ok(packages)
     }
 
@@ -926,6 +930,35 @@ impl TPackageService for PackageService {
 
     fn rem_package(&self, pack: Package) -> Result<(), ProjectError> {
         todo!()
+    }
+
+    fn read_config(&self, id: String) -> Result<String, ProjectError> {
+        let dir = CONFIG_SERVICE.get_data_dir()?;
+        let path_to_package = path_from![dir, "packages", id, "config.js"];
+        /*if !FS_READ_SERVICE.exists(path_to_package){
+            return Err(ProjectError::CreationFai);
+        }*/
+
+        let file = PFile::from_path_reg(path_to_package);
+        let text = FS_READ_SERVICE.read_file(&file)?;
+        Ok(text)
+    }
+
+    fn read_textmate(&self, id: String) -> Result<Vec<Grammar>, ProjectError> {
+        let dir = CONFIG_SERVICE.get_data_dir()?;
+        let path = path_from![dir, "packages", id, "tm"];
+        let dir = PDirectory::from_path(&path);
+        let read = FS_READ_SERVICE.read_dir(&dir)?;
+        let files = read.files;
+        let mut texts = Vec::<Grammar>::new();
+        for i in files {
+            let text = FS_READ_SERVICE.read_file(&i)?;
+            let Ok(parsed) = PARSING_SERVICE._from_string::<Grammar>(text) else {
+                continue;
+            };
+            texts.push(parsed);
+        }
+        Ok(texts)
     }
 }
 

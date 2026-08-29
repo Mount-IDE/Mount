@@ -232,19 +232,11 @@ function Field(props: FieldProps) {
 
     return (
         <div className={"create-entity-field"}>
-            {/*<p className={"create-entity-field-p"}>{props.placeholder}</p>*/}
-            {/*{props.area &&
-                <textarea ref={ref} placeholder={props.placeholder} value={props.val}
-                          onInput={(e) => props.cb(e.currentTarget.value)}/>
-            }
-            {!props.area &&
-                <input placeholder={props.placeholder} value={props.val}
-                       onInput={(e) => props.cb(e.currentTarget.value)}/>
-            }*/}
             <Input typ={props.area ? "area" : "input"}
                    value={props.val}
                    title={props.placeholder ?? ""}
                    write={props.cb}
+
                    placeholder={props.placeholder ?? ""}/>
         </div>
     )

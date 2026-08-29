@@ -281,7 +281,7 @@ pub async fn create_project(
             .collect::<Vec<Package>>()
     };
 
-    project.packages = packages.iter().map(|e| e.name.clone()).collect();
+    project.packages = packages.iter().map(|e| e.id.clone()).collect();
     // making tasks
     let tasks =
         ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);
@@ -420,5 +420,17 @@ pub fn read_project(path: Path) -> Result<Project, ErrorDto> {
 #[tauri::command]
 pub fn save_project(project: Project) -> Result<(), ErrorDto> {
     PROJECT_SERVICE.save_project(&project)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
+    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let path = path_from![dir, "recent_projects.json"];
+    let file = PFile::from_path_reg(path);
+
+    let parsed = PARSING_SERVICE.to_string(projects)?;
+    FS_WRITE_SERVICE.write_file(&file, parsed, FileWriteAccess::WRITE)?;
+
     Ok(())
 }

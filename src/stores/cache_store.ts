@@ -1,4 +1,6 @@
 import {create} from "zustand"
+import {path} from "@tauri-apps/api";
+import {invoke} from "@tauri-apps/api/core";
 
 
 interface Type {
@@ -8,6 +10,7 @@ interface Type {
     groups: string[],
     data_dir: string,
     os: string,
+
 
 
     recent_projects: IRecentProject[]
@@ -39,6 +42,8 @@ interface Type {
 
 
     add_recent: (rec: IRecentProject) => void
+    update_recent: (rec: IRecentProject) => void
+
 }
 
 
@@ -53,6 +58,26 @@ export const cacheStore = create<Type>((set, get) => ({
 
 
     os: "",
+    update_recent(rec: IRecentProject): void {
+        let path = rec.path;
+        let recents = get().recent_projects;
+
+        recents = recents.map(el => {
+            if (el.path == path) {
+                return rec
+            }
+            return el
+        })
+
+        set({
+            recent_projects: recents
+        })
+
+        invoke("update_recents", {projects: recents}).then()
+
+
+    },
+
     add_recent(rec: IRecentProject): void {
         set({
             recent_projects: [rec, ...get().recent_projects]

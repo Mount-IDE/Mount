@@ -19,7 +19,7 @@ export interface Group {
 }
 
 
-export const mainPageStore = create<Type>((set, get) => ({
+export const mainPageStore = create<Type>((set, _) => ({
     filter_string: "",
     set_filter_string(val: string): void {
         set({

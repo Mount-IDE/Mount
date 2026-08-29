@@ -1,3 +1,6 @@
+// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols
+
 const enum HotKeys {
     DUPLICATE,
     CUT,

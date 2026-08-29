@@ -8,14 +8,12 @@ import Project from "./Project.tsx";
 import {open_project} from "../../../services/create-project.ts";
 import {mainPageStore} from "../../../stores/main_page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
-import pageStore from "../../../stores/page_store.ts";
-import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {mapProjectButton} from "../../../utils/project-buttons.ts";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
 import Modal from "../../common/Modal.tsx";
 import {menuStore} from "../../../stores/menu_store.ts";
 import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 
 
 /**
@@ -59,32 +57,9 @@ export default function MainPage() {
     const groups = mainPageStore(state => state.groups);
     const set_current_group = mainPageStore(state => state.set_current_group)
     const current_group = mainPageStore(state => state.current_group);
-    const set_current_project = () => projectStore.getState().set_current_project
-    const openProject = () => pageStore.getState().openProject
-
-    /* /!**
-      * load recent projects
-      *!/
-     async function loadRecents() {
-         try {
-             let recent = await invoke<IRecentProject[]>("get_recent_projects");
-             let res = recent.sort((a, b) => b.last_opened - a.last_opened)
-             setRecent(res);
-             cacheStore.getState().set_recent_projects(res);
-         } catch (e) {
-             console.warn("not loaded", e)
-         }
-     }
-
-     useEffect(() => {
-         loadRecents().then()
-     }, [])
- */
-
     const filter_string = mainPageStore(state => state.filter_string);
 
     const [recent, setRecent] = useState<IRecentProject[]>([])
-
 
     useEffect(() => {
 
@@ -105,30 +80,15 @@ export default function MainPage() {
             try {
                 let res = await invoke<IProject>("read_project", {
                     path: current_path
-                })
-                const set = set_current_project();
-                set(res);
-                const open = openProject()
-                open();
-                const buttons = res.workspace.buttons;
-                let left_top = buttons.filter(el => el.pos == "LeftTop")
-                let left_bot = buttons.filter(el => el.pos == "LeftBottom")
-                let right_top = buttons.filter(el => el.pos == "RightTop")
-
-                let left_top_2 =
-                    left_top.map<IAsideButton>(mapProjectButton);
-
-                let left_bot_2 =
-                    left_bot.map<IAsideButton>(mapProjectButton);
-
-                let right_top_2 =
-                    right_top.map<IAsideButton>(mapProjectButton);
-                asideButtonsStore.getState().load_left(left_top_2);
-                asideButtonsStore.getState().load_bottom(left_bot_2);
-                asideButtonsStore.getState().load_right(right_top_2);
-
-
-                projectStore.getState().set_path_to_current_project(current_path);
+                }) as unknown
+                if (!res) {
+                    noteStore.getState().add_note({
+                        type: NotificationType.WARN,
+                        text: "Project not found"
+                    })
+                    return
+                }
+                await projectStore.getState().open_project(res as IProject)
             } catch (e) {
                 console.error(e)
             }

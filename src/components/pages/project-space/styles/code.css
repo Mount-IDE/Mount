@@ -22,3 +22,16 @@
     border-right: 1px solid var(--border2);
     position: relative;
 }
+
+
+.code-editor-text {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: normal;
+    word-spacing: normal;
+    padding: 10px;
+    box-sizing: border-box;
+
+}

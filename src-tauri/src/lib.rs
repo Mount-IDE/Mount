@@ -137,7 +137,12 @@ pub fn run() {
             save_settings,
             start_lsp,
             stop_lsp,
-            send_to_lsp
+            send_to_lsp,
+            get_meta_of_selected_packages,
+            read_scm,
+            read_scms,
+            update_recents,
+            read_binary
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

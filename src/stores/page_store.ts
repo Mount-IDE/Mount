@@ -15,7 +15,7 @@ interface Type {
 
 
 const pageStore =
-    create<Type>((set, get)=>({
+    create<Type>((set, _) => ({
         current: Window.Main,
         need_filter:false,
         openMain:() => set({current: Window.Main}),

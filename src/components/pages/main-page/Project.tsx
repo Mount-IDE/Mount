@@ -14,7 +14,7 @@ type Props = {
 export default function Project(props: Props) {
     const {project} = props;
 
-    async function loadProject(e: React.MouseEvent) {
+    async function loadProject() {
         try {
             let path = await invoke<string>("make_path_command", {
                 components: [project.path, project.name]

@@ -12,9 +12,9 @@ const REGISTRY = {
 
 type WIDGET = keyof typeof REGISTRY
 
-function getComponentType(button: IAsideButtonExtended) {
+/*function getComponentType(button: IAsideButtonExtended) {
     return button.component_type
-}
+}*/
 
 
 export function mapProjectButton(button: IAsideButtonExtended): IAsideButton {

@@ -1,3 +1,4 @@
+use crate::modules::contexts::package::domain::Grammar;
 use crate::modules::contexts::project::domain::entities::{
     Package, PackageAction, Project, ProjectTemplate, Var, _Task,
 };
@@ -80,6 +81,10 @@ pub trait TPackageService {
     fn add_package(&self, pack: Package) -> Result<(), ProjectError>;
 
     fn rem_package(&self, pack: Package) -> Result<(), ProjectError>;
+
+    fn read_config(&self, id: String) -> Result<String, ProjectError>;
+
+    fn read_textmate(&self, id: String) -> Result<Vec<Grammar>, ProjectError>;
 }
 
 pub trait TPackageCompileService {

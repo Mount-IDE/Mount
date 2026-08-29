@@ -3,7 +3,7 @@ use crate::modules::app::commands::project::get_recent_projects;
 use crate::modules::app::{
     CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, FS_READ_SERVICE, PACKAGE_SERVICE, SETTINGS_SERVICE,
 };
-use crate::modules::contexts::config::values::Cache;
+use crate::modules::contexts::config::values::{Cache, PackageInner};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
@@ -18,12 +18,14 @@ use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
 use base64::engine::general_purpose;
 use base64::Engine;
+use std::collections::HashMap;
 use tauri::State;
 use which::which;
 
 #[tauri::command]
 pub fn read_packages(state: State<'_, SharedPackages>) -> Result<Vec<Package>, ErrorDto> {
     let packs = PACKAGE_SERVICE.read_packages()?;
+    println!("ok packs {packs:?}");
     {
         let mut list = state.lock().unwrap();
         *list = Vec::from(packs.clone())
@@ -82,7 +84,6 @@ pub fn read_themes() -> Result<Vec<String>, ErrorDto> {
 
 #[tauri::command]
 pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
-    let packages = read_packages(state).unwrap_or(Vec::new());
     let templates = read_templates().unwrap_or(vec![ProjectTemplate::new()]);
     let data_dir_path = get_data_dir()?;
     let settings = CONFIG_SERVICE.get_settings()?;
@@ -122,6 +123,10 @@ pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
     let themes = read_themes()?;
 
     let recent = get_recent_projects().unwrap_or(vec![]);
+
+    let packages = read_packages(state).unwrap_or(Vec::new());
+    println!("packages {:?}", packages);
+
     let res = Cache {
         recent_projects: recent,
         settings,
@@ -136,5 +141,23 @@ pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
         shells,
         themes,
     };
+    Ok(res)
+}
+
+#[tauri::command]
+pub fn get_meta_of_selected_packages(
+    packs: Vec<Package>,
+) -> Result<HashMap<String, PackageInner>, ErrorDto> {
+    let mut res = HashMap::<String, PackageInner>::new();
+    for i in packs {
+        let config = PACKAGE_SERVICE.read_config(i.id.clone());
+        let langs = PACKAGE_SERVICE.read_textmate(i.id.clone());
+        let inner = PackageInner {
+            main: i.clone(),
+            config: config.unwrap_or("".to_string()),
+            grammars: langs.unwrap_or(vec![]),
+        };
+        res.insert(i.id, inner);
+    }
     Ok(res)
 }

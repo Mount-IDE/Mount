@@ -383,14 +383,72 @@ impl Default for ProjectTag {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Package {
+    #[serde(default)]
     pub(crate) id: String,
+    #[serde(default)]
     pub(crate) name: String,
+    #[serde(default)]
     meta: Option<PackageMeta>,
+    #[serde(default)]
     scheme: Schema,
+    #[serde(default)]
     dependencies: Vec<PackageDependency>,
+    #[serde(default)]
     pub(crate) startup: PackageStartup,
+    #[serde(default)]
     pub(crate) var: Option<Vec<Var>>,
+    #[serde(default)]
+    pub files: PackageFiles,
+    #[serde(default)]
+    pub highlight: Vec<PackageParser>,
+    #[serde(default)]
     components: Option<Vec<PackageComponent>>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageParser {
+    #[serde(default)]
+    pub id: String,
+    #[serde(default)]
+    pub lang: String,
+    #[serde(default)]
+    pub extentions: Vec<String>,
+    #[serde(default)]
+    pub ignore_files: Option<Vec<String>>,
+    #[serde(default)]
+    pub files: Option<Vec<String>>,
+    #[serde(default)]
+    pub nodes: HashMap<String, String>,
+    #[serde(default)]
+    pub syntax: Option<Syntax>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Syntax {
+    #[serde(default)]
+    base_color: Option<String>,
+    #[serde(default)]
+    colors: Option<HashMap<String, String>>,
+    #[serde(default)]
+    tokens: Option<HashMap<String, String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageFiles {
+    #[serde(default)]
+    pub extentions: Vec<String>,
+    #[serde(default)]
+    pub ignore_files: Option<Vec<String>>,
+    #[serde(default)]
+    pub files: Option<Vec<String>>,
+}
+impl Default for PackageFiles {
+    fn default() -> Self {
+        Self {
+            extentions: vec![],
+            files: None,
+            ignore_files: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -451,7 +509,7 @@ pub enum VersionCheckCommand {
     SINGLE(String),
     OBJ { platform: Platform, command: String },
 }
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct PackageStartup {
     options: Option<Vec<PackageOption>>,
     pub(crate) actions: Option<Vec<PackageAction>>,
@@ -580,7 +638,20 @@ impl Package {
     pub(crate) fn python() -> Self {
         Self {
             id: "opie.python".to_string(),
-
+            highlight: vec![PackageParser {
+                id: "python".to_string(),
+                lang: "python".to_string(),
+                extentions: vec![".py".__get(), ".cpy".__get()],
+                ignore_files: None,
+                files: None,
+                nodes: HashMap::from([]),
+                syntax: None,
+            }],
+            files: PackageFiles {
+                extentions: vec![".py".__get(), ".cpy".__get()],
+                ignore_files: None,
+                files: None,
+            },
             var: None,
             name: "Python 3.12".to_string(),
             meta: None,
@@ -666,6 +737,12 @@ impl Package {
         Self {
             id: "opie.rust".to_string(),
             name: "Rust 1.94".to_string(),
+            highlight: vec![],
+            files: PackageFiles {
+                extentions: vec![".rs".__get()],
+                ignore_files: None,
+                files: None,
+            },
             meta: Some(PackageMeta {
                 version: Some("1.0".__get()),
                 authors: Some(vec!["OPIE".to_string()]),

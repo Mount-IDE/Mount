@@ -97,3 +97,10 @@ pub fn rename_file(from: String, to: String) -> Result<(), ErrorDto> {
     FS_WRITE_SERVICE.rename_file(&file1, &file2)?;
     Ok(())
 }
+
+#[tauri::command]
+pub fn read_binary(path: Path) -> Result<Vec<u8>, ErrorDto> {
+    let file = PFile::from_path_reg(path);
+    let arr = FS_READ_SERVICE.read_bytes(&file)?;
+    Ok(arr)
+}

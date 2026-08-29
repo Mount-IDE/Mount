@@ -20,7 +20,7 @@ export const enum ElementType {
 }
 
 
-type key = ITheme["elements"]
+//type key = ITheme["elements"]
 
 interface Type {
     themes: ITheme[]
@@ -40,7 +40,7 @@ interface Type {
 export const themeStore = create<Type>((set, get) => ({
     current_theme: null,
     themes: [],
-    load_themes: (t, settings) => set(prev => {
+    load_themes: (t, settings) => set(_ => {
 
         let needed = t.find(el => el.name == settings.appearance.theme)
         if (needed) {

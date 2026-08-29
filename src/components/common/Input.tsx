@@ -63,7 +63,7 @@ export default function Input(props: Props) {
     return (
         <div className={"input"}
              style={
-                 props.show == false ? {
+                 props.show == false && props.show != undefined ? {
                      opacity: 0.5,
                      pointerEvents: "none"
                  } : {}
@@ -76,13 +76,13 @@ export default function Input(props: Props) {
                        value={props.value}
                        onInput={(e) => props.write(e.currentTarget.value)}
                        required={props.required}
-                       readOnly={!props.show}
+                       readOnly={!props.show && props.show != undefined}
                 />
             }
             {
                 typ == "area" &&
                 <textarea ref={ref}
-                          readOnly={!props.show}
+                          readOnly={!props.show && props.show != undefined}
                           placeholder={props.placeholder}
                           value={props.value}
                           onInput={(e) => props.write(e.currentTarget.value)}

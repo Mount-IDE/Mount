@@ -1,3 +1,4 @@
+
 interface IRecentProject {
     name: string,
     path: string
@@ -215,6 +216,11 @@ interface configFsTemplate {
     base_name?: string
 }
 
+interface PackageInner {
+    main: IPackage,
+    config: string,
+
+}
 
 interface Cache {
     recent_projects: IRecentProject[]
@@ -407,6 +413,12 @@ interface IThemeTitleBar {
 
 }
 
+interface IThemeSyntax {
+    base_color?: string,
+    tokens?: Record<string, string>
+    colors?: Record<string, string>
+}
+
 interface ITheme {
     id: string
     name: string
@@ -584,6 +596,8 @@ interface ITheme {
             icons?: {
                 color?: string
             }
+
+            syntax?: IThemeSyntax
 
         }
         mainpage?: {
@@ -895,6 +909,12 @@ interface IPackage {
 
         actions?: IPackageAction[]
     }
+    highlight: IPackageHighlight[]
+    files: {
+        extentions: string[], //string
+        files?: string[] // regex str
+        ignore_files?: string[] // regex str
+    }
     tasks?: []
     var?: {
         name: string,
@@ -925,6 +945,17 @@ interface IPackage {
 
 }
 
+interface IPackageHighlight {
+    // for finding parsers in <package>/highlight/<id>/{ grammar.js, parser.wasm, highlight.csm, ... }
+    id: string, // id of entity
+    lang: string, // language name
+    extentions: string[] // we can restrict logic only for files with this extensions
+    ignore_files?: string[] // list of files that must be ignored
+    files?: string[] // we can restrict logic only for theese files
+    nodes: Record<string, string>
+    syntax?: IThemeSyntax
+
+}
 
 interface IPackageParameter {
     id: string
@@ -968,25 +999,103 @@ interface IPackageAction {
 }
 
 interface PackageConfigMeta {
-    method: string
     project: IProject
 }
+
+type MethodBinding = string | ((args: any, meta: PackageConfigMeta) => { method: string; params: any } | undefined)
 
 
 interface PackageConfig {
     id: string
+    comments: {
+        line?: string
+        block?: string
+    }
+    languages: {
+
+        elements: {
+            id: string,
+            extensions: string[],
+            //        grammar: string
+        }[]
+
+    }
+
+
     methods?: {
-        fileOpened?: string
-        fileClosed?: string
-        fileSaved?: string
-        fileChanged?: string
-        GoToDefinition?: string
-        Hover?: string
-        GoToDeclaration?: string
-        InlayHints?: string
+        fileOpened?: MethodBinding | null
+        fileClosed?: MethodBinding | null
+        fileSaved?: MethodBinding | null
+        fileChanged?: MethodBinding | null
+        goToDefinition?: MethodBinding | null
+        goToDeclaration?: MethodBinding | null
+        goToImplementation?: MethodBinding | null
+        hover?: MethodBinding | null
+        completion?: MethodBinding | null
+        signatureHelp?: MethodBinding | null
+        references?: MethodBinding | null
+        rename?: MethodBinding | null
+        codeAction?: MethodBinding | null
+        formatting?: MethodBinding | null
+        inlayHints?: MethodBinding | null
+        documentSymbol?: MethodBinding | null
+        semanticTokens?: MethodBinding | null
     }
     lsp?: {
-        init: ((message: string, meta: PackageConfigMeta) => any | undefined) | null
-        request: ((message: string, meta: PackageConfigMeta) => any | undefined) | null
-    }
+        buildInitializationOptions?: (meta: PackageConfigMeta) => Record<string, any> | undefined
+        buildCapabilities?: (defaults: Record<string, any>, meta: PackageConfigMeta) => Record<string, any>
+        onInitialized?: (serverCapabilities: Record<string, any>, meta: PackageConfigMeta) => void
+
+        onServerRequest?: (method: string, params: any, meta: PackageConfigMeta) => any | undefined
+        onServerNotification?: (method: string, params: any, meta: PackageConfigMeta) => void
+
+        beforeShutdown?: (meta: PackageConfigMeta) => void
+        onCrash?: (exitCode: number | null, meta: PackageConfigMeta) => "restart" | "ignore"
+    } | null
 }
+
+
+interface IGrammar {
+    scopeName: string;              // уникальное имя scope языка, например "source.rust"
+    patterns: IRawRule[];           // список правил, применяемых на верхнем уровне файла
+    repository?: IRawRepository;    // "библиотека" именованных правил для переиспользования
+    injections?: { [expression: string]: IRawRule }; // внедрение правил в другие грамматики
+    injectionSelector?: string;
+    fileTypes?: string[];           // расширения файлов (мета-инфо, не обязательно)
+    name?: string;                  // человекочитаемое имя
+    firstLineMatch?: string;
+}
+
+interface IRawRule {
+    id?: number;
+    include?: string;               // ссылка на другое правило: "#keywords", "$self", "$base"
+
+    name?: string;                  // scope-имя токена, например "keyword.control.rust"
+    contentName?: string;           // scope для содержимого между begin/end
+
+    match?: string;                 // regex для однострочного совпадения
+    begin?: string;                 // regex начала блока (многострочного)
+    end?: string;                   // regex конца блока
+    while?: string;                 // альтернатива end — блок продолжается, пока матчится while
+
+    captures?: IRawCaptures;        // именование групп захвата для `match`
+    beginCaptures?: IRawCaptures;   // именование групп в `begin`
+    endCaptures?: IRawCaptures;     // именование групп в `end`
+    whileCaptures?: IRawCaptures;
+
+    patterns?: IRawRule[];          // вложенные правила (внутри begin/end блока)
+
+    applyEndPatternLast?: boolean;
+}
+
+interface IRawCaptures {
+    [group: string]: {
+        name?: string;
+        patterns?: IRawRule[];
+    };
+}
+
+interface IRawRepository {
+    [name: string]: IRawRule;
+}
+

@@ -62,7 +62,7 @@ impl PFile {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PDirectory {
     pub name: String,
     pub path: Path,
