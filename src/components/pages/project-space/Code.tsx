@@ -1,5 +1,5 @@
 import "./styles/code.css"
-import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
 import {themeStore} from "../../../stores/theme_store.ts";
@@ -8,7 +8,6 @@ import {projectStore} from "../../../stores/project_store.ts";
 import {get_last_entity_of_path} from "../../../utils/utils.ts";
 import {LanguageInner, languageStore} from "../../../stores/language_store.ts";
 import {QueryCapture} from "web-tree-sitter";
-import {highlightWorkerStore} from "../../../stores/highlight_worker_store.ts";
 
 type Props = {
     current: [number | null, number]
@@ -155,6 +154,7 @@ export default function Code(props: Props) {
             write_file(file.id, content);
         }
     }
+
     function _save() {
         if (file) {
             const cache = fileCacheStore.getState().get_by_id(file?.id);
@@ -164,9 +164,10 @@ export default function Code(props: Props) {
         }
     }
 
+    const ref = useRef<HTMLDivElement>(null)
 
     return (
-        <div className={"project-code"}>
+        <div className={"project-code"} ref={ref}>
             <div className={"project-code-rows"}
                  style={{
                      paddingRight: "5px"
@@ -185,7 +186,7 @@ export default function Code(props: Props) {
                     }}>{i + 1}</p>
                 )}
             </div>
-            <CodeEditor cache={file!} save={_save} setText={write} text={file.content}/>
+            <CodeEditor ref={ref} cache={file!} save={_save} setText={write} text={file.content}/>
         </div>
     )
 }
@@ -196,6 +197,7 @@ type CodeProps = {
     setText: (content: string) => void
     save: () => void
     cache: FileCache
+    ref: RefObject<HTMLDivElement | null>
 }
 
 function contains(regex: string[] | undefined, text: string) {
@@ -253,24 +255,24 @@ function get_needed_highlight(pack: IPackage, filename: string): IPackageHighlig
     })
 }
 
-async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight, prev_text: string): Promise<QueryCapture[] | null> {
-    console.log(last)
-    console.log(languageStore.getState().languages)
+async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
+    // console.log(last)
+    // console.log(languageStore.getState().languages)
     const inner = languageStore.getState().languages[pack.id]?.[highlight.id] as LanguageInner | undefined;
     if (!inner) {
         return null
     }
     let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
     if (!tree) {
-        console.log("not tree")
+        //    console.log("not tree")
         return null
     }
     let captures = inner.query.captures(tree[0].rootNode);
 
-    console.log("complete")
-    for (let i of captures) {
+    // console.log("complete")
+    /*for (let i of captures) {
         console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
-    }
+    }*/
 
     return captures
 }
@@ -302,16 +304,23 @@ export interface ExtToken extends Token {
     color: string
 }
 
+const LINE_HEIGHT = 21;
+const OVERSCAN = 5;
+
 function CodeEditor(props: CodeProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const cursor_ref = useRef<[number, number] | null>(null);
-    //const [text, setText]=useState("")
-    const [tokens, setTokens] = useState<ExtToken[] | null>(null)
+    const [tokens, setTokens] = useState<Map<number, ExtToken[]> | null>(null)
 
     const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
 
-    const worker = highlightWorkerStore(state => state.worker);
+    const totalLines = useMemo(() => {
+        return props.text.split("\n").length
+    }, [props.text])
+
+    const height = 20 + totalLines * LINE_HEIGHT
+
 
     useLayoutEffect(() => {
         if (!cursor_ref.current || !textareaRef.current) return
@@ -320,6 +329,45 @@ function CodeEditor(props: CodeProps) {
         cursor_ref.current = null
     }, [props.text]);
 
+
+    function buildLineIndex(text: string, tokens: ExtToken[]) {
+        const lineStarts: number[] = [0];
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === "\n") lineStarts.push(i + 1);
+        }
+
+        function lineOf(offset: number): number {
+            let lo = 0, hi = lineStarts.length - 1;
+            while (lo < hi) {
+                const mid = (lo + hi + 1) >> 1;
+                if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
+            }
+            return lo;
+        }
+
+        const byLine = new Map<number, ExtToken[]>();
+
+        for (const t of tokens) {
+            const startLine = lineOf(t.start);
+            const endLine = lineOf(Math.max(t.start, t.end - 1));
+            if (startLine === endLine) {
+                byLine.set(startLine, [...(byLine.get(startLine) ?? []), t]);
+                continue;
+            }
+            for (let l = startLine; l <= endLine; l++) {
+                const lineStart = lineStarts[l];
+                const lineEnd = lineStarts[l + 1] !== undefined ? lineStarts[l + 1] - 1 : text.length;
+                const s = Math.max(t.start, lineStart);
+                const e = Math.min(t.end, lineEnd);
+                byLine.set(l, [...(byLine.get(l) ?? []), {...t, start: s, end: e, text: text.slice(s, e)}]);
+            }
+        }
+        return {lineStarts, byLine};
+    }
+
+    /**
+     * highlight logic
+     */
     useEffect(() => {
 
 
@@ -331,25 +379,19 @@ function CodeEditor(props: CodeProps) {
                 return
             }
             let packs = [...projectStore.getState().selected_packages.entries()];
-            // console.log(packs)
             let pack = get_needed_package(packs, file!);
             if (!pack) {
-                //    console.log("\t not pack")
                 setTokens(null)
                 return
             }
             let highlight = get_needed_highlight(pack[1].main, file);
             if (!highlight) {
-                //   console.log("\t not highlight")
                 setTokens(null)
                 return
             }
 
 
-            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight, props.text);
-            //console.log("______________\n||||||||\n", typeof res)
-
-            // res.then(res=>{
+            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
             if (!res) {
                 setTokens(null)
                 return
@@ -358,7 +400,6 @@ function CodeEditor(props: CodeProps) {
             let dict = highlight.nodes;
             let map = new Map<string, Token>();
 
-            //console.log("ordering", dict)
             for (let i of res) {
                 let start = i.node.startIndex;
                 let end = i.node.endIndex
@@ -388,7 +429,6 @@ function CodeEditor(props: CodeProps) {
             let position = 0;
 
             for (const token of tokens) {
-                // Если между предыдущим токеном и текущим есть текст
                 if (position < token.start) {
                     result.push({
                         start: position,
@@ -417,9 +457,6 @@ function CodeEditor(props: CodeProps) {
                 setTokens(null)
                 return
             }
-            //console.log("res tokens")
-            // result.sort((a, b) => a.start - b.start);
-
             let res_tokens: ExtToken[] = [];
             let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
 
@@ -427,61 +464,45 @@ function CodeEditor(props: CodeProps) {
             for (let i of result) {
                 let typ = i.typ;
                 let color = colors.tokens?.[typ as string];
-                //   console.log("col", i.typ, color)
                 if (!color) {
                     color = colors.base_color;
-                    // console.log("\t\t sec col", color)
                     if (!color) {
                         color = syntaxTheme?.tokens?.[typ as string];
-                        //  console.log("\t\t\t 3 col", color)
                         if (!color) {
                             color = syntaxTheme?.base_color
-                            //  console.log("\t\t\t\t 4 col", color)
                             if (!color) {
                                 color = "var(--subtitle)"
-                                //    console.log("\t\t\t\t\t 5 col", color)
                             }
                         }
                     }
                 }
                 if (colors.colors) {
-                    // console.log("\tcolors")
                     if (color in colors.colors) {
                         color = colors.colors[color]
-                        // console.log("\t\t col2", color)
                     } else if (syntaxTheme?.colors) {
-                        // console.log("\tcolors 2")
                         if (color in syntaxTheme.colors) {
                             color = syntaxTheme.colors[color]
-                            // console.log("\t\t col2", color)
                         }
                     }
                 } else if (syntaxTheme?.colors) {
-                    //console.log("\tsyntax")
                     if (color in syntaxTheme.colors) {
                         color = syntaxTheme.colors[color]
-                        //console.log("\t\t col3", color)
 
                     }
                 }
                 if (!color) {
                     color = "var(--subtitle)"
-                    // console.log("\tinherit")
                 }
-                //console.log("\t\tcolor", color)
                 res_tokens.push({...i, color})
             }
 
-            // console.log("complete 22", res_tokens)
-
-            setTokens(res_tokens)
-            //setText(props.text)
-            //  })
-
+            let result_ = buildLineIndex(props.text, res_tokens)
+            setTokens(result_.byLine)
 
         }
 
-        a()
+
+        a().then()
     }, [props.text]);
 
     function keyDown(e: React.KeyboardEvent) {
@@ -588,6 +609,9 @@ function CodeEditor(props: CodeProps) {
     const row_ref = useRef<HTMLHRElement>(null)
 
 
+    /**
+     * highlighted row
+     */
     useEffect(() => {
 
         let cur = textareaRef.current;
@@ -620,37 +644,108 @@ function CodeEditor(props: CodeProps) {
         }
     }, [])
 
+    let raf_ref = useRef<number>(null)
+
+    useEffect(() => {
+        let cur = props.ref.current
+        if (!cur) return
+        let obs = new ResizeObserver(entries => {
+            let entry = entries[0]
+            let top = entry.target.clientHeight;
+            setViewportH(top)
+        })
+
+        obs.observe(cur)
+
+        return () => {
+            obs.disconnect()
+        }
+
+    }, []);
+
+
+    const [scrollTop, setScrollTop] = useState(0);
+    const [viewportH, setViewportH] = useState(0);
+
+    const firstLine = Math.max(0, Math.floor(scrollTop / LINE_HEIGHT) - OVERSCAN);
+    const lastLine = Math.min(
+        props.text.split("\n").length - 1,
+        Math.ceil((scrollTop + viewportH) / LINE_HEIGHT) + OVERSCAN
+    );
+
+    useEffect(() => {
+        let cur = props.ref.current;
+        let cur2 = h_ref.current;
+        if (!cur || !cur2) return
+
+
+        function handleScroll(e: Event) {
+            const top = (e.currentTarget as HTMLTextAreaElement).scrollTop;
+            if (raf_ref.current) return;
+            raf_ref.current = requestAnimationFrame(() => {
+                setScrollTop(top);
+                raf_ref.current = null;
+            });
+        }
+
+        cur.addEventListener("scroll", handleScroll)
+        return () => {
+            cur.removeEventListener("scroll", handleScroll)
+        }
+
+    }, [])
+
+    let container_ref = useRef<HTMLDivElement>(null)
+
+
     return (
         <div
+            ref={container_ref}
             style={{
                 position: "relative",
                 width: "100%",
-                height: "100%",
-                overflow: "hidden",
+                height: height + "px",
+                minHeight: " 100%",
+                // overflow: "hidden",
                 padding: "10x"
             }}
             onClick={() => textareaRef.current!.focus()}
         >
+
             <div ref={h_ref} className={"code-editor-text"} style={{
                 zIndex: 11,
                 pointerEvents: "none",
-
-            }}
-                 onClick={() => textareaRef.current?.focus()}
-            >
+                overflow: "hidden",
+                height: "100%"
+            }}>
                 {
-                    tokens != null &&
+                    Array.from({length: lastLine - firstLine + 1}, (_, i) => firstLine + i)
+                        .map(lineIndex => {
+                            const line_tokens = tokens?.get(lineIndex) ?? []
+                            return (
+                                <div key={lineIndex}
+                                     style={{
+                                         position: "absolute",
+                                         top: 10 + lineIndex * LINE_HEIGHT,
+                                         height: LINE_HEIGHT + "px",
+                                         lineHeight: LINE_HEIGHT + "px",
+                                         whiteSpace: "pre",
+                                         left: 10,
+                                         right: 10,
+                                         fontFamily: "monospace",
+                                         fontSize: "14px",
+                                         letterSpacing: "normal",
+                                         wordSpacing: "normal",
 
-                    tokens.map(el =>
-                        <span key={`${el.start}:${el.end}`}
-                              style={{color: el.color}}
-                        >
-                            {el.text}
-                        </span>
-                    )
+                                     }}
+                                >
+                                    {line_tokens.map(el =>
+                                        <span key={`${el.start}:${el.end}`} style={{color: el.color}}>{el.text}</span>
+                                    )}
+                                </div>
+                            )
+                        })
                 }
-
-
             </div>
             <textarea
                 ref={textareaRef}
@@ -660,12 +755,14 @@ function CodeEditor(props: CodeProps) {
                 autoCapitalize="off"
                 autoComplete="off"
                 className={"code-editor-text"}
-                onScroll={(e) => e.preventDefault()}
+
                 style={{
                     zIndex: 10,
                     opacity: "1",
                     border: "none",
                     outline: "none",
+                    height: height + "px",
+                    overflow: "hidden",
                     resize: "none",
                     background: "transparent",
                     color: "var(--subtitle)",
@@ -680,12 +777,13 @@ function CodeEditor(props: CodeProps) {
 
             <hr ref={row_ref} style={{
                 position: "absolute",
-                zIndex: 10,
+                zIndex: 9,
                 width: "calc(100% - 40px)",
                 left: "40px",
                 height: "21px",
                 background: "var(--border3)",
-                border: "none"
+                border: "none",
+                display: "block"
             }}></hr>
         </div>
     );

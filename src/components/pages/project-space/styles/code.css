@@ -32,12 +32,12 @@
     word-spacing: normal;
     padding: 10px;
     box-sizing: border-box;
-    overflow: hidden !important;
+    /*overflow: visible !important;*/
 
     width: max-content;
     min-width: 100%;
-    height: max-content;
-    min-height: 100%;
+    /*height: max-content;*/
+    /*min-height: 100%;*/
 
     position: absolute;
     left: 40px;

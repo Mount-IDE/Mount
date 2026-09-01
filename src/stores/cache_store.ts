@@ -1,5 +1,4 @@
 import {create} from "zustand"
-import {path} from "@tauri-apps/api";
 import {invoke} from "@tauri-apps/api/core";
 
 
@@ -61,9 +60,9 @@ export const cacheStore = create<Type>((set, get) => ({
     update_recent(rec: IRecentProject): void {
         let path = rec.path;
         let recents = get().recent_projects;
-
+        let path_ = this.make_path([path, rec.name])
         recents = recents.map(el => {
-            if (el.path == path) {
+            if (this.make_path([el.path, el.name]) == path_) {
                 return rec
             }
             return el
