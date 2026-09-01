@@ -6,8 +6,9 @@ import {themeStore} from "../../../stores/theme_store.ts";
 import {treeStore} from "../../../stores/tree_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import {get_last_entity_of_path} from "../../../utils/utils.ts";
-import {languageStore} from "../../../stores/language_store.ts";
-import {Query, QueryCapture} from "web-tree-sitter";
+import {LanguageInner, languageStore} from "../../../stores/language_store.ts";
+import {QueryCapture} from "web-tree-sitter";
+import {highlightWorkerStore} from "../../../stores/highlight_worker_store.ts";
 
 type Props = {
     current: [number | null, number]
@@ -128,6 +129,8 @@ const order_types = [
     "error",
     "other",
 ] as const
+
+
 export default function Code(props: Props) {
 
     if (props.current[0] == null) {
@@ -143,8 +146,6 @@ export default function Code(props: Props) {
         )
     }
     const [rows, setRows] = useState(file.content.split("\n"))
-
-
     useEffect(() => {
         setRows(file.content.split("\n"))
     }, [file.content]);
@@ -154,7 +155,6 @@ export default function Code(props: Props) {
             write_file(file.id, content);
         }
     }
-
     function _save() {
         if (file) {
             const cache = fileCacheStore.getState().get_by_id(file?.id);
@@ -177,8 +177,11 @@ export default function Code(props: Props) {
                         textAlign: "end",
                         fontSize: "14px",
                         color: "var(--border2)",
-                        lineHeight: 1.5,
-
+                        lineHeight: "21px",
+                        fontFamily: "monospace",
+                        letterSpacing: "normal",
+                        wordSpacing: "normal",
+                        // padding:"10px"
                     }}>{i + 1}</p>
                 )}
             </div>
@@ -250,28 +253,19 @@ function get_needed_highlight(pack: IPackage, filename: string): IPackageHighlig
     })
 }
 
-async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
+async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight, prev_text: string): Promise<QueryCapture[] | null> {
     console.log(last)
     console.log(languageStore.getState().languages)
-    let lang = languageStore.getState().languages[pack.id]?.[highlight.id];
-    if (!lang) {
-        console.log("lang")
-        let l = await languageStore.getState().add_language(pack.id, highlight.id)
-        if (!l) {
-            console.log("not lang")
-            return null
-        }
-        lang = l!
+    const inner = languageStore.getState().languages[pack.id]?.[highlight.id] as LanguageInner | undefined;
+    if (!inner) {
+        return null
     }
-
-    let lang1 = lang.lang;
     let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
     if (!tree) {
         console.log("not tree")
         return null
     }
-    let query = new Query(lang1, lang.scm);
-    let captures = query.captures(tree.rootNode);
+    let captures = inner.query.captures(tree[0].rootNode);
 
     console.log("complete")
     for (let i of captures) {
@@ -297,14 +291,14 @@ function get_order(typ: typeof order_types[number]): number {
 }
 
 
-interface Token {
+export interface Token {
     typ: typeof order_types[number],
     text: string,
     start: number,
     end: number
 }
 
-interface ExtToken extends Token {
+export interface ExtToken extends Token {
     color: string
 }
 
@@ -312,6 +306,12 @@ function CodeEditor(props: CodeProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const cursor_ref = useRef<[number, number] | null>(null);
+    //const [text, setText]=useState("")
+    const [tokens, setTokens] = useState<ExtToken[] | null>(null)
+
+    const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
+
+    const worker = highlightWorkerStore(state => state.worker);
 
     useLayoutEffect(() => {
         if (!cursor_ref.current || !textareaRef.current) return
@@ -320,39 +320,36 @@ function CodeEditor(props: CodeProps) {
         cursor_ref.current = null
     }, [props.text]);
 
-
-    const [tokens, setTokens] = useState<ExtToken[] | null>(null)
-
-    const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
-
     useEffect(() => {
 
 
         async function a() {
             let file = get_last_entity_of_path(props.cache.path);
             if (!file) {
-                console.log("\t not file")
+                //   console.log("\t not file")
                 setTokens(null)
                 return
             }
             let packs = [...projectStore.getState().selected_packages.entries()];
-            console.log(packs)
+            // console.log(packs)
             let pack = get_needed_package(packs, file!);
             if (!pack) {
-                console.log("\t not pack")
+                //    console.log("\t not pack")
                 setTokens(null)
                 return
             }
             let highlight = get_needed_highlight(pack[1].main, file);
             if (!highlight) {
-                console.log("\t not highlight")
+                //   console.log("\t not highlight")
                 setTokens(null)
                 return
             }
 
 
-            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
-            console.log("______________\n||||||||\n", typeof res)
+            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight, props.text);
+            //console.log("______________\n||||||||\n", typeof res)
+
+            // res.then(res=>{
             if (!res) {
                 setTokens(null)
                 return
@@ -361,7 +358,7 @@ function CodeEditor(props: CodeProps) {
             let dict = highlight.nodes;
             let map = new Map<string, Token>();
 
-            console.log("ordering", dict)
+            //console.log("ordering", dict)
             for (let i of res) {
                 let start = i.node.startIndex;
                 let end = i.node.endIndex
@@ -384,11 +381,6 @@ function CodeEditor(props: CodeProps) {
                     } satisfies Token)
                 }
             }
-
-
-            // parsed tokens
-            console.log("parsed", map)
-            console.log("other tokens")
 
             const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
             const result: Token[] = [];
@@ -425,8 +417,8 @@ function CodeEditor(props: CodeProps) {
                 setTokens(null)
                 return
             }
-            console.log("res tokens")
-            result.sort((a, b) => a.start - b.start);
+            //console.log("res tokens")
+            // result.sort((a, b) => a.start - b.start);
 
             let res_tokens: ExtToken[] = [];
             let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
@@ -435,60 +427,62 @@ function CodeEditor(props: CodeProps) {
             for (let i of result) {
                 let typ = i.typ;
                 let color = colors.tokens?.[typ as string];
-                console.log("col", i.typ, color)
+                //   console.log("col", i.typ, color)
                 if (!color) {
                     color = colors.base_color;
-                    console.log("\t\t sec col", color)
+                    // console.log("\t\t sec col", color)
                     if (!color) {
                         color = syntaxTheme?.tokens?.[typ as string];
-                        console.log("\t\t\t 3 col", color)
+                        //  console.log("\t\t\t 3 col", color)
                         if (!color) {
                             color = syntaxTheme?.base_color
-                            console.log("\t\t\t\t 4 col", color)
+                            //  console.log("\t\t\t\t 4 col", color)
                             if (!color) {
-                                color = "inherit"
-                                console.log("\t\t\t\t\t 5 col", color)
+                                color = "var(--subtitle)"
+                                //    console.log("\t\t\t\t\t 5 col", color)
                             }
                         }
                     }
                 }
                 if (colors.colors) {
-                    console.log("\tcolors")
+                    // console.log("\tcolors")
                     if (color in colors.colors) {
                         color = colors.colors[color]
-                        console.log("\t\t col2", color)
+                        // console.log("\t\t col2", color)
                     } else if (syntaxTheme?.colors) {
-                        console.log("\tcolors 2")
+                        // console.log("\tcolors 2")
                         if (color in syntaxTheme.colors) {
                             color = syntaxTheme.colors[color]
-                            console.log("\t\t col2", color)
+                            // console.log("\t\t col2", color)
                         }
                     }
                 } else if (syntaxTheme?.colors) {
-                    console.log("\tsyntax")
+                    //console.log("\tsyntax")
                     if (color in syntaxTheme.colors) {
                         color = syntaxTheme.colors[color]
-                        console.log("\t\t col3", color)
+                        //console.log("\t\t col3", color)
 
                     }
                 }
                 if (!color) {
-                    color = "inherit"
-                    console.log("\tinherit")
+                    color = "var(--subtitle)"
+                    // console.log("\tinherit")
                 }
-                console.log("\t\tcolor", color)
+                //console.log("\t\tcolor", color)
                 res_tokens.push({...i, color})
             }
 
-            console.log("complete 22", res_tokens)
+            // console.log("complete 22", res_tokens)
 
             setTokens(res_tokens)
+            //setText(props.text)
+            //  })
+
 
         }
 
-        a().then()
+        a()
     }, [props.text]);
-
 
     function keyDown(e: React.KeyboardEvent) {
         let cur = textareaRef.current;
@@ -588,6 +582,43 @@ function CodeEditor(props: CodeProps) {
     }
 
 
+    const h_ref = useRef<HTMLDivElement>(null)
+
+
+    const row_ref = useRef<HTMLHRElement>(null)
+
+
+    useEffect(() => {
+
+        let cur = textareaRef.current;
+        let cur2 = row_ref.current;
+        if (!cur || !cur2) return
+
+
+        function handler(e: MouseEvent) {
+            let tg = (e.currentTarget as HTMLTextAreaElement)
+            let pos = tg.selectionEnd;
+            let text = tg.value;
+            let slice = text.slice(0, pos);
+            let count = slice.split("\n").length;
+            let height = count * 21;
+            console.log("rows", count, pos, height)
+            cur2!.style.display = "block";
+            cur2!.style.top = (height - 21 / 2) + "px"
+        }
+
+        function blur() {
+            cur2!.style.display = "none"
+        }
+
+        cur.addEventListener("click", handler)
+        cur.addEventListener("blur", blur)
+
+        return () => {
+            cur.removeEventListener("click", handler)
+            cur.removeEventListener("blur", blur)
+        }
+    }, [])
 
     return (
         <div
@@ -600,17 +631,9 @@ function CodeEditor(props: CodeProps) {
             }}
             onClick={() => textareaRef.current!.focus()}
         >
-            <div className={"code-editor-text"} style={{
-                position: "absolute",
-                zIndex: 10,
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                padding: "10px",
+            <div ref={h_ref} className={"code-editor-text"} style={{
+                zIndex: 11,
                 pointerEvents: "none",
-                whiteSpace: "pre",
-                lineHeight: "24px",
 
             }}
                  onClick={() => textareaRef.current?.focus()}
@@ -637,25 +660,16 @@ function CodeEditor(props: CodeProps) {
                 autoCapitalize="off"
                 autoComplete="off"
                 className={"code-editor-text"}
+                onScroll={(e) => e.preventDefault()}
                 style={{
-                    zIndex: 11,
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    padding: "10px",
-                    minWidth: "100%",
-                    height: "100%",
+                    zIndex: 10,
                     opacity: "1",
                     border: "none",
                     outline: "none",
                     resize: "none",
                     background: "transparent",
-                    color: "transparent",
+                    color: "var(--subtitle)",
                     caretColor: "var(--subtitle)",
-                    lineHeight: "24px",
-                    fontSize: "14px",
-                    fontFamily: "monospace",
-                    overflow: "auto",
                     whiteSpace: "nowrap"
                 }}
                 value={props.text}
@@ -664,6 +678,15 @@ function CodeEditor(props: CodeProps) {
                 }
             />
 
+            <hr ref={row_ref} style={{
+                position: "absolute",
+                zIndex: 10,
+                width: "calc(100% - 40px)",
+                left: "40px",
+                height: "21px",
+                background: "var(--border3)",
+                border: "none"
+            }}></hr>
         </div>
     );
 }

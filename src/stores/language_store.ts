@@ -1,4 +1,4 @@
-import {Language} from "web-tree-sitter"
+import {Language, Parser, Query} from "web-tree-sitter"
 import {create} from "zustand";
 import {projectStore} from "./project_store.ts";
 import {packageStore} from "./package_store.ts";
@@ -10,6 +10,8 @@ type highlightId = string
 export interface LanguageInner {
     lang: Language,
     scm: string
+    parser: Parser
+    query: Query
 }
 
 
@@ -45,11 +47,16 @@ export const languageStore = create<Type>((set, get) => ({
             let scm = await invoke<string>("read_scm", {
                 pack, highlight
             })
+            let parser = new Parser()
+            parser.setLanguage(lang)
+            let query = new Query(lang, scm)
             langs[pack] = {
                 ...langs[pack] ?? {},
                 [highlight]: {
                     lang: lang,
-                    scm: scm
+                    scm: scm,
+                    parser,
+                    query
                 }
             }
             set({
@@ -58,7 +65,9 @@ export const languageStore = create<Type>((set, get) => ({
 
             return {
                 lang: lang,
-                scm: scm
+                scm: scm,
+                parser,
+                query
             } satisfies LanguageInner
         } catch (e) {
             console.error(e)
@@ -87,7 +96,7 @@ export const languageStore = create<Type>((set, get) => ({
         let pack_id = pack.id;
 
         let langs = get().languages;
-        let res = []
+        let res: LanguageInner[] = []
         try {
             let scms = await invoke<string>("read_scms", {pack: pack})
             console.log("scms")
@@ -99,13 +108,20 @@ export const languageStore = create<Type>((set, get) => ({
                 let arr = new Uint8Array(bin);
                 console.log("bin")
                 let lang = await Language.load(arr)
+                let parser = new Parser()
+                parser.setLanguage(lang)
+                let query = new Query(lang, scms[i] ?? "")
                 res.push({
-                    lang, scm: scms[i] ?? ""
+                    lang, scm: scms[i] ?? "", parser, query
                 })
                 console.log("setting", pack_id, h.id)
                 langs[pack_id] = {
                     ...langs[pack_id] ?? {},
-                    [h.id]: {lang, scm: scms[i] ?? ""}
+                    [h.id]: {
+                        lang,
+                        scm: scms[i] ?? "",
+                        parser, query
+                    }
                 }
             }
             set({

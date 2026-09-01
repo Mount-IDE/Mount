@@ -19,6 +19,7 @@ import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
 import {packageStore} from "./stores/package_store.ts";
 import {Parser} from "web-tree-sitter";
+import {highlightWorkerStore} from "./stores/highlight_worker_store.ts";
 
 
 /**
@@ -68,6 +69,9 @@ function App() {
     }
 
     useEffect(() => {
+        highlightWorkerStore.getState().init()
+
+
         let cancelled = false;
 
         async function setupWindow() {
