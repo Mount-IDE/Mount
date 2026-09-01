@@ -198,6 +198,7 @@ type CodeProps = {
     save: () => void
     cache: FileCache
     ref: RefObject<HTMLDivElement | null>
+
 }
 
 function contains(regex: string[] | undefined, text: string) {
@@ -270,9 +271,9 @@ async function tokenize(text: string, path: string, last: string, pack: IPackage
     let captures = inner.query.captures(tree[0].rootNode);
 
     // console.log("complete")
-    /*for (let i of captures) {
+    for (let i of captures) {
         console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
-    }*/
+    }
 
     return captures
 }
@@ -374,18 +375,20 @@ function CodeEditor(props: CodeProps) {
         async function a() {
             let file = get_last_entity_of_path(props.cache.path);
             if (!file) {
-                //   console.log("\t not file")
+                console.log("\t not file")
                 setTokens(null)
                 return
             }
             let packs = [...projectStore.getState().selected_packages.entries()];
             let pack = get_needed_package(packs, file!);
             if (!pack) {
+                console.log("not pack")
                 setTokens(null)
                 return
             }
             let highlight = get_needed_highlight(pack[1].main, file);
             if (!highlight) {
+                console.log("not highlight")
                 setTokens(null)
                 return
             }
@@ -393,6 +396,7 @@ function CodeEditor(props: CodeProps) {
 
             let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
             if (!res) {
+                console.log("not tokenize")
                 setTokens(null)
                 return
             }
@@ -423,6 +427,7 @@ function CodeEditor(props: CodeProps) {
                 }
             }
 
+            console.log("step 1")
             const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
             const result: Token[] = [];
 
@@ -460,6 +465,7 @@ function CodeEditor(props: CodeProps) {
             let res_tokens: ExtToken[] = [];
             let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
 
+            console.log("colors")
             //colors
             for (let i of result) {
                 let typ = i.typ;
@@ -496,6 +502,7 @@ function CodeEditor(props: CodeProps) {
                 res_tokens.push({...i, color})
             }
 
+            console.log("end")
             let result_ = buildLineIndex(props.text, res_tokens)
             setTokens(result_.byLine)
 
@@ -718,7 +725,7 @@ function CodeEditor(props: CodeProps) {
                 overflow: "hidden",
                 height: "100%"
             }}>
-                {
+                {tokens != null &&
                     Array.from({length: lastLine - firstLine + 1}, (_, i) => firstLine + i)
                         .map(lineIndex => {
                             const line_tokens = tokens?.get(lineIndex) ?? []

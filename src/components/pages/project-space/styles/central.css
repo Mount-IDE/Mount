@@ -3,4 +3,5 @@
     flex: 1;
     display: flex;
     background: var(--bg2);
+    overflow: hidden;
 }

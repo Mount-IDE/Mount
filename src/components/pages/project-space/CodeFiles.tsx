@@ -27,8 +27,17 @@ export default function CodeFiles(props: Props) {
         props.setCurrent(obj_.id, obj_.cache_id);
     }
 
-    const theme = themeStore(state => state.current_theme?.elements?.project_space?.center?.file_list)
+    const theme =
+        themeStore(state =>
+            state
+                .current_theme
+                ?.elements
+                ?.project_space
+                ?.center
+                ?.file_list
+        )
 
+    console.log(theme)
     const [buttons, setButtons] = useState<IContextMenuButton[]>([])
     const [cords, setCords] = useState<[number, number]>([0, 0])
     const [showContext, setShowContext] = useState(false)
@@ -74,12 +83,14 @@ export default function CodeFiles(props: Props) {
         return () => window.removeEventListener("click", hide)
     }, [showContext]);
 
+    let border = computeBP(theme?.this?.border, "border")
+    console.log(border)
     return (
         <>
             <div className={"code-space-files"}
                  style={{
-                     ...computeBP(theme?.this?.border, "border"),
-                     background: theme?.this?.background
+                     background: theme?.this?.background,
+                     ...border
                  }}
             >
                 {props.files.map(el =>

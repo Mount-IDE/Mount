@@ -122,6 +122,7 @@ function App() {
                 "bg-t",
                 "input",
                 "placeholder",
+                "files-bg"
             ];
             let root = document.querySelector(":root") as HTMLElement;
             if (root) {

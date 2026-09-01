@@ -29,6 +29,9 @@ interface Type {
 
 
     open_project: (proj: IProject) => Promise<void>
+
+
+    get_pack_by_file: (file: string | null) => PackageInner | null
 }
 
 
@@ -205,8 +208,21 @@ export const projectStore = create<Type>((set, get) => ({
             current_project: proj,
             path_to_current_project: cacheStore.getState().make_path([proj.path, proj.name])
         })
-
-
+    },
+    get_pack_by_file(file: string | null): PackageInner | null {
+        if (!file) return null
+        let packs = [...get().selected_packages]
+        let pack = packs.find(el => {
+            for (let i of el[1].main.files.extentions) {
+                if (file.endsWith(i)) return true
+            }
+            return false
+        })
+        if (!pack) {
+            return null
+        }
+        return pack[1]
     }
+
 
 }))

@@ -7,7 +7,7 @@
     background: var(--bg-t);
     border-radius: var(--rounded);
     padding: var(--padding);
-    z-index: 6;
+    z-index: 100;
     border: 1px solid var(--border2);
 
 }

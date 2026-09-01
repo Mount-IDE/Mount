@@ -124,10 +124,10 @@ export type BP = string | {
 
 export function computeBP(val: BP | undefined, kw: "padding" | "border") {
     return typeof val == "object" ? {
-        [`${kw}Left`]: val?.left,
-        [`${kw}Right`]: val?.right,
-        [`${kw}Top`]: val?.top,
-        [`${kw}Bottom`]: val?.bottom,
-    } : {[kw]: val}
+        [`${kw}Left`]: (val?.left ?? "none"),
+        [`${kw}Right`]: (val?.right ?? "none"),
+        [`${kw}Top`]: (val?.top ?? "none"),
+        [`${kw}Bottom`]: (val?.bottom ?? "none"),
+    } : {[kw]: val + " !important"}
 }
 

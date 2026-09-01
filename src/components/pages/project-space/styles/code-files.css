@@ -1,11 +1,12 @@
 .code-space-files {
     width: 100%;
-    height: 30px;
+    height: 35px;
     display: flex;
     border-bottom: 1px solid var(--border2);
     gap: 20px;
     padding-left: 10px;
     overflow: auto;
+    background: var(--files-bg);
 }
 
 .code-space-file {

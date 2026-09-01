@@ -1,9 +1,9 @@
 .project-code{
     width: 100%;
-    height: calc(100% - 30px);
+    height: calc(100% - 35px);
     display: flex;
     position: absolute;
-    top: 30px;
+    top: 35px;
     left: 0;
     overflow: auto;
     gap: 5px;

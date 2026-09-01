@@ -2,14 +2,10 @@ import {create} from "zustand";
 import {cacheStore} from "./cache_store.ts";
 
 
-
-
 interface Type {
     packages: IPackage[] // all packages
 
     set_package: (pack: IPackage[]) => void
-
-
     get_wasm: (pack: string, highlight: string) => string; // return only path to
 }
 

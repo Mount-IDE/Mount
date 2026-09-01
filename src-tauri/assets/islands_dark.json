@@ -10,6 +10,10 @@
         {
             "name": "bg2",
             "value": "#131313"
+        },
+        {
+            "name": "files-bg",
+            "value": "#101010"
         }
     ],
     "elements": {
@@ -58,7 +62,14 @@
             "center": {
                 "this": {
                     "rounded": "var(--rounded)",
-                    "padding": "10px"
+                    "padding": "0"
+                },
+                "file_list": {
+                    "this": {
+                        "border": {
+                            "bottom": "none"
+                        }
+                    }
                 }
             },
             "bottom": {

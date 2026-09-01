@@ -173,7 +173,7 @@ export default function CreateEntity() {
                 height: "100vh",
                 backdropFilter: "blur(5px)",
                 background: "rgba(0,0,0,0.5)",
-                zIndex: 5,
+                zIndex: 99,
             }}></div>
         </>
     )
