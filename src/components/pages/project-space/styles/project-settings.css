@@ -9,7 +9,7 @@
     background: var(--bg2);
     backdrop-filter: blur(20px);
     padding: 20px;
-    z-index: 20;
+    z-index: 120;
     opacity: 0.8;
 }
 

@@ -6,7 +6,7 @@
     position: fixed;
     top: 15%;
     left: 15%;
-    z-index: 100;
+    z-index: 120;
     border: 1px solid var(--border3);
     padding: var(--padding);
 }

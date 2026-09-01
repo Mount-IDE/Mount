@@ -7,7 +7,7 @@
     opacity: 0.9;
     backdrop-filter: blur(40px);
     background: var(--bg-t);
-    z-index: 10;
+    z-index: 120;
     border-radius: var(--rounded);
     padding: var(--padding);
     border: 1px solid var(--border2);

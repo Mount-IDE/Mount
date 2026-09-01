@@ -15,7 +15,7 @@
 An experimental modular integrated development environment where everything needed for development – compilers, LSP,
 formatters, debuggers – is managed by a single package system.
 
-<img src="./docs/images/1.png">
+<img src="./docs/images/2.jpg">
 
 # Why Mount
 
@@ -83,7 +83,7 @@ cd src-tauri/target/release
 - [x] Project Settings
 - [x] Global Settings
 - [x] Launch Configurations
-- [ ] Package Manager
+- [x] Package Manager
 - [ ] Process Monitor
 - [ ] Plugin System
 
