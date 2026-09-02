@@ -630,7 +630,7 @@ impl TLaunchRunService for LaunchRunService {
             println!("get child");
             let a = child.start_kill();
             println!("kill");
-            let code = child.wait().await;
+            let _ = child.wait().await;
             println!("close task 222");
             let mut writter = session.writer.lock().await;
             let _ = writter.flush();

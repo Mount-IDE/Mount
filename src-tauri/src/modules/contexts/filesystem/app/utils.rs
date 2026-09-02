@@ -22,12 +22,6 @@ pub trait PathPart {
     fn __get(&self) -> String;
 }
 
-/*impl PathPart for &'static str {
-    fn __get(&self) -> String {
-        self.to_string()
-    }
-}*/
-
 impl PathPart for &str {
     fn __get(&self) -> String {
         self.to_string()
@@ -46,30 +40,43 @@ impl PathPart for Path {
     }
 }
 
-pub fn make_path_string<T: PathPart>(paths: Vec<T>) -> String {
-    if paths.len() == 0 {
-        return "".to_string();
-    }
-    let mut res = String::new();
-    if cfg!(target_os = "windows") {
-        res = paths
+impl<T: Into<String> + Clone> PathPart for Vec<T> {
+    fn __get(&self) -> String {
+        let res = self
             .iter()
-            .map(|e| e.__get())
-            .collect::<Vec<String>>()
-            .join("\\");
-    } else {
-        res = paths
-            .iter()
-            .map(|e| e.__get())
-            .collect::<Vec<String>>()
-            .join("/");
+            .map(|e| e.clone().into())
+            .collect::<Vec<String>>();
+        if cfg!(target_os = "windows") {
+            return res.join("\\");
+        }
+        res.join("/")
     }
-    // println!("path end {}", res.clone());
-    res
 }
 
+#[deprecated]
+pub fn make_path_string<T: PathPart>(paths: Vec<T>) -> String {
+    todo!();
+    /*if paths.len() == 0 {
+        return "".to_string();
+    }
+    if cfg!(target_os = "windows") {
+        paths
+            .iter()
+            .map(|e| e.__get())
+            .collect::<Vec<String>>()
+            .join("\\")
+    } else {
+        paths
+            .iter()
+            .map(|e| e.__get())
+            .collect::<Vec<String>>()
+            .join("/")
+    }*/
+}
+#[deprecated]
 pub fn make_path<T: PathPart>(path: Vec<T>) -> Path {
-    Path(make_path_string(path))
+    todo!();
+    //Path(make_path_string(path))
 }
 
 macro_rules! path_from {
@@ -87,6 +94,9 @@ macro_rules! path_from {
 
        }
     };
+    ($x:expr)=>{
+        Path($x.__get())
+    }
 }
 
 pub(crate) use path_from;

@@ -5,10 +5,10 @@ use crate::modules::app::{
 };
 use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
+use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
-use crate::modules::contexts::filesystem::app::utils::{make_path, make_path_string, path_from};
 use crate::modules::contexts::filesystem::domain::entities::PFile;
-use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
+use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
@@ -33,18 +33,13 @@ use tauri::State;
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
     let dir = CONFIG_SERVICE.get_data_dir()?;
-    let file = PFile {
-        name: "recent-projects.json".to_string(),
-        path: dir,
-        typ: FileType::REGULAR,
-    };
+    let file = PFile::from_path_reg(dir);
+
     let ext = FS_READ_SERVICE.exist_file(&file);
     if !ext {
         let _ = CONFIG_RECOVERY_SERVICE.check_data_dir()?;
-        // println!("get second");
     }
     let recent = PROJECT_SERVICE.get_recent_projects()?;
-    // println!("GET_RECENT_OK");
     Ok(recent)
 }
 #[tauri::command]
@@ -53,29 +48,21 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
     let mut res: Vec<Project> = vec![];
 
     for path in vec_path {
-        let get = path.get().clone();
+        let get: String = path.clone().get();
 
-        let path_ = make_path_string(vec![get.as_str(), ".mount", "project.json"]);
-        let file = PFile {
-            name: "project.json".to_string(),
-            path: Path(path_.clone()),
-            typ: FileType::REGULAR,
-        };
+        let path_ = path_from![get, ".mount", "project.json"];
+        let file = PFile::from_path_reg(path_);
+
         if FS_READ_SERVICE.exist_file(&file) {
-            let config = FS_READ_SERVICE.read_file(&file);
-            if config.is_err() {
+            let Ok(config) = FS_READ_SERVICE.read_file(&file) else {
                 continue;
-            }
-            let config = config.unwrap();
-            let json = serde_json::from_str::<Project>(config.as_str());
-            if json.is_err() {
+            };
+            let Ok(json) = PARSING_SERVICE._from_string::<Project>(&config) else {
                 continue;
-            }
-            let json = json.unwrap();
+            };
             res.push(json);
         }
     }
-    // println!("READ_RECENT_OK");
     Ok(res)
 }
 
@@ -112,7 +99,6 @@ pub async fn create_project(
 
         let json = PARSING_SERVICE.to_string(error_dependency.clone());
         if let Err(_) = json {
-            println!("not3");
             return Err(ProjectError::NotAllDependenciesSuplied(error_dependency.clone()).into());
         }
 
@@ -157,7 +143,7 @@ pub async fn create_project(
         _ => return Err(ProjectError::PathNotFound.into()),
     };
 
-    let path_ = make_path(vec![path.as_str(), name.as_str()]);
+    let path_ = path_from![path, name];
     let ext = FS_READ_SERVICE.exists(path_.clone());
     if ext {
         // if project already exists
@@ -288,12 +274,10 @@ pub async fn create_project(
 
     // if tasks running completely
     if let Some(val) = tasks {
-        println!("PACKAGES {:?}", val.1);
-        println!("PACKAGES2 {:?}", pack_results);
-        let dir = FS_WRITE_SERVICE.create_dir(&path_)?;
+        let _ = FS_WRITE_SERVICE.create_dir(&path_)?;
         let path_to_mount = path_from![path_, ".mount"];
 
-        let mount = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
+        let _ = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
 
         let path_to_settings = path_from![path_to_mount, "project.json"];
 
@@ -382,7 +366,7 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
             color: String,
         }
 
-        let json = PARSING_SERVICE._from_string::<Image>(val);
+        let json = PARSING_SERVICE._from_string::<Image>(&val);
         if let Ok(json) = json {
             meta_.icon = match json.typ.as_str() {
                 "color" => Some(json.color),
@@ -400,7 +384,6 @@ fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -
         .map(|el| el.name.clone())
         .collect::<Vec<String>>();
     meta_.tags = _tags_.clone();
-    println!("{meta_:?}");
     meta_
 }
 
@@ -413,7 +396,6 @@ pub fn remove_project(path: Path) -> Result<(), ErrorDto> {
 
 #[tauri::command]
 pub fn read_project(path: Path) -> Result<Project, ErrorDto> {
-    // println!("path command {}", path.clone());
     PROJECT_SERVICE.open_project(&path).map_err(|e| e.into())
 }
 
@@ -426,7 +408,7 @@ pub fn save_project(project: Project) -> Result<(), ErrorDto> {
 #[tauri::command]
 pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
     let dir = CONFIG_SERVICE.get_data_dir()?;
-    let path = path_from![dir, "recent_projects.json"];
+    let path = path_from![dir, "recent-projects.json"];
     let file = PFile::from_path_reg(path);
 
     let parsed = PARSING_SERVICE.to_string(projects)?;

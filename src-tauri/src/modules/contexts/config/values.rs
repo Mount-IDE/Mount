@@ -1,5 +1,4 @@
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
-use crate::modules::contexts::package::domain::Grammar;
 use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
 use crate::modules::contexts::settings::domain::entities::{RecentProject, Settings};
 use crate::modules::shared::kernel::values::Path;
@@ -45,7 +44,6 @@ impl Default for FsType {
 pub struct PackageInner {
     pub main: Package,
     pub config: String,
-    pub grammars: Vec<Grammar>,
 }
 
 ///

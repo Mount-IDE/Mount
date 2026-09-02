@@ -1,7 +1,7 @@
 use super::default::action::*;
 use super::default::template::t_meta_icon;
 use crate::modules::shared::kernel::values::Val;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use ts_rs::TS;

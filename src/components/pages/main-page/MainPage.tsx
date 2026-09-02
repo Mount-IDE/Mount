@@ -130,6 +130,7 @@ export default function MainPage() {
                                 await invoke("remove_project", {path: currentPath});
                                 cacheStore.getState().remove_from_recents(currentPath);
                                 menuStore.getState().close_modal()
+                                cacheStore.getState().remove_from_recents(currentPath);
                             } catch (e) {
                                 console.error(e)
                             }

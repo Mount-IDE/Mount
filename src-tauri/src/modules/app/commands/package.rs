@@ -8,7 +8,6 @@ use crate::modules::contexts::package::traits::TLspService;
 use crate::modules::contexts::project::domain::entities::{Package, PackageComponent};
 use crate::modules::services::traits::TConfigService;
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::errors::ProjectError;
 use crate::modules::shared::kernel::values::Path;
 use serde_json::Value;
 use tauri::{AppHandle, State, Window};

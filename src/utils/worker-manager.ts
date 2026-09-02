@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 type PendingEntry = {
     resolve: (v: any) => void
     reject: (e: any) => void

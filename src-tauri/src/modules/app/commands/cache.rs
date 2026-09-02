@@ -25,7 +25,6 @@ use which::which;
 #[tauri::command]
 pub fn read_packages(state: State<'_, SharedPackages>) -> Result<Vec<Package>, ErrorDto> {
     let packs = PACKAGE_SERVICE.read_packages()?;
-    println!("ok packs {packs:?}");
     {
         let mut list = state.lock().unwrap();
         *list = Vec::from(packs.clone())
@@ -114,19 +113,16 @@ pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
         }
         which(e).is_ok()
     };
-    let shells = shells
-        .iter()
-        .filter(|e| exists(e.to_string().clone()))
-        .map(|e| e.to_string())
-        .collect::<Vec<String>>();
+
+    let shells = shells.iter();
+    let shells = shells.filter(|e| exists(e.to_string()));
+    let shells = shells.map(|e| e.clone()).collect::<Vec<String>>();
 
     let themes = read_themes()?;
 
     let recent = get_recent_projects().unwrap_or(vec![]);
 
     let packages = read_packages(state).unwrap_or(Vec::new());
-    println!("packages {:?}", packages);
-
     let res = Cache {
         recent_projects: recent,
         settings,
@@ -151,11 +147,9 @@ pub fn get_meta_of_selected_packages(
     let mut res = HashMap::<String, PackageInner>::new();
     for i in packs {
         let config = PACKAGE_SERVICE.read_config(i.id.clone());
-        let langs = PACKAGE_SERVICE.read_textmate(i.id.clone());
         let inner = PackageInner {
             main: i.clone(),
             config: config.unwrap_or("".to_string()),
-            grammars: langs.unwrap_or(vec![]),
         };
         res.insert(i.id, inner);
     }

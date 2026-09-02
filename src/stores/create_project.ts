@@ -1,6 +1,5 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
-import {projectStore} from "./project_store.ts";
 import pageStore from "./page_store.ts";
 
 
@@ -12,8 +11,6 @@ interface Type {
     tags: { id: number, name: string }[]
     packages: Set<string>
     add_result: (tid: string, sid: number, pid: string, value: string | boolean | string[]) => void,
-    // get_result:(tid: string, sid:number, pid: string)=>string | boolean | undefined,
-    // has_result: (from:string)=>boolean,
     add_package: (id: string) => void
     add_packages: (pack: string[]) => void
     remove_package: (pack: string) => void
@@ -27,6 +24,8 @@ interface Type {
 
     create_project(template: ITemplate): Promise<[number, string, IProject | null]>
 
+    clear: () => void
+
 }
 
 export interface Result {
@@ -39,7 +38,6 @@ export interface Result {
 
 
 export const createProjectStore = create<Type>((set, get) => ({
-    void: undefined,
     page_opened: false,
     results: {},
     packages: new Set(),
@@ -58,6 +56,14 @@ export const createProjectStore = create<Type>((set, get) => ({
         })
     },
 
+    clear: () => {
+        set({
+            packages: new Set(),
+            results: {},
+            tags: [],
+            package_results: {}
+        })
+    },
 
     close: () => set({page_opened: false}),
     open: () => set({page_opened: true}),
@@ -131,7 +137,7 @@ export const createProjectStore = create<Type>((set, get) => ({
                 components: [path, name]
             })
             pageStore.getState().setFilter(false);
-
+            this.clear()
             return [0, unified, project]
         } catch (e) {
             console.warn(e)

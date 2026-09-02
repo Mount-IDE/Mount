@@ -36,5 +36,5 @@ pub trait TConfigRecoveryService {
 pub trait TParsingService {
     fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError>;
 
-    fn _from_string<T: DeserializeOwned>(&self, obj: String) -> Result<T, ParsingError>;
+    fn _from_string<T: DeserializeOwned>(&self, obj: &String) -> Result<T, ParsingError>;
 }

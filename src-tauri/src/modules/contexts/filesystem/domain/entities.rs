@@ -10,6 +10,7 @@ pub struct PFile {
 }
 
 impl PFile {
+    #[allow(unused)]
     pub fn regular(name: String, path: Path) -> PFile {
         Self {
             name,

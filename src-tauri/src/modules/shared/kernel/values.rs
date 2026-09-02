@@ -1,4 +1,4 @@
-use crate::modules::contexts::filesystem::app::utils::{make_path, PathPart};
+use crate::modules::contexts::filesystem::app::utils::{path_from, PathPart};
 use crate::modules::contexts::filesystem::domain::values::FsPath;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
@@ -37,6 +37,7 @@ impl Platform {
         Self::SINGLE(PlatformType::WINDOWS)
     }
 
+    #[allow(unused)]
     pub fn macos() -> Self {
         Self::SINGLE(PlatformType::MACOS)
     }
@@ -98,7 +99,7 @@ impl Path {
             .collect::<Vec<String>>();
         let str_ = str_.iter().map(|e| e.as_str()).collect::<Vec<&str>>();
 
-        let path = make_path(str_);
+        let path = path_from!(str_);
         path
     }
 
@@ -271,13 +272,13 @@ impl IfStatementOperation {
             IfStatementOperation::LT => |a, b| a < b,
             IfStatementOperation::LE => |a, b| a >= b,
             IfStatementOperation::GE => |a, b| a <= b,
-            IfStatementOperation::Empty => |a, b| {
+            IfStatementOperation::Empty => |a, _| {
                 if let Val::STRING(v) = a {
                     return v.is_empty();
                 }
                 false
             },
-            IfStatementOperation::NonEmpty => |a, b| {
+            IfStatementOperation::NonEmpty => |a, _| {
                 if let Val::STRING(v) = a {
                     return !v.is_empty();
                 }
@@ -321,11 +322,11 @@ impl IfStatementOperation {
                 }
                 false
             },
-            IfStatementOperation::NonAlready => |a, b| true,
-            IfStatementOperation::Stopped => |a, b| true,
-            IfStatementOperation::NonStopped => |a, b| true,
-            IfStatementOperation::Installed => |a, b| true,
-            IfStatementOperation::NonInstalled => |a, b| true,
+            IfStatementOperation::NonAlready => |_, _| true,
+            IfStatementOperation::Stopped => |_, _| true,
+            IfStatementOperation::NonStopped => |_, _| true,
+            IfStatementOperation::Installed => |_, _| true,
+            IfStatementOperation::NonInstalled => |_, _| true,
         }
     }
 }

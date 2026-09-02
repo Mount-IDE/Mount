@@ -5,6 +5,7 @@ use crate::modules::contexts::project::domain::values::{ButtonPos, CreateProject
 
 pub mod functions {}
 
+#[allow(unused)]
 pub fn make_tasks(template: ProjectTemplate, values: CreateProjectResult) {}
 
 pub fn make_buttons() -> Vec<Button> {

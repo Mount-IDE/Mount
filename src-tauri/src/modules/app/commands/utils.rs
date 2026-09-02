@@ -1,6 +1,7 @@
 use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
-use crate::modules::contexts::filesystem::app::utils::make_path;
+use crate::modules::contexts::filesystem::app::utils::path_from;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::services::traits::TConfigService;
 use crate::modules::shared::kernel::entities::ErrorDto;
@@ -10,7 +11,8 @@ use base64::Engine;
 
 #[tauri::command]
 pub fn make_path_command(components: Vec<String>) -> Path {
-    make_path(components.iter().map(|x| x.as_str()).collect())
+    path_from![components]
+    //make_path(components.iter().map(|x| x.as_str()).collect())
 }
 
 #[tauri::command]
@@ -20,8 +22,7 @@ pub fn make_path_from_icon(
     code: bool,
 ) -> Result<String, ErrorDto> {
     let dir = CONFIG_SERVICE.get_data_dir()?;
-    // println!("data dir is {}", dir.clone());
-    let path = make_path(vec![dir.get().as_str(), path.as_str(), components.as_str()]);
+    let path = path_from![dir, path, components];
     if code {
         return make_base64(path.get());
     }

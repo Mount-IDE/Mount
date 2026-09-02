@@ -1,6 +1,5 @@
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::project::domain::values::ProjectMeta;
-use crate::modules::shared::kernel::values::{Path, Schema};
+use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -131,10 +130,7 @@ pub struct RecentProject {
     pub(crate) packages: Vec<String>,
 }
 
-///
-///
-///
-
+/*
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ITheme {
     pub id: String,
@@ -151,7 +147,6 @@ pub struct ThemeColor {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-
 pub struct IThemeMeta {
     pub authors: Option<Vec<String>>,
     pub description: Option<String>,
@@ -615,3 +610,4 @@ pub struct ThemeSettingsLeftList {
     pub hover: Option<ThemeHF>,
     pub focus: Option<ThemeHF>,
 }
+*/

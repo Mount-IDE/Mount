@@ -14,7 +14,7 @@ use tauri::{State, Window};
 
 #[tauri::command]
 pub fn create_ref(
-    results: LaunchTemplateResult,
+    #[allow(unused)] results: LaunchTemplateResult,
     l_template: LaunchTemplate,
     template: ProjectTemplate,
     mut project: Project,

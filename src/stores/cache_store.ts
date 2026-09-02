@@ -87,7 +87,7 @@ export const cacheStore = create<Type>((set, get) => ({
     remove_from_recents(path): void {
         set({
             recent_projects: get().recent_projects.filter(el =>
-                path != el.path
+                path != cacheStore.getState().make_path([el.path, el.name])
             )
         })
     },

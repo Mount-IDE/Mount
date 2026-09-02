@@ -3,6 +3,7 @@ import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../stores/cache_store.ts";
 import {languageStore} from "../stores/language_store.ts";
 
+// noinspection JSUnusedGlobalSymbols
 export function LOG(...messages: any[]) {
     console.log(...messages);
 }

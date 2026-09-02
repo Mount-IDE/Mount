@@ -6,8 +6,7 @@ use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWrite
 use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
-use crate::modules::contexts::filesystem::domain::values::{FileType, FileWriteAccess};
-use crate::modules::contexts::package::domain::Grammar;
+use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::app::traits::{
     TActionProjectService, TPackageService, TProjectService,
 };
@@ -76,23 +75,11 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        // println!("path open {}", project_path.clone());
         let path = path_from![project_path, ".mount", "project.json",];
-        let config = PFile {
-            name: "project.json".to_string(),
-            path: path.clone(),
-            typ: FileType::REGULAR,
-        };
-        // println!("path {path}");
+        let config = PFile::from_path_reg(path);
+
         let json = FS_READ_SERVICE.read_file(&config)?;
-        let proj =
-            serde_json::from_str::<Project>(&json).map_err(|e| ProjectError::ParsingError {
-                err: ParsingError::Deserialize {
-                    json: json.clone(),
-                    path: config.path.clone(),
-                    err: e,
-                },
-            })?;
+        let proj = PARSING_SERVICE._from_string::<Project>(&json)?;
         Ok(proj)
     }
 
@@ -103,11 +90,7 @@ impl TProjectService for ProjectService {
         let path_ = path_from![project_path, ".mount", "project.json",];
         let file = PFile::from_path_reg(path_.clone());
         let text = FS_READ_SERVICE.read_file(&file)?;
-        let json = serde_json::from_str(&text).map_err(|e| ParsingError::Deserialize {
-            json: text.clone(),
-            err: e,
-            path: path_.clone(),
-        })?;
+        let json = PARSING_SERVICE._from_string::<Project>(&text)?;
 
         let proj_dir = PDirectory::from_path(&project_path.clone());
         FS_WRITE_SERVICE.remove_dir(&proj_dir)?;
@@ -118,12 +101,8 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn get_projects(&self, dir: &Path) -> Result<Vec<Project>, ProjectError> {
-        let dir = PDirectory {
-            name: "".to_string(),
-            path: dir.clone(),
-            files: vec![],
-            directories: vec![],
-        };
+        let dir = PDirectory::from_path(dir);
+
         let directory = FS_READ_SERVICE.read_dir(&dir)?;
         let mut projects: Vec<Project> = vec![];
         for dir in directory.directories {
@@ -133,24 +112,12 @@ impl TProjectService for ProjectService {
             }
             let mount = mount.unwrap().clone();
             let path_to = path_from![mount.path, "project.json"];
-            let file = PFile {
-                name: "project.json".to_string(),
-                path: path_to.clone(),
-                typ: FileType::REGULAR,
-            };
-            let file = FS_READ_SERVICE.read_file(&file);
-            if file.is_err() {
+
+            let file = PFile::from_path_reg(path_to);
+            let Ok(file) = FS_READ_SERVICE.read_file(&file) else {
                 continue;
-            }
-            let file = file.unwrap();
-            let proj =
-                serde_json::from_str::<Project>(&file).map_err(|e| ProjectError::ParsingError {
-                    err: ParsingError::Deserialize {
-                        json: file,
-                        path: path_to.clone(),
-                        err: e,
-                    },
-                })?;
+            };
+            let proj = PARSING_SERVICE._from_string::<Project>(&file)?;
             projects.push(proj);
         }
         Ok(projects)
@@ -178,7 +145,7 @@ impl TProjectService for ProjectService {
         let file = PFile::from_path_reg(path_to);
 
         let text = FS_READ_SERVICE.read_file(&file)?;
-        let mut projects = PARSING_SERVICE._from_string::<Vec<RecentProject>>(text)?;
+        let mut projects = PARSING_SERVICE._from_string::<Vec<RecentProject>>(&text)?;
 
         projects.sort_by(|a, b| b.last_opened.cmp(&a.last_opened));
         Ok(projects)
@@ -187,19 +154,11 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn save_project(&self, _project: &Project) -> Result<(), ProjectError> {
-        // println!("PROJECT SAVING...");
         let path = _project.path.clone();
-        let json =
-            serde_json::to_string(&_project.clone()).map_err(|e| ParsingError::Serialize {
-                path: path.clone(),
-                err: e,
-            })?;
-        // println!("PROJECT JSON CONSTRUCTED");
         let path_ = path_from![path, _project.name, ".mount", "project.json",];
+        let json = PARSING_SERVICE.to_string(&_project)?;
         let file = PFile::from_path_reg(path_);
-        // println!("FILE {file:?}");
         FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
-        // println!("PROJECT SAVED");
         Ok(())
     }
 
@@ -208,23 +167,18 @@ impl TProjectService for ProjectService {
         let path_ = path_from![dir, "recent-projects.json"];
         let file = PFile::from_path_reg(path_.clone());
         let text = FS_READ_SERVICE.read_file(&file)?;
-        let json =
-            serde_json::from_str::<Vec<RecentProject>>(text.clone().as_str()).map_err(|e| {
-                ParsingError::Deserialize {
-                    path: path_.clone(),
-                    json: text,
-                    err: e,
-                }
-            })?;
+        let json = PARSING_SERVICE._from_string::<Vec<RecentProject>>(&text)?;
+
+        let path1 = path_from![_proj.path, _proj.name,];
         let new_json = json
             .iter()
-            .filter(|el| {
-                let path1 = path_from![_proj.path, _proj.name,];
+            .filter_map(|el| {
                 let path2 = path_from![el.path, el.name,];
-                // println!("PATH {path1} {path2}");
-                return path1.get() != path2.get();
+                if path1.get() == path2.get() {
+                    return None;
+                }
+                Some(el.clone())
             })
-            .map(|e| e.clone())
             .collect::<Vec<RecentProject>>();
 
         let json = PARSING_SERVICE.to_string(&new_json)?;
@@ -266,8 +220,8 @@ impl TProjectService for ProjectService {
             }
         }
         let text = text.unwrap();
-        let mut data = PARSING_SERVICE._from_string::<Vec<RecentProject>>(text)?;
-        data.push(recent.clone());
+        let mut data = PARSING_SERVICE._from_string::<Vec<RecentProject>>(&text)?;
+        data.push(recent);
         data.sort_by(|a, b| a.last_opened.cmp(&b.last_opened));
 
         let text = PARSING_SERVICE.to_string(&data)?;
@@ -447,7 +401,7 @@ impl TActionProjectService for ActionProjectService {
                                 if let Some(res) = res {
                                     val = res;
                                 } else {
-                                    let Some(res) = self.get_from_params(&sections, val_.clone())
+                                    let Some(_) = self.get_from_params(&sections, val_.clone())
                                     else {
                                         continue 'part;
                                     };
@@ -907,20 +861,17 @@ impl TPackageService for PackageService {
 
         for i in dirs.directories {
             let path = path_from![i.path, "config.json"];
-            println!("dir {:?} {path}", i.path);
             if FS_READ_SERVICE.exists(path.clone()) {
                 let file = PFile::from_path_reg(path);
                 let Ok(text) = FS_READ_SERVICE.read_file(&file) else {
                     continue;
                 };
-                let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(text) else {
-                    println!("not parsed");
+                let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(&text) else {
                     continue;
                 };
                 packages.push(parsed);
             }
         }
-        println!("ok packs pre {packages:?}");
         Ok(packages)
     }
 
@@ -935,76 +886,8 @@ impl TPackageService for PackageService {
     fn read_config(&self, id: String) -> Result<String, ProjectError> {
         let dir = CONFIG_SERVICE.get_data_dir()?;
         let path_to_package = path_from![dir, "packages", id, "config.js"];
-        /*if !FS_READ_SERVICE.exists(path_to_package){
-            return Err(ProjectError::CreationFai);
-        }*/
-
         let file = PFile::from_path_reg(path_to_package);
         let text = FS_READ_SERVICE.read_file(&file)?;
         Ok(text)
     }
-
-    fn read_textmate(&self, id: String) -> Result<Vec<Grammar>, ProjectError> {
-        let dir = CONFIG_SERVICE.get_data_dir()?;
-        let path = path_from![dir, "packages", id, "tm"];
-        let dir = PDirectory::from_path(&path);
-        let read = FS_READ_SERVICE.read_dir(&dir)?;
-        let files = read.files;
-        let mut texts = Vec::<Grammar>::new();
-        for i in files {
-            let text = FS_READ_SERVICE.read_file(&i)?;
-            let Ok(parsed) = PARSING_SERVICE._from_string::<Grammar>(text) else {
-                continue;
-            };
-            texts.push(parsed);
-        }
-        Ok(texts)
-    }
 }
-
-/*impl TPackageCompileService for PackageCompileService {
-    fn compile_package_actions(
-        &self,
-        pack: Package,
-        results: &CreateProjectPackageResults,
-    ) -> Result<(Vec<Var>, Vec<_Task>), ProjectError> {
-        let id = pack.id;
-        let needed = results.get(&id);
-        let actions = pack.startup.actions;
-        if let None = actions {
-            return Ok((pack.var.unwrap_or(vec![]).clone(), vec![]));
-        }
-        let actions = actions.unwrap();
-
-        let mut actions2 = Vec::<PackageAction>::new();
-        for i in actions {
-            if let Some(plat) = i.platform.clone() {
-                if !plat.is_correct() {
-                    continue;
-                }
-            }
-            let if_ = i.if_.clone();
-            if let None = if_ {
-                actions2.push(i.clone());
-                continue;
-            }
-            let if_ = if_.unwrap();
-            let mut results: Vec<bool> = vec![];
-            'or: for or in if_ {
-                let mut all = true;
-                'and: for and in or {
-                    let from = and.from;
-                    let op = and.oper;
-                    let value = and.value;
-
-                    let op = op.get_fn();
-                }
-
-                results.push(all)
-            }
-        }
-
-        Ok((pack.var.unwrap_or(vec![]).clone(), vec![]))
-    }
-}
-*/

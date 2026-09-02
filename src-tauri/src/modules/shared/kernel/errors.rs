@@ -6,6 +6,7 @@ use crate::modules::shared::kernel::values::{Dependency, Path};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+#[allow(unused)]
 pub enum ProjectError {
     #[error("config error that can`t describe as project error")]
     ConfigError(#[from] ConfigError),

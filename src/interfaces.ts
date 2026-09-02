@@ -82,36 +82,6 @@ interface ISection {
     params: IPackageParameter[]
 }
 
-interface IParameter {
-    out: string,
-    label: string | [string, string],
-    def: IVal,
-    typ: string[]
-    while_?: string
-    req?: boolean
-}
-
-
-interface IAction {
-    id: number,
-    for_?: string,
-    callable: boolean,
-    if_: IfStatementPart[][],
-    on_error: String,
-    next?: number
-    command:
-        {
-            platform: string
-            shell: string,
-            env?: [string, string][],
-            command: {
-                SINGLE: string
-            } |
-                {
-                    WithArgs: [string, string[]]
-                }
-        }[]
-}
 
 
 interface IfStatementPart {
@@ -1052,50 +1022,5 @@ interface PackageConfig {
         beforeShutdown?: (meta: PackageConfigMeta) => void
         onCrash?: (exitCode: number | null, meta: PackageConfigMeta) => "restart" | "ignore"
     } | null
-}
-
-
-interface IGrammar {
-    scopeName: string;              // уникальное имя scope языка, например "source.rust"
-    patterns: IRawRule[];           // список правил, применяемых на верхнем уровне файла
-    repository?: IRawRepository;    // "библиотека" именованных правил для переиспользования
-    injections?: { [expression: string]: IRawRule }; // внедрение правил в другие грамматики
-    injectionSelector?: string;
-    fileTypes?: string[];           // расширения файлов (мета-инфо, не обязательно)
-    name?: string;                  // человекочитаемое имя
-    firstLineMatch?: string;
-}
-
-interface IRawRule {
-    id?: number;
-    include?: string;               // ссылка на другое правило: "#keywords", "$self", "$base"
-
-    name?: string;                  // scope-имя токена, например "keyword.control.rust"
-    contentName?: string;           // scope для содержимого между begin/end
-
-    match?: string;                 // regex для однострочного совпадения
-    begin?: string;                 // regex начала блока (многострочного)
-    end?: string;                   // regex конца блока
-    while?: string;                 // альтернатива end — блок продолжается, пока матчится while
-
-    captures?: IRawCaptures;        // именование групп захвата для `match`
-    beginCaptures?: IRawCaptures;   // именование групп в `begin`
-    endCaptures?: IRawCaptures;     // именование групп в `end`
-    whileCaptures?: IRawCaptures;
-
-    patterns?: IRawRule[];          // вложенные правила (внутри begin/end блока)
-
-    applyEndPatternLast?: boolean;
-}
-
-interface IRawCaptures {
-    [group: string]: {
-        name?: string;
-        patterns?: IRawRule[];
-    };
-}
-
-interface IRawRepository {
-    [name: string]: IRawRule;
 }
 

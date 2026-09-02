@@ -17,7 +17,7 @@ impl TSettingsService for SettingsService {
             CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
         }
         let dir = dir.unwrap();
-        let themes = path_from![dir.get(), "themes"];
+        let themes = path_from![dir, "themes"];
         let dir_ = PDirectory::from_path(&themes);
         let content = FS_READ_SERVICE.read_dir(&dir_)?;
 

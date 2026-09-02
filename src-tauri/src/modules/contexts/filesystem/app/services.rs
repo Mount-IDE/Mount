@@ -1,9 +1,10 @@
-use super::utils::{make_path, split_path};
-use crate::modules::app::APP;
+use super::utils::{path_from, split_path};
+use crate::modules::app::{APP, FS_READ_SERVICE};
 use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::app::traits::{
     TFSReadService, TFSWriteService, TFWatchService,
 };
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{
     FileType, FileWriteAccess, WatchInstance,
@@ -66,28 +67,17 @@ impl TFSReadService for FileSystemReadService {
         for i in dir {
             if i.is_ok() {
                 let entry = i.unwrap();
-                let name = entry.file_name().to_str().unwrap().to_string();
                 let path = Path(entry.path().to_str().unwrap().to_string());
 
                 if entry.file_type().unwrap().is_file() {
-                    let typ = FileType::REGULAR;
-                    let file = PFile {
-                        name: name.clone(),
-                        path: path.clone(),
-                        typ,
-                    };
+                    let file = PFile::from_path_reg(path);
                     files.push(file);
                 } else {
-                    let dir_ = PDirectory {
-                        name: name.clone(),
-                        path: path.clone(),
-                        files: vec![],
-                        directories: vec![],
+                    let dir_ = PDirectory::from_path(&path);
+                    let Ok(dir) = self.read_dir(&dir_) else {
+                        continue;
                     };
-                    let dir = self.read_dir(&dir_);
-                    if dir.is_ok() {
-                        dirs.push(dir?);
-                    }
+                    dirs.push(dir);
                 }
             }
         }
@@ -105,6 +95,7 @@ impl TFSReadService for FileSystemReadService {
             files,
             directories: dirs,
         };
+
         Ok(directory)
     }
 
@@ -113,11 +104,9 @@ impl TFSReadService for FileSystemReadService {
     ///
     fn exist_file(&self, file: &PFile) -> bool {
         let path = file.path.get();
-        let ext = fs::exists(path);
-        if ext.is_err() {
+        let Ok(ext) = fs::exists(path) else {
             return false;
-        }
-        let ext = ext.unwrap();
+        };
         ext
     }
 
@@ -126,11 +115,9 @@ impl TFSReadService for FileSystemReadService {
     ///
     fn exist_dir(&self, file: &PDirectory) -> bool {
         let path = file.path.get();
-        let ext = fs::exists(path);
-        if ext.is_err() {
+        let Ok(ext) = fs::exists(path) else {
             return false;
-        }
-        let ext = ext.unwrap();
+        };
         ext
     }
 
@@ -147,11 +134,11 @@ impl TFSReadService for FileSystemReadService {
 
     fn exists(&self, path: Path) -> bool {
         let path_ = path.get();
-        let ext = fs::exists(path_);
-        if ext.is_err() {
+        let Ok(ext) = fs::exists(path_) else {
             return false;
-        }
-        ext.unwrap()
+        };
+
+        ext
     }
 }
 
@@ -166,8 +153,6 @@ impl TFSWriteService for FileSystemWriteService {
             path: path.clone(),
             err: e,
         })?;
-        // println!("file {}", path.get());
-
         let splited = split_path(&path);
         let name = splited
             .get(splited.len() - 1)
@@ -297,7 +282,7 @@ fn read_node(path: &str) -> Option<FsWatchNode> {
 
     if metadata.is_dir() {
         let dir = PDirectory::from_path(&path);
-        return FileSystemReadService()
+        return FS_READ_SERVICE
             .read_dir_recursive(&dir)
             .ok()
             .map(FsWatchNode::Directory);
@@ -459,7 +444,7 @@ impl TFWatchService for FileSystemWatchService {
         } else if cwd_string.is_empty() {
             proj_path
         } else {
-            make_path(vec![project_string.as_str(), cwd_string.as_str()])
+            path_from![project_string.as_str(), cwd_string.as_str()]
         };
         let (tx, rx) = channel();
 
