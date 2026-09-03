@@ -9,15 +9,12 @@ import {createProjectStore} from "./stores/create_project.ts";
 import CreateProject from "./components/pages/create-project/CreateProject.tsx";
 import ProjectSpace from "./components/pages/project-space/ProjectSpace.tsx";
 import {cacheStore} from "./stores/cache_store.ts";
-import {Group, mainPageStore} from "./stores/main_page_store.ts";
-import {fsExtStore} from "./stores/fs_ext_store.ts";
 import {projectSettingsStore} from "./stores/project_settings_store.ts";
 import ProjectSettings from "./components/pages/project-space/ProjectSettings.tsx";
 import {settingsStore} from "./stores/settings_store.ts";
 import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
 import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
-import {packageStore} from "./stores/package_store.ts";
 import {Parser} from "web-tree-sitter";
 import {highlightWorkerStore} from "./stores/highlight_worker_store.ts";
 
@@ -35,38 +32,6 @@ function App() {
     const projectSettingsOpened = projectSettingsStore(state => state.opened)
 
     const settingsFlag = settingsStore(state => state.show_settings)
-
-    /**
-     * Caching many data while app is opening
-     */
-    async function move_to_cache() {
-        try {
-            const cache = await invoke<Cache>("get_cache");
-            cacheStore.getState().set_data_dir(cache.data_dir_path);
-            cacheStore.getState().set_file_templates(cache.file_templates);
-            cacheStore.getState().set_os(cache.os);
-            cacheStore.getState().set_projects_path(cache.projects_dir);
-            cacheStore.getState().set_recent_projects(cache.recent_projects)
-            mainPageStore.getState().set_groups(cache.groups.map((el, i): Group => ({
-                id: i, name: el
-            })));
-            fsExtStore.getState().set_icons(cache.file_icons);
-            console.log(cache)
-            packageStore.getState().set_package(cache.packages);
-            cacheStore.getState().add_templates_to_cache(cache.templates);
-            if (cache.templates.length > 0) {
-                cacheStore.getState().set_current_template(cache.templates[0])
-            }
-            cacheStore.getState().set_shells(cache.shells);
-            settingsStore.getState().set_settings(cache.settings)
-
-            themeStore.getState().load_themes(cache.themes.map(e => JSON.parse(e) as ITheme), cache.settings)
-        } catch (e) {
-            console.warn(e)
-        }
-
-
-    }
 
     useEffect(() => {
         highlightWorkerStore.getState().init()
@@ -90,7 +55,7 @@ function App() {
 
             setWindowReady(true);
             setTimeout(() => invoke("show_win").then(), 0);
-            move_to_cache().then();
+            cacheStore.getState().update_cache().then()
         }
 
         setupWindow().then();
@@ -144,12 +109,15 @@ function App() {
 
 
     }, [currentTheme]);
+
+
+    const blur = pageStore(state => state.need_filter)
     /**
      * Setups cache and stores while project was selected
      */
     return (
         <>
-            <Blur/>
+            {blur && <Blur/>}
             <TitleBar/>
             <Notifications/>
             <div id={"main"}>

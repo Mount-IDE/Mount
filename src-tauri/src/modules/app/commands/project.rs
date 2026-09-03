@@ -272,19 +272,25 @@ pub async fn create_project(
     let tasks =
         ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);
 
+    println!("TASKS completed {:?}", tasks.clone().is_some());
     // if tasks running completely
     if let Some(val) = tasks {
         let _ = FS_WRITE_SERVICE.create_dir(&path_)?;
+        println!("dir created");
         let path_to_mount = path_from![path_, ".mount"];
 
         let _ = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
 
+        println!("mount created");
         let path_to_settings = path_from![path_to_mount, "project.json"];
 
         let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
+        println!("config created");
 
         let path_to_packages = path_from![path_to_mount, "packages.json"];
         let packages_file = FS_WRITE_SERVICE.create_file(&path_to_packages)?;
+
+        println!("packages created");
 
         project.vars = val.0.clone();
         project.template = template.clone();
@@ -300,15 +306,20 @@ pub async fn create_project(
                 .launch_templates
                 .insert(0, LaunchTemplate::default());
         }
+
         let json = PARSING_SERVICE.to_string(&project.clone())?;
 
         let packages_str = PARSING_SERVICE.to_string(&packages.clone())?;
 
         FS_WRITE_SERVICE.write_file(&packages_file, packages_str, FileWriteAccess::WRITE)?;
+        println!("packages writed");
         FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
+        println!("settings writed");
         PROJECT_SERVICE.add_to_recents(&project)?;
+        println!("add to recents");
 
-        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string())
+        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string());
+        println!("tasks runned");
     }
     Ok(project)
 }

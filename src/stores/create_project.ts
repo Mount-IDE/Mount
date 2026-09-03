@@ -1,6 +1,7 @@
 import {create} from "zustand";
 import {invoke} from "@tauri-apps/api/core";
 import pageStore from "./page_store.ts";
+import {cacheStore} from "./cache_store.ts";
 
 
 interface Type {
@@ -133,11 +134,9 @@ export const createProjectStore = create<Type>((set, get) => ({
             let name = get().results?.["__meta__"]?.[-4]?.["project-name"];
             let path = get().results?.["__meta__"]?.[-4]?.["project-path"];
 
-            let unified = await invoke<string>("make_path_command", {
-                components: [path, name]
-            })
+            let unified = cacheStore.getState().make_path([path?.toString(), name?.toString()]);
             pageStore.getState().setFilter(false);
-            this.clear()
+            get().clear()
             return [0, unified, project]
         } catch (e) {
             console.warn(e)

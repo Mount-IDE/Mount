@@ -790,7 +790,7 @@ function CodeEditor(props: CodeProps) {
                 height: "21px",
                 background: "var(--border3)",
                 border: "none",
-                display: "block"
+                display: "none"
             }}></hr>
         </div>
     );

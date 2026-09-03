@@ -30,7 +30,7 @@ export default function CreateProject() {
         if (current_template) {
             setIsCreating(true)
             let res = await create_project(current_template!);
-
+            console.log(res)
             if (res[0] == 0) {
                 createProjectStore.getState().close();
                 noteStore.getState().add_note({
@@ -54,7 +54,6 @@ export default function CreateProject() {
     useEffect(() => {
 
         let clear: number;
-        console.log("RERENDER")
         const unlisten = listen<string>("task-start", (d) => {
             let val = d.payload;
             setStartEvent(val)

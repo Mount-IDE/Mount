@@ -40,7 +40,7 @@ export async function loadPackages(pack: string[]): Promise<Map<string, PackageI
 
 export function get_last_entity_of_path(path: string): string | null {
     let os = cacheStore.getState().os;
-    let splited: string[] = []
+    let splited: string[]
     if (os == "windows") {
         splited = path.split("\\");
     } else {

@@ -1,5 +1,10 @@
 import {create} from "zustand"
 import {invoke} from "@tauri-apps/api/core";
+import {ERROR} from "../utils/utils.ts";
+import {themeStore} from "./theme_store.ts";
+import {Group, mainPageStore} from "./main_page_store.ts";
+import {packageStore} from "./package_store.ts";
+import {fsExtStore} from "./fs_ext_store.ts";
 
 
 interface Type {
@@ -43,6 +48,8 @@ interface Type {
     add_recent: (rec: IRecentProject) => void
     update_recent: (rec: IRecentProject) => void
 
+
+    update_cache: () => Promise<void>
 }
 
 
@@ -60,9 +67,9 @@ export const cacheStore = create<Type>((set, get) => ({
     update_recent(rec: IRecentProject): void {
         let path = rec.path;
         let recents = get().recent_projects;
-        let path_ = this.make_path([path, rec.name])
+        let path_ = get().make_path([path, rec.name])
         recents = recents.map(el => {
-            if (this.make_path([el.path, el.name]) == path_) {
+            if (get().make_path([el.path, el.name]) == path_) {
                 return rec
             }
             return el
@@ -185,6 +192,32 @@ export const cacheStore = create<Type>((set, get) => ({
         }
         res += pieces[pieces.length - 1]
         return res;
+    },
+    async update_cache(): Promise<void> {
+        try {
+            let cache = await invoke<Cache>("get_cache");
+            themeStore.getState().load_themes(
+                cache.themes.map(el => JSON.parse(el) as ITheme),
+                cache.settings)
+            mainPageStore.getState().set_groups(
+                cache.groups.map<Group>(
+                    (el, i) => ({id: i, name: el})
+                ))
+            packageStore.getState().set_package(cache.packages)
+            fsExtStore.getState().set_icons(cache.file_icons)
+
+            set({
+                data_dir: cache.data_dir_path,
+                file_templates: cache.file_templates,
+                os: cache.os,
+                projects_path: cache.projects_dir,
+                recent_projects: cache.recent_projects,
+                templates: cache.templates,
+                shells: cache.shells
+            })
+        } catch (e) {
+            ERROR(e)
+        }
     }
 
 
