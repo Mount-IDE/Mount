@@ -18,6 +18,14 @@ interface Type {
 
     add_variable: (type: "string" | "number" | "boolean") => void;
     rem_variable: (i: number) => void;
+
+
+    package_results: Record<string, Record<string, IVal>> // pack id -> id -> val
+
+    write_pack: (pack: string, id: string, val: IVal) => void
+
+    write_all_packs: (packs: IPackage[]) => void
+
 }
 
 
@@ -25,6 +33,27 @@ export const projectSettingsStore = create<Type>((set, get) => ({
     new_project_data: null,
     main_results: {},
     variables: [],
+    package_results: {},
+
+    write_all_packs: (packs) => {
+
+    },
+
+
+    write_pack: (pack, id, val) => {
+        let res = get().package_results
+        set({
+            package_results: {
+                ...res,
+                [pack]: {
+                    ...res[pack],
+                    [id]: val
+                }
+            }
+        })
+    },
+
+
     add_variable(type: "string" | "number" | "boolean"): void {
         set({
             variables: [...get().variables, {

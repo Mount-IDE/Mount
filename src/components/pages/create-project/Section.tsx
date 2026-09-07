@@ -22,66 +22,6 @@ export default function Section(props: Props) {
 
     const body_ref = useRef<HTMLDivElement>(null)
 
-    /* function toggle(_: React.MouseEvent<HTMLDivElement>) {
-         const body = body_ref.current!;
-         if (!collapsible) return
-         if (body.classList.contains("project-section-in-open")) {
-             body.style.maxHeight = body.scrollHeight + "px";
-
-             requestAnimationFrame(() => {
-                 body.style.maxHeight = "0px";
-             });
-
-             body.classList.remove("project-section-in-open");
-             setIsOpened(false);
-         } else {
-             body.classList.add("project-section-in-open");
-             body.style.maxHeight = body.scrollHeight + "px";
-             setIsOpened(true);
-         }
-
-     }
-
-     useEffect(() => {
-         if (!collapsible){
-             const body = body_ref.current!;
-             body.style.maxHeight = body.scrollHeight + "px";
-         }
-
-     }, [props.section]);
-
-     useEffect(() => {
-         const body = body_ref.current;
-         if (!body) return;
-
-         const observer = new ResizeObserver(() => {
-             if (isOpened) {
-                 body.style.height = `${body.scrollHeight}px`;
-             }
-         });
-
-         observer.observe(body);
-
-         return () => observer.disconnect();
-     }, [isOpened]);
-
-     useLayoutEffect(() => {
-         const body = body_ref.current;
-         if (!body) return;
-
-         if (isOpened) {
-             body.style.maxHeight = body.scrollHeight + "px";
-         } else {
-             body.style.maxHeight = "0px";
-         }
-     }, [isOpened]);
-
-     useEffect(() => {
-         if (!collapsible) {
-             setIsOpened(true);
-         }
-     }, [collapsible]);
- */
     useLayoutEffect(() => {
         const body = body_ref.current;
         if (!body) return;
@@ -127,7 +67,9 @@ export default function Section(props: Props) {
             >
                 {collapsible && <div
                     style={{
-                        transform: isOpened ? "rotate(0deg)" : "rotate(-90deg)"
+                        transform: isOpened ?
+                            "rotate(0deg)" :
+                            "rotate(-90deg)"
                     }}
                     className={"project-section-head-arrow"}>
                     <svg width="19" height="10" viewBox="0 0 19 10" fill="none" xmlns="http://www.w3.org/2000/svg">

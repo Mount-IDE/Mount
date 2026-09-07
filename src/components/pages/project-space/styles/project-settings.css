@@ -20,7 +20,15 @@
     position: relative;
     margin-bottom: 10px;
 
-    & p {
+    & #label-sec {
+        position: absolute;
+        top: 0;
+        left: 20%;
+        color: var(--subtitle);
+        font: 12pt "JetBrains Mono Medium";
+    }
+
+    & #label-main {
         position: absolute;
         top: 0;
         right: 0;

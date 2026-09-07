@@ -90,6 +90,9 @@
     }
 
     & select {
+        width: auto;
+        min-width: 10px;
+        max-width: 100%;
         background: transparent;
         color: var(--subtitle);
         border: none;
@@ -144,8 +147,8 @@
 
 .gen {
     width: 100%;
-    margin-top: 20px;
-    margin-bottom: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
 
     min-height: 4vh;
 
@@ -159,17 +162,23 @@
 
 .parameter-gen {
     margin-top: 10px;
-    height: 50px;
+    height: 4vh;
     overflow: auto;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     min-width: 0;
-    gap: 10px;
+    gap: 7px;
+    align-items: center;
 
     & hr {
         height: 90%;
+        margin-right: 20px;
         border: 1px solid var(--border2)
+    }
+
+    &::-webkit-scrollbar {
+        height: 3px;
     }
 }
 
@@ -180,19 +189,22 @@
     align-items: center;
     gap: 10px;
 
+    margin-right: 20px;
     & input {
         color: var(--subtitle);
         background: transparent;
         flex: 0 0 auto;
         border: none;
         outline: none;
-
+        field-sizing: content;
+        /*max-width: 100px;*/
         &:focus {
             color: var(--title)
         }
     }
 
     & button {
+        user-select: none;
         display: flex;
         background: transparent;
         height: 50%;

@@ -62,7 +62,7 @@ function useSettings(settings: Settings | null, themes: ITheme[]) {
                 },
             ],
         },
-    ], [settings]);
+    ], [settings, themes]);
 }
 
 export default function SettingsPage() {
@@ -75,7 +75,8 @@ export default function SettingsPage() {
 
     const themes = themeStore(state => state.themes)
     const baseSettings = useSettings(settings, themes);
-
+    console.log("PAGE", themes)
+    console.log(settings)
 
     const [currentSettings, setCurrentSettings] = useState<number>(0)
 

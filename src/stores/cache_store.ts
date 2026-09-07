@@ -5,6 +5,7 @@ import {themeStore} from "./theme_store.ts";
 import {Group, mainPageStore} from "./main_page_store.ts";
 import {packageStore} from "./package_store.ts";
 import {fsExtStore} from "./fs_ext_store.ts";
+import {settingsStore} from "./settings_store.ts";
 
 
 interface Type {
@@ -205,6 +206,8 @@ export const cacheStore = create<Type>((set, get) => ({
                 ))
             packageStore.getState().set_package(cache.packages)
             fsExtStore.getState().set_icons(cache.file_icons)
+
+            settingsStore.getState().set_settings(cache.settings)
 
             set({
                 data_dir: cache.data_dir_path,

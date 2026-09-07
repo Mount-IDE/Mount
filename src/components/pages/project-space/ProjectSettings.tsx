@@ -6,6 +6,7 @@ import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import ProjectSettingsVariables from "./ProjectSettingsVariables.tsx";
+import ProjectSettingsPackages from "./ProjectSettingsPackages.tsx";
 
 
 interface ProjectOption {
@@ -44,7 +45,7 @@ export default function ProjectSettings() {
         },
         {
             label: "Packages",
-            component: () => <></>
+            component: ProjectSettingsPackages
         },
     ]
 
@@ -72,7 +73,8 @@ export default function ProjectSettings() {
     return (
         <div id={"project-settings"}>
             <div id={"project-settings-top"}>
-                <p>Project settings</p>
+                <p id={"label-sec"}>{labels[current]?.label ?? "None"}</p>
+                <p id={"label-main"}>Project settings</p>
             </div>
             <div id={"project-settings-main"}>
                 <div id={"project-settings-left"}>

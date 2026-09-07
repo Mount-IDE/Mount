@@ -32,6 +32,8 @@ interface Type {
 
 
     get_pack_by_file: (file: string | null) => PackageInner | null
+
+
 }
 
 
@@ -40,7 +42,6 @@ export const projectStore = create<Type>((set, get) => ({
     package_configs: new Map(),
     async set_selected_packages(map: Map<string, PackageInner>): Promise<void> {
         let configs = new Map<string, PackageConfig>()
-        console.log(map)
         for (let i of map.entries()) {
             let blob = new Blob([i[1].config], {type: "text/javascript"})
 
