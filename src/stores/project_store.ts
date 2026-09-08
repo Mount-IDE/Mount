@@ -28,6 +28,8 @@ interface Type {
     set_selected_packages: (map: Map<string, PackageInner>) => Promise<void>
 
 
+    save_packages: (packs: Record<string, IPackage>) => Promise<void>
+
     open_project: (proj: IProject) => Promise<void>
 
 
@@ -40,6 +42,29 @@ interface Type {
 export const projectStore = create<Type>((set, get) => ({
     selected_packages: new Map(),
     package_configs: new Map(),
+    async save_packages(packs: Record<string, IPackage>) {
+
+        let res = new Map(get().selected_packages);
+        let proj = get().current_project
+        for (let i of Object.entries(packs)) {
+            let got = res.get(i[0])
+            if (got) {
+                got.main = {...i[1]}
+            }
+        }
+        set({
+            selected_packages: res
+        })
+        if (proj) {
+            await invoke("save_packages", {
+                packs: [...res.values()].map(el => el.main),
+                path: cacheStore.getState().make_path([proj.path, proj.name])
+            })
+
+        }
+    },
+
+
     async set_selected_packages(map: Map<string, PackageInner>): Promise<void> {
         let configs = new Map<string, PackageConfig>()
         for (let i of map.entries()) {

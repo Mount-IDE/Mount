@@ -47,7 +47,7 @@ impl TLspService for LspService {
             }
         });
 
-        let mut app_clone = app.clone();
+        let app_clone = app.clone();
         let id_clone = obj.id.clone();
         let window_clone = window.clone();
         tokio::spawn(async move {

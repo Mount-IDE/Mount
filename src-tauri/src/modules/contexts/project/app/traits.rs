@@ -15,6 +15,9 @@ pub trait TProjectService {
     fn get_projects(&self, dir: &Path) -> Result<Vec<Project>, ProjectError>;
     fn get_recent_projects(&self) -> Result<Vec<RecentProject>, ProjectError>;
     fn save_project(&self, project: &Project) -> Result<(), ProjectError>;
+
+    fn save_packages(&self, packs: Vec<Package>, path: Path) -> Result<(), ProjectError>;
+
     fn remove_from_recents(&self, proj: &Project) -> Result<(), ProjectError>;
     fn add_to_recents(&self, project: &Project) -> Result<(), ProjectError>;
 

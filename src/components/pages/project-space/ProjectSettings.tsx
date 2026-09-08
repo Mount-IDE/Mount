@@ -66,6 +66,8 @@ export default function ProjectSettings() {
                     group: main_data[4] as string ?? project.meta.group
                 }
             })
+            let packs = projectSettingsStore.getState().package_results
+            projectStore.getState().save_packages(packs).then()
         }
     }
 

@@ -18,7 +18,6 @@ export default function Input(props: Props) {
     const ref = useRef<HTMLTextAreaElement>(null)
     const ref2 = useRef<HTMLInputElement>(null)
 
-
     useEffect(() => {
         if (props.typ == "area") {
             const cur = ref.current;
@@ -36,30 +35,6 @@ export default function Input(props: Props) {
 
     }, [props.typ, props.value]);
 
-    /* useEffect(() => {
-         if (!props.incorrect) {
-             if (props.typ == "input") {
-                 let cur = ref2.current!;
-                 cur.setCustomValidity("")
-                 cur.reportValidity()
-             } else {
-                 let cur = ref.current!;
-                 cur.setCustomValidity("")
-                 cur.reportValidity()
-             }
-             return
-         }
-         if (props.typ == "input") {
-             let cur = ref2.current!;
-             cur.setCustomValidity(props.incorrect)
-             cur.reportValidity()
-         } else {
-             let cur = ref.current!;
-             cur.setCustomValidity(props.incorrect)
-             cur.reportValidity()
-         }
-     }, [props.incorrect]);
- */
     return (
         <div className={"input"}
              style={

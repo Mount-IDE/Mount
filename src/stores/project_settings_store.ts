@@ -1,6 +1,7 @@
 import {create} from "zustand";
 import {launchStore} from "./launch_store.ts";
 
+
 interface Type {
     new_project_data: IProject | null
     set_project: (proj: IProject | null) => void
@@ -20,9 +21,11 @@ interface Type {
     rem_variable: (i: number) => void;
 
 
-    package_results: Record<string, Record<string, IVal>> // pack id -> id -> val
+    package_results: Record<string, IPackage> // pack id -> package
 
-    write_pack: (pack: string, id: string, val: IVal) => void
+    write_pack: (pack: string, cb: ((pack: IPackage) => IPackage), def: IPackage) => void
+
+    get_pack_res: (pack: string) => IPackage | undefined
 
     write_all_packs: (packs: IPackage[]) => void
 
@@ -35,20 +38,33 @@ export const projectSettingsStore = create<Type>((set, get) => ({
     variables: [],
     package_results: {},
 
-    write_all_packs: (packs) => {
+    get_pack_res: (pack) => {
+        return get().package_results[pack]
 
     },
 
 
-    write_pack: (pack, id, val) => {
-        let res = get().package_results
+    write_all_packs: (packs) => {
+        let res: Record<string, IPackage> = get().package_results
+        for (let i of packs) {
+            if (i.id ! in res) {
+                res[i.id] = i
+            }
+        }
+        set({
+            package_results: res
+        })
+    },
+    write_pack(pack: string, cb: (pack: IPackage) => IPackage, def): void {
+        let packs = get().package_results;
+        let pack_ = packs[pack];
+        let base = pack_ ? {...pack_} : {...def};
+        let res = cb(base);
+
         set({
             package_results: {
-                ...res,
-                [pack]: {
-                    ...res[pack],
-                    [id]: val
-                }
+                ...packs,
+                [pack]: {...res}
             }
         })
     },

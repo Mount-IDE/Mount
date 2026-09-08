@@ -162,6 +162,15 @@ impl TProjectService for ProjectService {
         Ok(())
     }
 
+    fn save_packages(&self, packs: Vec<Package>, path: Path) -> Result<(), ProjectError> {
+        let path_ = path_from![path, ".mount", "packages.json"];
+        let json = PARSING_SERVICE.to_string(&packs)?;
+        let file = PFile::from_path_reg(path_);
+        FS_WRITE_SERVICE.write_file(&file, json, FileWriteAccess::WRITE)?;
+
+        Ok(())
+    }
+
     fn remove_from_recents(&self, _proj: &Project) -> Result<(), ProjectError> {
         let dir = CONFIG_SERVICE.get_data_dir()?;
         let path_ = path_from![dir, "recent-projects.json"];

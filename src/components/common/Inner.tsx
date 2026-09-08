@@ -7,12 +7,10 @@ import Gen from "./Gen.tsx";
 import List from "./List.tsx";
 import Check from "./Check.tsx";
 
-export type childVal = string | string[] | boolean | null | undefined
-
 export interface Child {
     typ: "text" | "input" | "inner" | "check" | "area" | "list" | "file" | "dir" | "gen"
-    value?: childVal
-    setValue?: (val: childVal) => void
+    value?: IVal
+    setValue?: (val: IVal) => void
     meta?: Props
     other_meta?: {
         placeholder?: string
@@ -168,7 +166,10 @@ export default function Inner(props: Props) {
                     {props.children && props.children}
                     {!props.children && props.api_children &&
                         props.api_children.map((el, i) => {
-                            return <Fragment key={i}>{parseChild(el)}</Fragment>
+                            return (
+                                <Fragment key={i}>
+                                    {parseChild(el)}
+                                </Fragment>)
                         })
                     }
                 </div>

@@ -417,6 +417,12 @@ pub fn save_project(project: Project) -> Result<(), ErrorDto> {
 }
 
 #[tauri::command]
+pub fn save_packages(packs: Vec<Package>, path: Path) -> Result<(), ErrorDto> {
+    PROJECT_SERVICE.save_packages(packs, path)?;
+    Ok(())
+}
+
+#[tauri::command]
 pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
     let dir = CONFIG_SERVICE.get_data_dir()?;
     let path = path_from![dir, "recent-projects.json"];
