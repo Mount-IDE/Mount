@@ -329,6 +329,14 @@ impl TConfigService for ConfigService {
 
         Ok(json)
     }
+
+    fn get_licenses(&self) -> Result<Vec<String>, ConfigError> {
+        todo!()
+    }
+
+    fn get_license(&self, name: String) -> Result<String, ConfigError> {
+        todo!()
+    }
 }
 
 pub struct ConfigRecoveryService();
@@ -396,7 +404,7 @@ fn get_files_new() -> Vec<FsEntity_> {
             "packages",
             vec![
                 FsEntity_::dir_entities(
-                    "opie.py",
+                    "opie.python",
                     vec![FsEntity_::file_s_content(
                         "config.json",
                         PARSING_SERVICE
@@ -411,6 +419,28 @@ fn get_files_new() -> Vec<FsEntity_> {
                         "config.json",
                         PARSING_SERVICE.to_string(Package::rust()).unwrap().as_str(),
                     )],
+                ),
+            ],
+        ),
+        FsEntity_::dir_entities(
+            "licenses",
+            vec![
+                FsEntity_::file_s_content(
+                    "gpl-3.0.txt",
+                    include_str!("../../../assets/licenses/gpl-3.0"),
+                ),
+                FsEntity_::file_s_content(
+                    "lgpl-3.0.txt",
+                    include_str!("../../../assets/licenses/lgpl-3.0"),
+                ),
+                FsEntity_::file_s_content("mit.txt", include_str!("../../../assets/licenses/mit")),
+                FsEntity_::file_s_content(
+                    "bsd-3.txt",
+                    include_str!("../../../assets/licenses/bsd-3"),
+                ),
+                FsEntity_::file_s_content(
+                    "apache-2.0.txt",
+                    include_str!("../../../assets/licenses/apache-2.0"),
                 ),
             ],
         ),

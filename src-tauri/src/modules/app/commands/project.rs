@@ -1,7 +1,7 @@
 use crate::modules::app::utils::project::make_buttons;
 use crate::modules::app::{
     ACTION_PROJECT_SERVICE, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, EVENT_SERVICE,
-    FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE,
+    FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE, SETTINGS,
 };
 use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
@@ -75,7 +75,7 @@ pub async fn create_project(
     packages: Vec<String>,
     tags: Vec<ProjectTag>,
     pack_results: CreateProjectPackageResults,
-    window: tauri::Window,
+    window: Window,
     pack_state: State<'_, SharedPackages>,
 ) -> Result<Project, ErrorDto> {
     EVENT_SERVICE.send(
@@ -166,12 +166,38 @@ pub async fn create_project(
         "project-path".to_string(),
         Val::STRING(path.clone()),
     ));
+    vars.push(Var::new(
+        "project-description".__get(),
+        Val::STRING(additions.description.clone()),
+    ));
+    vars.push(Var::new(
+        "project-license".__get(),
+        Val::STRING(additions.license.clone().unwrap_or("NonLicense".__get())),
+    ));
+    vars.push(Var::new(
+        "project-authors".__get(),
+        Val::ARRAY(additions.authors.clone()),
+    ));
+    vars.push(Var::new(
+        "project-tags".__get(),
+        Val::ARRAY(additions.tags.clone()),
+    ));
+
+    vars.push(Var::new(
+        "project-group".__get(),
+        Val::STRING(additions.group.clone()),
+    ));
+
+    vars.push(Var::new(
+        "project-template".__get(),
+        Val::STRING(template.id.clone()),
+    ));
 
     // creating project object
     let mut project = Project::new();
     project.name = name;
     project.path = Path(path.clone());
-    project.meta = additions;
+    project.meta = additions.clone();
     project.vars = vars.clone();
 
     // adding git actions
@@ -274,25 +300,25 @@ pub async fn create_project(
     let tasks =
         ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);
 
-    println!("TASKS completed {:?}", tasks.clone().is_some());
+    // println!("TASKS completed {:?}", tasks.clone().is_some());
     // if tasks running completely
     if let Some(val) = tasks {
         let _ = FS_WRITE_SERVICE.create_dir(&path_)?;
-        println!("dir created");
+        // println!("dir created");
         let path_to_mount = path_from![path_, ".mount"];
 
         let _ = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
 
-        println!("mount created");
+        // println!("mount created");
         let path_to_settings = path_from![path_to_mount, "project.json"];
 
         let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
-        println!("config created");
+        // println!("config created");
 
         let path_to_packages = path_from![path_to_mount, "packages.json"];
         let packages_file = FS_WRITE_SERVICE.create_file(&path_to_packages)?;
 
-        println!("packages created");
+        // println!("packages created");
 
         project.vars = val.0.clone();
         project.template = template.clone();
@@ -314,14 +340,74 @@ pub async fn create_project(
         let packages_str = PARSING_SERVICE.to_string(&packages.clone())?;
 
         FS_WRITE_SERVICE.write_file(&packages_file, packages_str, FileWriteAccess::WRITE)?;
-        println!("packages writed");
+        // println!("packages writed");
         FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
-        println!("settings writed");
+        // println!("settings writed");
         PROJECT_SERVICE.add_to_recents(&project)?;
-        println!("add to recents");
+        // println!("add to recents");
 
         ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string());
-        println!("tasks runned");
+        // println!("tasks runned");
+
+        let license = additions.license.clone();
+        if let Some(license) = license {
+            //   println!("license");
+            // if project has license
+            let settings = { SETTINGS.get().unwrap().lock().unwrap().clone() };
+            let licenses = settings.licenses;
+            let needed = licenses.get(&license);
+            if let Some(needed) = needed {
+                //    println!("has needed license");
+                // if settings has needed license
+                if let Ok(dir) = CONFIG_SERVICE.get_data_dir() {
+                    //println!("has dir");
+                    // if app dir exists
+                    let lic = path_from![dir, "licenses", needed.filename];
+                    let file = PFile::from_path_reg(lic);
+                    let read = FS_READ_SERVICE.read_file(&file);
+                    if let Ok(mut read) = read {
+                        //  println!("read correct");
+                        // if file was read correctly
+                        let entries_var = needed.entries_var.clone();
+                        let entries_input = needed.entries_input.clone();
+                        if let Some(entry) = entries_input {
+                            //println!("input");
+                            for i in entry.iter() {
+                                let key = format!("{license}-{}", i.0);
+                                let Some(result) = results.get("__meta__") else {
+                                    continue;
+                                };
+                                let Some(result) = result.get(&-3) else {
+                                    continue;
+                                };
+                                let Some(result) = result.get(&key) else {
+                                    continue;
+                                };
+                                let result = result.to_str();
+                                for j in i.1.iter() {
+                                    read = read.replace(j, &result);
+                                }
+                            }
+                        } // replacing from ui inputs
+                        if let Some(entry) = entries_var {
+                            // println!("var");
+                            for i in entry.iter() {
+                                let Some(var) = vars.iter().find(|e| e.name.eq(i.0)) else {
+                                    continue;
+                                };
+                                for j in i.1.iter() {
+                                    read = read.replace(j, &var.value.to_str());
+                                }
+                            }
+                        } // replacing from vars
+
+                        let lic_path = path_from![path_, "LICENSE"];
+                        let file = PFile::from_path_reg(lic_path);
+                        let _ = FS_WRITE_SERVICE.write_file(&file, read, FileWriteAccess::WRITE);
+                    }
+                }
+            }
+        }
     }
     Ok(project)
 }

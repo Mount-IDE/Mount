@@ -1,6 +1,8 @@
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::project::domain::values::ProjectMeta;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use ts_rs::TS;
 
 ///
@@ -19,6 +21,16 @@ pub struct Settings {
     pub appearance: Appearance,
     #[serde(default)]
     pub run: Run,
+    #[serde(default)]
+    pub licenses: HashMap<String, SettingsLicenseEntry>,
+}
+
+#[derive(Serialize, Default, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
+pub struct SettingsLicenseEntry {
+    pub filename: String,
+    pub entries_input: Option<HashMap<String, Vec<String>>>, // UI params -> text in license
+    pub entries_var: Option<HashMap<String, Vec<String>>>,   // var name -> text in license
 }
 
 impl Settings {
@@ -29,6 +41,63 @@ impl Settings {
             general: GeneralSettings::new(),
             appearance: Appearance::new(),
             run: Run::default(),
+            licenses: HashMap::from([
+                ("Apache-2.0".__get(), SettingsLicenseEntry {
+                    filename: "apache-2.0.txt".to_string(),
+                    entries_input: Some(HashMap::from([
+                        ("Year".__get(), vec!["[yyyy]".__get()]),
+                    ])),
+                    entries_var: Some(
+                        HashMap::from([
+                            ("project-authors".__get(), vec!["[name of copyright owner]".__get()])]
+                        )
+                    ),
+                }),
+                ("BSD-3.0".__get(), SettingsLicenseEntry {
+                    filename: "bsd-3.0.txt".__get(),
+                    entries_input: Some(HashMap::from([
+                        ("Year".__get(), vec!["[year]".__get()]),
+                    ])),
+                    entries_var: Some(
+                        HashMap::from([
+                            ("project-authors".__get(), vec!["[authors]".__get()])
+                        ])
+                    ),
+                }),
+                ("GPL-3.0".__get(), SettingsLicenseEntry {
+                    filename: "gpl-3.0.txt".__get(),
+                    entries_input: Some(HashMap::from([
+                        ("Year".__get(), vec!["<year>".__get()]),
+                    ])),
+                    entries_var: Some(
+                        HashMap::from([
+                            ("project-authors".__get(), vec!["<name of authors>".__get(), "<name of author>".__get()]),
+                            ("project-name".__get(), vec!["<program>".__get(), "<one line to give the program's name and a brief idea of what it does.>".__get()]),
+                        ])
+                    ),
+                }), ("LGPL-3.0".__get(), SettingsLicenseEntry {
+                    filename: "gpl-3.0.txt".__get(),
+                    entries_input: Some(HashMap::from([
+                        ("Year".__get(), vec!["<year>".__get()]),
+                    ])),
+                    entries_var: Some(
+                        HashMap::from([
+                            ("project-authors".__get(), vec!["<name of authors>".__get(), "<name of author>".__get()]),
+                            ("project-name".__get(), vec!["<program>".__get(), "<one line to give the program's name and a brief idea of what it does.>".__get()]),
+                        ])
+                    ),
+                }), ("MIT".__get(), SettingsLicenseEntry {
+                    filename: "mit.txt".__get(),
+                    entries_input: Some(HashMap::from([
+                        ("Year".__get(), vec!["[year]".__get()]),
+                    ])),
+                    entries_var: Some(
+                        HashMap::from([
+                            ("project-authors".__get(), vec!["[authors]".__get()]),
+                        ])
+                    ),
+                }),
+            ])
         }
     }
 }

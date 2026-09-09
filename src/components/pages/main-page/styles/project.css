@@ -43,6 +43,15 @@
     font-family: "JetBrains Mono Light", monospace;
 }
 
+.main-page-project-last {
+    position: absolute;
+    bottom: 5%;
+    left: 45%;
+    color: var(--subtitle);
+    font-size: 8pt;
+    font-family: "JetBrains Mono Light", monospace;
+}
+
 .main-page-project-right-{
     position: absolute;
     right: 5%;

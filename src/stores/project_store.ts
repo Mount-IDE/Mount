@@ -231,6 +231,7 @@ export const projectStore = create<Type>((set, get) => ({
         let path__ = cacheStore.getState().make_path([proj.path, proj.name])
         let rec = cacheStore.getState().recent_projects.find(el => cacheStore.getState().make_path([el.path, el.name]) == path__);
         if (!rec) {
+            console.log("OPEN 1")
             cacheStore.getState().add_recent({
                 last_opened: new Date().getTime(),
                 meta: {...proj.meta},
@@ -240,8 +241,9 @@ export const projectStore = create<Type>((set, get) => ({
 
             } satisfies IRecentProject)
         } else {
+            console.log("OPEN 2")
             rec.last_opened = new Date().getTime()
-            cacheStore.getState().update_recent(rec)
+            cacheStore.getState().update_recent({...rec})
         }
         pageStore.getState().openProject();
         const path_ = cacheStore.getState().make_path([proj.path, proj.name])

@@ -39,6 +39,7 @@ export default function Project(props: Props) {
         return ""
     })()
 
+    let date = new Date(project.last_opened);
 
     return (
         <div className={"main-page-project"} onClick={loadProject}
@@ -118,6 +119,14 @@ export default function Project(props: Props) {
                    }}
                 >{project.path}</p>
             </div>
+            <p
+                className={"main-page-project-last"}
+                style={{
+                    color: theme?.path?.color,
+                    textDecoration: theme?.path?.underscore
+                }}
+            >{`${date.getFullYear()}.${date.getMonth()}.${date.getDate()}`}
+            </p>
             <div className={"main-page-project-right-"}>
                 <p className={"main-page-project-packages"}
                    style={{

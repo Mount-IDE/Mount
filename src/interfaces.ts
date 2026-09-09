@@ -79,7 +79,7 @@ interface ISection {
     id: number,
     label: string,
     list: [boolean, boolean],
-    params: IPackageParameter[]
+    params: (IPackageParameter | null)[]
 }
 
 
@@ -343,6 +343,17 @@ interface Settings {
     },
     run: {
         shells: string[]
+    }
+    licenses: {
+        [key: string]: {
+            filename: string,
+            entries_input?: {
+                [key: string]: string[] //
+            },
+            entries_var?: {
+                [key: string]: string[]
+            }
+        }
     }
 }
 

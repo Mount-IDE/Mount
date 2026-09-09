@@ -20,6 +20,7 @@ import {packageStore} from "../../../stores/package_store.ts";
 import Dyn, {ManyVal} from "../../common/Dyn.tsx";
 import return_ from "../../../assets/return.svg"
 import Load from "../../common/Load.tsx";
+import {settingsStore} from "../../../stores/settings_store.ts";
 
 /**
  * buttons for creating project
@@ -75,6 +76,8 @@ export default function MainPage() {
     }, [recents])
     const packages = packageStore(state => state.packages).map(el => el.id)
 
+    const licenses = Object.keys(settingsStore(state => state.settings)?.licenses ?? {})
+
     useEffect(() => {
         console.log("AUTHORS", authors)
         console.log("Tags", tags)
@@ -84,6 +87,7 @@ export default function MainPage() {
     const [usedAuthors, setUsedAuthors] = useState<string[]>([])
     const [usedTags, setUsedTags] = useState<string[]>([])
     const [usedPackages, setUsedPackages] = useState<string[]>([])
+    const [usedLicenses, setUsedLicenses] = useState<string[]>([])
 
 
     useEffect(() => {
@@ -94,18 +98,28 @@ export default function MainPage() {
             : recents
 
         res = res.filter(el => {
-            if (usedAuthors.length == 0 && usedTags.length == 0 && usedPackages.length == 0) {
+            if (usedAuthors.length == 0 && usedLicenses.length == 0 && usedTags.length == 0 && usedPackages.length == 0) {
                 return true
             }
             let auth = el.meta.authors.filter(e => usedAuthors.includes(e))
             let tag = el.meta.tags.filter(e => usedTags.includes(e))
             let pack = el.packages.filter(e => usedPackages.includes(e))
-            return (auth.length > 0 || usedAuthors.length == 0) && (tag.length > 0 || usedTags.length == 0) && (pack.length > 0 || usedPackages.length == 0)
+            let lic = usedLicenses.includes(el.meta.license)
+            return (auth.length > 0 || usedAuthors.length == 0)
+                && (tag.length > 0 || usedTags.length == 0)
+                && (pack.length > 0 || usedPackages.length == 0)
+                && (lic || usedLicenses.length == 0)
         })
 
         setRecent(res)
 
-    }, [recents, filter_string, usedPackages, usedTags, usedAuthors]);
+        if (usedLicenses.length > 0 || usedPackages.length > 0 || usedAuthors.length > 0 || usedTags.length > 0) {
+            filterStore.getState().set_activated(true)
+        } else {
+            filterStore.getState().set_activated(false)
+        }
+
+    }, [recents, filter_string, usedPackages, usedTags, usedLicenses, usedAuthors]);
 
     /**
      * Open project when user selects a project from list
@@ -285,7 +299,7 @@ export default function MainPage() {
                                     height: 0
                                 }}
                                 animate={{
-                                    height: "140px"
+                                    height: "150px"
                                 }}
                                 exit={{
                                     height: 0
@@ -293,61 +307,91 @@ export default function MainPage() {
                                 style={{
                                     width: "100%",
                                     borderBottom: "1px solid var(--border)",
-                                    overflow: "hidden"
+                                    overflow: "hidden",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between"
                                 }}
                             >
-                                <Dyn
-                                    dynamic={false}
-                                    value={authors
-                                        .map(el => ({
-                                                typ: "check",
-                                                val: usedAuthors.includes(el),
-                                                title: el
-                                            }) satisfies ManyVal
-                                        )}
-                                    write={(e) => {
-                                        let res = (e as ManyVal[])
-                                            .filter(el_ => el_.val == true)
-                                            .map(el => el.title!)
-                                        setUsedAuthors(res)
+                                <div className={"main-page-filter-part"}>
+                                    <Dyn
+                                        vertical={true}
+                                        dynamic={false}
+                                        value={authors.map(el => ({
+                                            typ: "check",
+                                            val: usedAuthors.includes(el),
+                                            title: el
+                                        }) satisfies ManyVal)}
+                                        write={(e) => {
+                                            let res = (e as ManyVal[])
+                                                .filter(el_ => el_.val == true)
+                                                .map(el => el.title!)
+                                            setUsedAuthors(res)
+                                        }}
+                                        title={"Authors:"}
+                                        otherwise={"[ ]"}
+                                    />
+                                    <Dyn
+                                        vertical={true}
+                                        value={tags.map(el => ({
+                                            typ: "check",
+                                            val: usedTags.includes(el),
+                                            title: el
+                                        })satisfies ManyVal)}
+                                        write={(e) => {
+                                            let res = (e as ManyVal[])
+                                                .filter(el_ => el_.val == true)
+                                                .map(el => el.title!)
+                                            setUsedTags(res)
+                                        }}
+                                        dynamic={false}
+                                        title={"Tags:"}
+                                        otherwise={"[ ]"}
+                                    />
+                                </div>
+                                <hr
+                                    style={{
+                                        height: "60%",
+                                        border: "1px solid var(--border2)"
                                     }}
-                                    title={"Authors:"}
-                                    otherwise={"[ ]"}
                                 />
-                                <Dyn
-                                    value={tags.map(el => ({
-                                        typ: "check",
-                                        val: usedTags.includes(el),
-                                        title: el
-                                    })satisfies ManyVal)}
-                                    write={(e) => {
-                                        let res = (e as ManyVal[])
-                                            .filter(el_ => el_.val == true)
-                                            .map(el => el.title!)
-                                        setUsedTags(res)
-                                    }}
-                                    dynamic={false}
-                                    title={"Tags:"}
-                                    otherwise={"[ ]"}
-                                />
-
-                                <Dyn
-                                    value={packages.map(el => ({
-                                        typ: "check",
-                                        val: usedPackages.includes(el),
-                                        title: el
-                                    }) satisfies ManyVal)}
-                                    write={(e) => {
-                                        console.log("change", e)
-                                        let res = (e as ManyVal[])
-                                            .filter(el_ => el_.val == true)
-                                            .map(el => el.title!)
-                                        setUsedPackages(res)
-                                    }}
-                                    dynamic={false}
-                                    title={"Packages:"}
-                                    otherwise={"Nothing to show"}
-                                />
+                                <div className={"main-page-filter-part"}>
+                                    <Dyn
+                                        vertical={true}
+                                        value={packages.map(el => ({
+                                            typ: "check",
+                                            val: usedPackages.includes(el),
+                                            title: el
+                                        }) satisfies ManyVal)}
+                                        write={(e) => {
+                                            console.log("change", e)
+                                            let res = (e as ManyVal[])
+                                                .filter(el_ => el_.val == true)
+                                                .map(el => el.title!)
+                                            setUsedPackages(res)
+                                        }}
+                                        dynamic={false}
+                                        title={"Packages:"}
+                                        otherwise={"[ ]"}
+                                    />
+                                    <Dyn
+                                        vertical={true}
+                                        value={licenses.map(el => ({
+                                            typ: "check",
+                                            val: usedLicenses.includes(el),
+                                            title: el
+                                        }) satisfies ManyVal)}
+                                        write={(e) => {
+                                            let res = (e as ManyVal[])
+                                                .filter(el_ => el_.val == true)
+                                                .map(el => el.title!)
+                                            setUsedLicenses(res)
+                                        }}
+                                        dynamic={false}
+                                        title={"Licenses:"}
+                                        otherwise={"[ ]"}
+                                    />
+                                </div>
                             </motion.div>
                         }
                     </AnimatePresence>

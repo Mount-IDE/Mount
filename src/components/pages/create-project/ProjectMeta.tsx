@@ -6,7 +6,7 @@ import {settingsStore} from "../../../stores/settings_store.ts";
 
 import img_ from "../../../assets/img.svg"
 import close_ from "../../../assets/title-close.svg"
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 
 import {SketchPicker} from 'react-color';
 import {open} from "@tauri-apps/plugin-dialog";
@@ -16,11 +16,45 @@ import {invoke} from "@tauri-apps/api/core";
 import {createProjectStore} from "../../../stores/create_project.ts";
 import PackageSection from "./PackageSection.tsx";
 
+
+function useLicense(current: string, settings: Settings | null): IPackageParameter[] | null {
+    if (!settings) {
+        return null
+    }
+    if (current == "NonLicense") return null
+    let res: IPackageParameter[] = []
+    let license = settings.licenses[current]
+    if (!license) {
+        return null
+    }
+    let input = license.entries_input
+    if (!input)
+        return null
+    for (let i of Object.keys(input)) {
+        res.push({
+            def: "",
+            id: `${current}-${i}`,
+            title: i,
+            typ: {
+                typ: "input",
+            },
+        } satisfies IPackageParameter)
+    }
+    return res
+}
+
+
 export default function ProjectMeta() {
 
     const project_path = cacheStore(state => state.projects_path);
     const settings = settingsStore(state => state.settings)
-    const base_meta: ISection[] = [
+
+
+    const license = createProjectStore(state =>
+        state.get_result("__meta__", -3, "project-license")
+    )
+
+    const base_meta: ISection[] = useMemo(() => ([
         {
             id: -4,
             label: "",
@@ -47,7 +81,8 @@ export default function ProjectMeta() {
                     },
                 }
             ]
-        }, {
+        },
+        {
             id: -3,
             label: "Addition Information",
             list: [true, true],
@@ -58,7 +93,7 @@ export default function ProjectMeta() {
                     id: "project-authors",
                     typ: {
                         typ: "input",
-                        placeholder: "author1 author2"
+                        placeholder: "author1<email> author2<email"
                     },
                 }, {
                     def: "",
@@ -74,9 +109,13 @@ export default function ProjectMeta() {
                     id: "project-license",
                     typ: {
                         typ: "list",
-                        list_type: ["NonLicense", "LGPL", "APACHE"]
+                        list_type: ["NonLicense", ...Object.keys(settings?.licenses ?? {})]
                     },
                 },
+                ...(useLicense(
+                    license?.toString() ?? "NonLicense",
+                    settings
+                ) ?? []),
                 {
                     def: "general",
                     title: "Group",
@@ -87,7 +126,8 @@ export default function ProjectMeta() {
                     },
                 },
             ]
-        }, {
+        },
+        {
             id: -2,
             label: "Git Options",
             list: [true, false],
@@ -119,7 +159,7 @@ export default function ProjectMeta() {
                 }
             ]
         }
-    ]
+    ]), [license])
     const template = cacheStore(state => state.currentTemplate);
     const other_sections = template ? template.startup.sections : []
 

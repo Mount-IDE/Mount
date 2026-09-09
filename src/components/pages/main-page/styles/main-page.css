@@ -131,6 +131,12 @@
     overflow: auto;
     position: relative;
     margin-top: 10px;
+}
 
-
+.main-page-filter-part {
+    height: 100%;
+    width: 47%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }

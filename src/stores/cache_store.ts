@@ -17,7 +17,6 @@ interface Type {
     os: string,
 
 
-
     recent_projects: IRecentProject[]
     set_recent_projects: (rec: IRecentProject[]) => void
 
@@ -68,6 +67,7 @@ export const cacheStore = create<Type>((set, get) => ({
     async reload_recents() {
         try {
             let res = await invoke<IRecentProject[]>("get_recent_projects")
+            res.sort((a, b) => b.last_opened - a.last_opened)
             set({
                 recent_projects: res
             })
@@ -90,6 +90,7 @@ export const cacheStore = create<Type>((set, get) => ({
             }
             return el
         })
+        recents.sort((a, b) => b.last_opened - a.last_opened)
 
         set({
             recent_projects: recents
@@ -101,8 +102,10 @@ export const cacheStore = create<Type>((set, get) => ({
     },
 
     add_recent(rec: IRecentProject): void {
+        let rec_ = [...get().recent_projects, rec]
+        rec_.sort((a, b) => b.last_opened - a.last_opened)
         set({
-            recent_projects: [rec, ...get().recent_projects]
+            recent_projects: rec_
         })
     },
 
@@ -198,6 +201,7 @@ export const cacheStore = create<Type>((set, get) => ({
     shells: [],
     recent_projects: [],
     set_recent_projects(rec: IRecentProject[]): void {
+        rec.sort((a, b) => b.last_opened - a.last_opened)
         set({recent_projects: rec})
     },
     make_path(pieces: string[]): string {

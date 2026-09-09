@@ -31,7 +31,7 @@ type Props = {
     dynamic?: boolean
     def?: ManyValType
     maxWidth?: string
-
+    vertical?: boolean
     otherwise?: string
 }
 
@@ -114,22 +114,22 @@ export default function Dyn(props: Props) {
     return (
         <div className={"gen"}
              style={props.show == false ? {
-                 display: props.dynamic ? "block" : "block",
+                 display: props.dynamic || props.vertical ? "block" : "flex",
                  opacity: 0.5,
                  pointerEvents: "none",
-                 alignItems: props.dynamic ? "none" : "center",
+                 alignItems: props.dynamic || props.vertical ? "none" : "center",
                  maxWidth: props.maxWidth ?? "none"
 
              } : {
-                 display: props.dynamic ? "block" : "flex",
-                 alignItems: props.dynamic ? "none" : "center",
+                 display: props.dynamic || props.vertical ? "block" : "flex",
+                 alignItems: props.dynamic || props.vertical ? "none" : "center",
                  maxWidth: props.maxWidth ?? "none"
              }}
         >
             <p
                 style={{
-                    height: props.dynamic ? "auto" : "100%",
-                    marginRight: props.dynamic ? "none" : "10px"
+                    height: props.dynamic || props.vertical ? "auto" : "100%",
+                    marginRight: props.dynamic || props.vertical ? "none" : "15px",
                 }}
             >{props.title}</p>
             <div className={"parameter-gen"}

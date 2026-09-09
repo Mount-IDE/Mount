@@ -23,6 +23,9 @@ pub trait TConfigService {
     fn get_settings(&self) -> Result<Settings, ConfigError>;
 
     fn get_file_templates(&self) -> Result<Vec<ConfigFsTemplate>, ConfigError>;
+
+    fn get_licenses(&self) -> Result<Vec<String>, ConfigError>; // only names
+    fn get_license(&self, name: String) -> Result<String, ConfigError>;
 }
 
 pub trait TConfigRecoveryService {

@@ -25,6 +25,9 @@ interface Type {
 
     create_project(template: ITemplate): Promise<[number, string, IProject | null]>
 
+
+    get_result: (temp: string, section: number, id: string) => IVal | null
+
     clear: () => void
 
 }
@@ -44,6 +47,10 @@ export const createProjectStore = create<Type>((set, get) => ({
     packages: new Set(),
     tags: [],
     package_results: {},
+
+    get_result: (temp, sec, id) => {
+        return get().results[temp]?.[sec]?.[id] ?? null
+    },
     add_pack_result(pack: string, param: string, val: IVal): void {
         let prev = get().package_results
         set({

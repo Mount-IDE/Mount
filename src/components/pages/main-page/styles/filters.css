@@ -53,9 +53,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
     & > img {
         width: 50%;
         height: 50%;
+    }
+
+    &:hover {
+        filter: brightness(2)
     }
 }
 
