@@ -2,6 +2,7 @@
     width: 100%;
     height: 50px;
     display: flex;
+    align-items: center;
     background: transparent;
     border-bottom: 1px solid var(--border);
 
@@ -47,7 +48,13 @@
 #filters-filters {
     height: 100%;
 
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     & > img {
+        width: 50%;
         height: 50%;
     }
 }

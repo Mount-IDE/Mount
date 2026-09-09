@@ -17,24 +17,6 @@ import {cacheStore} from "../../stores/cache_store.ts";
 export default function FsAside() {
 
     const tree = fsAsideTreeStore(state => state.tree);
-    const load_tree = fsAsideTreeStore(state => state.load_tree);
-    // const watch = fsAsideTreeStore(state => state.watch);
-    //const unwatch = fsAsideTreeStore(state => state.unwatch);
-    //const cwd = projectStore(state => state.path_to_current_project);
-
-    /*   useEffect(() => {
-           if (cwd.length === 0) {
-               return;
-           }
-
-           load_tree(cwd).then();
-           watch(cwd).then();
-
-           return () => {
-               void unwatch();
-           }
-       }, [cwd, load_tree, watch, unwatch]);*/
-
     const [cursor, setCursor] = useState([0, 0])
     const [showContext, setShowContext] = useState(false)
     const [_, setContextTree] = useState<FsFile | FsDirectory | null>(null)

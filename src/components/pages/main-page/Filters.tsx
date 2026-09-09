@@ -2,6 +2,7 @@ import "./styles/filters.css"
 import search from "../../../assets/search.svg"
 import filters from "../../../assets/filters.svg"
 import {mainPageStore} from "../../../stores/main_page_store.ts";
+import {filterStore} from "../../../stores/filter_store.ts";
 
 
 export default function Filters() {
@@ -22,7 +23,7 @@ export default function Filters() {
                        placeholder={"Search projects"}
                 />
             </div>
-            <div id={"filters-filters"}>
+            <div id={"filters-filters"} onClick={() => filterStore.getState().set_opened()}>
                 <img src={filters}/>
             </div>
         </div>

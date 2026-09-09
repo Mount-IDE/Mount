@@ -8,6 +8,7 @@ type Props = {
     show?: boolean
     incorrect?: string
     required?: boolean
+    margin?: string
 }
 
 export default function Check(props: Props) {
@@ -23,8 +24,12 @@ export default function Check(props: Props) {
             style={
                 props.show == false ? {
                     opacity: 0.5,
-                    pointerEvents: "none"
-                } : {}
+                    pointerEvents: "none",
+                    marginTop: props.margin ?? "10px"
+                } : {
+                    marginTop: props.margin ?? "10px"
+
+                }
             }
         >
             <input type={"checkbox"}

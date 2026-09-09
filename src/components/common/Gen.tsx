@@ -68,7 +68,8 @@ export default function Gen(props: Props) {
                                        (e) =>
                                            change(
                                                i,
-                                               (e.target as HTMLInputElement).value
+                                               (e.target as HTMLInputElement)
+                                                   .value
                                            )
                                    }
                             />

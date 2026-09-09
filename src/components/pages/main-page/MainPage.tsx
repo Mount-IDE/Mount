@@ -14,7 +14,12 @@ import Modal from "../../common/Modal.tsx";
 import {menuStore} from "../../../stores/menu_store.ts";
 import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
-
+import {AnimatePresence, motion} from "motion/react";
+import {filterStore} from "../../../stores/filter_store.ts";
+import {packageStore} from "../../../stores/package_store.ts";
+import Dyn, {ManyVal} from "../../common/Dyn.tsx";
+import return_ from "../../../assets/return.svg"
+import Load from "../../common/Load.tsx";
 
 /**
  * buttons for creating project
@@ -61,15 +66,46 @@ export default function MainPage() {
 
     const [recent, setRecent] = useState<IRecentProject[]>([])
 
+
+    const authors = useMemo(() => {
+        return [...new Set(recents.map(el => el.meta?.authors ?? []).flat().filter(el => el.length > 0))]
+    }, [recents])
+    const tags = useMemo(() => {
+        return [...new Set(recents.map(el => el.meta?.tags ?? []).flat().filter(el => el.length > 0))]
+    }, [recents])
+    const packages = packageStore(state => state.packages).map(el => el.id)
+
+    useEffect(() => {
+        console.log("AUTHORS", authors)
+        console.log("Tags", tags)
+        console.log("Tags", packages)
+    }, [authors, tags, packages]);
+
+    const [usedAuthors, setUsedAuthors] = useState<string[]>([])
+    const [usedTags, setUsedTags] = useState<string[]>([])
+    const [usedPackages, setUsedPackages] = useState<string[]>([])
+
+
     useEffect(() => {
 
         let res = filter_string.length > 0 ? recents.filter(el =>
                 el.name.includes(filter_string)
             )
             : recents
+
+        res = res.filter(el => {
+            if (usedAuthors.length == 0 && usedTags.length == 0 && usedPackages.length == 0) {
+                return true
+            }
+            let auth = el.meta.authors.filter(e => usedAuthors.includes(e))
+            let tag = el.meta.tags.filter(e => usedTags.includes(e))
+            let pack = el.packages.filter(e => usedPackages.includes(e))
+            return (auth.length > 0 || usedAuthors.length == 0) && (tag.length > 0 || usedTags.length == 0) && (pack.length > 0 || usedPackages.length == 0)
+        })
+
         setRecent(res)
 
-    }, [recents, filter_string]);
+    }, [recents, filter_string, usedPackages, usedTags, usedAuthors]);
 
     /**
      * Open project when user selects a project from list
@@ -190,6 +226,25 @@ export default function MainPage() {
 
     const theme = themeStore(state => state.current_theme?.elements?.mainpage)
 
+
+    let filters_opened = filterStore(state => state.opened)
+
+
+    const [reloading, setReloading] = useState(false)
+
+    useEffect(() => {
+        async function a() {
+            if (reloading) {
+                await cacheStore.getState().reload_recents()
+                setReloading(false)
+            }
+        }
+
+        a().then()
+
+    }, [reloading])
+
+
     return (
         <div className={"page"} id={"main-page"}>
             <div
@@ -222,6 +277,81 @@ export default function MainPage() {
             >
                 <div id={"main-page-right-dec"}>
                     <Filters/>
+                    <AnimatePresence>
+                        {
+                            filters_opened &&
+                            <motion.div
+                                initial={{
+                                    height: 0
+                                }}
+                                animate={{
+                                    height: "140px"
+                                }}
+                                exit={{
+                                    height: 0
+                                }}
+                                style={{
+                                    width: "100%",
+                                    borderBottom: "1px solid var(--border)",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                <Dyn
+                                    dynamic={false}
+                                    value={authors
+                                        .map(el => ({
+                                                typ: "check",
+                                                val: usedAuthors.includes(el),
+                                                title: el
+                                            }) satisfies ManyVal
+                                        )}
+                                    write={(e) => {
+                                        let res = (e as ManyVal[])
+                                            .filter(el_ => el_.val == true)
+                                            .map(el => el.title!)
+                                        setUsedAuthors(res)
+                                    }}
+                                    title={"Authors:"}
+                                    otherwise={"[ ]"}
+                                />
+                                <Dyn
+                                    value={tags.map(el => ({
+                                        typ: "check",
+                                        val: usedTags.includes(el),
+                                        title: el
+                                    })satisfies ManyVal)}
+                                    write={(e) => {
+                                        let res = (e as ManyVal[])
+                                            .filter(el_ => el_.val == true)
+                                            .map(el => el.title!)
+                                        setUsedTags(res)
+                                    }}
+                                    dynamic={false}
+                                    title={"Tags:"}
+                                    otherwise={"[ ]"}
+                                />
+
+                                <Dyn
+                                    value={packages.map(el => ({
+                                        typ: "check",
+                                        val: usedPackages.includes(el),
+                                        title: el
+                                    }) satisfies ManyVal)}
+                                    write={(e) => {
+                                        console.log("change", e)
+                                        let res = (e as ManyVal[])
+                                            .filter(el_ => el_.val == true)
+                                            .map(el => el.title!)
+                                        setUsedPackages(res)
+                                    }}
+                                    dynamic={false}
+                                    title={"Packages:"}
+                                    otherwise={"Nothing to show"}
+                                />
+                            </motion.div>
+                        }
+                    </AnimatePresence>
+
                     <div id={"main-page-groups"}>
                         <div id={"main-page-groups-list"}>
                             {groups.map((el) =>
@@ -234,14 +364,25 @@ export default function MainPage() {
                                 </div>
                             )}
                         </div>
+                        <div id={"main-page-reload"}
+                             onClick={() => setReloading(true)}
+                        >
+                            <img src={return_}/>
+                        </div>
                     </div>
                     <div id={"main-page-projects"}>
-                        {recentByGroup.length > 0 &&
+
+
+                        {
+                            reloading &&
+                            <Load/>
+                        }
+                        {!reloading && recentByGroup.length > 0 &&
                             recentByGroup.map((el, i) =>
                                 <Project onContext={show_context} onClick={setup_project} project={el} key={i}/>
                             )
                         }
-                        {recentByGroup.length == 0 && <p
+                        {!reloading && recentByGroup.length == 0 && <p
                             style={{
                                 color: "var(--subtitle)",
                                 width: "100%",

@@ -61,7 +61,7 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    margin-top: 10px;
+    /*margin-top: 10px;*/
 
 
     & p {
@@ -161,9 +161,10 @@
 }
 
 .parameter-gen {
-    margin-top: 10px;
+    /*margin-top: 10px;*/
     height: 4vh;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -188,7 +189,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-
     margin-right: 20px;
 
     & input {

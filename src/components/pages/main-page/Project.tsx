@@ -1,6 +1,5 @@
 import "./styles/project.css"
 import more from "../../../assets/more.svg"
-import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../../../stores/cache_store.ts";
 import {computeBP, themeStore} from "../../../stores/theme_store.ts";
 import React from "react";
@@ -16,9 +15,7 @@ export default function Project(props: Props) {
 
     async function loadProject() {
         try {
-            let path = await invoke<string>("make_path_command", {
-                components: [project.path, project.name]
-            })
+            let path = cacheStore.getState().make_path([project.path, project.name])
             props.onClick(path);
         } catch (e) {
             console.error(e)
@@ -27,6 +24,21 @@ export default function Project(props: Props) {
 
 
     const theme = themeStore(state => state.current_theme?.elements?.mainpage?.project)
+
+
+    const color = (() => {
+        if (project.meta.icon?.includes("#")) {
+            let col = project.meta.icon!.replace("#", "")
+            let r = parseInt(col.substring(0, 2), 16);
+            let g = parseInt(col.substring(2, 4), 16);
+            let b = parseInt(col.substring(4, 6), 16);
+            const brightness =
+                (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? "#333" : "#fff"
+        }
+        return ""
+    })()
+
 
     return (
         <div className={"main-page-project"} onClick={loadProject}
@@ -44,6 +56,21 @@ export default function Project(props: Props) {
                  }}
             >
                 {
+                    !project.meta.icon &&
+                    <div style={{
+                        width: "100%",
+                        height: "100%",
+                        background: project.meta.icon,
+                        font: "20pt 'Jetbrains Mono Medium'",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: color,
+                    }}>{project.name[0].toUpperCase()}</div>
+                }
+
+                {
                     project.meta.icon && project.meta.icon?.includes("#") &&
                     <div style={{
                         width: "100%",
@@ -54,7 +81,8 @@ export default function Project(props: Props) {
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "var(--title)",
+                        color: color,
+                        // mixBlendMode: "difference"
                     }}>{project.name[0].toUpperCase()}</div>
                 }
                 {

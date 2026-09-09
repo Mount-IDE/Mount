@@ -228,7 +228,8 @@ export const projectStore = create<Type>((set, get) => ({
             console.error(e)
         }
 
-        let rec = cacheStore.getState().recent_projects.find(el => el.path == proj.path);
+        let path__ = cacheStore.getState().make_path([proj.path, proj.name])
+        let rec = cacheStore.getState().recent_projects.find(el => cacheStore.getState().make_path([el.path, el.name]) == path__);
         if (!rec) {
             cacheStore.getState().add_recent({
                 last_opened: new Date().getTime(),

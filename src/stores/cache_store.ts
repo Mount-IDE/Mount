@@ -51,6 +51,9 @@ interface Type {
 
 
     update_cache: () => Promise<void>
+
+
+    reload_recents: () => Promise<boolean>
 }
 
 
@@ -62,6 +65,18 @@ export const cacheStore = create<Type>((set, get) => ({
     data_dir: "",
     projects_path: "",
     groups: [],
+    async reload_recents() {
+        try {
+            let res = await invoke<IRecentProject[]>("get_recent_projects")
+            set({
+                recent_projects: res
+            })
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    },
 
 
     os: "",
