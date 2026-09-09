@@ -5,6 +5,7 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 import {contextStore} from "../../../stores/context_store.ts";
 import {menuStore} from "../../../stores/menu_store.ts";
 import Input from "../../common/Input.tsx";
+import {motion} from "motion/react";
 
 /**
  *
@@ -83,8 +84,13 @@ export default function CreateEntity() {
     }
 
     return (
-        <>
-            <div id={"create-entity"}>
+        <motion.div
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.2}}
+
+            id={"create-entity"}>
                 <div id={"create-entity-header"}>
                     <p id={"create-entity-path"}>{path_to}</p>
                     <p id={"create-entity-label"}>Create file</p>
@@ -164,18 +170,8 @@ export default function CreateEntity() {
 
                     </div>
                 </div>
-            </div>
-            <div style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100vw",
-                height: "100vh",
-                backdropFilter: "blur(5px)",
-                background: "rgba(0,0,0,0.5)",
-                zIndex: 99,
-            }}></div>
-        </>
+        </motion.div>
+
     )
 }
 

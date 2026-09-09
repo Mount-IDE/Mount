@@ -6,6 +6,7 @@ import {useMemo, useState} from "react";
 import SettingsSection from "./SettingsSection.tsx";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import {themeStore} from "../../../stores/theme_store.ts";
+import {motion} from "motion/react";
 
 
 function useSettings(settings: Settings | null, themes: ITheme[]) {
@@ -117,7 +118,13 @@ export default function SettingsPage() {
     }
 
     return (
-        <div id={"settings-page"}>
+        <motion.div
+
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.2}}
+            id={"settings-page"}>
             <div id={"settings-head"}>
                 <p id={"settings-label"}>Settings</p>
             </div>
@@ -159,6 +166,6 @@ export default function SettingsPage() {
                     <Button title={"Apply"} cb={ok}/>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }

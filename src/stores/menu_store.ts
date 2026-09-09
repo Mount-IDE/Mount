@@ -1,5 +1,6 @@
 import {create} from "zustand";
 import {ModalProps} from "../components/common/Modal.tsx";
+import pageStore from "./page_store.ts";
 
 
 interface Type {
@@ -18,15 +19,18 @@ interface Type {
 export const menuStore = create<Type>((set, _) => ({
     file_create_menu: false,
     close_file_create_menu: () => {
+        pageStore.getState().setFilter(false)
         set({
             file_create_menu: false
         })
     },
     open_file_create_menu: () => {
+        pageStore.getState().setFilter(true)
         set({
             file_create_menu: true
         })
     }, set_file_create_menu: (val: boolean) => {
+        pageStore.getState().setFilter(val)
         set({
             file_create_menu: val
         })

@@ -10,6 +10,7 @@ import {projectStore} from "../../../stores/project_store.ts";
 import {launchStore} from "../../../stores/launch_store.ts";
 import LaunchPage from "./LaunchPage.tsx";
 import {themeStore} from "../../../stores/theme_store.ts";
+import {AnimatePresence} from "motion/react";
 
 
 export default function ProjectSpace() {
@@ -32,19 +33,22 @@ export default function ProjectSpace() {
                 background: theme?.this?.background,
             }}
             id={"project-space"}>
-            {
-                show_modal && modal_settings!=null &&
-                <Modal {...modal_settings}/>
+            <AnimatePresence>
+                {
+                    show_modal && modal_settings != null &&
+                    <Modal {...modal_settings}/>
 
-            }
-            {
-                launch_opened &&
-                <LaunchPage/>
-            }
-            {
-                show_file_creation_menu &&
-                <CreateEntity/>
-            }
+                }
+                {
+                    launch_opened &&
+                    <LaunchPage/>
+                }
+                {
+                    show_file_creation_menu &&
+                    <CreateEntity/>
+                }
+            </AnimatePresence>
+
             <ProjectWorkSpace/>
             <Footer/>
         </div>

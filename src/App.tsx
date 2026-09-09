@@ -17,6 +17,7 @@ import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
 import {Parser} from "web-tree-sitter";
 import {highlightWorkerStore} from "./stores/highlight_worker_store.ts";
+import {AnimatePresence} from "motion/react";
 
 
 /**
@@ -121,26 +122,28 @@ function App() {
             <TitleBar/>
             <Notifications/>
             <div id={"main"}>
-                {
-                    windowReady && settingsFlag &&
-                    <SettingsPage/>
-                }
-                {
-                    windowReady && projectSettingsOpened &&
-                    <ProjectSettings/>
-                }
-                {
-                    windowReady && createProjectOpened &&
-                    <CreateProject/>
-                }
-                {
-                    windowReady && current == Window.Main &&
-                    <MainPage/>
-                }
-                {
-                    windowReady && current == Window.Project &&
-                    <ProjectSpace/>
-                }
+                <AnimatePresence>
+                    {
+                        windowReady && settingsFlag &&
+                        <SettingsPage/>
+                    }
+                    {
+                        windowReady && projectSettingsOpened &&
+                        <ProjectSettings/>
+                    }
+                    {
+                        windowReady && createProjectOpened &&
+                        <CreateProject/>
+                    }
+                    {
+                        windowReady && current == Window.Main &&
+                        <MainPage/>
+                    }
+                    {
+                        windowReady && current == Window.Project &&
+                        <ProjectSpace/>
+                    }
+                </AnimatePresence>
             </div>
 
         </>

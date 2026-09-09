@@ -11,6 +11,7 @@ import {useEffect, useState} from "react";
 import Load from "../../common/Load.tsx";
 import {listen} from "@tauri-apps/api/event";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import {motion} from "motion/react";
 
 /**
  *
@@ -124,7 +125,11 @@ conflicts:\n
     }, [])
 
     return (
-        <div
+        <motion.div
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.2}}
             id={"create-project"}>
             {
                 startEvent != null &&
@@ -179,6 +184,6 @@ conflicts:\n
                     <Button title={"Create Project"} cb={() => create_project_()}/>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }

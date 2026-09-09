@@ -7,6 +7,7 @@ import pageStore from "../../../stores/page_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import ProjectSettingsVariables from "./ProjectSettingsVariables.tsx";
 import ProjectSettingsPackages from "./ProjectSettingsPackages.tsx";
+import {motion} from "motion/react";
 
 
 interface ProjectOption {
@@ -74,7 +75,13 @@ export default function ProjectSettings() {
 
     const _Widget = labels[current].component
     return (
-        <div id={"project-settings"}>
+        <motion.div
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.2}}
+
+            id={"project-settings"}>
             <div id={"project-settings-top"}>
                 <p id={"label-sec"}>{labels[current]?.label ?? "None"}</p>
                 <p id={"label-main"}>Project settings</p>
@@ -120,6 +127,6 @@ export default function ProjectSettings() {
                     }}/>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }

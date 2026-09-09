@@ -9,6 +9,7 @@ import LaunchSection from "./LaunchSection.tsx";
 import {useEffect, useMemo, useState} from "react";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import pageStore from "../../../stores/page_store.ts";
+import {motion} from "motion/react";
 
 
 export default function LaunchPage() {
@@ -129,7 +130,12 @@ export default function LaunchPage() {
 
 
     return (
-        <div id={"launch-page"}>
+        <motion.div
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.2}}
+            id={"launch-page"}>
             <div id={"launch-top"}>
                 <div id={"launch-label"}>
                     <p>Launch Configurations</p>
@@ -222,7 +228,7 @@ export default function LaunchPage() {
                     }}/>
                 </div>
             </div>
-        </div>
+        </motion.div>
 
     )
 }
