@@ -9,6 +9,8 @@ import Launch from "./Launch.tsx";
 import SettingsButton from "./SettingsButton.tsx";
 import {computeBP, themeStore} from "../../stores/theme_store.ts";
 import {useMemo} from "react";
+import proj from "../../assets/project.svg"
+import {menuBarStore} from "../../stores/menubar_store.ts";
 
 export default function TitleBar() {
 
@@ -68,6 +70,15 @@ export default function TitleBar() {
                 </>
             }
             <div id={"title-bar-buttons"}>
+                {
+                    current_page == Window.Project &&
+                    <button
+                        className={"proj-bt"}
+                        onClick={() => menuBarStore.getState().project_settings()}
+                    >
+                        <img src={proj}/>
+                    </button>
+                }
                 <SettingsButton/>
                 {buttons.map(el => {
                     return <TitleBarButton styles={buttonThemes} key={el.icon} {...el}/>

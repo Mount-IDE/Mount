@@ -7,6 +7,7 @@ use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::Path;
+use serde::{Deserialize, Serialize};
 use tauri::{State, WebviewWindow};
 
 #[tauri::command]
@@ -71,6 +72,21 @@ pub fn create_dir(path: String) -> Result<(), ErrorDto> {
 pub fn write_file(path: String, content: String) -> Result<(), ErrorDto> {
     let file = PFile::from_path_reg(Path(path));
     FS_WRITE_SERVICE.write_file(&file, content, FileWriteAccess::WRITE)?;
+    Ok(())
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct FileCache {
+    content: String,
+    path: Path,
+}
+
+#[tauri::command]
+pub fn write_files(files: Vec<FileCache>) -> Result<(), ErrorDto> {
+    for i in files.iter() {
+        let file = PFile::from_path_reg(i.path.clone());
+        FS_WRITE_SERVICE.write_file(&file, i.content.clone(), FileWriteAccess::WRITE)?;
+    }
     Ok(())
 }
 

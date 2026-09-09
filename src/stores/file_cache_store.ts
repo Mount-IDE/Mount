@@ -10,15 +10,50 @@ interface Type {
     save: (path: string) => void;
     write_file: (path: string, content: string) => void;
     write_file_by_id: (id: number, content: string) => void;
-    get_by_path: (path:string)=>FileCache|null;
-    get_by_id: (id: number)=>FileCache|null;
-    remove: (path: string)=>void;
-    move: (from: string, to: string)=>void;
+    get_by_path: (path: string) => FileCache | null;
+    get_by_id: (id: number) => FileCache | null;
+    remove: (path: string) => void;
+    move: (from: string, to: string) => void;
+
+
+    has_one_dirty: () => boolean
+
+
+    save_all: () => Promise<void>
+    clear: () => void
 }
 
 
 export const fileCacheStore =
     create<Type>((set, get) => ({
+
+        save_all: async () => {
+            let files = get().files;
+            try {
+                await invoke("write_files", {files: files.map(el => ({content: el.content, path: el.path}))})
+                for (let i = 0; i < files.length; i++) {
+                    files[i].is_dirty = false
+                }
+                set({files: files})
+            } catch (e) {
+                console.error(e)
+            }
+        },
+
+        has_one_dirty: () => {
+            for (let i of get().files) {
+                if (i.is_dirty) {
+                    return true
+                }
+            }
+            return false
+        },
+
+        clear: () => {
+            set({
+                files: []
+            })
+        },
         add_to_cache(file: FileCacheLight): void {
             const files = get().files
             const exists = files.some(el => el.path === file.path);
@@ -50,20 +85,20 @@ export const fileCacheStore =
         },
         files: [],
         make_dirty(path: string): void {
-            const files = get().files.map(el=>{
-                if (el.path!=path){
+            const files = get().files.map(el => {
+                if (el.path != path) {
                     return el
                 }
-                el.is_dirty=true;
+                el.is_dirty = true;
                 return el
             })
             set({
                 files: files
             })
         },
-         save(path: string): void {
-            const files =  get().files.map( (el)=>{
-                if (el.path!=path){
+        save(path: string): void {
+            const files = get().files.map((el) => {
+                if (el.path != path) {
                     return el;
                 }
                 invoke("write_file", {path: el.path, content: el.content}).then();
@@ -75,7 +110,7 @@ export const fileCacheStore =
 
 
             set({
-                files:  files
+                files: files
             })
         },
         write_file(path: string, content: string): void {
@@ -110,34 +145,34 @@ export const fileCacheStore =
                 files
             });
         },
-        get_by_path(path: string): FileCache |null{
+        get_by_path(path: string): FileCache | null {
             let files = get().files;
-            for (let i of files){
-                if (i.path==path){
+            for (let i of files) {
+                if (i.path == path) {
                     return i
                 }
             }
             return null
         },
-        get_by_id(id: number): FileCache |null{
+        get_by_id(id: number): FileCache | null {
             let files = get().files;
-            for (let i of files){
-                if (i.id==id){
+            for (let i of files) {
+                if (i.id == id) {
                     return i
                 }
             }
             return null
         },
         remove(path: string): void {
-            const files = get().files.filter(el=>el.path!=path);
+            const files = get().files.filter(el => el.path != path);
             set({
                 files: files
             })
         }, move(from: string, to: string): void {
-            const files = get().files.map(el=>{
-                if (el.path==from){
+            const files = get().files.map(el => {
+                if (el.path == from) {
                     const elem = {...el}
-                    elem.path=to;
+                    elem.path = to;
                     return elem
                 }
                 return el

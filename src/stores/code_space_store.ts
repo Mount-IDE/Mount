@@ -26,6 +26,8 @@ interface Type {
     remove_file_from_code_space: (id: number, file: Opened) => void
     select_current_file: (id: number, id2: number | null) => void // id of space and id of file
     get_space: (id: number) => ICodeSpace | null
+
+    clear: () => void
 }
 
 export const codeSpaceStore = create<Type>((set, get) => ({
@@ -200,7 +202,12 @@ export const codeSpaceStore = create<Type>((set, get) => ({
         }
         return got!
     }
+    ,
 
-
+    clear: () => {
+        set({
+            spaces: []
+        })
+    }
 }))
 

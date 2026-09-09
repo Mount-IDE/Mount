@@ -121,7 +121,7 @@ export const cacheStore = create<Type>((set, get) => ({
             temp.push(t);
         }
         return {
-            templates: temp
+            templates: temp,
         }
     }),
     clear_current_template: () => set({
@@ -156,8 +156,11 @@ export const cacheStore = create<Type>((set, get) => ({
                 id = temps.map(el => el.id)
             }
         }
+        console.log("TEMP", temps)
         return {
-            templates: temps
+            templates: temps,
+            currentTemplate: temps[0] ?? null
+
         }
     }),
     set_current_template: (t: ITemplate) => set({currentTemplate: t}),
@@ -216,7 +219,8 @@ export const cacheStore = create<Type>((set, get) => ({
                 projects_path: cache.projects_dir,
                 recent_projects: cache.recent_projects,
                 templates: cache.templates,
-                shells: cache.shells
+                shells: cache.shells,
+                currentTemplate: cache.templates[0] ?? null
             })
         } catch (e) {
             ERROR(e)

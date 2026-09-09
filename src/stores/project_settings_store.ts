@@ -29,6 +29,9 @@ interface Type {
 
     write_all_packs: (packs: IPackage[]) => void
 
+
+    clear: () => void
+
 }
 
 
@@ -37,6 +40,14 @@ export const projectSettingsStore = create<Type>((set, get) => ({
     main_results: {},
     variables: [],
     package_results: {},
+    clear: () => {
+        set({
+            new_project_data: null,
+            main_results: {},
+            variables: [],
+            package_results: {}
+        })
+    },
 
     get_pack_res: (pack) => {
         return get().package_results[pack]

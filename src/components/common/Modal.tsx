@@ -6,7 +6,7 @@ import {menuStore} from "../../stores/menu_store.ts";
 type ModalType = "alert" |"confirm" | "prompt"
 
 export interface ModalButton {
-    typ: "cancel" | "input"
+    typ: "cancel" | "input" | "close"
     title: string,
     cb: (val?: string) => void;
 }
@@ -15,6 +15,7 @@ export type ModalProps = {
     title: string
     typ: ModalType,
     val?: string
+    chain?: string
     buttons: ModalButton[]
 }
 
@@ -44,22 +45,33 @@ export default function Modal(props: ModalProps) {
                 {
                     props.typ=="prompt" &&
                     <ModalButton obj={{
-                        cb: (_)=> close(),
+                        cb: () => {
+                        },
                         title: "Cancel",
-                        typ: "cancel"
+                        typ: "close"
 
-                    }} _callback={(obj)=>{obj.cb()}}/>
+                    }} _callback={(obj) => {
+                        obj.cb()
+                        close()
+                    }}/>
                 }
                 {
                     props.typ=="confirm" &&
                     <ModalButton obj={{
-                        cb:(_)=> close(),
+                        cb: () => {
+                        },
                         title: "Cancel",
-                        typ: "cancel"
-                    }} _callback={(obj)=>{obj.cb()}}/>
+                        typ: "close"
+                    }} _callback={(obj) => {
+                        obj.cb()
+                        close()
+                    }}/>
                 }
                 {props.buttons.map((el, i) =>
-                    <ModalButton obj={el} _callback={cb} key={i}/>
+                    <ModalButton obj={el} _callback={(obj) => {
+                        cb(obj)
+                        close()
+                    }} key={i}/>
                 )}
             </div>
         </div>

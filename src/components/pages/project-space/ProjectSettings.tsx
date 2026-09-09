@@ -68,6 +68,7 @@ export default function ProjectSettings() {
             })
             let packs = projectSettingsStore.getState().package_results
             projectStore.getState().save_packages(packs).then()
+            projectSettingsStore.getState().clear()
         }
     }
 

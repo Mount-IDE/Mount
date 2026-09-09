@@ -21,6 +21,9 @@ interface Type {
     delete_node: (path: string) => void;
     add_node: (node: FsNode) => void;
     unwatch: () => Promise<void>;
+
+    clear: () => void
+
 }
 
 let fs_watch_unlisten: UnlistenFn | null = null;
@@ -237,12 +240,12 @@ export const fsAsideTreeStore =
                     return;
                 }
 
-                try{
+                try {
                     const res = await invoke<FsDirectory>("read_dir_rec", {
                         cwd: cwd
                     })
                     set({tree: res})
-                }catch (e){
+                } catch (e) {
                     console.error(e)
                 }
             },
@@ -304,7 +307,12 @@ export const fsAsideTreeStore =
                 } finally {
                     watched_project_path = "";
                 }
+            },
+            clear: () => {
+                watched_project_path = ""
+                set({
+                    tree: null
+                })
             }
-
         }
     ))

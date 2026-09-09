@@ -27,6 +27,9 @@ interface Type{
     set_current_left_button: (bt: IAsideButton |null)=>void;
     set_current_bottom_button: (bt: IAsideButton| null)=>void;
     set_current_right_button: (bt: IAsideButton| null)=>void;
+
+
+    clear: () => void
 }
 
 
@@ -34,6 +37,17 @@ export const asideButtonsStore= create<Type>((set, get)=>({
     left_buttons: [],
     bottom_buttons: [],
     right_buttons: [],
+
+    clear: () => {
+        set({
+            left_buttons: [],
+            bottom_buttons: [],
+            right_buttons: [],
+            current_bottom: null,
+            current_left: null,
+            current_right: null
+        })
+    },
     add_to_bottom(bt: IAsideButton): void {
         const buttons = get().bottom_buttons;
         const id = buttons.map(el=>el.id)

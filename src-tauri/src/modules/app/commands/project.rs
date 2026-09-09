@@ -9,6 +9,7 @@ use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
+use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
 use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
@@ -19,6 +20,7 @@ use crate::modules::contexts::project::domain::values::{
     ActionOnError, CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
+use crate::modules::contexts::terminal::app::managers::SharedTerminalManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::ProjectError;
@@ -28,7 +30,7 @@ use crate::modules::shared::kernel::values::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use tauri::State;
+use tauri::{State, Window};
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
@@ -432,4 +434,33 @@ pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
     FS_WRITE_SERVICE.write_file(&file, parsed, FileWriteAccess::WRITE)?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn has_processes(
+    window: Window,
+    state1: State<'_, SharedTerminalManager>,
+    state2: State<'_, SharedLaunchManager>,
+) -> Result<(bool, bool), ()> {
+    let terminals = {
+        state1
+            .lock()
+            .unwrap()
+            .terminals
+            .iter()
+            .filter(|(_, obj)| obj.window_id == window.label())
+            .count()
+    };
+
+    let launches = {
+        state2
+            .lock()
+            .unwrap()
+            .launches
+            .iter()
+            .filter(|(_, obj)| obj.window_id == window.label())
+            .count()
+    };
+
+    Ok((terminals != 0, launches != 0))
 }

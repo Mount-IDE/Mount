@@ -5,6 +5,7 @@ import {asideButtonsStore} from "./aside_buttons_store.ts";
 import {mapProjectButton} from "../utils/project-buttons.ts";
 import {cacheStore} from "./cache_store.ts";
 import pageStore from "./page_store.ts";
+import {fsAsideTreeStore} from "./fs_aside_tree_store.ts";
 
 
 interface Type {
@@ -36,12 +37,25 @@ interface Type {
     get_pack_by_file: (file: string | null) => PackageInner | null
 
 
+    close_project: () => void
+
 }
 
 
 export const projectStore = create<Type>((set, get) => ({
     selected_packages: new Map(),
     package_configs: new Map(),
+
+    close_project(): void {
+        set({
+            current_project: null,
+            path_to_current_project: "",
+        })
+
+
+    },
+
+
     async save_packages(packs: Record<string, IPackage>) {
 
         let res = new Map(get().selected_packages);
@@ -229,11 +243,16 @@ export const projectStore = create<Type>((set, get) => ({
             cacheStore.getState().update_recent(rec)
         }
         pageStore.getState().openProject();
+        const path_ = cacheStore.getState().make_path([proj.path, proj.name])
         set({
             selected_packages: packs ?? new Map(),
             current_project: proj,
-            path_to_current_project: cacheStore.getState().make_path([proj.path, proj.name])
+            path_to_current_project: path_
         })
+
+        await fsAsideTreeStore.getState().load_tree(path_)
+        await fsAsideTreeStore.getState().watch(path_)
+
     },
     get_pack_by_file(file: string | null): PackageInner | null {
         if (!file) return null

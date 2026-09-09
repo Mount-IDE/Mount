@@ -24,6 +24,9 @@ interface Type {
     trees: Record<filename, TreeEntry>,
     set_tree: (filename: string, pack: string, highlight: string, text: string) => [Tree, Range[] | null] | null,
     load_csm: (pack: string, highlight: string) => Promise<string | null> // text of file
+
+
+    clear: () => void
 }
 
 
@@ -72,6 +75,13 @@ function computeEdit(oldText: string, newText: string) {
 
 
 export const treeStore = create<Type>((set, get) => ({
+    clear: () => {
+        set({
+            trees: {}
+        })
+    },
+
+
     async load_csm(pack: string, highlight: string): Promise<string | null> {
         try {
             let text = await invoke<string>("read_scm", {pack, highlight})

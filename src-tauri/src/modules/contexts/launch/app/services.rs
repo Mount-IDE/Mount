@@ -644,4 +644,40 @@ impl TLaunchRunService for LaunchRunService {
         println!("close task2");
         Ok(())
     }
+
+    async fn close_window_tasks(
+        &self,
+        state: State<'_, SharedLaunchManager>,
+        label: &str,
+    ) -> Result<(), ()> {
+        let app = APP.get();
+        if let None = app {
+            return Err(());
+        }
+        let matched: Vec<(String, _, _)> = {
+            let launches = &state.lock().unwrap().launches;
+            launches
+                .iter()
+                .filter(|(_, obj)| obj.window_id == label)
+                .map(|(id, obj)| (id.clone(), obj.child.clone(), obj.writer.clone()))
+                .collect()
+        };
+
+        for (_, child, writer) in &matched {
+            let mut child = child.lock().await;
+            let _ = child.start_kill();
+            let _ = child.wait().await;
+            let mut writer = writer.lock().await;
+            let _ = writer.flush().await;
+        }
+
+        {
+            let launches = &mut state.lock().unwrap().launches;
+            for (id, _, _) in &matched {
+                launches.remove(id);
+            }
+        }
+
+        Ok(())
+    }
 }

@@ -35,3 +35,26 @@
     }
 }
 
+
+.proj-bt {
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: all 0.2s;
+    margin-right: 5px;
+
+    & img {
+        width: 70%;
+        height: 70%;
+        display: block;
+        object-fit: contain;
+    }
+
+    &:hover {
+        filter: brightness(2);
+    }
+}

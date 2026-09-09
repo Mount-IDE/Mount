@@ -35,10 +35,24 @@ interface Type {
     rem_reference: (i: number) => void
 
     add_references: (refs: LaunchTemplateReference[]) => void;
+
+
+    clear: () => void
 }
 
 
 export const launchStore = create<Type>((set, get) => ({
+    clear: () => {
+        set({
+            current_launch: null,
+            current_obj: null,
+            opened: false,
+            current_template: null,
+            active_objects: new Set(),
+            references: []
+        })
+    },
+
     current_obj: null,
     current_template: null,
     opened: false,

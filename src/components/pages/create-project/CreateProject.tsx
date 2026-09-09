@@ -23,6 +23,7 @@ export default function CreateProject() {
     const [isCreating, setIsCreating] = useState(false)
     const [startEvent, setStartEvent] = useState<string | null>(null)
     const [endEvent, setEndEvent] = useState<string | null>(null)
+
     /**
      *
      */
@@ -147,13 +148,35 @@ conflicts:\n
             <div id={"create-project-main"}>
                 <ProjectTemplates/>
                 <hr id={"create-project-hr"}/>
-                <ProjectMeta/>
-                <ProjectPackages/>
+                {
+                    current_template != null &&
+                    <>
+                        <ProjectMeta/>
+                        <ProjectPackages/>
+                    </>
+
+                }
+                {
+                    current_template == null &&
+                    <p style={{
+                        marginLeft: "5%",
+                        position: "absolute",
+                        left: "45%",
+                        top: "45%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--subtitle)",
+                        fontSize: "14pt"
+                    }}>
+                        Select the project template
+                    </p>
+                }
             </div>
             <div id={"create-project-bottom"}>
                 <div id={"create-project-buttons"}>
                     <Button title={"Close"} cb={() => close_project()}/>
-                    <Button title={"Create Project"} cb={()=>create_project_()}/>
+                    <Button title={"Create Project"} cb={() => create_project_()}/>
                 </div>
             </div>
         </div>

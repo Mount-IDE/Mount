@@ -24,9 +24,17 @@ interface Type {
     add_languages: (pack: IPackage) => Promise<LanguageInner[] | null>
     remove_languages: (pack: packageId) => void;
     remove_language: (pack: packageId, highlight: highlightId) => void
+
+    clear: () => void
 }
 
 export const languageStore = create<Type>((set, get) => ({
+    clear: () => {
+        set({
+            languages: {}
+        })
+    },
+
     async add_language(pack: packageId, highlight: highlightId): Promise<LanguageInner | null> {
 //        await Parser.init()
         let packages = projectStore.getState().selected_packages;

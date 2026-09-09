@@ -17,6 +17,9 @@ interface Type {
     set_current_left: (elem: comp) => void
     set_current_right: (elem: comp) => void
     set_current_bottom: (elem: comp) => void
+
+    clear: () => void
+
 }
 
 // type comp = (props?: { active?: boolean }) => ReactElement | null
@@ -29,6 +32,13 @@ export const asideStore = create<Type>((set, get) => ({
     bottom: false,
     left_aside: false,
     right_aside: false,
+    clear: () => {
+        set({
+            bottom: false,
+            left_aside: false,
+            right_aside: false
+        })
+    },
     current_bottom: () => null,
     current_left: () => null,
     current_right: () => null,

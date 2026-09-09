@@ -1,4 +1,5 @@
 use crate::modules::app::{APP, LAUNCH_COMPILE_SERVICE, LAUNCH_RUN_SERVICE, PROJECT_SERVICE};
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
@@ -148,5 +149,19 @@ pub async fn close_launch(
             message: "".to_string(),
         });
     }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn close_window_launches(
+    state: State<'_, SharedLaunchManager>,
+    window: Window,
+) -> Result<(), ErrorDto> {
+    LAUNCH_RUN_SERVICE
+        .close_window_tasks(state, window.label())
+        .await
+        .map_err(|e| ErrorDto {
+            message: "".__get(),
+        })?;
     Ok(())
 }

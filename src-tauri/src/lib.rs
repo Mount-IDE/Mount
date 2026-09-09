@@ -143,7 +143,10 @@ pub fn run() {
             read_scms,
             update_recents,
             read_binary,
-            save_packages
+            save_packages,
+            close_window_launches,
+            has_processes,
+            write_files
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
