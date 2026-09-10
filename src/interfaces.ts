@@ -79,7 +79,7 @@ interface ISection {
     id: number,
     label: string,
     list: [boolean, boolean],
-    params: (IPackageParameter | null)[]
+    params: (IPackageParameter)[]
 }
 
 
@@ -132,6 +132,11 @@ interface ICodeSpace {
     opened_files_stack: number[]
 }
 
+interface FsMeta {
+    modified: number,
+    readonly: boolean,
+    memory: number
+}
 
 interface FsDirectory {
     name: string;
@@ -139,6 +144,7 @@ interface FsDirectory {
     directories: FsDirectory[]
     files: FsFile[]
     path: string;
+    meta?: FsMeta
 }
 
 interface FsFile {
@@ -146,6 +152,7 @@ interface FsFile {
     path: string;
     typ_: "file"
     modified?: boolean;
+    meta?: FsMeta
 }
 
 

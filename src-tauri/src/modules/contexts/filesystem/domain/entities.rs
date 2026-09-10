@@ -2,11 +2,47 @@ use crate::modules::contexts::filesystem::app::utils::split_path;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
+use std::path;
+use std::time::Duration;
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct FsMeta {
+    pub modified: u64,
+    pub readonly: bool,
+    pub memory: u64,
+}
+
+impl FsMeta {
+    pub fn by_path(path: Path) -> Self {
+        let path = path.clone().get();
+        let path = path::Path::new(&path);
+        Self {
+            modified: path
+                .metadata()
+                .unwrap()
+                .modified()
+                .unwrap_or(std::time::SystemTime::now())
+                .elapsed()
+                .unwrap_or(Duration::new(0, 0))
+                .as_secs(),
+            readonly: path.metadata().unwrap().permissions().readonly(),
+            memory: path.metadata().unwrap().len(),
+        }
+        /* Self {
+            modified: 0,
+            readonly: true,
+            memory: 0
+        }*/
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PFile {
     pub name: String,
     pub path: Path,
     pub typ: FileType,
+
+    pub meta: Option<FsMeta>,
 }
 
 impl PFile {
@@ -16,6 +52,7 @@ impl PFile {
             name,
             path,
             typ: FileType::REGULAR,
+            meta: None,
         }
     }
     #[allow(unused)]
@@ -24,6 +61,7 @@ impl PFile {
             name,
             path,
             typ: FileType::BINARY,
+            meta: None,
         }
     }
 
@@ -44,6 +82,7 @@ impl PFile {
                 name: "".to_string(),
                 path: Path(String::new()),
                 typ: FileType::REGULAR,
+                meta: None,
             };
         }
         let name = path_.get(path_.len() - 1);
@@ -52,6 +91,7 @@ impl PFile {
                 name: "".to_string(),
                 path: Path(String::new()),
                 typ: FileType::REGULAR,
+                meta: None,
             };
         }
         let name = name.unwrap();
@@ -59,6 +99,7 @@ impl PFile {
             name: name.to_string(),
             path,
             typ: FileType::REGULAR,
+            meta: None,
         }
     }
 }
@@ -69,6 +110,7 @@ pub struct PDirectory {
     pub path: Path,
     pub files: Vec<PFile>,
     pub directories: Vec<PDirectory>,
+    pub meta: Option<FsMeta>,
 }
 impl PDirectory {
     pub fn new() -> PDirectory {
@@ -77,6 +119,7 @@ impl PDirectory {
             path: Path(String::new()),
             files: Vec::new(),
             directories: Vec::new(),
+            meta: None,
         }
     }
 
@@ -95,6 +138,7 @@ impl PDirectory {
             path: path.clone(),
             files: Vec::new(),
             directories: Vec::new(),
+            meta: None,
         }
     }
 }

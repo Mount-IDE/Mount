@@ -100,12 +100,17 @@
     position: absolute;
     right: 0;
     top: 0;
+    transition: all 0.2s;
 
     & img {
         width: 50%;
         height: 50%;
         display: block;
         object-fit: contain;
+    }
+
+    &:hover {
+        filter: brightness(2)
     }
 }
 .main-page-group {

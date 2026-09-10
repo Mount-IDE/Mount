@@ -33,6 +33,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            println!("SETUP");
             APP.set(app.handle().clone()).expect("no app btw :(");
             CONFIG_RECOVERY_SERVICE
                 .check_data_dir()
@@ -62,6 +63,9 @@ pub fn run() {
                 .set(Mutex::new(settings))
                 .expect("Unable to set settings");
             Ok(())
+        })
+        .on_webview_event(|w, e| {
+            println!("EVENT {w:?} ::\n\n\n :: {e:?}");
         })
         .on_window_event(|window, event| {
             if matches!(

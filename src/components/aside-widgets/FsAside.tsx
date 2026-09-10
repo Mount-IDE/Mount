@@ -57,6 +57,9 @@ export default function FsAside() {
     const close_modal = menuStore(state => state.close_modal)
 
 
+    useEffect(() => {
+        console.log("TREE", tree)
+    }, [tree])
     /**
      * @function open_context_menu
      * function tha makes ContextMenu visible
@@ -155,7 +158,7 @@ export default function FsAside() {
                                 cb: (val) => {
                                     if (val !== undefined) {
                                         const os = cacheStore.getState().os;
-                                        const sep = os!=="windows"?"/":"\\"
+                                        const sep = os !== "windows" ? "/" : "\\"
                                         const path_ = `${path}${sep}${val}`
                                         try {
                                             invoke("rename_file", {from: obj.path, to: path_}).then();
@@ -299,8 +302,12 @@ export default function FsAside() {
                                 is_file,
                                 path, path2) =>
                         open_context_menu(e, obj, is_file, path, path2)
-
-                    } obj={tree}/>}
+                    }
+                    opened={true}
+                    obj={tree}
+                    root={tree}
+                />
+                }
             </div>
         </>
     )

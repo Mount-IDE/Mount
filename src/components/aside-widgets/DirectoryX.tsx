@@ -1,8 +1,9 @@
 import "./styles/directory.css"
 import FileX from "./FileX.tsx";
 import arrow from "../../assets/arrow.svg"
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {fsExtStore} from "../../stores/fs_ext_store.ts";
+import {asideStore} from "../../stores/aside_store.ts";
 
 /**
  * @type Props
@@ -10,9 +11,10 @@ import {fsExtStore} from "../../stores/fs_ext_store.ts";
  * @param onContext a function that calls when OnContext event was emitted
  */
 type Props = {
-   obj: FsDirectory
+    obj: FsDirectory
     onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile,is_file:boolean, path?:string, path_file?:string)=>void
-
+    opened?: true
+    root: FsDirectory
 }
 
 /**
@@ -25,13 +27,29 @@ export default function DirectoryX(props: Props){
     const directories = props.obj.directories
     const files = props.obj.files
 
-    const [opened, setOpened]=useState(false);
+    const [opened, setOpened] = useState(props.opened ?? false);
 
     const ref=useRef<HTMLDivElement>(null);
     const ico = fsExtStore.getState().get_dir_by_type()
 
     const path = `/builtin/fs-icons/${ico[1]}`
 
+
+    const results = asideStore(state => state.widgets_results?.["fs"]) as Record<string, IVal> | undefined
+    const [dirs, setDirs] = useState(directories)
+
+    const [files_, setFiles] = useState(files)
+
+    useEffect(() => {
+        const dotFiles = results?.["ap:hide"] ?? false;
+        let dirs_ = directories
+        if (!dotFiles) {
+            dirs_ =
+                directories
+                    .filter(el => !el.name.startsWith("."))
+        }
+        setDirs(dirs_)
+    }, [results, directories, files, props.root])
 
     return (
         <div
@@ -59,11 +77,22 @@ export default function DirectoryX(props: Props){
                 <div className={"fs-aside-name"}>{props.obj.name}</div>
             </div>
             {opened && <div ref={ref} className={"dirx-body"}>
-                {directories.map(el=>
-                    <DirectoryX onContext={props.onContext} obj={el} key={`${el.path}`}/>
+                {dirs.map(el =>
+                    <DirectoryX
+                        onContext={props.onContext}
+                        obj={el}
+                        key={`${el.path}`}
+                        root={props.root}
+                    />
                 )}
-                {files.map(el=>
-                    <FileX parent_path={props.obj.path} onContext={props.onContext} obj={el} key={`${el.path}`}/>
+                {files_.map(el =>
+                    <FileX
+                        parent_path={props.obj.path}
+                        onContext={props.onContext}
+                        obj={el}
+                        key={`${el.path}`}
+                        root={props.root}
+                    />
                 )}
             </div>}
         </div>

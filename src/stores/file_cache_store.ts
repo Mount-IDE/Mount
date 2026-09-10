@@ -16,6 +16,8 @@ interface Type {
     move: (from: string, to: string) => void;
 
 
+    change_meta: (path: string, meta: FsMeta | null) => void
+
     has_one_dirty: () => boolean
 
 
@@ -26,6 +28,14 @@ interface Type {
 
 export const fileCacheStore =
     create<Type>((set, get) => ({
+        change_meta(path: string, meta: FsMeta | null): void {
+            let files = get().files;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].path == path) {
+                }
+            }
+        },
+
 
         save_all: async () => {
             let files = get().files;

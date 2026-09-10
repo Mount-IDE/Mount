@@ -5,7 +5,7 @@ use crate::modules::contexts::filesystem::app::traits::{
     TFSReadService, TFSWriteService, TFWatchService,
 };
 use crate::modules::contexts::filesystem::app::utils::PathPart;
-use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
+use crate::modules::contexts::filesystem::domain::entities::{FsMeta, PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{
     FileType, FileWriteAccess, WatchInstance,
 };
@@ -58,7 +58,7 @@ impl TFSReadService for FileSystemReadService {
     ///
     ///
     fn read_dir(&self, dir_: &PDirectory) -> Result<PDirectory, FileSystemError> {
-        let dir = fs::read_dir(dir_.path.get()).map_err(|e| FileSystemError::DirRead {
+        let dir = fs::read_dir(dir_.path.clone().get()).map_err(|e| FileSystemError::DirRead {
             path: dir_.path.clone(),
             err: e,
         })?;
@@ -68,21 +68,36 @@ impl TFSReadService for FileSystemReadService {
             if i.is_ok() {
                 let entry = i.unwrap();
                 let path = Path(entry.path().to_str().unwrap().to_string());
-
+                let meta = FsMeta {
+                    modified: entry
+                        .metadata()
+                        .unwrap()
+                        .modified()
+                        .unwrap_or(std::time::SystemTime::now())
+                        .elapsed()
+                        .unwrap_or(Duration::new(0, 0))
+                        .as_secs(),
+                    readonly: entry.metadata().unwrap().permissions().readonly(),
+                    memory: entry.metadata().unwrap().len(),
+                };
                 if entry.file_type().unwrap().is_file() {
-                    let file = PFile::from_path_reg(path);
+                    let mut file = PFile::from_path_reg(path);
+                    file.meta = Some(meta);
                     files.push(file);
                 } else {
                     let dir_ = PDirectory::from_path(&path);
-                    let Ok(dir) = self.read_dir(&dir_) else {
+                    let Ok(mut dir) = self.read_dir(&dir_) else {
                         continue;
                     };
+                    dir.meta = Some(meta);
                     dirs.push(dir);
                 }
             }
         }
 
         let splited = split_path(&dir_.path);
+
+        let meta = FsMeta::by_path(dir_.path.clone());
 
         let name = splited
             .get(splited.len() - 1)
@@ -94,6 +109,7 @@ impl TFSReadService for FileSystemReadService {
             path: dir_.path.clone(),
             files,
             directories: dirs,
+            meta: Some(meta),
         };
 
         Ok(directory)
@@ -149,7 +165,7 @@ impl TFSWriteService for FileSystemWriteService {
     ///
     ///
     fn create_file(&self, path: &Path) -> Result<PFile, FileSystemError> {
-        File::create(path.get()).map_err(|e| FileSystemError::FileCreation {
+        File::create(path.clone().get()).map_err(|e| FileSystemError::FileCreation {
             path: path.clone(),
             err: e,
         })?;
@@ -157,10 +173,12 @@ impl TFSWriteService for FileSystemWriteService {
         let name = splited
             .get(splited.len() - 1)
             .ok_or(FileSystemError::PathParsing { path: path.clone() })?;
+
         let res = PFile {
             name: name.clone(),
             path: path.clone(),
             typ: FileType::REGULAR,
+            meta: Some(FsMeta::by_path(path.clone())),
         };
         Ok(res)
     }
@@ -183,6 +201,7 @@ impl TFSWriteService for FileSystemWriteService {
             path: path.clone(),
             files: Vec::new(),
             directories: vec![],
+            meta: Some(FsMeta::by_path(path.clone())),
         })
     }
 

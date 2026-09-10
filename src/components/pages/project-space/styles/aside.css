@@ -6,7 +6,7 @@
     /*padding: 1rem 0;*/
     max-width: 70vw;
     min-width: 10vh;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .project-aside-dis {
@@ -18,6 +18,9 @@
     position: relative;
 }
 
+.project-aside-body {
+    overflow: hidden;
+}
 
 .project-aside-selector{
     /*transition: all 0.2s;*/

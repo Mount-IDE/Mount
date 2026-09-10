@@ -20,6 +20,11 @@ interface Type {
 
     clear: () => void
 
+    widgets_results: Record<string, Record<string, IVal>>
+
+    write_results: (widget: string, id: string, val: IVal) => void;
+
+    rewrite_results: (widget: string, ids: string[], val: IVal) => void
 }
 
 // type comp = (props?: { active?: boolean }) => ReactElement | null
@@ -29,6 +34,31 @@ type prev_ = (prev: boolean) => boolean
 export type toggleCallback = ((prev?: prev_) => void)
 
 export const asideStore = create<Type>((set, get) => ({
+    widgets_results: {},
+
+    rewrite_results: (widget, id, val) => {
+        let res = {...get().widgets_results}
+        for (let i of id) {
+            if (widget in res) {
+                res[widget][i] = val
+            }
+        }
+        set({
+            widgets_results: res,
+        })
+    },
+    write_results: (widget, id, val) => {
+        let res = get().widgets_results
+        set({
+            widgets_results: {
+                ...res,
+                [widget]: {
+                    ...res[widget],
+                    [id]: val
+                }
+            }
+        })
+    },
     bottom: false,
     left_aside: false,
     right_aside: false,

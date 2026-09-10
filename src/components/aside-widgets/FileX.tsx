@@ -3,12 +3,15 @@ import {fsExtStore} from "../../stores/fs_ext_store.ts";
 import {fileCacheStore} from "../../stores/file_cache_store.ts";
 import {codeSpaceStore} from "../../stores/code_space_store.ts";
 import {invoke} from "@tauri-apps/api/core";
-import React from "react";
+import React, {useEffect} from "react";
+import {asideStore} from "../../stores/aside_store.ts";
+import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
 
 type Props = {
     obj: FsFile
     onContext: (e: React.MouseEvent, obj: FsDirectory | FsFile, is_file: boolean, path?: string, path_file?: string) => void
     parent_path: string
+    root: FsDirectory
 }
 
 /**
@@ -32,6 +35,21 @@ export default function FileX(props: Props) {
     const add_file_to_tab = codeSpaceStore(state => state.add_file_to_code_space)
     const current = codeSpaceStore(state => state.current)
     const check_in_cache = fileCacheStore(state => state.check)
+
+    const results = asideStore(state => state.widgets_results["fs"]) as Record<string, IVal> | undefined;
+
+    const meta = results?.["ap:det"]
+
+    useEffect(() => {
+        let file = {...props.obj}
+        file.meta = {
+            memory: file.meta?.memory ?? 0,
+            readonly: file.meta?.readonly ?? false,
+            modified: new Date().getTime()
+        };
+
+        fsAsideTreeStore.getState().change_node(file.path, file);
+    }, [from_cache?.content]);
 
 
     /**
@@ -69,6 +87,8 @@ export default function FileX(props: Props) {
         }
     }
 
+
+    const date = new Date(props.obj.meta?.modified ?? 0)
     return (
         <div
             onContextMenu={(e) => {
@@ -85,6 +105,13 @@ export default function FileX(props: Props) {
                 </div>
                 <div className={"fs-aside-name"}>{props.obj.name}</div>
                 {from_cache !== null && from_cache.is_dirty && <div className={"fs-aside-dirty"}>*</div>}
+                {
+                    meta &&
+                    <div className={"fs-aside-meta"}>
+                        {`${date.getFullYear()}.${date.getMonth()}.${date.getDate()}, ${props.obj.meta?.memory} B ${", " + props.obj.meta?.readonly ? "Readonly" : ""}`}
+
+                    </div>
+                }
             </div>
         </div>
     )

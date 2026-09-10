@@ -22,6 +22,7 @@ interface Type {
     add_node: (node: FsNode) => void;
     unwatch: () => Promise<void>;
 
+
     clear: () => void
 
 }
@@ -205,8 +206,10 @@ const mark_modified_in_tree = (tree: FsDirectory, path: string): FsDirectory => 
 }
 
 export const fsAsideTreeStore =
-    create<Type>((set, get) => (
-        {
+    create<Type>((set, get) => ({
+
+
+
             tree: null,
             add_node(node: FsNode): void {
                 set(state => ({

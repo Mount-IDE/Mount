@@ -4,3 +4,14 @@
     height: 100%;
     margin-left: 5px;
 }
+
+.fs-aside-meta {
+    margin-left: 5px;
+    height: 100%;
+    display: flex;
+    white-space: pre;
+    align-items: center;
+    color: var(--subtitle);
+    font-size: 6pt;
+}
+

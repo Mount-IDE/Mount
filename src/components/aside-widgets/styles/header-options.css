@@ -1,0 +1,82 @@
+.header-options {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    min-width: 120px;
+    padding: 7px 0 7px 15px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    z-index: 50;
+}
+
+.header-opt-list {
+    width: 100%;
+    min-height: 40px;
+    position: relative;
+}
+
+.header-opt-h {
+    width: calc(100% - 15px);
+    height: 20px;
+    display: flex;
+    align-items: center;
+    color: var(--subtitle);
+    font-size: 9pt;
+}
+
+.header-opt-h-img {
+    height: 20px;
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+
+    & img {
+        width: 70%;
+        height: 70%;
+        display: block;
+        object-fit: contain;
+    }
+}
+
+
+.header-opt-list-in {
+    position: absolute;
+    left: calc(100%);
+    top: 0;
+    min-width: 120px;
+    padding: 7px 0 7px 15px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+}
+
+.header-opt-check {
+    margin-right: 15px;
+    padding-left: 10px;
+    padding-right: 5px;
+    width: calc(100% - 15px);
+    /*padding: 0 5px;*/
+    height: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    user-select: none;
+    /*justify-content: center;*/
+
+    background: transparent;
+    color: var(--subtitle);
+    font-size: 8pt;
+    white-space: pre;
+
+    &:hover {
+        background: var(--hover);
+    }
+}
+
+.header-opt-title {
+    color: var(--border2);
+    font-size: 10pt;
+}
