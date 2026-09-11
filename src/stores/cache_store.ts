@@ -174,7 +174,7 @@ export const cacheStore = create<Type>((set, get) => ({
                 id = temps.map(el => el.id)
             }
         }
-        console.log("TEMP", temps)
+        //console.log("TEMP", temps)
         return {
             templates: temps,
             currentTemplate: temps[0] ?? null

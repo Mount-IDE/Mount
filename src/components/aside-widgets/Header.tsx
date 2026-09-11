@@ -103,7 +103,7 @@ function parseId(el: comp): string {
 
 export default function Header(props: Props){
 
-    const minus_ref = useRef<HTMLButtonElement>(null)
+    const minus_ref = useRef<HTMLDivElement>(null)
 
     const main_ref = useRef<HTMLDivElement>(null)
 
@@ -115,7 +115,7 @@ export default function Header(props: Props){
         const obs = new ResizeObserver(e => {
             for (let entry of e) {
                 if (entry.target == main) {
-                    if (entry.contentRect.width > 130) {
+                    if (entry.contentRect.width > 150) {
                         minus_.style.display = "flex"
                     } else {
                         minus_.style.display = "none"
@@ -147,20 +147,23 @@ export default function Header(props: Props){
     return (
         <div ref={main_ref} className={"aside--header"}>
             <p className={"aside-header-p"}>{props.label}</p>
-            <div className={"aside-header-opt"}
-                 onMouseEnter={() => setOpened(true)}
-                 onMouseLeave={() => setOpened(false)}
-            >
-                <div className={"aside-header-opt-bt"}>
-                    <img src={more}/>
+            <div ref={minus_ref} className={"aside-header-info"}>
+                <div className={"aside-header-opt"}
+                     onMouseEnter={() => setOpened(true)}
+                     onMouseLeave={() => setOpened(false)}
+                >
+                    <div className={"aside-header-opt-bt"}>
+                        <img src={more}/>
+                    </div>
+                    {opened &&
+                        <HeaderOptions options={buttons} aside_id={id}/>
+                    }
                 </div>
-                {opened &&
-                    <HeaderOptions options={buttons} aside_id={id}/>
-                }
+                <button onClick={click} className={"aside-header-bt"}>
+                    <img src={minus}/>
+                </button>
             </div>
-            <button ref={minus_ref} onClick={click} className={"aside-header-bt"}>
-                <img src={minus}/>
-            </button>
+
         </div>
     )
 }

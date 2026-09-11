@@ -15,6 +15,7 @@
 
 .aside-header-p {
     /*width: 80%;*/
+    overflow: hidden;
     height: 100%;
     margin-left: 10px;
     color: var(--subtitle);

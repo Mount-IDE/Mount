@@ -46,6 +46,7 @@ pub enum ProjectError {
 }
 
 #[derive(Error, Debug)]
+#[allow(unused)]
 pub enum FileSystemError {
     #[error("failed to create directory: {path}")]
     DirCreation {
@@ -120,6 +121,7 @@ pub enum FileSystemError {
 }
 
 #[derive(Error, Debug)]
+#[allow(unused)]
 pub enum ConfigError {
     #[error("failed to get app_data_dir")]
     GetDataDir {
@@ -176,6 +178,7 @@ pub enum ParsingError {
 }
 
 #[derive(Debug, Error)]
+#[allow(unused)]
 pub enum TerminalError {
     #[error("error of config context tha can`t described by terminal err")]
     Config { err: ConfigError },
@@ -192,6 +195,7 @@ pub enum TerminalError {
 }
 
 #[derive(Debug, Error)]
+#[allow(unused)]
 pub enum LaunchError {
     #[error("Invalid object of launch configuration {0:?}")]
     InvalidObject(LaunchObject),
@@ -212,6 +216,7 @@ pub enum LaunchError {
 }
 
 #[derive(Debug, Error)]
+#[allow(unused)]
 pub enum SettingsError {
     #[error("Themes config not found")]
     ThemesFileNotFound,

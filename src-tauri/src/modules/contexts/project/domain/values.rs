@@ -59,32 +59,6 @@ impl ProjectMeta {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS)]
-pub struct PackageMeta {
-    #[serde(default)]
-    authors: Vec<String>,
-    #[serde(default)]
-    description: String,
-}
-
-impl Default for PackageMeta {
-    fn default() -> Self {
-        Self {
-            authors: Vec::new(),
-            description: String::new(),
-        }
-    }
-}
-
-impl PackageMeta {
-    pub fn new() -> Self {
-        Self {
-            authors: Vec::new(),
-            description: String::new(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
 pub struct TemplateMeta {
     #[serde(default)]
     pub authors: Vec<String>,
@@ -129,8 +103,8 @@ pub struct ActionCommand {
     pub command: ActionCommandIn,
 }
 
-impl ActionCommand {
-    pub fn new() -> ActionCommand {
+impl Default for ActionCommand {
+    fn default() -> ActionCommand {
         Self {
             platform: String::new(),
             shell: String::new(),
@@ -168,7 +142,7 @@ pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>; // section i
 pub type CreateProjectPackageResults = HashMap<String, HashMap<String, Val>>; // package_id -> option id -> value
 
 pub type ResultsRecord = HashMap<String, Val>;
-
+#[allow(unused)]
 pub trait TRes {
     fn get_value(&self, addr: String) -> Option<Val>;
 }

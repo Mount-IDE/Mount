@@ -109,6 +109,7 @@
     overflow: auto hidden;
 }
 
+/*noinspection CssUnresolvedCustomProperty*/
 .aside-launch-tab {
     min-width: 120px;
     max-width: 220px;

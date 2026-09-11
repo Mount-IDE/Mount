@@ -28,6 +28,7 @@
     align-items: center;
 }
 
+/*noinspection ALL,CssUnresolvedCustomProperty*/
 .terminal-tab {
     min-width: 120px;
     max-width: 220px;
@@ -63,6 +64,7 @@
     white-space: nowrap;
 }
 
+/*noinspection CssUnresolvedCustomProperty*/
 .terminal-tab-close {
     width: 18px;
     height: 18px;
@@ -105,6 +107,7 @@
     }
 }
 
+/*noinspection CssUnresolvedCustomProperty*/
 #terminal-new {
     width: 34px;
     height: 32px;

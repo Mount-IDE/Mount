@@ -8,7 +8,7 @@ interface Type {
 }
 
 
-export const highlightWorkerStore = create<Type>((set, get) => ({
+export const highlightWorkerStore = create<Type>((_set, _get) => ({
     init(): void {
         /*   let worker = new Worker(work /!*, {type: "module"}*!/)
            set({

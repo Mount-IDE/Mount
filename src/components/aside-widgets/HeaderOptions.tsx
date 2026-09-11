@@ -108,11 +108,6 @@ function HeaderCheck(props: OptionsProps) {
     }, [props.other, props.i])
 
 
-    let res = asideStore(state => state.widgets_results)
-
-    useEffect(() => {
-        console.log(res)
-    }, [res]);
 
     return (
         <div className={"header-opt-check"} onClick={write}>

@@ -9,6 +9,7 @@ use crate::modules::shared::kernel::errors::ProjectError;
 use crate::modules::shared::kernel::values::{Dependency, Path, Val};
 
 pub trait TProjectService {
+    #[allow(unused)]
     fn create_project(&self, proj: &Project) -> Result<(), ProjectError>;
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError>;
     fn delete_project(&self, project_path: &Path) -> Result<Project, ProjectError>;
@@ -80,17 +81,11 @@ pub trait TActionProjectService {
 pub trait TPackageService {
     fn read_packages(&self) -> Result<Vec<Package>, ProjectError>;
 
+    #[allow(unused)]
     fn add_package(&self, pack: Package) -> Result<(), ProjectError>;
 
+    #[allow(unused)]
     fn rem_package(&self, pack: Package) -> Result<(), ProjectError>;
 
     fn read_config(&self, id: String) -> Result<String, ProjectError>;
-}
-
-pub trait TPackageCompileService {
-    fn compile_package_actions(
-        &self,
-        pack: Package,
-        results: CreateProjectResult,
-    ) -> Result<(Vec<Var>, Vec<_Task>), ProjectError>;
 }

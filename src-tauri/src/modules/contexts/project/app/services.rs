@@ -672,7 +672,7 @@ impl TActionProjectService for ActionProjectService {
         is_pack: bool,
         pack_params: &ResultsRecord,
     ) -> Option<_Task> {
-        let def_ = || {
+        /*let def_ = || {
             if cfg!(target_os = "linux") {
                 std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string())
             } else if cfg!(target_os = "windows") {
@@ -680,7 +680,7 @@ impl TActionProjectService for ActionProjectService {
             } else {
                 "zsh".to_string()
             }
-        };
+        };*/
 
         let mut commands = Vec::<TaskCommand>::new();
         let commands_ = action.command.clone()?;
@@ -702,7 +702,7 @@ impl TActionProjectService for ActionProjectService {
             if let None = command_ {
                 continue;
             }
-            let mut shell = if let Some(v) = command.shell {
+            let shell = if let Some(v) = command.shell {
                 v
             } else {
                 if cfg!(windows) {
@@ -884,11 +884,11 @@ impl TPackageService for PackageService {
         Ok(packages)
     }
 
-    fn add_package(&self, pack: Package) -> Result<(), ProjectError> {
+    fn add_package(&self, _pack: Package) -> Result<(), ProjectError> {
         todo!()
     }
 
-    fn rem_package(&self, pack: Package) -> Result<(), ProjectError> {
+    fn rem_package(&self, _pack: Package) -> Result<(), ProjectError> {
         todo!()
     }
 

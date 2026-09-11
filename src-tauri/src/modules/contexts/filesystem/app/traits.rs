@@ -29,9 +29,12 @@ pub trait TFSWriteService {
     ) -> Result<(), FileSystemError>;
 
     fn rename_file(&self, from: &PFile, to: &PFile) -> Result<(), FileSystemError>;
+
+    #[allow(unused)]
     fn rename_dir(&self, from: &PDirectory, to: &PDirectory) -> Result<(), FileSystemError>;
 }
 
+#[allow(unused)]
 pub trait TFSManageService {
     fn copy_file(&self, file: &PFile) -> PFile;
     fn copy_dir(&self, directory: &PDirectory) -> PDirectory;

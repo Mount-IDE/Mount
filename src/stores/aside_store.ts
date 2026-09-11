@@ -1,5 +1,6 @@
 import React from "react";
 import {create} from "zustand";
+import {projectStore} from "./project_store.ts";
 
 interface Type {
     left_aside: boolean,
@@ -25,6 +26,9 @@ interface Type {
     write_results: (widget: string, id: string, val: IVal) => void;
 
     rewrite_results: (widget: string, ids: string[], val: IVal) => void
+
+
+    set_results: (rec: Record<string, Record<string, IVal>>) => void
 }
 
 // type comp = (props?: { active?: boolean }) => ReactElement | null
@@ -36,6 +40,14 @@ export type toggleCallback = ((prev?: prev_) => void)
 export const asideStore = create<Type>((set, get) => ({
     widgets_results: {},
 
+    set_results(rec: Record<string, Record<string, IVal>>): void {
+
+        set({
+            widgets_results: rec
+        })
+    },
+
+
     rewrite_results: (widget, id, val) => {
         let res = {...get().widgets_results}
         for (let i of id) {
@@ -46,18 +58,43 @@ export const asideStore = create<Type>((set, get) => ({
         set({
             widgets_results: res,
         })
+
+        let proj = {...projectStore.getState().current_project} as IProject | null;
+        if (proj) {
+            proj!.workspace = {
+                ...proj.workspace,
+                aside_results: {...res}
+            }
+
+            projectStore.getState().save_project(proj)
+
+        }
+
+
+
     },
     write_results: (widget, id, val) => {
         let res = get().widgets_results
-        set({
-            widgets_results: {
-                ...res,
-                [widget]: {
-                    ...res[widget],
-                    [id]: val
-                }
+        let res2 = {
+            ...res,
+            [widget]: {
+                ...res[widget],
+                [id]: val
             }
+        }
+        set({
+            widgets_results: res2
         })
+        let proj = {...projectStore.getState().current_project} as IProject | null;
+        if (proj) {
+            proj!.workspace = {
+                ...proj.workspace,
+                aside_results: {...res2}
+            }
+
+            projectStore.getState().save_project(proj)
+
+        }
     },
     bottom: false,
     left_aside: false,
@@ -66,7 +103,8 @@ export const asideStore = create<Type>((set, get) => ({
         set({
             bottom: false,
             left_aside: false,
-            right_aside: false
+            right_aside: false,
+            widgets_results: {}
         })
     },
     current_bottom: () => null,

@@ -105,8 +105,7 @@
 }
 
 #image-click-toggle {
-    margin: auto;
-    margin-bottom: 20px;
+    margin: auto auto 20px;
     background: #000;
     height: 30px;
     width: 30%;

@@ -10,7 +10,7 @@ interface Type {
 }
 
 
-export const filterStore = create<Type>((set, get) => ({
+export const filterStore = create<Type>((set, _) => ({
     activated: false,
     set_activated(b: boolean): void {
         set({activated: b})

@@ -361,7 +361,7 @@ impl TLaunchCompileService for LaunchCompileService {
         let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
         let mut seq = false;
 
-        let mut result = FunctionResult::SCALAR(Default::default());
+        let mut result: FunctionResult;
         for act in function.actions.iter() {
             let res: Option<FunctionResult> = match act.function.as_str() {
                 "read_from" => {
@@ -628,7 +628,7 @@ impl TLaunchRunService for LaunchRunService {
             println!("close task 22");
             let mut child = session.child.lock().await;
             println!("get child");
-            let a = child.start_kill();
+            let _ = child.start_kill();
             println!("kill");
             let _ = child.wait().await;
             println!("close task 222");

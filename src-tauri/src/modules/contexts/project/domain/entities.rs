@@ -78,6 +78,8 @@ pub struct WorkSpace {
     pub launch_objects: Vec<LaunchObject>,
     pub launch_templates: Vec<LaunchTemplate>,
     pub current_launch: Option<i32>,
+    #[serde(default)]
+    pub aside_results: HashMap<String, HashMap<String, Val>>,
 }
 
 impl Default for WorkSpace {
@@ -93,6 +95,7 @@ impl Default for WorkSpace {
             launch_objects: Vec::new(),
             launch_templates: Vec::new(),
             current_launch: None,
+            aside_results: HashMap::new(),
         }
     }
 }
@@ -482,6 +485,7 @@ impl PackageComponent {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[allow(non_camel_case_types)]
 pub enum PackageComponentTyp {
     COMPILER,
     TRANSPILER,
@@ -631,6 +635,7 @@ pub enum PackageTyp {
     LANGUAGE,
     FRAMEWORK,
     TOOL,
+    #[allow(non_camel_case_types)]
     BUILD_SYSTEM,
 }
 

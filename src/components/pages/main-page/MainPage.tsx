@@ -78,12 +78,12 @@ export default function MainPage() {
 
     const licenses = Object.keys(settingsStore(state => state.settings)?.licenses ?? {})
 
-    useEffect(() => {
-        console.log("AUTHORS", authors)
-        console.log("Tags", tags)
-        console.log("Tags", packages)
-    }, [authors, tags, packages]);
-
+    /*   useEffect(() => {
+           console.log("AUTHORS", authors)
+           console.log("Tags", tags)
+           console.log("Tags", packages)
+       }, [authors, tags, packages]);
+   */
     const [usedAuthors, setUsedAuthors] = useState<string[]>([])
     const [usedTags, setUsedTags] = useState<string[]>([])
     const [usedPackages, setUsedPackages] = useState<string[]>([])

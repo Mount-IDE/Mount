@@ -54,6 +54,7 @@ impl<T: Into<String> + Clone> PathPart for Vec<T> {
 }
 
 #[deprecated]
+#[allow(unused)]
 pub fn make_path_string<T: PathPart>(paths: Vec<T>) -> String {
     todo!();
     /*if paths.len() == 0 {
@@ -74,6 +75,7 @@ pub fn make_path_string<T: PathPart>(paths: Vec<T>) -> String {
     }*/
 }
 #[deprecated]
+#[allow(unused)]
 pub fn make_path<T: PathPart>(path: Vec<T>) -> Path {
     todo!();
     //Path(make_path_string(path))

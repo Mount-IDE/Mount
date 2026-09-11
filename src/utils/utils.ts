@@ -21,10 +21,10 @@ export async function loadPackages(pack: string[]): Promise<Map<string, PackageI
     try {
         let packs = packageStore.getState().packages;
         let packs2 = packs.filter(el => pack.includes(el.id))
-        console.log(packs2, pack, packs)
+        //console.log(packs2, pack, packs)
         let meta_packs3: Record<string, PackageInner> =
             await invoke("get_meta_of_selected_packages", {packs: packs2})
-        console.log(meta_packs3)
+        //console.log(meta_packs3)
 
         let meta_packs = new Map(Object.entries(meta_packs3));
         for (let i of Object.entries(meta_packs3)) {

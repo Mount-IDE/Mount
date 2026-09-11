@@ -160,7 +160,7 @@ pub async fn close_window_launches(
     LAUNCH_RUN_SERVICE
         .close_window_tasks(state, window.label())
         .await
-        .map_err(|e| ErrorDto {
+        .map_err(|_| ErrorDto {
             message: "".__get(),
         })?;
     Ok(())

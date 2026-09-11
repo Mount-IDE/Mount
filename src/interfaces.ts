@@ -35,7 +35,8 @@ interface IProject {
         launch_references: LaunchTemplateReference[],
         launch_objects: LaunchObject[],
         launch_templates: LaunchTemplate[],
-        current_launch: number | null
+        current_launch: number | null,
+        aside_results: Record<string, Record<string, IVal>>
     },
     vars: IVar[],
     tasks: any[],
@@ -341,6 +342,11 @@ interface Settings {
     general: {
         path_to_projects: string,
         project_groups: string[]
+        projects: {
+            global: {
+                aside_results: Record<string, Record<string, IVal>>
+            }
+        }
     },
     appearance: {
         theme: string,

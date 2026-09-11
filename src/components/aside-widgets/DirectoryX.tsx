@@ -85,7 +85,7 @@ export default function DirectoryX(props: Props){
                         root={props.root}
                     />
                 )}
-                {files_.map(el =>
+                {files.map(el =>
                     <FileX
                         parent_path={props.obj.path}
                         onContext={props.onContext}

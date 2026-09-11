@@ -42,6 +42,7 @@ impl Platform {
         Self::SINGLE(PlatformType::MACOS)
     }
 
+    #[allow(unused)]
     pub fn linux() -> Self {
         Self::SINGLE(PlatformType::LINUX)
     }

@@ -11,9 +11,13 @@ pub trait TConfigService {
     #[allow(unused)]
     fn save_settings(&self, settings: &Settings) -> Result<(), ConfigError>;
     fn get_data_dir(&self) -> Result<Path, ConfigError>;
+
+    #[allow(unused)]
     fn make_data_dir(&self) -> Result<(), ConfigError>;
 
+    #[allow(unused)]
     fn read_packages(&self) -> Result<Vec<Package>, ConfigError>;
+    #[allow(unused)]
     fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError>;
 
     fn get_home_dir(&self) -> Result<Path, ConfigError>;
@@ -24,7 +28,10 @@ pub trait TConfigService {
 
     fn get_file_templates(&self) -> Result<Vec<ConfigFsTemplate>, ConfigError>;
 
+    #[allow(unused)]
     fn get_licenses(&self) -> Result<Vec<String>, ConfigError>; // only names
+
+    #[allow(unused)]
     fn get_license(&self, name: String) -> Result<String, ConfigError>;
 }
 
@@ -33,6 +40,8 @@ pub trait TConfigRecoveryService {
     fn repair_data_dir(&self) -> Result<(), ConfigError>;
     #[allow(unused)]
     fn add_settings_by_default(&self) -> Result<(), ConfigError>;
+
+    #[allow(unused)]
     fn add_recents_by_default(&self) -> Result<(), ConfigError>;
 }
 

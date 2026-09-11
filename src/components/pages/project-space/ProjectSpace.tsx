@@ -39,10 +39,14 @@ export default function ProjectSpace() {
                     <Modal {...modal_settings}/>
 
                 }
+            </AnimatePresence>
+            <AnimatePresence>
                 {
                     launch_opened &&
                     <LaunchPage/>
                 }
+            </AnimatePresence>
+            <AnimatePresence>
                 {
                     show_file_creation_menu &&
                     <CreateEntity/>

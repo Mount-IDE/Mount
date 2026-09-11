@@ -14,6 +14,7 @@ pub enum FileType {
 
 pub enum FileWriteAccess {
     WRITE,
+    #[allow(unused)]
     APPEND,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]

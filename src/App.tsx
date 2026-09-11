@@ -127,18 +127,28 @@ function App() {
                         windowReady && settingsFlag &&
                         <SettingsPage/>
                     }
+
+                </AnimatePresence>
+
+                <AnimatePresence>
                     {
                         windowReady && projectSettingsOpened &&
                         <ProjectSettings/>
                     }
+                </AnimatePresence>
+                <AnimatePresence>
                     {
                         windowReady && createProjectOpened &&
                         <CreateProject/>
                     }
+                </AnimatePresence>
+                <AnimatePresence>
                     {
                         windowReady && current == Window.Main &&
                         <MainPage/>
                     }
+                </AnimatePresence>
+                <AnimatePresence>
                     {
                         windowReady && current == Window.Project &&
                         <ProjectSpace/>

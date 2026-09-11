@@ -6,6 +6,7 @@ import {mapProjectButton} from "../utils/project-buttons.ts";
 import {cacheStore} from "./cache_store.ts";
 import pageStore from "./page_store.ts";
 import {fsAsideTreeStore} from "./fs_aside_tree_store.ts";
+import {asideStore} from "./aside_store.ts";
 
 
 interface Type {
@@ -221,6 +222,10 @@ export const projectStore = create<Type>((set, get) => ({
         asideButtonsStore.getState().load_left(left_top_2);
         asideButtonsStore.getState().load_bottom(left_bot_2);
         asideButtonsStore.getState().load_right(right_top_2);
+        console.log("PROJ", proj)
+
+
+        asideStore.getState().set_results(proj.workspace.aside_results)
         try {
             await invoke("unwatch_project");
             await invoke("close_window_terminals");
@@ -231,7 +236,7 @@ export const projectStore = create<Type>((set, get) => ({
         let path__ = cacheStore.getState().make_path([proj.path, proj.name])
         let rec = cacheStore.getState().recent_projects.find(el => cacheStore.getState().make_path([el.path, el.name]) == path__);
         if (!rec) {
-            console.log("OPEN 1")
+            //console.log("OPEN 1")
             cacheStore.getState().add_recent({
                 last_opened: new Date().getTime(),
                 meta: {...proj.meta},
@@ -241,7 +246,7 @@ export const projectStore = create<Type>((set, get) => ({
 
             } satisfies IRecentProject)
         } else {
-            console.log("OPEN 2")
+            // console.log("OPEN 2")
             rec.last_opened = new Date().getTime()
             cacheStore.getState().update_recent({...rec})
         }

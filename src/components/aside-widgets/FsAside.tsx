@@ -56,10 +56,10 @@ export default function FsAside() {
 
     const close_modal = menuStore(state => state.close_modal)
 
-
-    useEffect(() => {
-        console.log("TREE", tree)
-    }, [tree])
+    /*
+        useEffect(() => {
+            console.log("TREE", tree)
+        }, [tree])*/
     /**
      * @function open_context_menu
      * function tha makes ContextMenu visible
