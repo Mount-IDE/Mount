@@ -337,6 +337,16 @@ impl TConfigService for ConfigService {
     fn get_license(&self, name: String) -> Result<String, ConfigError> {
         todo!()
     }
+
+    fn get_shell(&self) -> String {
+        if cfg!(target_os = "linux") {
+            std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string())
+        } else if cfg!(target_os = "windows") {
+            "powershell".to_string()
+        } else {
+            "zsh".to_string()
+        }
+    }
 }
 
 pub struct ConfigRecoveryService();

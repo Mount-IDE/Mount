@@ -33,6 +33,8 @@ pub trait TConfigService {
 
     #[allow(unused)]
     fn get_license(&self, name: String) -> Result<String, ConfigError>;
+
+    fn get_shell(&self) -> String;
 }
 
 pub trait TConfigRecoveryService {

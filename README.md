@@ -64,29 +64,36 @@ npm i
 ```bash
 # dev 
 npm run tauri
+cd src-tauri/target/debug
 # release
 npm run tauri:release
+cd src-tauri/target/release
 ```
 
 4. Run
 ```bash
-cd src-tauri/target/release
 ./mount
 ```
 
 # Roadmap
 
 - [x] Project Creation Menu
-- [ ] Project Filtering
+- [x] Project Filtering
 - [x] View Project Files
 - [x] Terminal
 - [x] Project Settings
 - [x] Global Settings
 - [x] Launch Configurations
 - [x] Package Manager
-- [ ] Process Monitor
+- [ ] Toolchain System
+- [ ] Git Integration
+- [ ] LSP Integration
 - [ ] Plugin System
-
+- [ ] File Indexation
+- [ ] Command System
+- [ ] Project Management
+- [ ] Project Tasks System
+- [ ] Process Monitor
 # License
 
 The project is licensed under the [MIT License](./LICENSE)
