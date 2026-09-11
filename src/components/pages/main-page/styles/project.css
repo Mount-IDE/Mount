@@ -43,16 +43,8 @@
     font-family: "JetBrains Mono Light", monospace;
 }
 
-.main-page-project-last {
-    position: absolute;
-    bottom: 5%;
-    left: 45%;
-    color: var(--subtitle);
-    font-size: 8pt;
-    font-family: "JetBrains Mono Light", monospace;
-}
 
-.main-page-project-right-{
+.main-page-project-right {
     position: absolute;
     right: 5%;
     top: 0;
@@ -78,4 +70,25 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.main-page-project-center {
+    height: 100%;
+}
+
+.main-page-project-center-2 {
+    display: flex;
+    height: 50%;
+    gap: 20px;
+}
+
+.main-page-project-p {
+    color: var(--subtitle);
+    font-size: 8pt;
+    font-family: "JetBrains Mono Light", monospace;
+    white-space: pre;
+
+    &.p {
+        height: 50%;
+    }
 }

@@ -119,15 +119,16 @@ export default function Project(props: Props) {
                    }}
                 >{project.path}</p>
             </div>
-            <p
-                className={"main-page-project-last"}
-                style={{
-                    color: theme?.path?.color,
-                    textDecoration: theme?.path?.underscore
-                }}
-            >{`${date.getFullYear()}.${date.getMonth()}.${date.getDate()}`}
-            </p>
-            <div className={"main-page-project-right-"}>
+            <div className={"main-page-project-center"}>
+                <p className={"main-page-project-p p"}>
+                    {project.meta.authors.join(" ")}
+                </p>
+                <div className={"main-page-project-center-2"}>
+                    <p className={"main-page-project-p"}>{date.getFullYear()}.{date.getMonth() + 1}.{date.getDate()} at {date.getHours()}:{date.getMinutes()}</p>
+                    <p className={"main-page-project-p"}>{project.meta.license}</p>
+                </div>
+            </div>
+            <div className={"main-page-project-right"}>
                 <p className={"main-page-project-packages"}
                    style={{
                        color: theme?.path?.color,
