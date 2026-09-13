@@ -8,3 +8,4 @@ pub mod package;
 pub mod project;
 pub mod settings;
 pub mod terminal;
+pub mod toolchains;

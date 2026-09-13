@@ -1,4 +1,3 @@
-
 interface IRecentProject {
     name: string,
     path: string
@@ -82,7 +81,6 @@ interface ISection {
     list: [boolean, boolean],
     params: (IPackageParameter)[]
 }
-
 
 
 interface IfStatementPart {
@@ -915,7 +913,7 @@ interface IPackage {
         value: string | boolean | string[]
         readonly?: boolean
     }[]
-    components?:
+    components?: // deprecated
         {
             id: string
             typ: "compiler" | "transpiler" | "interpreter" | "lsp" | "formatter" | "debugger" | "build_system" | "pack_manager"
@@ -937,6 +935,18 @@ interface IPackage {
             }
         }[]
 
+    toolchains?: {
+        [name: string]: {
+            id: string
+            version: string
+            repair: {
+                addition_type?: "replace" | "add" // replace - fully replace whole toolchain (not recommended); add - append missing components
+                components: {
+                    [id: string]: MaybeArray<Repair>
+                }
+            }
+        }
+    }
 }
 
 interface IPackageHighlight {
@@ -1047,4 +1057,93 @@ interface PackageConfig {
         onCrash?: (exitCode: number | null, meta: PackageConfigMeta) => "restart" | "ignore"
     } | null
 }
+
+
+interface IToolchain {
+    id: string // <developer?>-<launguage|framework|util>
+    version: string
+    copy_name?: string // if we don't want toolchain was fully replaced, a copy of toolchain will create and requests from package will be delegates to itself
+    scheme: number
+    platform?: string | string[]
+    typ: {
+        typ: "language"
+        languages: {
+            language: string,
+            version?: string,
+            version_check_command?: string
+        }[]
+    } | {
+        typ: "framework"
+        framework: string
+        version: string
+    }
+    meta?: unknown
+    components: {
+        [id: string]: {
+            typ: componentTyp,
+            platforms: {
+                [os: string]: IToolchainComponent
+            }
+        }
+    }
+}
+
+type componentTyp = "lsp" | "compiler" | "interpreter" | "debugger" | "formatter" | "package_manager" | "builder"
+
+type MaybeArray<T> = T | T[]
+
+interface IToolchainComponent {
+    program: string
+    args: string[] // <arg> | <@project-var> | <#value from ui>
+    version?: string
+    min_version?: string
+
+    langs: {
+        typ: "language"
+        languages: { language: string, version: string, version_check_command?: string }[]
+    } | {
+        typ: "framework"
+        framework: string
+        version: string
+    }
+    requires?: string[]
+    repair?: Repair
+}
+
+type ComponentRepair = IComponentRepairRaw & IComponentRepairAddition
+
+
+type Repair = {
+    discovery?: DiscoveryRepair[],
+    install?: ComponentRepair[]
+}
+
+type DiscoveryRepair = {
+    platform?: MaybeArray<string>
+    is_builtin?: boolean
+    in_path_var?: boolean
+    path_to_program?: string
+    version_check_command?: string
+}
+
+type IComponentRepairAddition = {
+    platform?: string | string[]
+    version_check_command?: string
+}
+
+type IComponentRepairRaw = {
+    method: "curl",
+    url: string,
+    shell?: string // for "curl ... | <shell>"
+} | {
+    method: "pack"
+    pm: string // apt, dnf,  etc, keys evaluates by IDE
+    packages: string[]
+} | {
+    method: "internal",
+    url: string
+}
+
+
+
 

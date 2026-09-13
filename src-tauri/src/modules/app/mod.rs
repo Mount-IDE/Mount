@@ -1,5 +1,6 @@
 pub mod cmd;
 pub mod commands;
+pub mod stores;
 pub mod utils;
 
 use super::contexts::filesystem::app::services::{

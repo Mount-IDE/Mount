@@ -454,6 +454,7 @@ fn get_files_new() -> Vec<FsEntity_> {
                 ),
             ],
         ),
+        FsEntity_::dir("toolchains"),
     ]
 }
 

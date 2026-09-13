@@ -64,9 +64,6 @@ pub fn run() {
                 .expect("Unable to set settings");
             Ok(())
         })
-        .on_webview_event(|w, e| {
-            println!("EVENT {w:?} ::\n\n\n :: {e:?}");
-        })
         .on_window_event(|window, event| {
             if matches!(
                 event,
