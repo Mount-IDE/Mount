@@ -1,7 +1,7 @@
 .header-options {
     position: absolute;
     top: 0;
-    left: 50%;
+    left: 60%;
     min-width: 120px;
     padding: 7px 0 7px 15px;
     background: var(--bg2);

@@ -1,0 +1,41 @@
+{
+    "id": "opie.main",
+    "name": "Base Utils",
+    "meta": {
+        "version": "1",
+        "authors": [
+            "opie"
+        ]
+    },
+    "scheme": 1,
+    "files": {
+        "extentions": [
+            ".json",
+            ".md",
+            ".json5",
+            ".conf",
+            ".sh",
+            ".bat",
+            ".csv",
+            ".graphql",
+            ".xml",
+            ".yml",
+            ".yaml"
+        ]
+    },
+    "highlight": [
+        {
+            "id": "json",
+            "lang": "json",
+            "extentions": [
+                ".json",
+                ".json5"
+            ],
+            "nodes": {},
+            "syntax": {
+                "base_color": "#bcbeb4",
+                "tokens": {}
+            }
+        }
+    ]
+}

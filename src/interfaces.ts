@@ -896,9 +896,7 @@ interface IPackage {
         level: "required" | "conflicts"
     }[]
     startup: {
-        options?:
-            IPackageParameter[]
-
+        options?: IPackageParameter[]
         actions?: IPackageAction[]
     }
     highlight: IPackageHighlight[]
@@ -1114,8 +1112,8 @@ type ComponentRepair = IComponentRepairRaw & IComponentRepairAddition
 
 
 type Repair = {
-    discovery?: DiscoveryRepair[],
-    install?: ComponentRepair[]
+    discovery?: DiscoveryRepair,
+    install?: ComponentRepair
 }
 
 type DiscoveryRepair = {

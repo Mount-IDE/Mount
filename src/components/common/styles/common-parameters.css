@@ -245,3 +245,30 @@
         display: block;
     }
 }
+
+
+.restricted-list {
+
+
+    & .restricted-list-p {
+        font-size: 10pt;
+
+    }
+
+
+    & .restricted-list-button {
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        & img {
+            width: 70%;
+            height: 70%;
+            display: block;
+            object-fit: contain;
+        }
+    }
+
+}

@@ -407,6 +407,64 @@ pub struct Package {
     #[serde(default)]
     components: Option<Vec<PackageComponent>>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageToolchain {
+    id: String,
+    version: String,
+    repair: Vec<Repair>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PackageRepairType {
+    REPLACE,
+    ADD,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PackageRepair {
+    addition_type: PackageRepairType,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Repair {
+    discovery: Option<DiscoveryRepair>,
+    install: Option<InstallRepair>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiscoveryRepair {
+    platform: Option<Platform>,
+    is_builtin: Option<bool>,
+    is_path_var: Option<bool>,
+    path_to_program: Option<String>,
+    version_check_command: Option<String>,
+    needed_version: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstallRepair {
+    platform: Option<Platform>,
+    version_check_command: Option<String>,
+    needed_version: Option<String>,
+    program: Option<String>,
+
+    method: RepairMethod,
+
+    url: Option<String>,
+    shell: Option<String>,
+
+    pm: Option<String>,
+    packages: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum RepairMethod {
+    CURL,
+    PACK,
+    INTERNAL,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageParser {
     #[serde(default)]

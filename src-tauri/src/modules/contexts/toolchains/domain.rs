@@ -6,12 +6,12 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Toolchain {
     pub id: String,
-    version: String,
-    copy_name: Option<String>,
-    scheme: Schema,
-    platform: Option<Platform>,
-    typ: ToolchainTyp,
-    components: HashMap<String, ToolchainComponent>,
+    pub version: String,
+    pub copy_name: Option<String>,
+    pub scheme: Schema,
+    pub platform: Option<Platform>,
+    pub typ: ToolchainTyp,
+    pub components: HashMap<String, ToolchainComponent>,
 }
 impl Default for Toolchain {
     fn default() -> Self {
@@ -65,7 +65,7 @@ pub struct ToolchainComponent {
 pub struct ToolchainComponentIn {
     program: String,
     args: Vec<String>,
-    versiob: Option<String>,
+    version: Option<String>,
     min_version: Option<String>,
     langs: ToolchainTyp,
     requires: Option<Vec<String>>,

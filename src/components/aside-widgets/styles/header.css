@@ -1,20 +1,15 @@
 .aside--header {
     position: absolute;
     top: 0;
-    /*max-width: 70vw;*/
-    /*min-width: 10vh;*/
     width: 100%;
-    /*flex: 1;*/
     height: 5vh;
     left: 0;
     align-items: center;
-    /*justify-content: center;*/
     display: flex;
 
 }
 
 .aside-header-p {
-    /*width: 80%;*/
     overflow: hidden;
     height: 100%;
     margin-left: 10px;
@@ -26,8 +21,8 @@
 }
 
 .aside-header-bt {
-    position: absolute;
-    top: 15%;
+    /* position: absolute; */
+    /* top: 15%; */
     height: 70%;
     aspect-ratio: 1/1;
     right: 10px;
@@ -55,8 +50,8 @@
 
 .aside-header-opt {
     height: 100%;
-    position: absolute;
-    right: 50px;
+    /* position: absolute; */
+    /* right: 50px; */
     top: 0;
     display: flex;
     align-items: center;
@@ -71,9 +66,27 @@
     align-items: center;
 
     & img {
-        width: 70%;
-        height: 70%;
+        width: 60%;
+        height: 60%;
         display: block;
         object-fit: contain;
     }
+}
+
+.aside-header-buttons {
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    align-items: center;
+}
+
+
+.aside-header-info {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    height: 100%;
+    position: absolute;
+    right: 10px;
+
 }

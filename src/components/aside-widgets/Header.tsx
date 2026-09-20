@@ -5,6 +5,9 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import FsAside from "./FsAside.tsx";
 import more from "../../assets/more.svg"
 import HeaderOptions from "./HeaderOptions.tsx";
+import RestrictedList from "../common/RestrictedList.tsx";
+import HeaderButton from "./HeaderButton.tsx";
+import {signalStore} from "../../stores/signal_store.ts";
 
 type Props={
     label: string
@@ -19,6 +22,16 @@ export interface HeaderOption {
     radio?: boolean
     inner?: HeaderOption[]
 }
+
+
+export interface IHeaderButton {
+    signal_name: string,
+    icon: string,
+    name: string
+    is_builtin?: boolean
+    is_save?: boolean
+}
+
 
 function parse(el: comp): HeaderOption[] {
     if (el === FsAside) {
@@ -92,6 +105,31 @@ function parse(el: comp): HeaderOption[] {
     return []
 }
 
+function useButtons(el: comp): IHeaderButton[] {
+    if (el == FsAside) {
+        return [
+            {
+                signal_name: "collapse",
+                icon: "collapse.svg",
+                is_builtin: true,
+                name: "Collapse All"
+            },
+            {
+                signal_name: "locate",
+                name: "Locate File",
+                is_builtin: true,
+                icon: "locate.svg"
+            }
+        ]
+    }
+
+    return []
+}
+
+
+
+
+
 function parseId(el: comp): string {
     if (el == FsAside) {
         return "fs"
@@ -135,8 +173,11 @@ export default function Header(props: Props){
     const current = asideStore(state => props.is_left ? state.current_left : state.current_right)
 
 
-    const buttons = useMemo(() => parse(current), [current])
+    const options = useMemo(() => parse(current), [current])
     const id = useMemo(() => parseId(current), [current])
+
+    const buttons = useMemo(() => useButtons(current), [current])
+
 
     function click() {
         props.is_left ? asideStore.getState().toggle_left(_ => false) : asideStore.getState().toggle_right(_ => false)
@@ -144,19 +185,38 @@ export default function Header(props: Props){
 
     const [opened, setOpened] = useState(false)
 
+    function write_signal(signal: string) {
+        signalStore.getState().append(id, signal)
+    }
+
+
     return (
         <div ref={main_ref} className={"aside--header"}>
             <p className={"aside-header-p"}>{props.label}</p>
             <div ref={minus_ref} className={"aside-header-info"}>
+                <div className={"aside-header-buttons"}>
+                    <RestrictedList
+                        flex={true}
+                        height={"100%"}
+                        limit={4}
+                        gap={"5px"}
+                        align={"end"}
+                    >
+                        {
+                            buttons.map((el, i) =>
+                                <HeaderButton obj={el} key={i} write_signal={write_signal}/>
+                            )
+                        }
+                    </RestrictedList>
+                </div>
                 <div className={"aside-header-opt"}
-                     onMouseEnter={() => setOpened(true)}
-                     onMouseLeave={() => setOpened(false)}
+                     onClick={() => setOpened(prev => !prev)}
                 >
                     <div className={"aside-header-opt-bt"}>
                         <img src={more}/>
                     </div>
                     {opened &&
-                        <HeaderOptions options={buttons} aside_id={id}/>
+                        <HeaderOptions options={options} aside_id={id}/>
                     }
                 </div>
                 <button onClick={click} className={"aside-header-bt"}>

@@ -19,7 +19,7 @@
     gap: 10px;
 
     & .code-file-img {
-        height: 80%;
+        height: 70%;
         aspect-ratio: 1/1;
         display: flex;
         flex-direction: column;
@@ -36,7 +36,7 @@
 
     & p{
         color: var(--subtitle);
-        font-size: 10pt;
+        font-size: 8pt;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -50,7 +50,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 40%;
+        height: 30%;
         aspect-ratio: 1/1;
 
         & img {

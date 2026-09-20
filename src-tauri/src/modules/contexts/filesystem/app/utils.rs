@@ -80,7 +80,7 @@ pub fn make_path<T: PathPart>(path: Vec<T>) -> Path {
     todo!();
     //Path(make_path_string(path))
 }
-
+#[macro_export]
 macro_rules! path_from {
     () => {
         Path::empty()

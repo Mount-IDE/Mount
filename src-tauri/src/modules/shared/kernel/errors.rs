@@ -1,6 +1,7 @@
 use crate::modules::contexts::launch::domain::entities::{
     LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
+use crate::modules::contexts::toolchains::domain::ToolchainComponent;
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::values::{Dependency, Path};
 use thiserror::Error;
@@ -238,6 +239,34 @@ pub enum SettingsError {
         #[from]
         ParsingError,
     ),
+}
+
+#[derive(Debug, Error)]
+#[allow(unused)]
+pub enum ToolchainError {
+    #[error("Failed to create toolchain {id} with {version}")]
+    CreationFailed { id: String, version: String },
+    #[error("Toolchain with id `{id}` and version `{version}` already exists")]
+    AlreaddyExists { id: String, version: String },
+    #[error("Toolchain with id `{id}` and version `{version}` not found")]
+    NotFound { id: String, version: String },
+    #[error("Failed to add component in toolchain with id `{0}` and version `{1}`")]
+    CommponentAdditionFailed(String, String, ToolchainComponent),
+
+    #[error("Component in toolchain with id `{0}` and version `{1}` already exists by id {2:?}")]
+    ComponentAlreadyExists(String, String, ToolchainComponent),
+    #[error("CONFIG ERROR {0:?}")]
+    Config(#[from] ConfigError),
+    #[error("FS ERROR {0:?}")]
+    FS(#[from] FileSystemError),
+}
+
+impl From<ToolchainError> for ErrorDto {
+    fn from(value: ToolchainError) -> Self {
+        Self {
+            message: format!("{:?}", value),
+        }
+    }
 }
 
 impl From<LaunchError> for ErrorDto {

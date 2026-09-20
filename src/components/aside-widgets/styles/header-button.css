@@ -1,0 +1,26 @@
+
+.header-button {
+    height: 90%;
+    aspect-ratio: 1/1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    user-select: none;
+    transition: all 0.2s;
+
+
+    & img {
+        width: 80%;
+        height: 80%;
+        display: block;
+        object-fit: contain;
+
+    }
+
+    &:hover {
+        background: var(--bg-hover);
+    }
+}
