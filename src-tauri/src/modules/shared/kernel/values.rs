@@ -14,11 +14,48 @@ pub enum PlatformType {
     ALL,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, TS)]
+impl Into<String> for PlatformType {
+    fn into(self) -> String {
+        match self {
+            PlatformType::WINDOWS => "windows".__get(),
+            PlatformType::MACOS => "macos".__get(),
+            PlatformType::LINUX => "linux".__get(),
+            PlatformType::ALL => "all".__get(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[serde(untagged)]
 pub enum Platform {
     ARRAY(Vec<PlatformType>),
     SINGLE(PlatformType),
+}
+
+impl From<String> for Platform {
+    fn from(value: String) -> Self {
+        Self::SINGLE(match value.to_lowercase().as_str() {
+            "windows" => PlatformType::WINDOWS,
+            "linux" => PlatformType::LINUX,
+            _ => PlatformType::MACOS,
+        })
+    }
+}
+
+impl PartialEq for Platform {
+    fn eq(&self, other: &Self) -> bool {
+        if let Self::SINGLE(v) = self {
+            if let Self::SINGLE(v2) = other {
+                return v == v2;
+            }
+        }
+        if let Self::ARRAY(v) = self {
+            if let Self::ARRAY(v2) = other {
+                return v == v2;
+            }
+        }
+        false
+    }
 }
 
 impl Platform {

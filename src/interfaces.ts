@@ -634,7 +634,6 @@ interface ITheme {
             }
             title_bar?: IThemeTitleBar
         }
-
         project_space?: {
             this?: {
                 background?: string
@@ -822,7 +821,6 @@ interface ITheme {
             },
 
         }
-
 
         create_entities?: {
             this?: {

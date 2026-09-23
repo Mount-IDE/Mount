@@ -57,34 +57,34 @@ pub enum ComponentTyp {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolchainComponent {
-    typ: ComponentTyp,
-    platform: HashMap<String, ToolchainComponentIn>,
+    pub typ: ComponentTyp,
+    pub platforms: HashMap<String, ToolchainComponentIn>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolchainComponentIn {
-    program: String,
-    args: Vec<String>,
-    version: Option<String>,
-    min_version: Option<String>,
-    langs: ToolchainTyp,
-    requires: Option<Vec<String>>,
-    repair: Option<ToolchainRepair>,
+    pub program: String,
+    pub args: Vec<String>,
+    pub version: Option<String>,
+    pub min_version: Option<String>,
+    pub langs: ToolchainTyp,
+    pub requires: Option<Vec<String>>,
+    pub repair: Option<ToolchainRepair>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolchainRepair {
-    discovery: Option<Vec<ToolchainDiscovery>>,
-    install: Option<Vec<ComponentRepairRaw>>,
+    pub discovery: Option<Vec<ToolchainDiscovery>>,
+    pub install: Option<Vec<ComponentRepairRaw>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolchainDiscovery {
-    platform: Option<Platform>,
-    is_builtin: Option<bool>,
-    is_path_var: Option<bool>,
-    path_to_program: Option<String>,
-    version_check_command: Option<String>,
+    pub platform: Option<Platform>,
+    pub is_builtin: Option<bool>,
+    pub is_path_var: Option<bool>,
+    pub path_to_program: Option<String>,
+    pub version_check_command: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

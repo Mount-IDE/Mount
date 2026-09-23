@@ -433,28 +433,28 @@ pub struct Repair {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiscoveryRepair {
-    platform: Option<Platform>,
-    is_builtin: Option<bool>,
-    is_path_var: Option<bool>,
-    path_to_program: Option<String>,
-    version_check_command: Option<String>,
-    needed_version: Option<String>,
+    pub platform: Option<Platform>,
+    pub is_builtin: Option<bool>,
+    pub is_path_var: Option<bool>,
+    pub path_to_program: Option<String>,
+    pub version_check_command: Option<String>,
+    pub needed_version: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstallRepair {
-    platform: Option<Platform>,
-    version_check_command: Option<String>,
-    needed_version: Option<String>,
-    program: Option<String>,
+    pub platform: Option<Platform>,
+    pub version_check_command: Option<String>,
+    pub needed_version: Option<String>,
+    pub program: Option<String>,
 
-    method: RepairMethod,
+    pub method: RepairMethod,
 
-    url: Option<String>,
-    shell: Option<String>,
+    pub url: Option<String>,
+    pub shell: Option<String>,
 
-    pm: Option<String>,
-    packages: Option<Vec<String>>,
+    pub pm: Option<String>,
+    pub packages: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

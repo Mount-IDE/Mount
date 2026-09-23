@@ -1,0 +1,55 @@
+{
+    "id": "vs.dark",
+    "name": "VSCode-Dark",
+    "schema": 1,
+    "meta": {},
+    "colors": [
+        {
+            "name": "bg",
+            "value": "1e1f22"
+        }
+    ],
+    "elements": {
+        "project-space": {
+            "this": {
+                "background": "#1e1f22"
+            },
+            "mini_aside": {
+                "right": {
+                    "border": "1px solid #303031",
+                    "rounded": "10px",
+                    "background": "var(--bg)"
+                },
+                "left": {
+                    "border": "1px solid #303031",
+                    "roundecd": "10px",
+                    "background": "var(--bg)"
+                }
+            },
+            "aside": {
+                "left": {
+                    "border": "1px solid #303031",
+                    "rounded": "10px",
+                    "background": "var(--bg)"
+                },
+                "right": {
+                    "border": "1px solid #303031",
+                    "rounded": "10px",
+                    "background": "var(--bg)"
+                }
+            },
+            "center": {
+                "this": {
+                    "border": "1px solid #303031",
+                    "background": "#1e1f22",
+                    "rounded": "10px"
+                }
+            },
+            "border": {
+                "border": "1px solid #303031",
+                "rounded": "10px",
+                "background": "var(--bg)"
+            }
+        }
+    }
+}

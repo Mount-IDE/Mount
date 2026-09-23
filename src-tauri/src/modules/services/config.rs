@@ -408,6 +408,13 @@ fn get_files_new() -> Vec<FsEntity_> {
                         include_str!("../../../assets/islands_dark.json"),
                     )],
                 ),
+                FsEntity_::dir_entities(
+                    "vs.dark",
+                    vec![FsEntity_::file_s_content(
+                        "theme.json",
+                        include_str!("../../../assets/vs-dark.json"),
+                    )],
+                ),
             ],
         ),
         FsEntity_::dir_entities(

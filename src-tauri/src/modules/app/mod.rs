@@ -15,6 +15,9 @@ use crate::modules::contexts::project::app::services::{
 use crate::modules::contexts::settings::app::services::SettingsService;
 use crate::modules::contexts::settings::domain::entities::Settings;
 use crate::modules::contexts::terminal::app::services::TerminalService;
+use crate::modules::contexts::toolchains::services::{
+    ToolchainComponentService, ToolchainMakeService, ToolchainPackageService,
+};
 use crate::modules::services::config::{ConfigRecoveryService, ConfigService, ParsingService};
 use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
@@ -30,19 +33,23 @@ pub static APP: OnceLock<AppHandle> = OnceLock::new();
 
 pub static SETTINGS: OnceLock<Mutex<Settings>> = OnceLock::new();
 
-pub static TERMINAL_SERVICE: TerminalService = TerminalService;
-pub static ACTION_PROJECT_SERVICE: ActionProjectService = ActionProjectService();
+pub const TERMINAL_SERVICE: TerminalService = TerminalService;
+pub const ACTION_PROJECT_SERVICE: ActionProjectService = ActionProjectService();
 
-pub static PARSING_SERVICE: ParsingService = ParsingService();
-pub static LAUNCH_COMPILE_SERVICE: LaunchCompileService = LaunchCompileService();
+pub const PARSING_SERVICE: ParsingService = ParsingService();
+pub const LAUNCH_COMPILE_SERVICE: LaunchCompileService = LaunchCompileService();
 
-pub static LAUNCH_RUN_SERVICE: LaunchRunService = LaunchRunService();
+pub const LAUNCH_RUN_SERVICE: LaunchRunService = LaunchRunService();
 
-pub static SETTINGS_SERVICE: SettingsService = SettingsService();
+pub const SETTINGS_SERVICE: SettingsService = SettingsService();
 
-pub static EVENT_SERVICE: EventService = EventService();
+pub const EVENT_SERVICE: EventService = EventService();
 
-pub static PACKAGE_SERVICE: PackageService = PackageService();
+pub const PACKAGE_SERVICE: PackageService = PackageService();
 //pub static PACKAGE_COMPILE_SERVICE: PackageCompileService = PackageCompileService();
 
-pub static LSP_SERVICE: LspService = LspService();
+pub const LSP_SERVICE: LspService = LspService();
+
+pub const TOOLCHAIN_MAKE_SERVICE: ToolchainMakeService = ToolchainMakeService();
+pub const TOOLCHAIN_COMPONENT_SERVICE: ToolchainComponentService = ToolchainComponentService();
+pub const TOOLCHAIN_PACKAGE_SERVICE: ToolchainPackageService = ToolchainPackageService();

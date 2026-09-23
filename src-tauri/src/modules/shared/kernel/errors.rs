@@ -250,6 +250,14 @@ pub enum ToolchainError {
     AlreaddyExists { id: String, version: String },
     #[error("Toolchain with id `{id}` and version `{version}` not found")]
     NotFound { id: String, version: String },
+    #[error(
+        "Component with id `{id_c}` in toolchain with id `{id}` and version `{version}` not found"
+    )]
+    ComponentNotFound {
+        id_c: String,
+        id: String,
+        version: String,
+    },
     #[error("Failed to add component in toolchain with id `{0}` and version `{1}`")]
     CommponentAdditionFailed(String, String, ToolchainComponent),
 
@@ -259,6 +267,23 @@ pub enum ToolchainError {
     Config(#[from] ConfigError),
     #[error("FS ERROR {0:?}")]
     FS(#[from] FileSystemError),
+    #[error("PARSING ERROR {0:?}")]
+    PARSING(#[from] ParsingError),
+
+    #[error("Needed platform of component with id `{id_c}` of toolchain with id `{id}` and version `{version}` not found"
+    )]
+    WrongComponentPlatform {
+        id_c: String,
+        id: String,
+        version: String,
+    },
+    #[error("Repair object of component with id `{id_c}` of toolchain with id `{id}` and version `{version}` not found"
+    )]
+    RepairOfComponentNotFound {
+        id_c: String,
+        id: String,
+        version: String,
+    },
 }
 
 impl From<ToolchainError> for ErrorDto {
