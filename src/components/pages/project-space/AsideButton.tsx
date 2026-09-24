@@ -19,7 +19,8 @@ export default function AsideButton(props: Props) {
                 let res = await invoke<string>("make_path_from_icon", {
                     components: props.bt.icon,
                     path: "aside_icons",
-                    code: true
+                    code: true,
+                    builtin: true
                 })
                 setDir(res)
             } catch (e) {

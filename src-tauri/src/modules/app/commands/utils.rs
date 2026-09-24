@@ -1,3 +1,4 @@
+use crate::join;
 use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::path_from;
@@ -20,7 +21,12 @@ pub fn make_path_from_icon(
     components: String,
     path: String,
     code: bool,
+    builtin: bool,
 ) -> Result<String, ErrorDto> {
+    if builtin {
+        let path = join!["/", "/builtin/aside-icons/aside", components];
+        return Ok(path);
+    }
     let dir = CONFIG_SERVICE.get_data_dir()?;
     let path = path_from![dir, path, components];
     if code {

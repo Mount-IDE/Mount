@@ -101,4 +101,16 @@ macro_rules! path_from {
     }
 }
 
+#[macro_export]
+macro_rules! join {
+    () => {String::new()};
+    ($a: literal, $($x:expr), * $(,)?) => {
+        {
+            let a_: Vec<String> = vec![$($x.__get()), *];
+            a_.join($a)
+        }
+
+    };
+}
+
 pub(crate) use path_from;
