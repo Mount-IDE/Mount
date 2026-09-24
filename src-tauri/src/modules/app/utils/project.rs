@@ -75,9 +75,9 @@ pub fn make_buttons() -> Vec<Button> {
         icon: "git.svg".to_string(),
     });
     res.push(Button {
-        alt: "Project Settings".to_string(),
+        alt: "Notifications".to_string(),
         pos: ButtonPos::RightTop,
-        widget: String::from("SettingsAside"),
+        widget: String::from("AsideNotifications"),
         component_type: ButtonComponentType::Light,
         order: 0,
         keys: String::new(),

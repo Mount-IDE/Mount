@@ -2,8 +2,10 @@ use crate::modules::contexts::filesystem::app::utils::split_path;
 use crate::modules::contexts::filesystem::domain::values::FileType;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
-use std::path;
-use std::time::Duration;
+use std::{
+    path,
+    time::{Duration, SystemTime},
+};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct FsMeta {
@@ -16,23 +18,24 @@ impl FsMeta {
     pub fn by_path(path: Path) -> Self {
         let path = path.clone().get();
         let path = path::Path::new(&path);
-        Self {
-            modified: path
-                .metadata()
-                .unwrap()
+        let mut modified = 0u64;
+        let mut readonly = false;
+        let mut memory = 0u64;
+        if let Ok(meta) = path.metadata() {
+            modified = meta
                 .modified()
-                .unwrap_or(std::time::SystemTime::now())
+                .unwrap_or(SystemTime::now())
                 .elapsed()
                 .unwrap_or(Duration::new(0, 0))
-                .as_secs(),
-            readonly: path.metadata().unwrap().permissions().readonly(),
-            memory: path.metadata().unwrap().len(),
+                .as_secs();
+            readonly = meta.permissions().readonly();
+            memory = meta.len();
         }
-        /* Self {
-            modified: 0,
-            readonly: true,
-            memory: 0
-        }*/
+        Self {
+            modified,
+            readonly,
+            memory,
+        }
     }
 }
 

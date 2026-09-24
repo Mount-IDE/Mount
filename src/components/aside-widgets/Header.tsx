@@ -9,7 +9,7 @@ import RestrictedList from "../common/RestrictedList.tsx";
 import HeaderButton from "./HeaderButton.tsx";
 import {signalStore} from "../../stores/signal_store.ts";
 
-type Props={
+type Props = {
     label: string
     is_left: boolean;
 }
@@ -127,9 +127,6 @@ function useButtons(el: comp): IHeaderButton[] {
 }
 
 
-
-
-
 function parseId(el: comp): string {
     if (el == FsAside) {
         return "fs"
@@ -139,7 +136,7 @@ function parseId(el: comp): string {
 }
 
 
-export default function Header(props: Props){
+export default function Header(props: Props) {
 
     const minus_ref = useRef<HTMLDivElement>(null)
 
@@ -210,9 +207,10 @@ export default function Header(props: Props){
                     </RestrictedList>
                 </div>
                 <div className={"aside-header-opt"}
-                     onClick={() => setOpened(prev => !prev)}
                 >
-                    <div className={"aside-header-opt-bt"}>
+                    <div className={"aside-header-opt-bt"}
+                         onClick={() => setOpened(prev => !prev)}
+                    >
                         <img src={more}/>
                     </div>
                     {opened &&

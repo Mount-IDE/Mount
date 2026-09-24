@@ -2,12 +2,13 @@ import FsAside from "../components/aside-widgets/FsAside.tsx";
 import Terminal from "../components/pages/project-space/Terminal.tsx";
 import AsideLaunch from "../components/pages/project-space/AsideLaunch.tsx";
 import React from "react";
-
+import FsNotifications from "../components/aside-widgets/FsNotifications.tsx"
 
 const REGISTRY = {
     FsAside: FsAside,
     TerminalAside: Terminal,
-    AsideLaunch: AsideLaunch
+    AsideLaunch: AsideLaunch,
+    AsideNotifications: FsNotifications
 } satisfies Record<string, React.ComponentType<{ active?: boolean }>>
 
 type WIDGET = keyof typeof REGISTRY
