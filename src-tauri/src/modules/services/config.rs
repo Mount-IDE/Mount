@@ -238,12 +238,31 @@ impl TConfigService for ConfigService {
 
     fn read_packages(&self) -> Result<Vec<Package>, ConfigError> {
         let dir = self.get_data_dir()?;
-        let path_ = path_from![dir, "packages.json"];
-        let file = PFile::from_path_reg(path_.clone());
+        // let path_ = path_from![dir, "packages.json"];
+        // let file = PFile::from_path_reg(path_.clone());
+        //
+        // let content = FS_READ_SERVICE.read_file(&file)?;
+        // let json = PARSING_SERVICE._from_string::<Vec<Package>>(&content)?;
+        // Ok(json)
 
-        let content = FS_READ_SERVICE.read_file(&file)?;
-        let json = PARSING_SERVICE._from_string::<Vec<Package>>(&content)?;
-        Ok(json)
+        let path_to = path_from![dir, "packages"];
+        let dir = PDirectory::from_path(&path_to);
+        let dir = FS_READ_SERVICE.read_dir(&dir)?;
+        let mut packages = Vec::<Package>::new();
+        for i in dir.directories {
+            let name = i.name;
+            let path = path_from![path_to, name, "config.json"];
+            let file = PFile::from_path_reg(path);
+            let Ok(content) = FS_READ_SERVICE.read_file(&file) else {
+                continue;
+            };
+            let Ok(parsed) = PARSING_SERVICE._from_string::<Package>(&content) else {
+                continue;
+            };
+            crate::debug!("||\tparsed {:?}", parsed);
+            packages.push(parsed);
+        }
+        Ok(packages)
     }
 
     fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError> {

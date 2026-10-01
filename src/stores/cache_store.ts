@@ -219,6 +219,7 @@ export const cacheStore = create<Type>((set, get) => ({
     async update_cache(): Promise<void> {
         try {
             let cache = await invoke<Cache>("get_cache");
+            console.log(cache)
             themeStore.getState().load_themes(
                 cache.themes.map(el => JSON.parse(el) as ITheme),
                 cache.settings)

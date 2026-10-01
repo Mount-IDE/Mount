@@ -938,7 +938,7 @@ interface IPackage {
             repair: {
                 addition_type?: "replace" | "add" // replace - fully replace whole toolchain (not recommended); add - append missing components
                 components: {
-                    [id: string]: MaybeArray<Repair>
+                    [id: string]: Repair
                 }
             }
         }

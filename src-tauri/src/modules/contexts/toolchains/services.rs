@@ -233,6 +233,10 @@ pub struct ToolchainPackageService();
 
 impl TToolchainPackageComponent for ToolchainPackageService {
     fn start_repairing(&self, package: Package) -> Result<Toolchain, ToolchainError> {
+        let cmp = package.components;
+        if let Some(cmp) = cmp {
+            for i in cmp {}
+        }
         unimplemented!()
     }
 

@@ -405,14 +405,16 @@ pub struct Package {
     #[serde(default)]
     pub highlight: Vec<PackageParser>,
     #[serde(default)]
-    components: Option<Vec<PackageComponent>>,
+    pub components: Option<Vec<PackageComponent>>,
+    #[serde(default)]
+    pub toolchains: HashMap<String, PackageToolchain>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageToolchain {
     id: String,
     version: String,
-    repair: Vec<Repair>,
+    repair: PackageRepair,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -424,6 +426,7 @@ pub enum PackageRepairType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageRepair {
     addition_type: PackageRepairType,
+    components: HashMap<String, Repair>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Repair {
@@ -793,6 +796,7 @@ impl Package {
                     version_check_command: None,
                 },
             }]),
+            toolchains: Default::default(),
         }
     }
 
@@ -857,6 +861,7 @@ impl Package {
                     version_check_command: None,
                 },
             }]),
+            toolchains: Default::default(),
         }
     }
 }
