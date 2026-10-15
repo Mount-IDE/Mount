@@ -6,13 +6,15 @@
     padding: 7px 0 7px 15px;
     background: var(--bg2);
     border: 1px solid var(--border2);
-    z-index: 50;
+    z-index: 100;
 }
 
 .header-opt-list {
     width: 100%;
     min-height: 40px;
     position: relative;
+    z-index: 100;
+
 }
 
 .header-opt-h {

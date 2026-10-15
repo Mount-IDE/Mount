@@ -10,7 +10,6 @@
     width: 100%;
     text-align: center;
     color: var(--subtitle);
-    font-weight: lighter;
 }
 
 #create-project-templates-list {

@@ -4,8 +4,8 @@ import {createProjectStore} from "../../../stores/create_project.ts";
 import {useEffect} from "react";
 import Package from "./Package.tsx";
 import {packageStore} from "../../../stores/package_store.ts";
-
-
+import Icon from "../../common/Icon.tsx";
+import settings from "../../../assets/settings.svg";
 
 
 export default function ProjectPackages(){
@@ -31,7 +31,10 @@ export default function ProjectPackages(){
 
     return (
     <div id={"create-project-packages"}>
-        <p id={"create-project-packages-p"}>Packages</p>
+        <div className={"flex w-full justify-between items-center"}>
+            <p id={"create-project-packages-p"}>Packages</p>
+            <Icon src={settings} size={"65%"}/>
+        </div>
         <div id={"create-project-packages-list"}>
             {packages.map((el, i)=>
                 <Package key={`${el.id}-${i}`}
@@ -41,6 +44,6 @@ export default function ProjectPackages(){
                 />
             )}
         </div>
-        <button id={"create-project-packages-manage"}>Manage Packages</button>
+        {/*<button id={"create-project-packages-manage"}>Manage Packages</button>*/}
     </div>)
 }

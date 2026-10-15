@@ -1,10 +1,8 @@
-
 import "./styles/project-templates.css"
 import {cacheStore} from "../../../stores/cache_store.ts";
 import Template from "./Template.tsx";
-
-
-
+import settings from "../../../assets/settings.svg"
+import Icon from "../../common/Icon.tsx";
 
 
 export default function ProjectTemplates() {
@@ -13,7 +11,10 @@ export default function ProjectTemplates() {
     const setCurrent = cacheStore(state=>state.set_current_template);
     return (
         <div id={"create-project-templates"}>
-            <p id={"create-project-templates-p"}>Templates</p>
+            <div className={"flex w-full justify-between items-center"}>
+                <p id={"create-project-templates-p"}>Templates</p>
+                <Icon src={settings} size={"65%"}/>
+            </div>
             <div id={"create-project-templates-list"}>
                 {templates.map((el, i)=>
                 <Template current={el.id==current?.id} template={el} cb={()=>{
@@ -21,7 +22,7 @@ export default function ProjectTemplates() {
                 }} key={`${el.id}-${i}`}/>
                 )}
             </div>
-            <button id={"create-project-templates-manage"}>Manage Templates</button>
+            {/*<button id={"create-project-templates-manage"}>Manage Templates</button>*/}
         </div>
     )
 }

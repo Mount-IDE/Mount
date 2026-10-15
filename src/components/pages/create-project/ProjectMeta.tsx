@@ -178,8 +178,14 @@ export default function ProjectMeta() {
     }, [typ, image, color]);
 
 
+    const desc = (template?.meta?.description ?? "").trim()?.length > 0 ? template?.meta?.description : "no description";
     return (
         <div id={"create-project-meta"}>
+            <div
+                className={"w-full whitespace-nowrap text-(--subtitle) transition duration-100 hover:text-(--title) cursor-pointer"}
+                onClick={() => cacheStore.getState().set_current_template(null)}>
+                {template?.name}
+            </div>
             <div id={"create-project-img"}>
 
                 {
@@ -302,6 +308,13 @@ export default function ProjectMeta() {
                         </div>
                     </div>
                 }
+            </div>
+            <div className={"w-full text-(--subtitle)"}
+                 style={{
+                     font: "10pt \"Jetbrains Mono Light\""
+                 }}
+            >
+                {desc}
             </div>
             {base_meta.map(
                 (el, i) =>

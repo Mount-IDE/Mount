@@ -893,52 +893,33 @@ interface IPackage {
         version_check_command?: string
         level: "required" | "conflicts"
     }[]
-    startup: {
+    startup: { // system use it only while project is creating
         options?: IPackageParameter[]
         actions?: IPackageAction[]
     }
-    highlight: IPackageHighlight[]
+    highlight: IPackageHighlight[] // using for syntax highlighting
     files: {
         extentions: string[], //string
         files?: string[] // regex str
         ignore_files?: string[] // regex str
     }
-    tasks?: []
+    tasks?: [] // tasks that start while system send some signals
     var?: {
         name: string,
         value: string | boolean | string[]
         readonly?: boolean
     }[]
     components?: // deprecated
-        {
-            id: string
-            typ: "compiler" | "transpiler" | "interpreter" | "lsp" | "formatter" | "debugger" | "build_system" | "pack_manager"
-            program: string // имя программы
-            platform: ("windows" | "macos" | "linux")[] | "all"
-            languages: string[]
-            priority?: number
-            arguments?: string[]
-            builtin_params: {
-                is_builtin: boolean
-                url?: string
-                path?: string
-                in_path?: boolean
-                min_version?: string
-                version_check_command?: string | {
-                    platform: string
-                    command: string
-                }[]
-            }
-        }[]
+        any[]
 
     toolchains?: {
         [name: string]: {
             id: string
             version: string
-            repair: {
-                addition_type?: "replace" | "add" // replace - fully replace whole toolchain (not recommended); add - append missing components
-                components: {
-                    [id: string]: Repair
+            components: {
+                [id: string]: {
+                    signals: string[]
+                    repair: Repair
                 }
             }
         }
@@ -1056,9 +1037,9 @@ interface PackageConfig {
 
 
 interface IToolchain {
-    id: string // <developer?>-<launguage|framework|util>
+    id: string // <developer>.<technology>
     version: string
-    copy_name?: string // if we don't want toolchain was fully replaced, a copy of toolchain will create and requests from package will be delegates to itself
+    copy_name?: string // deprecated (toolchain cannot be repalced fully, only expand) :: if we don't want toolchain was fully replaced, a copy of toolchain will create and requests from package will be delegates to itself
     scheme: number
     platform?: string | string[]
     typ: {

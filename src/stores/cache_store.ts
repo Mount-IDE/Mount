@@ -33,7 +33,7 @@ interface Type {
     clear_templates: () => void
     clear_packages: () => void
     clear_current_template: () => void
-    set_current_template: (t: ITemplate) => void,
+    set_current_template: (t: ITemplate | null) => void,
     projects_path: string
     set_projects_path: (path: string) => void
     load_groups: (groups: string[]) => void
@@ -181,7 +181,7 @@ export const cacheStore = create<Type>((set, get) => ({
 
         }
     }),
-    set_current_template: (t: ITemplate) => set({currentTemplate: t}),
+    set_current_template: (t: ITemplate | null) => set({currentTemplate: t}),
     set_projects_path: (path: string) => set({projects_path: path}),
     load_groups: (groups: string[]) => set({
         groups

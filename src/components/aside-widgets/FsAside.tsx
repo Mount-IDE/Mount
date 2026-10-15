@@ -27,6 +27,10 @@ export default function FsAside() {
 
     const set_path = contextStore(state => state.set_path)
 
+    useEffect(() => {
+        console.log("TREE", tree)
+    }, [tree]);
+
 
     useEffect(() => {
         function handler(e: MouseEvent) {
