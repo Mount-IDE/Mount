@@ -87,6 +87,7 @@
     color: var(--title);
     display: flex;
     align-items: center;
+    font-size: 10pt;
 }
 
 #terminal-add {

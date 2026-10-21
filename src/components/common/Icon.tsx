@@ -5,6 +5,7 @@ type Props = {
     size?: string
     in_size?: string
     onClick?: (e?: _MouseEvent) => void
+    modifier?: string
 }
 
 export default function Icon(props: Props) {
@@ -13,7 +14,7 @@ export default function Icon(props: Props) {
     return (
         <div
             style={{
-                height: props.size ? props.size : "80%"
+                [props.modifier ?? "height"]: props.size ? props.size : "80%"
             }}
             className={"aspect-square centered"}
             onClick={props.onClick}

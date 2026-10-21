@@ -6,6 +6,7 @@ import {cacheStore} from "../../../stores/cache_store.ts";
 // import aside from "./Aside.tsx";
 import {asideStore, comp} from "../../../stores/aside_store.ts";
 import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import Icon from "../../common/Icon.tsx";
 
 
 type Props = {
@@ -103,10 +104,14 @@ function MiniAside(props: Props) {
                     )}
                 </div>
                 {
+                    // props.max_top !== null &&
+                    // <button className={"project-mini-aside-other-buttons"}>
+                    //     <img src={more2}/>
+                    // </button>
+
                     props.max_top !== null &&
-                    <button className={"project-mini-aside-other-buttons"}>
-                        <img src={more2}/>
-                    </button>
+
+                    <Icon src={more2} size={"70%"} modifier={"width"}/>
                 }
             </div>
             {
