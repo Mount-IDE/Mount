@@ -28,6 +28,11 @@ interface Type {
     clear: () => void
 }
 
+
+/**
+ * @deprecated
+ * fully replaced by worker
+ */
 export const languageStore = create<Type>((set, get) => ({
     clear: () => {
         set({
@@ -45,11 +50,14 @@ export const languageStore = create<Type>((set, get) => ({
             .find(el => el.id == highlight)
         if (!needed) return null
         let path = packageStore.getState().get_wasm(pack, highlight);
+
         let bin = await invoke<number[]>("read_binary", {path: path})
         let arr = new Uint8Array(bin);
 
         let lang = await Language.load(arr)
+
         let langs = get().languages;
+
         try {
 
             let scm = await invoke<string>("read_scm", {
@@ -106,15 +114,12 @@ export const languageStore = create<Type>((set, get) => ({
         let langs = get().languages;
         let res: LanguageInner[] = []
         try {
-            let scms = await invoke<string>("read_scms", {pack: pack})
-            //console.log("scms")
+            let scms = await invoke<string[]>("read_scms", {pack: pack})
             for (let i = 0; i < pack.highlight.length; i++) {
                 let h = pack.highlight[i]
                 let path = packageStore.getState().get_wasm(pack_id, h.id);
-                //console.log(path)
                 let bin = await invoke<number[]>("read_binary", {path: path})
                 let arr = new Uint8Array(bin);
-                //console.log("bin")
                 let lang = await Language.load(arr)
                 let parser = new Parser()
                 parser.setLanguage(lang)
@@ -122,7 +127,6 @@ export const languageStore = create<Type>((set, get) => ({
                 res.push({
                     lang, scm: scms[i] ?? "", parser, query
                 })
-                // console.log("setting", pack_id, h.id)
                 langs[pack_id] = {
                     ...langs[pack_id] ?? {},
                     [h.id]: {

@@ -3,131 +3,17 @@ import React, {RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState}
 import {fileCacheStore} from "../../../stores/file_cache_store.ts";
 
 import {themeStore} from "../../../stores/theme_store.ts";
-import {treeStore} from "../../../stores/tree_store.ts";
+//import {treeStore} from "../../../stores/tree_store.ts";
 import {projectStore} from "../../../stores/project_store.ts";
 import {get_last_entity_of_path} from "../../../utils/utils.ts";
-import {LanguageInner, languageStore} from "../../../stores/language_store.ts";
-import {QueryCapture} from "web-tree-sitter";
+//import {LanguageInner, languageStore} from "../../../stores/language_store.ts";
+//import {QueryCapture} from "web-tree-sitter";
+import {highlightClient} from "../../../workers/highlight_client.ts";
+import {ExtToken, Token} from "../../../workers/highlight_shared.ts";
 
 type Props = {
     current: [number | null, number]
 }
-
-
-const order_types = [
-    // ─────────────────────────────
-    // Base
-    // ─────────────────────────────
-    "unknown",
-    "expression",
-    "identifier",
-    "property",
-    "operator",
-    "punctuation",
-
-    // ─────────────────────────────
-    // Literals
-    // ─────────────────────────────
-
-    "string",
-    "char",
-    "number",
-    "bool",
-    "null",
-    "regex",
-    "template",
-
-    // ─────────────────────────────
-    // Declarations / types
-    // ─────────────────────────────
-
-    "type",
-    "type_builtin",
-    "generic",
-    "param",
-    "argument",
-
-    "const",
-
-    "fn_decl",
-    "fn_call",
-    "fn_b",
-
-    "a_fn_decl",
-    "a_fn_call",
-    "a_fn_b",
-
-    "spec_fn",
-
-    "entity_stat",
-
-    // ─────────────────────────────
-    // Modifiers / keywords
-    // ─────────────────────────────
-
-    "modifier",
-    "visibility",
-    "storage",
-
-    "other_kw_decl",
-    "other_kw_stat",
-
-    // ─────────────────────────────
-    // Control flow
-    // ─────────────────────────────
-
-    "if_stat",
-
-    "while_stat",
-    "for_stat",
-    "loop_stat",
-
-    "match_in",
-    "match_stat",
-
-    "util_stat",
-    "util_decl",
-
-    // ─────────────────────────────
-    // Exceptions
-    // ─────────────────────────────
-
-    "exception",
-    "exception_decl",
-
-    // ─────────────────────────────
-    // Modules
-    // ─────────────────────────────
-
-    "scope",
-    "import",
-    "export",
-
-    // ─────────────────────────────
-    // Special
-    // ─────────────────────────────
-
-    "decorator",
-    "annotation",
-    "attribute",
-    "macro",
-
-    // ─────────────────────────────
-    // Comments / documentation
-    // ─────────────────────────────
-
-    "comment",
-    "doc_comment",
-
-    // ─────────────────────────────
-    // Misc
-    // ─────────────────────────────
-
-    "label",
-    "escape",
-    "error",
-    "other",
-] as const
 
 
 export default function Code(props: Props) {
@@ -263,54 +149,27 @@ function get_needed_highlight(pack: IPackage, filename: string): IPackageHighlig
     })
 }
 
-async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
-    // console.log(last)
-    // console.log(languageStore.getState().languages)
-    const inner = languageStore.getState().languages[pack.id]?.[highlight.id] as LanguageInner | undefined;
-    if (!inner) {
-        return null
-    }
-    let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
-    if (!tree) {
-        //    console.log("not tree")
-        return null
-    }
-    let captures = inner.query.captures(tree[0].rootNode);
-
-    // console.log("complete")
-    for (let i of captures) {
-        console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
-    }
-
-    return captures
-}
-
-function get_type_from_arr(typ: string, arr: Record<string, string>): typeof order_types[number] {
-    let type_ = arr[typ] as string | undefined;
-    console.log("\t\t\t got", typ, type_)
-    if (typeof type_ == "string" && order_types.includes(type_ as typeof order_types[number])) {
-        return type_ as typeof order_types[number]
-    }
-    return "unknown"
-}
-
-
-function get_order(typ: typeof order_types[number]): number {
-    let index = order_types.indexOf(typ)
-    return index ?? 0
-}
-
-
-export interface Token {
-    typ: typeof order_types[number],
-    text: string,
-    start: number,
-    end: number
-}
-
-export interface ExtToken extends Token {
-    color: string
-}
+// async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
+//     // console.log(last)
+//     // console.log(languageStore.getState().languages)
+//     const inner = languageStore.getState().languages[pack.id]?.[highlight.id] as LanguageInner | undefined;
+//     if (!inner) {
+//         return null
+//     }
+//     let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
+//     if (!tree) {
+//         //    console.log("not tree")
+//         return null
+//     }
+//     let captures = inner.query.captures(tree[0].rootNode);
+//
+//     // console.log("complete")
+//     for (let i of captures) {
+//         console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
+//     }
+//
+//     return captures
+// }
 
 const LINE_HEIGHT = 21;
 const OVERSCAN = 5;
@@ -319,7 +178,7 @@ function CodeEditor(props: CodeProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const cursor_ref = useRef<[number, number] | null>(null);
-    const [tokens, setTokens] = useState<Map<number, ExtToken[]> | null>(null)
+    //const [tokens, setTokens] = useState<Map<number, ExtToken[]> | null>(null)
 
     const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
 
@@ -338,186 +197,256 @@ function CodeEditor(props: CodeProps) {
     }, [props.text]);
 
 
-    function buildLineIndex(text: string, tokens: ExtToken[]) {
-        const lineStarts: number[] = [0];
-        for (let i = 0; i < text.length; i++) {
-            if (text[i] === "\n") lineStarts.push(i + 1);
-        }
+    /* function buildLineIndex(text: string, tokens: ExtToken[]) {
+         const lineStarts: number[] = [0];
+         for (let i = 0; i < text.length; i++) {
+             if (text[i] === "\n") lineStarts.push(i + 1);
+         }
 
-        function lineOf(offset: number): number {
-            let lo = 0, hi = lineStarts.length - 1;
-            while (lo < hi) {
-                const mid = (lo + hi + 1) >> 1;
-                if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
-            }
-            return lo;
-        }
+         function lineOf(offset: number): number {
+             let lo = 0, hi = lineStarts.length - 1;
+             while (lo < hi) {
+                 const mid = (lo + hi + 1) >> 1;
+                 if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
+             }
+             return lo;
+         }
 
-        const byLine = new Map<number, ExtToken[]>();
+         const byLine = new Map<number, ExtToken[]>();
 
-        for (const t of tokens) {
-            const startLine = lineOf(t.start);
-            const endLine = lineOf(Math.max(t.start, t.end - 1));
-            if (startLine === endLine) {
-                byLine.set(startLine, [...(byLine.get(startLine) ?? []), t]);
-                continue;
-            }
-            for (let l = startLine; l <= endLine; l++) {
-                const lineStart = lineStarts[l];
-                const lineEnd = lineStarts[l + 1] !== undefined ? lineStarts[l + 1] - 1 : text.length;
-                const s = Math.max(t.start, lineStart);
-                const e = Math.min(t.end, lineEnd);
-                byLine.set(l, [...(byLine.get(l) ?? []), {...t, start: s, end: e, text: text.slice(s, e)}]);
-            }
-        }
-        return {lineStarts, byLine};
-    }
-
+         for (const t of tokens) {
+             const startLine = lineOf(t.start);
+             const endLine = lineOf(Math.max(t.start, t.end - 1));
+             if (startLine === endLine) {
+                 byLine.set(startLine, [...(byLine.get(startLine) ?? []), t]);
+                 continue;
+             }
+             for (let l = startLine; l <= endLine; l++) {
+                 const lineStart = lineStarts[l];
+                 const lineEnd = lineStarts[l + 1] !== undefined ? lineStarts[l + 1] - 1 : text.length;
+                 const s = Math.max(t.start, lineStart);
+                 const e = Math.min(t.end, lineEnd);
+                 byLine.set(l, [...(byLine.get(l) ?? []), {...t, start: s, end: e, text: text.slice(s, e)}]);
+             }
+         }
+         return {lineStarts, byLine};
+     }
+ */
     /**
      * highlight logic
      */
-    useEffect(() => {
+    /*
+        useEffect(() => {
 
 
-        async function a() {
-            let file = get_last_entity_of_path(props.cache.path);
-            if (!file) {
-                console.log("\t not file")
-                setTokens(null)
-                return
-            }
-            let packs = [...projectStore.getState().selected_packages.entries()];
-            let pack = get_needed_package(packs, file!);
-            if (!pack) {
-                console.log("not pack")
-                setTokens(null)
-                return
-            }
-            let highlight = get_needed_highlight(pack[1].main, file);
-            if (!highlight) {
-                console.log("not highlight")
-                setTokens(null)
-                return
-            }
-
-
-            let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
-            if (!res) {
-                console.log("not tokenize")
-                setTokens(null)
-                return
-            }
-
-            let dict = highlight.nodes;
-            let map = new Map<string, Token>();
-
-            for (let i of res) {
-                let start = i.node.startIndex;
-                let end = i.node.endIndex
-                let key = `${start}:${end}`
-                let typ = get_type_from_arr(i.name, dict);
-                let got = map.get(key);
-                if (!got) {
-                    map.set(key, {
-                        end, start, text: i.node.text, typ: typ
-                    }satisfies Token)
-                    continue;
+            async function a() {
+                let file = get_last_entity_of_path(props.cache.path);
+                if (!file) {
+                    console.log("\t not file")
+                    setTokens(null)
+                    return
+                }
+                let packs = [...projectStore.getState().selected_packages.entries()];
+                let pack = get_needed_package(packs, file!);
+                if (!pack) {
+                    console.log("not pack")
+                    setTokens(null)
+                    return
+                }
+                let highlight = get_needed_highlight(pack[1].main, file);
+                if (!highlight) {
+                    console.log("not highlight")
+                    setTokens(null)
+                    return
                 }
 
-                let typ2 = got.typ;
-                let order1 = get_order(typ)
-                let order2 = get_order(typ2)
-                if (order1 > order2) {
-                    map.set(key, {
-                        end, start, text: i.node.text, typ: typ
-                    } satisfies Token)
+
+                let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
+                if (!res) {
+                    console.log("not tokenize")
+                    setTokens(null)
+                    return
                 }
-            }
 
-            console.log("step 1")
-            const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
-            const result: Token[] = [];
+                let dict = highlight.nodes;
+                let map = new Map<string, Token>();
 
-            let position = 0;
+                for (let i of res) {
+                    let start = i.node.startIndex;
+                    let end = i.node.endIndex
+                    let key = `${start}:${end}`
+                    let typ = get_type_from_arr(i.name, dict);
+                    let got = map.get(key);
+                    if (!got) {
+                        map.set(key, {
+                            end, start, text: i.node.text, typ: typ
+                        }satisfies Token)
+                        continue;
+                    }
 
-            for (const token of tokens) {
-                if (position < token.start) {
+                    let typ2 = got.typ;
+                    let order1 = get_order(typ)
+                    let order2 = get_order(typ2)
+                    if (order1 > order2) {
+                        map.set(key, {
+                            end, start, text: i.node.text, typ: typ
+                        } satisfies Token)
+                    }
+                }
+
+                console.log("step 1")
+                const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
+                const result: Token[] = [];
+
+                let position = 0;
+
+                for (const token of tokens) {
+                    if (position < token.start) {
+                        result.push({
+                            start: position,
+                            end: token.start,
+                            text: props.text.slice(position, token.start),
+                            typ: "unknown"
+                        });
+                    }
+
+                    result.push(token);
+
+                    position = Math.max(position, token.end);
+                }
+
+                if (position < props.text.length) {
                     result.push({
                         start: position,
-                        end: token.start,
-                        text: props.text.slice(position, token.start),
+                        end: props.text.length,
+                        text: props.text.slice(position),
                         typ: "unknown"
                     });
                 }
 
-                result.push(token);
 
-                position = Math.max(position, token.end);
-            }
+                if (result.length == 0) {
+                    setTokens(null)
+                    return
+                }
+                let res_tokens: ExtToken[] = [];
+                let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
 
-            if (position < props.text.length) {
-                result.push({
-                    start: position,
-                    end: props.text.length,
-                    text: props.text.slice(position),
-                    typ: "unknown"
-                });
-            }
-
-
-            if (result.length == 0) {
-                setTokens(null)
-                return
-            }
-            let res_tokens: ExtToken[] = [];
-            let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
-
-            console.log("colors")
-            //colors
-            for (let i of result) {
-                let typ = i.typ;
-                let color = colors.tokens?.[typ as string];
-                if (!color) {
-                    color = colors.base_color;
+                console.log("colors")
+                //colors
+                for (let i of result) {
+                    let typ = i.typ;
+                    let color = colors.tokens?.[typ as string];
                     if (!color) {
-                        color = syntaxTheme?.tokens?.[typ as string];
+                        color = colors.base_color;
                         if (!color) {
-                            color = syntaxTheme?.base_color
+                            color = syntaxTheme?.tokens?.[typ as string];
                             if (!color) {
-                                color = "var(--subtitle)"
+                                color = syntaxTheme?.base_color
+                                if (!color) {
+                                    color = "var(--subtitle)"
+                                }
                             }
                         }
                     }
-                }
-                if (colors.colors) {
-                    if (color in colors.colors) {
-                        color = colors.colors[color]
+                    if (colors.colors) {
+                        if (color in colors.colors) {
+                            color = colors.colors[color]
+                        } else if (syntaxTheme?.colors) {
+                            if (color in syntaxTheme.colors) {
+                                color = syntaxTheme.colors[color]
+                            }
+                        }
                     } else if (syntaxTheme?.colors) {
                         if (color in syntaxTheme.colors) {
                             color = syntaxTheme.colors[color]
+
                         }
                     }
-                } else if (syntaxTheme?.colors) {
-                    if (color in syntaxTheme.colors) {
-                        color = syntaxTheme.colors[color]
-
+                    if (!color) {
+                        color = "var(--subtitle)"
                     }
+                    res_tokens.push({...i, color})
                 }
-                if (!color) {
-                    color = "var(--subtitle)"
-                }
-                res_tokens.push({...i, color})
+
+                console.log("end")
+                let result_ = buildLineIndex(props.text, res_tokens)
+                setTokens(result_.byLine)
+
             }
 
-            console.log("end")
-            let result_ = buildLineIndex(props.text, res_tokens)
-            setTokens(result_.byLine)
 
+            a().then()
+        }, [props.text]);
+    */
+
+
+    const reqRef = useRef(0);
+    const [rawTokens, setRawTokens] = useState<Map<number, Token[]> | null>(null);
+    const [hl, setHl] = useState<IPackageHighlight | null>(null);
+
+// получение результатов
+    useEffect(() => {
+        let a = highlightClient
+            .subscribe(
+                (fileId, reqId, lines) => {
+                    if (fileId !== String(props.cache.id)) return;
+                    if (reqId !== reqRef.current) return;// устаревший ответ
+                    console.log("LINES", lines)
+                    setRawTokens(lines);
+                });
+
+        return () => {
+            a()
         }
+    }, [props.cache.id]);
+
+// закрытие дерева при размонтировании
+    useEffect(() => () => highlightClient.close(String(props.cache.id)), [props.cache.id]);
+
+// отправка текста (с debounce)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const file = get_last_entity_of_path(props.cache.path);
+            if (!file) return setRawTokens(null);
+
+            const packs = [...projectStore.getState().selected_packages.entries()];
+            const pack = get_needed_package(packs, file);
+            if (!pack) return setRawTokens(null);
+
+            const highlight = get_needed_highlight(pack[1].main, file);
+            if (!highlight) return setRawTokens(null);
+
+            const key = `${pack[1].main.id}:${highlight.id}`;
+            // wasmUrl и querySource возьмите оттуда, где они у вас сейчас лежат:
+            // highlightClient.register(key, wasmUrl, querySource);
+
+            setHl(highlight);
+            const id = ++reqRef.current;
+            highlightClient.highlight(id, String(props.cache.id), key, props.text, highlight.nodes);
+        }, 30);
+        return () => clearTimeout(timer);
+    }, [props.text, props.cache.path]);
 
 
-        a().then()
-    }, [props.text]);
+    function resolveColor(typ: string, colors: any, theme: any): string {
+        let color = colors.tokens?.[typ] ?? colors.base_color
+            ?? theme?.tokens?.[typ] ?? theme?.base_color ?? "var(--subtitle)";
+        if (colors.colors && color in colors.colors) color = colors.colors[color];
+        else if (theme?.colors && color in theme.colors) color = theme.colors[color];
+        return color || "var(--subtitle)";
+    }
+
+// цвета считаются в основном потоке и не требуют повторного парсинга
+    const tokens = useMemo(() => {
+        if (!rawTokens || !hl) return null;
+        const colors = hl.syntax ?? syntaxTheme ?? {};
+        const out = new Map<number, ExtToken[]>();
+        for (const [line, arr] of rawTokens) {
+            out.set(line, arr.map(t => ({...t, color: resolveColor(t.typ, colors, syntaxTheme)})));
+        }
+        return out;
+    }, [rawTokens, hl, syntaxTheme]);
 
     function keyDown(e: React.KeyboardEvent) {
         let cur = textareaRef.current;

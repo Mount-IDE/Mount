@@ -13,6 +13,7 @@ pub fn get_os() -> String {
 }
 
 #[inline]
+#[deprecated]
 pub fn get_platform() -> PlatformType {
     if cfg!(windows) {
         return PlatformType::WINDOWS;
@@ -23,6 +24,7 @@ pub fn get_platform() -> PlatformType {
     PlatformType::MACOS
 }
 
+#[deprecated]
 pub fn shell_default() -> String {
     if cfg!(windows) {
         return "cmd".__get();

@@ -15,7 +15,6 @@ import {settingsStore} from "./stores/settings_store.ts";
 import SettingsPage from "./components/pages/settings/SettingsPage.tsx";
 import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
-import {Parser} from "web-tree-sitter";
 import {highlightWorkerStore} from "./stores/highlight_worker_store.ts";
 import {AnimatePresence} from "motion/react";
 
@@ -42,10 +41,10 @@ function App() {
 
         async function setupWindow() {
             // noinspection JSUnusedGlobalSymbols
-            await Parser.init({
+            // await Parser.init({
 
-                locateFile: (path: string) => "/" + path
-            })
+            //  locateFile: (path: string) => "/" + path
+            //})
             try {
                 await invoke("close_window_terminals");
             } catch (e) {

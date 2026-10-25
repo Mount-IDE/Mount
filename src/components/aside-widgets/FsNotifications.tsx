@@ -10,7 +10,7 @@ export default function FsNotifications() {
             <div className={"aside-in"}>
                 {
                     notes.map((el, i) => (
-                        <div>{el.text}</div>
+                        <div key={i}>{el.text}</div>
                     ))
                 }
             </div>

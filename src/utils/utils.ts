@@ -1,7 +1,7 @@
 import {packageStore} from "../stores/package_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 import {cacheStore} from "../stores/cache_store.ts";
-import {languageStore} from "../stores/language_store.ts";
+import {highlightClient} from "../workers/highlight_client.ts";
 
 // noinspection JSUnusedGlobalSymbols
 export function LOG(...messages: any[]) {
@@ -21,14 +21,26 @@ export async function loadPackages(pack: string[]): Promise<Map<string, PackageI
     try {
         let packs = packageStore.getState().packages;
         let packs2 = packs.filter(el => pack.includes(el.id))
-        //console.log(packs2, pack, packs)
         let meta_packs3: Record<string, PackageInner> =
             await invoke("get_meta_of_selected_packages", {packs: packs2})
-        //console.log(meta_packs3)
 
         let meta_packs = new Map(Object.entries(meta_packs3));
+
         for (let i of Object.entries(meta_packs3)) {
-            await languageStore.getState().add_languages(i[1].main)
+            let {main: pack} = i[1];
+            let id = pack.id;
+            try {
+                let scms = await invoke<string[]>("read_scms", {pack})
+                for (let i = 0; i < pack.highlight.length; i++) {
+                    let h = pack.highlight[i]
+                    let path = packageStore.getState().get_wasm(id, h.id)
+                    let bin = await invoke<number[]>("read_binary", {path})
+                    let arr = new Uint8Array(bin)
+                    highlightClient.register(`${id}:${h.id}`, arr, scms[i])
+                }
+            } catch (e) {
+                console.error(e)
+            }
         }
         return meta_packs
     } catch (e) {

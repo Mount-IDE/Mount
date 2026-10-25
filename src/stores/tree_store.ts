@@ -73,7 +73,10 @@ function computeEdit(oldText: string, newText: string) {
     };
 }
 
-
+/**
+ * @deprecated
+ * fully replaced by worker
+ */
 export const treeStore = create<Type>((set, get) => ({
     clear: () => {
         set({
@@ -102,10 +105,8 @@ export const treeStore = create<Type>((set, get) => ({
         const parser = inner.parser;
         let parsed: Tree | null;
         let changedRanges: Range[] | null = null
-        // используем старое дерево только если это тот же файл + тот же язык/пресет подсветки
         if (prev && prev.pack === pack && prev.highlight === highlight) {
             if (prev.content === text) {
-                // текст не изменился — возвращаем закешированное дерево
                 return [prev.tree, null]
             }
             const edit = computeEdit(prev.content, text);

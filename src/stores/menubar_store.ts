@@ -10,9 +10,7 @@ import {asideStore} from "./aside_store.ts";
 import {codeSpaceStore} from "./code_space_store.ts";
 import {fileCacheStore} from "./file_cache_store.ts";
 import {fsAsideTreeStore} from "./fs_aside_tree_store.ts";
-import {languageStore} from "./language_store.ts";
 import {launchStore} from "./launch_store.ts";
-import {treeStore} from "./tree_store.ts";
 import {menuStore} from "./menu_store.ts";
 
 interface Type {
@@ -89,9 +87,9 @@ export const menuBarStore = create<Type>(() => ({
             fileCacheStore.getState().clear()
             await fsAsideTreeStore.getState().unwatch()
             fsAsideTreeStore.getState().clear()
-            languageStore.getState().clear()
+            //languageStore.getState().clear()
             launchStore.getState().clear()
-            treeStore.getState().clear()
+            //treeStore.getState().clear()
             pageStore.getState().openMain();
         }
 
