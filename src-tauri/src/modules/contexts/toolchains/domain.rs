@@ -13,6 +13,24 @@ pub struct Toolchain {
     pub typ: ToolchainTyp,
     pub components: HashMap<String, ToolchainComponent>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct _Toolchain {
+    #[serde(default)]
+    pub id: String,
+    #[serde(default)]
+    pub version: String,
+
+    #[serde(default)]
+    pub scheme: Schema,
+    pub platform: Option<Platform>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct _ToolchainComponent {
+    pub id: String,
+}
+
 impl Default for Toolchain {
     fn default() -> Self {
         Self {
@@ -35,6 +53,7 @@ pub enum ToolchainTyp {
     #[serde(rename = "framework")]
     FRAMEWORK { framework: String, version: String },
 }
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LanguageUnit {
     language: String,

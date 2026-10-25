@@ -304,6 +304,7 @@ export default function MainPage() {
                                 exit={{
                                     height: 0
                                 }}
+
                                 style={{
                                     width: "100%",
                                     borderBottom: "1px solid var(--border)",

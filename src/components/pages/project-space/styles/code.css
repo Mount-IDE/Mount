@@ -5,21 +5,26 @@
     position: absolute;
     top: 35px;
     left: 0;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: auto;
     gap: 5px;
     min-width: 0;
     min-height: 0;
+
 
 }
 
 .project-code-rows{
     padding-top: 10px;
     width: 40px;
-    height: 100%;
+    min-width: 40px;
+    height: max-content;
+    /*height: 100%;*/
     border-right: 1px solid var(--border2);
-    position: absolute;
+    position: sticky;
     left: 0;
-    top: 0
+    z-index: 20;
+    background: var(--bg2);
 }
 
 
@@ -32,18 +37,34 @@
     word-spacing: normal;
     padding: 10px;
     box-sizing: border-box;
-    /*overflow: visible !important;*/
-
-    width: max-content;
-    min-width: 100%;
-    /*height: max-content;*/
-    /*min-height: 100%;*/
-
+    overflow: hidden;
+    width: calc(100% - 40px);
     position: absolute;
-    left: 40px;
+    /*left: 40px;*/
     top: 0;
 
-    /*width: max-content;*/
+    z-index: 10;
+    opacity: 1;
+    border: none;
+    outline: none;
+    resize: none;
+    background: transparent;
+    color: var(--subtitle);
+    caret-color: var(--subtitle);
 
+
+
+}
+
+.code-editor-scroll {
+
+    overflow-y: hidden;
+
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    position: relative;
+    height: max-content;
+    width: 100%;
 
 }

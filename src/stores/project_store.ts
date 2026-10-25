@@ -222,7 +222,7 @@ export const projectStore = create<Type>((set, get) => ({
         asideButtonsStore.getState().load_left(left_top_2);
         asideButtonsStore.getState().load_bottom(left_bot_2);
         asideButtonsStore.getState().load_right(right_top_2);
-        console.log("PROJ", proj)
+        //console.log("PROJ", proj)
 
 
         asideStore.getState().set_results(proj.workspace.aside_results)

@@ -107,14 +107,14 @@ export const languageStore = create<Type>((set, get) => ({
         let res: LanguageInner[] = []
         try {
             let scms = await invoke<string>("read_scms", {pack: pack})
-            console.log("scms")
+            //console.log("scms")
             for (let i = 0; i < pack.highlight.length; i++) {
                 let h = pack.highlight[i]
                 let path = packageStore.getState().get_wasm(pack_id, h.id);
-                console.log(path)
+                //console.log(path)
                 let bin = await invoke<number[]>("read_binary", {path: path})
                 let arr = new Uint8Array(bin);
-                console.log("bin")
+                //console.log("bin")
                 let lang = await Language.load(arr)
                 let parser = new Parser()
                 parser.setLanguage(lang)
@@ -122,7 +122,7 @@ export const languageStore = create<Type>((set, get) => ({
                 res.push({
                     lang, scm: scms[i] ?? "", parser, query
                 })
-                console.log("setting", pack_id, h.id)
+                // console.log("setting", pack_id, h.id)
                 langs[pack_id] = {
                     ...langs[pack_id] ?? {},
                     [h.id]: {

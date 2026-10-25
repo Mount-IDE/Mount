@@ -33,7 +33,7 @@ export default function ProjectSettingsVariables() {
                 return
             }
             let tg = e.target as Element
-            console.log(tg, cur, cur.contains(tg))
+            //console.log(tg, cur, cur.contains(tg))
             if (!(cur.contains(tg) || tg == cur) && !bt.contains(tg)) {
                 setShow(false)
             }

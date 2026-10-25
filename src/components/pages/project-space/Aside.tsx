@@ -33,7 +33,9 @@ function Aside(props: Props) {
         let frame: number | null = null;
 
         function start_move(e: MouseEvent) {
-            console.log("START")
+            //
+            //
+            // console.log("START")
             is_moving.current = true;
             base_pos.current = e.clientX;
             base_width.current = current.getBoundingClientRect().width;
@@ -46,7 +48,7 @@ function Aside(props: Props) {
 
             if (frame != null) return
 
-            console.log("MOVE")
+            //console.log("MOVE")
             frame = requestAnimationFrame(() => {
                 frame = null;
                 const delta = e.clientX - base_pos.current;
@@ -63,7 +65,7 @@ function Aside(props: Props) {
 
 
         function stop_move() {
-            console.log("END")
+            /// console.log("END")
             if (!is_moving.current) return
             is_moving.current = false
             document.body.style.userSelect = "";

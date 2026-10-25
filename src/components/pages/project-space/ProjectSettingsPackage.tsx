@@ -1,7 +1,7 @@
 import "./styles/project-settings-package.css"
 import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import Inner, {Props as InnerProps} from "../../common/Inner.tsx";
-import {useEffect, useMemo} from "react";
+import {useMemo} from "react";
 
 
 type Props = {
@@ -44,7 +44,7 @@ export default function ProjectSettingsPackage(props: Props) {
                                 // value: pack?.meta?.description ?? "",
                                 value: results?.meta?.description ?? pack.meta?.description ?? "",
                                 setValue: (val) => write(pack.id, p => {
-                                    console.log("CALl")
+                                    //console.log("CALl")
                                     p.meta = {
                                         ...p.meta,
                                         description: val.toString() ?? ""
@@ -188,10 +188,6 @@ export default function ProjectSettingsPackage(props: Props) {
 
     }, [results, props.pack])
 
-
-    useEffect(() => {
-        console.log("RES", results)
-    }, [results]);
 
     return (
         <>

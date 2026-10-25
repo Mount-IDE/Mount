@@ -132,22 +132,16 @@ const order_types = [
 
 export default function Code(props: Props) {
 
-    if (props.current[0] == null) {
-        return <div className={"project-code"}>Not Opened</div>
-    }
+
     const file =
         fileCacheStore(state => state.files.find(el => el.id == props.current[1]))
     const write_file = fileCacheStore(state => state.write_file_by_id)
     const save = fileCacheStore(state => state.save);
-    if (file === undefined) {
-        return (
-            <div className={"project-code"}>File not found</div>
-        )
-    }
-    const [rows, setRows] = useState(file.content.split("\n"))
+
+    const [rows, setRows] = useState(file?.content.split("\n") ?? [])
     useEffect(() => {
-        setRows(file.content.split("\n"))
-    }, [file.content]);
+        setRows(file?.content.split("\n") ?? [])
+    }, [file?.content]);
 
     function write(content: string) {
         if (file) {
@@ -165,6 +159,17 @@ export default function Code(props: Props) {
     }
 
     const ref = useRef<HTMLDivElement>(null)
+
+    if (props.current[0] == null) {
+        return <div className={"project-code"}>Not Opened</div>
+    }
+
+    if (file === undefined) {
+        return (
+            <div className={"project-code"}>File not found</div>
+        )
+    }
+
 
     return (
         <div className={"project-code"} ref={ref}>
@@ -186,7 +191,9 @@ export default function Code(props: Props) {
                     }}>{i + 1}</p>
                 )}
             </div>
+            {/*<div className={"code-editor-scroll"}>*/}
             <CodeEditor ref={ref} cache={file!} save={_save} setText={write} text={file.content}/>
+            {/*</div>*/}
         </div>
     )
 }
@@ -704,6 +711,14 @@ function CodeEditor(props: CodeProps) {
 
     let container_ref = useRef<HTMLDivElement>(null)
 
+    const CHAR_WIDTH = 8.43; // для monospace 14px; лучше измерить (см. ниже)
+
+    const maxLen = useMemo(
+        () => props.text.split("\n").reduce((m, l) => Math.max(m, l.length), 0),
+        [props.text]
+    );
+    const contentWidth = maxLen * CHAR_WIDTH; // + padding
+
 
     return (
         <div
@@ -711,10 +726,11 @@ function CodeEditor(props: CodeProps) {
             style={{
                 position: "relative",
                 width: "100%",
+                minWidth: `${contentWidth}px`,
                 height: height + "px",
-                minHeight: " 100%",
-                // overflow: "hidden",
-                padding: "10x"
+                minHeight: "100%",
+                // padding: "10x",
+                zIndex: 19
             }}
             onClick={() => textareaRef.current!.focus()}
         >
@@ -764,16 +780,7 @@ function CodeEditor(props: CodeProps) {
                 className={"code-editor-text"}
 
                 style={{
-                    zIndex: 10,
-                    opacity: "1",
-                    border: "none",
-                    outline: "none",
-                    height: height + "px",
-                    overflow: "hidden",
-                    resize: "none",
-                    background: "transparent",
-                    color: "var(--subtitle)",
-                    caretColor: "var(--subtitle)",
+                    height: "100%",
                     whiteSpace: "nowrap"
                 }}
                 value={props.text}
@@ -785,8 +792,8 @@ function CodeEditor(props: CodeProps) {
             <hr ref={row_ref} style={{
                 position: "absolute",
                 zIndex: 9,
-                width: "calc(100% - 40px)",
-                left: "40px",
+                // left: "40px",
+                width: "calc(100%)",
                 height: "21px",
                 background: "var(--border3)",
                 border: "none",

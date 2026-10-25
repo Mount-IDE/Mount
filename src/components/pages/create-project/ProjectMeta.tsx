@@ -259,7 +259,7 @@ export default function ProjectMeta() {
                                     <SketchPicker
                                         color={color}
                                         onChange={(e) => {
-                                            console.log("changed")
+                                            //console.log("changed")
                                             setColor(e.hex)
                                         }}
                                     />

@@ -37,7 +37,7 @@ export default function CodeFiles(props: Props) {
                 ?.file_list
         )
 
-    console.log(theme)
+    //console.log(theme)
     const [buttons, setButtons] = useState<IContextMenuButton[]>([])
     const [cords, setCords] = useState<[number, number]>([0, 0])
     const [showContext, setShowContext] = useState(false)
@@ -84,7 +84,7 @@ export default function CodeFiles(props: Props) {
     }, [showContext]);
 
     let border = computeBP(theme?.this?.border, "border")
-    console.log(border)
+    //console.log(border)
     return (
         <>
             <div className={"code-space-files"}

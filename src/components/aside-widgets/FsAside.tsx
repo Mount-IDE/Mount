@@ -27,10 +27,6 @@ export default function FsAside() {
 
     const set_path = contextStore(state => state.set_path)
 
-    useEffect(() => {
-        console.log("TREE", tree)
-    }, [tree]);
-
 
     useEffect(() => {
         function handler(e: MouseEvent) {
@@ -60,10 +56,7 @@ export default function FsAside() {
 
     const close_modal = menuStore(state => state.close_modal)
 
-    /*
-        useEffect(() => {
-            console.log("TREE", tree)
-        }, [tree])*/
+
     /**
      * @function open_context_menu
      * function tha makes ContextMenu visible
