@@ -50,10 +50,7 @@ export default function FsAside() {
         useRef<HTMLDivElement>(null)
 
     const save_file = fileCacheStore(state => state.save)
-
-
     const open_modal = menuStore(state => state.open_modal)
-
     const close_modal = menuStore(state => state.close_modal)
 
 

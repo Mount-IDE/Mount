@@ -6,6 +6,7 @@ type Props = {
     in_size?: string
     onClick?: (e?: _MouseEvent) => void
     modifier?: string
+    rotate?: string
 }
 
 export default function Icon(props: Props) {
@@ -22,6 +23,7 @@ export default function Icon(props: Props) {
             <img
 
                 style={{
+                    rotate: props.rotate,
                     width: props.in_size ? props.in_size : "80%",
                     height: props.in_size ? props.in_size : "80%",
                 }}

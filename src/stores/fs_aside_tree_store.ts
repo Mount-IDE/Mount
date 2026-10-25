@@ -11,6 +11,12 @@ type FsWatchEvent =
     | { kind: "modified"; path: string }
     | { kind: "renamed"; old_path: string; new_path: string; node?: FsNode };
 
+
+type CurrentFsType = {
+    type: "dir" | "file"
+    path: string
+}
+
 interface Type {
     tree: FsDirectory | null;
     load_tree: (cwd: string) => Promise<void>;
@@ -21,6 +27,9 @@ interface Type {
     delete_node: (path: string) => void;
     add_node: (node: FsNode) => void;
     unwatch: () => Promise<void>;
+
+    current: CurrentFsType | null
+    set_current: (v: CurrentFsType | null) => void
 
 
     clear: () => void
@@ -207,9 +216,10 @@ const mark_modified_in_tree = (tree: FsDirectory, path: string): FsDirectory => 
 
 export const fsAsideTreeStore =
     create<Type>((set, get) => ({
-
-
-
+            set_current(v) {
+                set({current: v})
+            },
+            current: null,
             tree: null,
             add_node(node: FsNode): void {
                 set(state => ({

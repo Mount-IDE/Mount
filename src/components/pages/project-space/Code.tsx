@@ -149,27 +149,6 @@ function get_needed_highlight(pack: IPackage, filename: string): IPackageHighlig
     })
 }
 
-// async function tokenize(text: string, path: string, last: string, pack: IPackage, highlight: IPackageHighlight): Promise<QueryCapture[] | null> {
-//     // console.log(last)
-//     // console.log(languageStore.getState().languages)
-//     const inner = languageStore.getState().languages[pack.id]?.[highlight.id] as LanguageInner | undefined;
-//     if (!inner) {
-//         return null
-//     }
-//     let tree = treeStore.getState().set_tree(path, pack.id, highlight.id, text);
-//     if (!tree) {
-//         //    console.log("not tree")
-//         return null
-//     }
-//     let captures = inner.query.captures(tree[0].rootNode);
-//
-//     // console.log("complete")
-//     for (let i of captures) {
-//         console.log("CAP", `[${i.node.startIndex}:${i.node.endIndex}]`, i.node.text, i.name)
-//     }
-//
-//     return captures
-// }
 
 const LINE_HEIGHT = 21;
 const OVERSCAN = 5;
@@ -178,7 +157,6 @@ function CodeEditor(props: CodeProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const cursor_ref = useRef<[number, number] | null>(null);
-    //const [tokens, setTokens] = useState<Map<number, ExtToken[]> | null>(null)
 
     const syntaxTheme = themeStore(state => state.current_theme?.elements?.common?.syntax)
 
@@ -196,196 +174,10 @@ function CodeEditor(props: CodeProps) {
         cursor_ref.current = null
     }, [props.text]);
 
-
-    /* function buildLineIndex(text: string, tokens: ExtToken[]) {
-         const lineStarts: number[] = [0];
-         for (let i = 0; i < text.length; i++) {
-             if (text[i] === "\n") lineStarts.push(i + 1);
-         }
-
-         function lineOf(offset: number): number {
-             let lo = 0, hi = lineStarts.length - 1;
-             while (lo < hi) {
-                 const mid = (lo + hi + 1) >> 1;
-                 if (lineStarts[mid] <= offset) lo = mid; else hi = mid - 1;
-             }
-             return lo;
-         }
-
-         const byLine = new Map<number, ExtToken[]>();
-
-         for (const t of tokens) {
-             const startLine = lineOf(t.start);
-             const endLine = lineOf(Math.max(t.start, t.end - 1));
-             if (startLine === endLine) {
-                 byLine.set(startLine, [...(byLine.get(startLine) ?? []), t]);
-                 continue;
-             }
-             for (let l = startLine; l <= endLine; l++) {
-                 const lineStart = lineStarts[l];
-                 const lineEnd = lineStarts[l + 1] !== undefined ? lineStarts[l + 1] - 1 : text.length;
-                 const s = Math.max(t.start, lineStart);
-                 const e = Math.min(t.end, lineEnd);
-                 byLine.set(l, [...(byLine.get(l) ?? []), {...t, start: s, end: e, text: text.slice(s, e)}]);
-             }
-         }
-         return {lineStarts, byLine};
-     }
- */
-    /**
-     * highlight logic
-     */
-    /*
-        useEffect(() => {
-
-
-            async function a() {
-                let file = get_last_entity_of_path(props.cache.path);
-                if (!file) {
-                    console.log("\t not file")
-                    setTokens(null)
-                    return
-                }
-                let packs = [...projectStore.getState().selected_packages.entries()];
-                let pack = get_needed_package(packs, file!);
-                if (!pack) {
-                    console.log("not pack")
-                    setTokens(null)
-                    return
-                }
-                let highlight = get_needed_highlight(pack[1].main, file);
-                if (!highlight) {
-                    console.log("not highlight")
-                    setTokens(null)
-                    return
-                }
-
-
-                let res = await tokenize(props.text, props.cache.path, file, pack[1].main, highlight);
-                if (!res) {
-                    console.log("not tokenize")
-                    setTokens(null)
-                    return
-                }
-
-                let dict = highlight.nodes;
-                let map = new Map<string, Token>();
-
-                for (let i of res) {
-                    let start = i.node.startIndex;
-                    let end = i.node.endIndex
-                    let key = `${start}:${end}`
-                    let typ = get_type_from_arr(i.name, dict);
-                    let got = map.get(key);
-                    if (!got) {
-                        map.set(key, {
-                            end, start, text: i.node.text, typ: typ
-                        }satisfies Token)
-                        continue;
-                    }
-
-                    let typ2 = got.typ;
-                    let order1 = get_order(typ)
-                    let order2 = get_order(typ2)
-                    if (order1 > order2) {
-                        map.set(key, {
-                            end, start, text: i.node.text, typ: typ
-                        } satisfies Token)
-                    }
-                }
-
-                console.log("step 1")
-                const tokens: Token[] = [...map.values()].sort((a, b) => a.start - b.start);
-                const result: Token[] = [];
-
-                let position = 0;
-
-                for (const token of tokens) {
-                    if (position < token.start) {
-                        result.push({
-                            start: position,
-                            end: token.start,
-                            text: props.text.slice(position, token.start),
-                            typ: "unknown"
-                        });
-                    }
-
-                    result.push(token);
-
-                    position = Math.max(position, token.end);
-                }
-
-                if (position < props.text.length) {
-                    result.push({
-                        start: position,
-                        end: props.text.length,
-                        text: props.text.slice(position),
-                        typ: "unknown"
-                    });
-                }
-
-
-                if (result.length == 0) {
-                    setTokens(null)
-                    return
-                }
-                let res_tokens: ExtToken[] = [];
-                let colors = highlight.syntax ?? syntaxTheme ?? {} satisfies IThemeSyntax
-
-                console.log("colors")
-                //colors
-                for (let i of result) {
-                    let typ = i.typ;
-                    let color = colors.tokens?.[typ as string];
-                    if (!color) {
-                        color = colors.base_color;
-                        if (!color) {
-                            color = syntaxTheme?.tokens?.[typ as string];
-                            if (!color) {
-                                color = syntaxTheme?.base_color
-                                if (!color) {
-                                    color = "var(--subtitle)"
-                                }
-                            }
-                        }
-                    }
-                    if (colors.colors) {
-                        if (color in colors.colors) {
-                            color = colors.colors[color]
-                        } else if (syntaxTheme?.colors) {
-                            if (color in syntaxTheme.colors) {
-                                color = syntaxTheme.colors[color]
-                            }
-                        }
-                    } else if (syntaxTheme?.colors) {
-                        if (color in syntaxTheme.colors) {
-                            color = syntaxTheme.colors[color]
-
-                        }
-                    }
-                    if (!color) {
-                        color = "var(--subtitle)"
-                    }
-                    res_tokens.push({...i, color})
-                }
-
-                console.log("end")
-                let result_ = buildLineIndex(props.text, res_tokens)
-                setTokens(result_.byLine)
-
-            }
-
-
-            a().then()
-        }, [props.text]);
-    */
-
-
     const reqRef = useRef(0);
     const [rawTokens, setRawTokens] = useState<Map<number, Token[]> | null>(null);
     const [hl, setHl] = useState<IPackageHighlight | null>(null);
 
-// получение результатов
     useEffect(() => {
         let a = highlightClient
             .subscribe(
@@ -401,10 +193,8 @@ function CodeEditor(props: CodeProps) {
         }
     }, [props.cache.id]);
 
-// закрытие дерева при размонтировании
     useEffect(() => () => highlightClient.close(String(props.cache.id)), [props.cache.id]);
 
-// отправка текста (с debounce)
     useEffect(() => {
         const timer = setTimeout(() => {
             const file = get_last_entity_of_path(props.cache.path);
@@ -418,9 +208,6 @@ function CodeEditor(props: CodeProps) {
             if (!highlight) return setRawTokens(null);
 
             const key = `${pack[1].main.id}:${highlight.id}`;
-            // wasmUrl и querySource возьмите оттуда, где они у вас сейчас лежат:
-            // highlightClient.register(key, wasmUrl, querySource);
-
             setHl(highlight);
             const id = ++reqRef.current;
             highlightClient.highlight(id, String(props.cache.id), key, props.text, highlight.nodes);
@@ -437,7 +224,6 @@ function CodeEditor(props: CodeProps) {
         return color || "var(--subtitle)";
     }
 
-// цвета считаются в основном потоке и не требуют повторного парсинга
     const tokens = useMemo(() => {
         if (!rawTokens || !hl) return null;
         const colors = hl.syntax ?? syntaxTheme ?? {};
@@ -640,13 +426,13 @@ function CodeEditor(props: CodeProps) {
 
     let container_ref = useRef<HTMLDivElement>(null)
 
-    const CHAR_WIDTH = 8.43; // для monospace 14px; лучше измерить (см. ниже)
+    const CHAR_WIDTH = 8.43;
 
     const maxLen = useMemo(
         () => props.text.split("\n").reduce((m, l) => Math.max(m, l.length), 0),
         [props.text]
     );
-    const contentWidth = maxLen * CHAR_WIDTH; // + padding
+    const contentWidth = maxLen * CHAR_WIDTH;
 
 
     return (

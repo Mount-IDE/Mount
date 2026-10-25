@@ -96,7 +96,13 @@ export default function FileX(props: Props) {
                 props.onContext(e, props.obj, true, props.parent_path, props.obj.path)
             }}
 
-            className={"fs-filex"} onClick={click}>
+            className={"fs-filex"}
+            onDoubleClick={click}
+            onClick={(e) => {
+                e.stopPropagation()
+                fsAsideTreeStore.getState().set_current({path: props.obj.path, type: "file"})
+            }}
+        >
             <div className={"fs-aside-head"}>
                 <div className={"fs-aside-icon2"}>
                     {ico[0] &&

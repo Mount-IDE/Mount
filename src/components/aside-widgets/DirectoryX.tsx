@@ -4,6 +4,7 @@ import arrow from "../../assets/arrow.svg"
 import React, {useEffect, useRef, useState} from "react";
 import {fsExtStore} from "../../stores/fs_ext_store.ts";
 import {asideStore} from "../../stores/aside_store.ts";
+import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
 
 /**
  * @type Props
@@ -12,7 +13,7 @@ import {asideStore} from "../../stores/aside_store.ts";
  */
 type Props = {
     obj: FsDirectory
-    onContext: (e:React.MouseEvent, obj: FsDirectory|FsFile,is_file:boolean, path?:string, path_file?:string)=>void
+    onContext: (e: React.MouseEvent, obj: FsDirectory | FsFile, is_file: boolean, path?: string, path_file?: string) => void
     opened?: true
     root: FsDirectory
 }
@@ -22,14 +23,14 @@ type Props = {
  * @param props Props
  * @constructor
  */
-export default function DirectoryX(props: Props){
+export default function DirectoryX(props: Props) {
 
     const directories = props.obj.directories
     const files = props.obj.files
 
     const [opened, setOpened] = useState(props.opened ?? false);
 
-    const ref=useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
     const ico = fsExtStore.getState().get_dir_by_type()
 
     const path = `/builtin/fs-icons/${ico[1]}`
@@ -53,19 +54,24 @@ export default function DirectoryX(props: Props){
 
     return (
         <div
-            className={"fs-dirx"}>
+            className={"fs-dirx"}
+            onClick={(e) => {
+                e.stopPropagation()
+                fsAsideTreeStore.getState().set_current({path: props.obj.path, type: "dir"})
+            }}
+        >
             <div
                 onContextMenu={
-                    (e)=> {
+                    (e) => {
                         e.stopPropagation()
                         props.onContext(e, props.obj, false)
                     }}
                 className={"fs-aside-head"}>
                 <div className={"fs-aside-icon"}
                      style={{
-                     transform: opened? "rotate(0deg)":"rotate(-90deg)"
+                         transform: opened ? "rotate(0deg)" : "rotate(-90deg)"
                      }}
-                     onClick={()=>setOpened(prev=>!prev)}
+                     onClick={() => setOpened(prev => !prev)}
                 >
                     <img src={arrow}/>
                 </div>
