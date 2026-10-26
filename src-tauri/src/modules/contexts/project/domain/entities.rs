@@ -188,10 +188,24 @@ pub struct Var {
     pub name: String,
     #[serde(default)]
     pub value: Val,
+    #[serde(default)]
+    pub readonly: Option<bool>,
 }
 impl Var {
     pub fn new(name: String, value: Val) -> Var {
-        Self { name, value }
+        Self {
+            name,
+            value,
+            readonly: None,
+        }
+    }
+
+    pub fn readonly(name: String, value: Val) -> Var {
+        Self {
+            name,
+            value,
+            readonly: Some(true),
+        }
     }
 }
 

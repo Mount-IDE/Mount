@@ -647,10 +647,7 @@ impl TActionProjectService for ActionProjectService {
                         return None;
                     }
                     param = true;
-                    res.push(Var {
-                        name: i.name.clone(),
-                        value: res_.unwrap(),
-                    });
+                    res.push(Var::new(i.name.clone(), res_.unwrap()));
                 }
             }
             if !param {

@@ -1,4 +1,5 @@
 import {create} from "zustand";
+import {fsAsideTreeStore} from "./fs_aside_tree_store.ts";
 
 function pushToStack(stack: number[], id: number): number[] {
     return [...stack.filter(el => el !== id), id];
@@ -156,7 +157,6 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                 stackId => stackId !== file.id && openedIds.has(stackId)
             );
             const currentFile = stack.length > 0 ? stack[stack.length - 1] : null;
-
             return {
                 ...space,
                 opened_files: opened,
@@ -164,7 +164,11 @@ export const codeSpaceStore = create<Type>((set, get) => ({
                 opened_files_stack: stack,
             };
         });
+
         const res = spaces.filter(el => el.opened_files.length > 0)
+        if (res.length == 0) {
+            fsAsideTreeStore.getState().set_current(null)
+        }
         set({spaces: res});
     },
     spaces: [],

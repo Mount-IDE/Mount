@@ -3,6 +3,7 @@ import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
 import cross from "../../../assets/title-close.svg"
 import plus from "../../../assets/plus.svg"
 import {useEffect, useRef, useState} from "react";
+import Gen from "../../common/Gen.tsx";
 
 export default function ProjectSettingsVariables() {
 
@@ -78,14 +79,19 @@ export default function ProjectSettingsVariables() {
             <div id={"var-body"}>
                 {
                     variables.map((el, i) => (
-                        <div className={"variable"} key={i}>
-                            <span>{i + 1}</span>
+                        <div className={"variable"} key={i} style={{
+                            opacity: el.readonly ? 0.65 : 1,
+                            pointerEvents: el.readonly ? "none" : "auto"
+                        }}>
+                            <span className={"select-none"}>{i + 1}</span>
                             <input className={"var-name"} value={el.name}
+                                   readOnly={el.readonly}
                                    onInput={
                                        e => changeName(i, e.currentTarget.value)}/>
                             {
                                 typeof el.value == "string" &&
                                 <input className={"var-val"}
+                                       readOnly={el.readonly}
                                        value={el.value}
                                        onInput={e => changeVal(i, e.currentTarget.value)}
                                 />
@@ -93,6 +99,7 @@ export default function ProjectSettingsVariables() {
                             {
                                 typeof el.value == "boolean" &&
                                 <input
+                                    readOnly={el.readonly}
                                     className={"var-val"}
                                     type={"checkbox"}
                                     checked={el.value}
@@ -103,18 +110,30 @@ export default function ProjectSettingsVariables() {
                             {
                                 typeof el.value == "number" &&
                                 <input
+                                    readOnly={el.readonly}
                                     className={"var-val"}
                                     type={"number"}
                                     value={el.value}
                                     onInput={e => changeVal(i, e.currentTarget.value)}
                                 />
                             }
+                            {
+                                Array.isArray(el.value) &&
+                                <Gen show={el.readonly != true} height={"3vh"} value={el.value}
+                                     write={(e) => changeVal(i, e)}/>
+                            }
+                            {
+                                el.readonly &&
+                                <p className={"text-(--subtitle) text-[10pt] font-[300] select-none"}>readonly</p>
+                            }
 
-                            <div className={"var-delete"}
-                                 onClick={() => remVar(i)}
+                            {!el.readonly && <div className={"var-delete"}
+                                                  onClick={() => {
+                                                      if (!el.readonly) remVar(i)
+                                                  }}
                             >
                                 <img src={cross}/>
-                            </div>
+                            </div>}
                         </div>
                     ))
                 }

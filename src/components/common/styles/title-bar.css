@@ -17,6 +17,9 @@
     height: 100%;
     display: flex;
     align-items: center;
+
+    -webkit-app-region: no-drag;
+    user-select: none;
 }
 
 .title-bar-button {

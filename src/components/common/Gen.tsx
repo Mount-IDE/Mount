@@ -2,15 +2,17 @@ import "./styles/common-parameters.css"
 import {noteStore, NotificationType} from "../../stores/note_store.ts";
 import add from "../../assets/plus.svg";
 import close from "../../assets/title-close.svg";
+import Icon from "./Icon.tsx";
 
 
 type Props = {
-    title: string;
+    title?: string;
     value: string[];
     write: (val: string[]) => void;
     required?: boolean
     show?: boolean;
     def?: string
+    height?: string
 }
 
 export default function Gen(props: Props) {
@@ -47,42 +49,72 @@ export default function Gen(props: Props) {
     }
 
 
-    return (
-        <div className={"gen"}
-             style={props.show == false ? {
-                 opacity: 0.5,
-                 pointerEvents: "none"
-             } : {}}
-        >
-            <p>{props.title}</p>
-            <div className={"parameter-gen"}>
-                <button className={"parameter-gen-bt"} onClick={add_}>
-                    <img src={add}/>
-                </button>
-                <hr/>
-                {
-                    list?.map((el, i) =>
-                        <div key={i} className={"parameter-gen-el"}>
-                            <input value={el}
-                                   onInput={
-                                       (e) =>
-                                           change(
-                                               i,
-                                               (e.target as HTMLInputElement)
-                                                   .value
-                                           )
-                                   }
-                            />
-                            <button className={""}
-                                    onClick={() => remove(i)}
-                            >
-                                <img src={close}/>
-                            </button>
-                        </div>
-                    )
-                }
+    if (typeof props.title == "string") {
+        return (
+            <div className={"gen"} style={props.show == false ? {
+                opacity: 0.5,
+                pointerEvents: "none",
+                height: props.height
+            } : {height: props.height}}>
+                <p>{props.title}</p>
+                <div className={"parameter-gen"} style={{
+                    height: props.height
+                }}>
+                    <Icon onClick={add_} src={add} size={"70%"}/>
+                    <hr/>
+                    {
+                        list?.map((el, i) =>
+                            <div key={i} className={"parameter-gen-el"}>
+                                <input value={el}
+                                       onInput={
+                                           (e) =>
+                                               change(
+                                                   i,
+                                                   (e.target as HTMLInputElement)
+                                                       .value
+                                               )
+                                       }
+                                />
+                                <button className={""}
+                                        onClick={() => remove(i)}
+                                >
+                                    <img src={close}/>
+                                </button>
+                            </div>
+                        )
+                    }
+                </div>
             </div>
+        )
+    }
 
+    return (
+        <div className={"parameter-gen"} style={{
+            height: props.height
+        }}>
+            <Icon onClick={add_} src={add} size={"70%"}/>
+            <hr/>
+            {
+                list?.map((el, i) =>
+                    <div key={i} className={"parameter-gen-el"}>
+                        <input value={el}
+                               onInput={
+                                   (e) =>
+                                       change(
+                                           i,
+                                           (e.target as HTMLInputElement)
+                                               .value
+                                       )
+                               }
+                        />
+                        <button className={""}
+                                onClick={() => remove(i)}
+                        >
+                            <img src={close}/>
+                        </button>
+                    </div>
+                )
+            }
         </div>
     )
 }

@@ -7,6 +7,7 @@ type Props = {
     onClick?: (e?: _MouseEvent) => void
     modifier?: string
     rotate?: string
+    styles?: string
 }
 
 export default function Icon(props: Props) {
@@ -17,7 +18,7 @@ export default function Icon(props: Props) {
             style={{
                 [props.modifier ?? "height"]: props.size ? props.size : "80%"
             }}
-            className={"aspect-square centered"}
+            className={`aspect-square centered ${props.styles}`}
             onClick={props.onClick}
         >
             <img

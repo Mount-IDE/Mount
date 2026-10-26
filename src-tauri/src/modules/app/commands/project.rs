@@ -157,12 +157,12 @@ pub async fn create_project(
     let mut vars = template.clone().startup.var;
 
     // adding required variables
-    vars.push(Var::new(
+    vars.push(Var::readonly(
         "project-name".to_string(),
         Val::STRING(name.clone()),
     ));
 
-    vars.push(Var::new(
+    vars.push(Var::readonly(
         "project-path".to_string(),
         Val::STRING(path.clone()),
     ));
@@ -188,7 +188,7 @@ pub async fn create_project(
         Val::STRING(additions.group.clone()),
     ));
 
-    vars.push(Var::new(
+    vars.push(Var::readonly(
         "project-template".__get(),
         Val::STRING(template.id.clone()),
     ));

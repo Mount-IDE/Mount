@@ -7,7 +7,9 @@ export default function SettingsButton() {
 
     return (
         <button
-            id={"settings-button"}
+            id={"settings-button"} style={{
+            marginRight: "13px"
+        }}
             onClick={menuBarStore.getState().global_settings}>
             <img src={settings}/>
         </button>
