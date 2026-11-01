@@ -3,7 +3,7 @@
     width: 200px;
     background: var(--bg);
     padding: 5px;
-    z-index: 20;
+    z-index: 120;
     border: 1px solid vaR(--border2);
 }
 

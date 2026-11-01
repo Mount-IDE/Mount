@@ -7,10 +7,12 @@ import SettingsSection from "./SettingsSection.tsx";
 import {noteStore, NotificationType} from "../../../stores/note_store.ts";
 import {themeStore} from "../../../stores/theme_store.ts";
 import {motion} from "motion/react";
+import {ModalApiShorted} from "../../../stores/modal_page_store.ts";
 
 
 function useSettings(settings: Settings | null, themes: ITheme[]) {
-    let needed = themes.find(el => el.id == settings?.appearance.theme)
+    let needed = themes?.find(el => el.id == settings?.appearance?.theme)
+    console.log(settings)
     return useMemo<SettingsElement[]>(() => [
         {
             id: 0,
@@ -66,6 +68,12 @@ function useSettings(settings: Settings | null, themes: ITheme[]) {
     ], [settings, themes]);
 }
 
+
+type Props = {
+    api: ModalApiShorted
+}
+
+
 export default function SettingsPage() {
 
 
@@ -118,15 +126,9 @@ export default function SettingsPage() {
     }
 
     return (
-        <motion.div
-
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            exit={{opacity: 0}}
-            transition={{duration: 0.2}}
-            id={"settings-page"}>
+        <motion.div id={"settings-page"}>
             <div id={"settings-head"}>
-                <p id={"settings-label"}>Settings</p>
+                <p>Settings</p>
             </div>
             <div id={"settings-main"}>
                 <div id={"settings-aside"}>
@@ -155,17 +157,16 @@ export default function SettingsPage() {
             </div>
             <div id={"settings-footer"}>
                 <div id={"settings-buttons"}>
-                    <Button title={"Close"} cb={close}/>
-                    <Button title={"Ok"} cb={async () => {
-                        let k = await ok()
-                        if (k == 0) {
-                            close_settings(false)
-                            close_blur(false)
-                        }
+                    <Button title={"Cancel"} cb={close}/>
+                    <Button title={"Ok"} cb={ok}/>
+                    <Button title={"APply"} cb={() => {
+                        close()
+                        ok()
                     }}/>
-                    <Button title={"Apply"} cb={ok}/>
                 </div>
             </div>
         </motion.div>
+
+
     )
 }

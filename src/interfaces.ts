@@ -74,7 +74,7 @@ interface IVar {
 }
 
 type IVal = string | boolean | number | string[]
-
+type IValExtended = NonNullable<any>
 
 interface ISection {
     id: number,

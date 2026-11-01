@@ -17,6 +17,7 @@ import {themeStore} from "./stores/theme_store.ts";
 import Notifications from "./components/common/Notifications.tsx";
 import {highlightWorkerStore} from "./stores/highlight_worker_store.ts";
 import {AnimatePresence} from "motion/react";
+import {ModalPageState, modalPageStore} from "./stores/modal_page_store.ts";
 
 
 /**
@@ -70,7 +71,8 @@ function App() {
 
     let currentTheme = themeStore(state => state.current_theme)
 
-
+    const showPage = modalPageStore(state => state.current)
+    const neededPageProps = modalPageStore(state => showPage ? state.pages[showPage] : undefined) as ModalPageState | undefined
     useEffect(() => {
         //console.log("THEME", currentTheme)
         if (currentTheme) {
@@ -110,6 +112,9 @@ function App() {
 
     }, [currentTheme]);
 
+    useEffect(() => {
+        console.log(showPage, neededPageProps)
+    }, [neededPageProps, showPage])
 
     const blur = pageStore(state => state.need_filter)
     /**
@@ -121,6 +126,13 @@ function App() {
             <TitleBar/>
             <Notifications/>
             <div id={"main"}>
+
+                {/*<AnimatePresence>
+
+                      windowReady && showPage!=undefined  &&
+                        <Page/>
+
+                </AnimatePresence>*/}
                 <AnimatePresence>
                     {
                         windowReady && settingsFlag &&
@@ -135,6 +147,7 @@ function App() {
                         <ProjectSettings/>
                     }
                 </AnimatePresence>
+
                 <AnimatePresence>
                     {
                         windowReady && createProjectOpened &&

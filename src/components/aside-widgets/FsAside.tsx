@@ -78,7 +78,7 @@ export default function FsAside() {
                     {
                         cb: () => open_window(),
                         hotkeys: "",
-                        icon: "copy.svg",
+                        icon: "plus.svg",
                         title: "New"
                     },
                     {
@@ -142,7 +142,7 @@ export default function FsAside() {
 
                     },
                     hotkeys: "",
-                    icon: "",
+                    icon: "trash.svg",
                     title: "Delete"
 
                 }, {
@@ -174,9 +174,8 @@ export default function FsAside() {
                         })
                     },
                     hotkeys: "",
-                    icon: "",
+                    icon: "edit.svg",
                     title: "Rename"
-
                 }
                 ]
             )
@@ -240,7 +239,7 @@ export default function FsAside() {
 
                     },
                     hotkeys: "",
-                    icon: "",
+                    icon: "trash.svg",
                     title: "Delete"
 
                 }, {
@@ -272,7 +271,7 @@ export default function FsAside() {
                         })
                     },
                     hotkeys: "",
-                    icon: "",
+                    icon: "edit.svg",
                     title: "Rename"
 
                 }

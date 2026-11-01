@@ -161,6 +161,42 @@ export const menuBarStore = create<Type>(() => ({
     global_settings() {
         pageStore.getState().setFilter(true)
         settingsStore.getState().set_show_settings(true)
+
+        /*let res = modalPageStore.getState().add_page("settings", {
+            default_data: (()=>{
+                let settings = settingsStore.getState().settings
+                if (settings){
+                    return settings
+                }
+                return {}
+            })(),
+            save_fn(): Promise<void> {
+                return Promise.resolve(undefined);
+            },
+            props: {
+                buttons: [
+                    {
+                        text: "Cancel",
+                        onClick: ()=>{}
+
+                    }, {
+                        text: "Ok",
+                        onClick: ()=>{
+
+                        }
+
+                    }, {
+                        text: "Apply",
+                        onClick: ()=>{}
+
+                    },
+                ],
+                component: SettingsPage,
+                title: "Settings"
+            }
+
+        }satisfies ModalPageState)
+*/
     },
     exit(): void {
     },
