@@ -23,6 +23,7 @@ export default function ProjectSpace() {
 
     useEffect(() => {
         set_project(project)
+        launchStore.getState().add_references(project?.workspace.launch_references ?? [])
     }, [project])
 
 

@@ -1,15 +1,17 @@
 import "./styles/launch-page.css"
 import Button from "../../common/Button.tsx";
-import {launchStore} from "../../../stores/launch_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
+import {launchStore} from "@stores/launch_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 
 import plus from "../../../assets/plus.svg"
 import minus from "../../../assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
-import {useEffect, useMemo, useState} from "react";
-import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import {useMemo, useState} from "react";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
 import pageStore from "../../../stores/page_store.ts";
 import {motion} from "motion/react";
+import Icon from "../../common/Icon.tsx";
+import Table from "@common/Table.tsx";
 
 
 export default function LaunchPage() {
@@ -32,13 +34,10 @@ export default function LaunchPage() {
     const templates = project?.workspace.launch_templates ?? [];
     const references = launchStore(state => state.references)
 
-    useEffect(() => {
-        if (references.length == 0) {
-            launchStore.getState().add_references(project?.workspace.launch_references ?? [])
-        }
-    }, [project]);
 
-
+    /**
+     * need to rewrite
+     */
     let meta = useMemo<LaunchSection>(() => {
 
         let val = find(-1, "name", curRef ?? -1)
@@ -143,21 +142,18 @@ export default function LaunchPage() {
             </div>
             <div id={"launch-main"}>
                 <div id={"launch-left"}>
-                    <div id={"launch-left-head"}>
-                        <button className={"launch-head-bt"} onClick={() => {
-                            setShowContext(prev => !prev)
-                        }}>
-                            <img src={plus}/>
-                        </button>
-                        <button className={"launch-head-bt"} onClick={removeReference}>
-                            <img src={minus}/>
-                        </button>
+                    <div id={"launch-left-head"} className={"items-center justify-center"}>
+                        <Icon src={plus} size={"80%"} onClick={() => setShowContext(prev => !prev)}/>
+                        <Icon src={minus} size={"80%"} onClick={() => removeReference()}/>
                         {
                             showContext &&
                             <div id={"launch-template-select"}>
                                 {templates.map((el, i) =>
                                     <LaunchSelect references={references}
-                                                  add_ref={(r) => addReference(el, r)}
+                                                  add_ref={(r) => {
+                                                      addReference(el, r)
+                                                      setShowContext(false)
+                                                  }}
                                                   obj={el} key={i} temp={template}
                                     />
                                 )}
@@ -173,29 +169,22 @@ export default function LaunchPage() {
                         }
                     </div>
                 </div>
-                <div id={"launch-right"}>
-                    <div id={"launch-sections"}>
-                        {
-                            current_launch_template !== null && curRef != null &&
-                            <>
-                                <LaunchSection cur_ref={curRef}
-                                               obj={meta}
-                                               functions={current_launch_template?.functions ?? []}
-                                               project={project}
-                                />
-                                {
-                                    current_launch_template?.sections.map((el, i) =>
-                                        <LaunchSection cur_ref={curRef}
-                                                       key={i}
-                                                       obj={el}
-                                                       functions={current_launch_template?.functions ?? []}
-                                                       project={project}
-                                        />
-                                    )
-                                }
-                            </>
-                        }
-                    </div>
+                <div id={"launch-right"} className={"relative"}>
+                    {
+                        (current_launch_template == null || curRef == null) &&
+                        <p style={{margin: "auto"}}
+                           className={"flex flex-col items-center justify-center text-(--subtitle) absolute inset-0"}>Create
+                            or select exist launch configuration</p>
+                    }
+                    {
+                        current_launch_template !== null && curRef != null &&
+                        <LaunchPageSections
+                            project={project}
+                            curRef={curRef}
+                            current_launch_template={current_launch_template}
+                            meta={meta}
+                        />
+                    }
                     <div id={"launch-before"}></div>
                 </div>
             </div>
@@ -233,6 +222,49 @@ export default function LaunchPage() {
     )
 }
 
+
+type SectionsProps = {
+    current_launch_template: LaunchTemplate
+    curRef: number
+    project: IProject | null
+    meta: LaunchSection
+}
+
+function LaunchPageSections(props: SectionsProps) {
+    const {project, meta, curRef, current_launch_template} = props
+
+    return (
+        <div id={"launch-sections"}>
+            <p className={"text-(--subtitle) text-[10pt] font-[400]"}>{current_launch_template.title}</p>
+            <LaunchSection cur_ref={curRef}
+                           obj={meta}
+                           functions={current_launch_template?.functions ?? []}
+                           project={project}
+            />
+            {
+                current_launch_template?.sections.map((el, i) =>
+                    <LaunchSection cur_ref={curRef}
+                                   key={i}
+                                   obj={el}
+                                   functions={current_launch_template?.functions ?? []}
+                                   project={project}
+                    />
+                )
+            }
+            <div className={""}>
+                <p className={""}>Before Launch</p>
+                <Table rows={[
+                    {
+                        data: ["3", "4", "5"]
+                    }
+                ]} add_row={() => {
+                }} rem_row={() => {
+                }} swap_rows={() => {
+                }} style={"select-none"}/>
+            </div>
+        </div>
+    )
+}
 
 type RefProps = {
     obj: LaunchTemplateReference

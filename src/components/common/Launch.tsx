@@ -10,6 +10,7 @@ import {projectStore} from "../../stores/project_store.ts";
 import {asideButtonsStore} from "../../stores/aside_buttons_store.ts";
 import {asideStore} from "../../stores/aside_store.ts";
 import pageStore from "../../stores/page_store.ts";
+import Icon from "./Icon.tsx";
 
 export default function Launch() {
 
@@ -39,8 +40,14 @@ export default function Launch() {
         },
     ]
 
+    const refs = launchStore(state => state.references)
+
+
     const ref = useRef<HTMLDivElement>(null)
 
+    const [clicked, setClicked] = useState(false)
+
+    console.log(refs)
     return (
         <div id={"launch"}>
 
@@ -48,42 +55,52 @@ export default function Launch() {
 
             </div>
             <div
+                className={clicked ? "launch-current-click" : ""}
                 style={{
-                    opacity: currentLaunch ? "1" : "0.5"
-
+                    opacity: currentLaunch ? "1" : "0.5",
                 }}
-                id={"launch-current"}>
-                <div className={"launch-current-img"}>
-                    <img src={launch}/>
-                </div>
-                <p id={"launch-current-p"}>{currentLaunch ? currentLaunch.name : "Nothing"}</p>
-                <div className={"launch-current-img2"}>
-                    <img src={arrow}/>
-                </div>
-            </div>
-            <button
-                disabled={!currentLaunch}
-                id={"launch-launch"}
-                onClick={async () => {
-                    if (!currentLaunch || !project) return;
-
-                    let object =
-                        project.workspace.launch_objects.find((obj) => obj.launch_reference === currentLaunch.id) ?? null;
-
-                    if (!object) {
-                        const template = project.workspace.launch_templates.find((template) => template.id === currentLaunch.template[1]);
-                        if (!template) return;
-                        object = await compileToObj(currentLaunch, currentLaunch.results, template);
-                    }
-
-                    if (!object) return;
-                    runLaunch(object);
-
-                    openAsideLaunch();
-                }}
+                id={"launch-current"}
+                onClick={() => setClicked(p => !p)}
             >
-                <img src={play}/>
-            </button>
+                <Icon src={launch} size={"18px"}/>
+                <p id={"launch-current-p"}
+                   className={"select-none"}>{currentLaunch ? currentLaunch.name : "Nothing"}</p>
+
+                <Icon src={arrow} size={"13px"}/>
+                {clicked && <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        padding: "10px"
+                    }}
+                    className={"absolute min-w-full top-full flex flex-col min-h-10 max-h-50 overflow-auto bg-(--bg) border border-(--border3) overflow-x-hidden"}>
+                    {refs.map((el, i) =>
+                        <div className={"w-full h-5 flex items-center hover:bg-(--hover) text-(--subtitle)"} key={i}
+                             onClick={() => launchStore.getState().set_current_launch(el)}
+                        >
+                            <p className={"whitespace-nowrap text-[8pt] font-[300]"}>{el.name}</p>
+                        </div>
+                    )}
+                </div>}
+            </div>
+            <Icon src={play} in_size={"65%"} styles={"hover:bg-(--hover) rounded-[5px]"} disabled={!currentLaunch}
+                  onClick={async () => {
+                      if (!currentLaunch || !project) return;
+
+                      let object =
+                          project.workspace.launch_objects.find((obj) => obj.launch_reference === currentLaunch.id) ?? null;
+
+                      if (!object) {
+                          const template = project.workspace.launch_templates.find((template) => template.id === currentLaunch.template[1]);
+                          if (!template) return;
+                          object = await compileToObj(currentLaunch, currentLaunch.results, template);
+                      }
+
+                      if (!object) return;
+                      runLaunch(object);
+
+                      openAsideLaunch();
+                  }}/>
+
             <button id={"launch-actions"}
                     onClick={(e) => {
                         setShowContext(prev => !prev)

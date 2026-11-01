@@ -15,11 +15,23 @@
 }
 
 #launch-current {
-    height: 100%;
+    height: 80%;
     display: flex;
     align-items: center;
     gap: 5px;
     transition: all 0.2s;
+    position: relative;
+    border-radius: 5px;
+
+    &:hover {
+        background: var(--hover);
+    }
+}
+
+.launch-current-click {
+    height: 100% !important;
+    background: var(--hover);
+    border-radius: 0 !important;
 }
 
 #launch-current-p {

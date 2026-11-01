@@ -65,6 +65,7 @@ impl TLaunchCompileService for LaunchCompileService {
             icon: l_template.icon.clone(),
             name: l_template.title.clone(),
             results: HashMap::new(),
+            before: None
         };
 
         Some(obj)

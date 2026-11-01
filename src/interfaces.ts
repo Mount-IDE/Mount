@@ -233,6 +233,20 @@ interface LaunchTemplateReference {
     icon?: string,
     name: string,
     results: LaunchTemplateResult
+    before?: LaunchReferenceBefore[]
+}
+
+
+type LaunchReferenceBefore = {
+    typ: "custom"
+    scheme: number
+    template: [string, number]
+    icon?: string
+    name: string
+    results: LaunchTemplateResult
+} | {
+    typ: "other",
+    id: number
 }
 
 type LaunchTemplateResult = Record<number, Record<string, string>>

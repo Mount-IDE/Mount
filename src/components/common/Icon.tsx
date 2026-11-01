@@ -8,6 +8,7 @@ type Props = {
     modifier?: string
     rotate?: string
     styles?: string
+    disabled?: boolean
 }
 
 export default function Icon(props: Props) {
@@ -18,8 +19,8 @@ export default function Icon(props: Props) {
             style={{
                 [props.modifier ?? "height"]: props.size ? props.size : "80%"
             }}
-            className={`aspect-square centered ${props.styles}`}
-            onClick={props.onClick}
+            className={`aspect-square centered select-none  ${props.styles}`}
+            onClick={(e) => props.disabled != true && props.onClick?.(e)}
         >
             <img
 

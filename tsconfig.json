@@ -1,6 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2020",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@common/*": [
+        "./src/components/common/*"
+      ],
+      "@pages/*": [
+        "./src/components/pages/*"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@assets/*": [
+        "./public/*"
+      ]
+    },
     "useDefineForClassFields": true,
       "lib": [
           "ES2020",

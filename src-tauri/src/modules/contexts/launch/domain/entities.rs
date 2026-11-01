@@ -68,7 +68,31 @@ pub struct LaunchTemplateReference {
     pub name: String,
     #[serde(default)]
     pub results: LaunchTemplateResult,
+    #[serde(default)]
+    pub before: Option<Vec<LaunchReferenceBefore>>
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[serde(tag = "typ", rename_all = "lowercase")]
+pub enum LaunchReferenceBefore {
+    CUSTOM {
+        #[serde(default)]
+        scheme: Schema,
+        #[serde(default)]
+        template: (String, i32),
+        #[serde(default)]
+        icon: Option<String>,
+        #[serde(default)]
+        name: String,
+        #[serde(default)]
+        results: LaunchTemplateResult,
+    },
+    OTHER {
+        #[serde(default)]
+        id: i8
+    },
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct LaunchFunction {
@@ -77,6 +101,7 @@ pub struct LaunchFunction {
     #[serde(default)]
     pub actions: Vec<LaunchFunctionAction>,
 }
+
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct LaunchFunctionAction {
