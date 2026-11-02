@@ -443,7 +443,8 @@ export default function MainPage() {
                             &&
                             <Modal {...modalSettings!} />
                         }
-                        <ContextMenu auto={true} ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]}
+                        <ContextMenu setShow={el => {
+                        }} auto={true} ref={ref} buttons={context_buttons} x={cords[0]} y={cords[1]}
                                      show={showContext}/>
                     </div>
                 </div>

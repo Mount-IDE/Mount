@@ -1,4 +1,4 @@
-import {MouseEvent as _MouseEvent} from "react"
+import {MouseEvent as _MouseEvent, RefObject} from "react"
 
 type Props = {
     src: string
@@ -9,6 +9,8 @@ type Props = {
     rotate?: string
     styles?: string
     disabled?: boolean
+
+    ref?: RefObject<HTMLDivElement | null>
 }
 
 export default function Icon(props: Props) {
@@ -16,10 +18,11 @@ export default function Icon(props: Props) {
 
     return (
         <div
+            ref={props.ref}
             style={{
                 [props.modifier ?? "height"]: props.size ? props.size : "80%"
             }}
-            className={`aspect-square centered select-none  ${props.styles}`}
+            className={`aspect-square centered select-none  ${props.styles ?? ""}`}
             onClick={(e) => props.disabled != true && props.onClick?.(e)}
         >
             <img

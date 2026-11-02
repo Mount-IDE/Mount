@@ -2,13 +2,14 @@ import {projectStore} from "@stores/project_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 import {launchStore} from "@stores/launch_store.ts";
 
-
 export const enum LaunchResult {
     Done,
     ProjectNotFound,
     ReferenceNotFound,
     ReferenceAlreadyExists,
-    CompileLaunchObjects
+    CompileLaunchObjects,
+    ReferenceIsSame,
+    ReferenceNotSelected
 }
 
 
@@ -34,10 +35,104 @@ interface Type {
 
 
     run_launch: (launch: LaunchObject) => LaunchResult
+
+
+    add_before_launch: (launch: LaunchReferenceBefore) => LaunchResult
+    rem_before_launch_by_id: (id: number) => LaunchResult
+    rem_before_launch_by_index: (index: number) => LaunchResult
 }
 
 
 export class LaunchService implements Type {
+    add_before_launch(launch: LaunchReferenceBefore): LaunchResult {
+        let proj = projectStore.getState().current_project
+        if (!proj) return LaunchResult.ProjectNotFound
+        let cur = proj.workspace.current_launch
+        if (cur == null) return LaunchResult.ReferenceNotSelected
+        let id = launch.typ == "custom" ? null : launch.id
+        if (id != null && id == cur) return LaunchResult.ReferenceIsSame
+        let references = proj.workspace.launch_references
+        let found = references.findIndex(el => el.id == cur)
+        if (found == -1) return LaunchResult.ReferenceNotFound
+        if (references[found].before == undefined) {
+            references[found].before = []
+        }
+        if (id == null) {
+            references[found].before.push(launch)
+        } else {
+            let f = references[found].before.find(el => el.typ == "other" && el.id == id)
+            if (f) {
+                return LaunchResult.ReferenceAlreadyExists
+            }
+            references[found].before.push(launch)
+        }
+        projectStore.setState({
+            current_project: {
+                ...proj,
+                workspace: {
+                    ...proj.workspace,
+                    launch_references: [...references]
+                }
+            }
+        })
+        return LaunchResult.Done;
+    }
+
+    rem_before_launch_by_id(id: number): LaunchResult {
+        let proj = projectStore.getState().current_project
+        if (!proj) return LaunchResult.ProjectNotFound
+
+        let cur = proj.workspace.current_launch
+        if (cur == null) return LaunchResult.ReferenceNotSelected
+
+        let refs = proj.workspace.launch_references
+        let ref = refs.findIndex(el => el.id == cur)
+        if (ref == -1) return LaunchResult.ReferenceNotFound
+
+        let i = refs[ref].before?.findIndex(el => el.typ == "other" && el.id == id)
+        if (i == -1 || i == undefined) return LaunchResult.ReferenceNotFound
+
+        refs[ref].before?.splice(i, 1);
+        projectStore.setState({
+            current_project: {
+                ...proj,
+                workspace: {
+                    ...proj.workspace,
+                    launch_references: [...refs]
+                }
+            }
+        })
+        return LaunchResult.Done;
+    }
+
+    rem_before_launch_by_index(index: number): LaunchResult {
+        if (index == -1) {
+            return LaunchResult.ReferenceNotFound
+        }
+        let proj = projectStore.getState().current_project
+        if (!proj) return LaunchResult.ProjectNotFound
+
+        let cur = proj.workspace.current_launch
+        if (cur == null) return LaunchResult.ReferenceNotSelected
+
+
+        let refs = proj.workspace.launch_references
+        let ref = refs.findIndex(el => el.id == cur)
+        if (ref == -1) return LaunchResult.ReferenceNotFound
+        refs[ref].before?.splice(index, 1)
+        projectStore.setState({
+            current_project: {
+                ...proj,
+                workspace: {
+                    ...proj.workspace,
+                    launch_references: [...refs]
+                }
+            }
+        })
+        return LaunchResult.Done
+    }
+
+
 
     run_launch(launch: LaunchObject): LaunchResult {
 

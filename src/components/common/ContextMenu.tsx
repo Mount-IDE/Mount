@@ -1,5 +1,5 @@
 import "./styles/context-menu.css"
-import {RefObject, useEffect, useRef, useState} from "react";
+import {RefObject, useEffect, useMemo, useRef} from "react";
 
 
 export interface IContextMenuButton {
@@ -10,13 +10,24 @@ export interface IContextMenuButton {
 }
 
 
-type Props = {
+type Props = _Props & {
+    auto: true,
+    setShow: (val: boolean) => void
+    show: boolean
+} | _Props & {
+    auto?: false,
+    setShow?: never
+}
+
+
+type _Props = {
     buttons: IContextMenuButton[] // array of buttons
-    x: number; // x cord of mouse click
-    y: number; // y cord of mouse click
+    x?: number; // x cord of mouse click
+    y?: number; // y cord of mouse click
     show?: boolean; // if true that component can be visible and hidden otherwise
     ref?: RefObject<HTMLDivElement | null> // reference to manage the component
-    auto?: boolean // if true - component close automatically
+    near?: RefObject<HTMLElement | null> //
+    absolute?: boolean
 }
 
 
@@ -32,22 +43,20 @@ export default function ContextMenu(props: Props) {
 
     const ref = useRef<HTMLDivElement>(null)
 
-    const [context, setShowContext] = useState(props.show == undefined ? false : props.show);
-
-
     useEffect(() => {
-
+        console.log(props.show)
         if (!props.auto) return
 
         function handler(e: MouseEvent) {
             const tg = ref.current;
 
-
             if (!tg) return;
+
+            console.log("RECT!", tg.getBoundingClientRect())
             const elem = e.target as Element
             if (!(tg.contains(elem) || tg == elem)) {
-                setShowContext(false)
-
+                //setShowContext(false)
+                // props.setShow?.(false)
             }
 
         }
@@ -57,28 +66,56 @@ export default function ContextMenu(props: Props) {
             window.removeEventListener("click", handler);
         };
 
-    }, [props.auto]);
+    }, [props.auto, props.show]);
+
+
+    const [x, y] = useMemo<[number, number]>(() => {
+        const rect = props.near?.current?.getBoundingClientRect()
+        console.log("RECT", rect)
+        let sx = (rect?.left ?? 0)/* - (rect?.width??0)*/
+        let sy = (rect?.top ?? 0) /*- (rect?.height??0)*/
+        return [(props.x ?? 0) + sx, (props.y ?? 0) + sy]
+
+    }, [props.near, props.near?.current, props.x, props.y])
 
     useEffect(() => {
-        setShowContext(props.show != undefined ? props.show : false)
-    }, [props.show]);
+        console.log("XY", x, y)
+        console.log("REF", ref.current?.style.left, ref.current?.style.top)
+    }, [x, y, props.auto, props.show, props.near?.current])
 
+    /*
+        useEffect(() => {
+            const rect = props.near?.current?.getBoundingClientRect()
+            let x = (rect?.left??0) + (props.x??0)
+            let y = (rect?.top??0) + (props.y??0)
+            if (props.ref?.current) {
+                props.ref.current.style.left = `${x}px`
+                props.ref.current.style.top=`${y}px`
+            }else if (ref.current) {
+                ref.current.
+            }
+        }, [props.x,props.y, props.auto, props.show, props.near?.current, props.]);*/
 
     return (
-        <div ref={props.auto ? ref : props.ref}
-             style={{
-                 opacity: context ? 1 : 0,
-                 pointerEvents: context ? "all" : "none",
-                 left: `${props.x}px`,
-                 top: `${props.y}px`,
-             }}
-             className={"context-menu"}>
+        <>
             {
-                props.buttons.map((el, i) =>
-                    <ContextMenuButton obj={el} key={i}/>
-                )
+                props.show &&
+                <div ref={props.auto ? ref : props.ref}
+                     style={{
+                         position: props.absolute ? "absolute" : "fixed",
+                         left: `${x}px`,
+                         top: `${y}px`,
+                     }}
+                     className={"context-menu"}>
+                    {
+                        props.buttons.map((el, i) =>
+                            <ContextMenuButton obj={el} key={i}/>
+                        )
+                    }
+                </div>
             }
-        </div>
+        </>
+
     )
 }
 
@@ -92,12 +129,12 @@ type ButtonProps = {
  * @param props
  * @constructor
  */
-function ContextMenuButton(props: ButtonProps) {
+export function ContextMenuButton(props: ButtonProps) {
     const {obj} = props;
     return (
         <div
 
-            className={"context-menu-button"}
+            className={"context-menu-button select-none"}
             onClick={obj.cb}
         >
             {obj.icon !== undefined &&

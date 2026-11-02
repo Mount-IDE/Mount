@@ -2,7 +2,7 @@ import plus from "@/public/builtin/icons/plus.svg"
 import minus from "@/public/builtin/icons/title-wrap.svg"
 import arrow_line from "@/public/builtin/icons/arrow-line.svg"
 import Icon from "@common/Icon.tsx";
-import {Fragment, useState} from "react";
+import {Fragment, RefObject, useState} from "react";
 
 export interface ITableRow {
     data: (string | { type: "text" | "img", val: string })[]
@@ -24,6 +24,10 @@ type Props = {
     child_size?: string
 
     style?: string
+
+    ref?: RefObject<HTMLDivElement | null>
+
+    add_ref?: RefObject<HTMLDivElement | null>
 }
 
 export default function Table(props: Props) {
@@ -32,12 +36,13 @@ export default function Table(props: Props) {
     const [clicked, setClicked] = useState(-1)
 
     return (
-        <div className={`w-full min-h-[100px] border border-(--border3) ${props.style}`}>
+        <div ref={props.ref} className={`w-full min-h-[100px] border border-(--border3) ${props.style}`}>
             <div className={"h-[40px] gap-2 w-full flex items-center"}>
                 {props.add_row && <Icon src={plus} size={"50%"} onClick={props.add_row}/>}
                 {props.rem_row && <Icon src={minus} size={"50%"} onClick={() => props.rem_row?.(clicked)}/>}
                 {props.swap_rows && <>
-                    <Icon src={arrow_line} size={"50%"} onClick={() => props.swap_rows?.(clicked - 1, clicked)}/>
+                    <Icon ref={props.add_ref} src={arrow_line} size={"50%"}
+                          onClick={() => props.swap_rows?.(clicked - 1, clicked)}/>
                     <Icon src={arrow_line} styles={"rotate-180"} size={"50%"}
                           onClick={() => props.swap_rows?.(clicked, clicked + 1)}/>
                 </>}

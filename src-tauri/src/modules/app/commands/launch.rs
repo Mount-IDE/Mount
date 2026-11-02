@@ -4,8 +4,8 @@ use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
-    LaunchTemplateResult,
+    LaunchFlatTask, LaunchFunction, LaunchObject, LaunchReferenceBefore, LaunchTemplate,
+    LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::app::traits::TProjectService;
 use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
@@ -71,6 +71,32 @@ pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject
         let Some(needed_template) = templates.iter().find(|e| e.id == ref_.template.1) else {
             continue;
         };
+        if let Some(before) = ref_.before.clone() {
+            let r = before
+                .iter()
+                .filter_map(|e| {
+                    if let LaunchReferenceBefore::OTHER { id } = e {
+                        let Some(ref__) = references.iter().find(|e2| e2.id.eq(id)) else {
+                            return None;
+                        };
+                        let Some(tmp) = templates.iter().find(|e2| e2.id == ref__.template.1)
+                        else {
+                            return None;
+                        };
+                        return LAUNCH_COMPILE_SERVICE.compile_object(
+                            &ref__,
+                            &vars,
+                            &tmp,
+                            &ref__.results,
+                        );
+                    }
+                    return None;
+                })
+                .collect::<Vec<LaunchObject>>();
+
+            r.iter().for_each(|e| res.push(e.clone()))
+        }
+
         let obj =
             LAUNCH_COMPILE_SERVICE.compile_object(&ref_, &vars, &needed_template, &ref_.results);
         if let Some(obj) = obj {

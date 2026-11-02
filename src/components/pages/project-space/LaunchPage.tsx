@@ -6,13 +6,14 @@ import {projectStore} from "@stores/project_store.ts";
 import plus from "@assets/plus.svg"
 import minus from "@assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {noteStore, NotificationType} from "@stores/note_store.ts";
 import pageStore from "@stores/page_store.ts";
 import {motion} from "motion/react";
 import Icon from "@common/Icon.tsx";
-import Table from "@common/Table.tsx";
+import Table, {ITableRow} from "@common/Table.tsx";
 import launchService from "@/src/services/launch_service.ts";
+import {ContextMenuButton, IContextMenuButton} from "@common/ContextMenu.tsx";
 
 
 export default function LaunchPage() {
@@ -290,6 +291,77 @@ type SectionsProps = {
 function LaunchPageSections(props: SectionsProps) {
     const {project, meta, curRef, current_launch_template} = props
 
+    const [context, setContext] = useState(false)
+
+    const references = launchStore(state => state.copy_references)
+
+
+    const before = launchStore(
+        state => state
+            .copy_references
+            .find(el =>
+                el.id == props.curRef)?.before)
+
+    const contextButtons = useMemo<IContextMenuButton[]>(() => {
+        let res: IContextMenuButton[] = []
+        //  let templates = projectStore.getState().current_project?.workspace.launch_templates ?? []
+        for (let i of references) {
+            // let temp = templates.find(el=>el.id == i.)
+            res.push({
+                title: i.name,
+                icon: i.icon ?? "",
+                cb: () => {
+                    console.log("CLICK", curRef, i.id)
+                    if (curRef != i.id) {
+                        launchService.add_before_launch({
+                            typ: "other",
+                            id: i.id
+                        } satisfies LaunchReferenceBefore)
+                        setContext(false)
+                    }
+                }
+            })
+        }
+        return res
+    }, [references])
+
+
+    const before_render = useMemo<ITableRow[]>(() => {
+        let res: ITableRow[] = []
+        if (!before) {
+            return []
+        }
+        for (let i of before) {
+            let icon = ""
+            let name = ""
+            if (i.typ == "custom") {
+                icon = i.icon ?? ""
+                name = i.name
+            } else {
+                let ref = references.find(el => el.id == i.id)
+                if (ref) {
+                    icon = ref.icon ?? ""
+                    name = ref.name
+                } else {
+                    continue
+                }
+            }
+            res.push({
+                data: [
+                    {
+                        type: "img",
+                        val: icon
+                    },
+                    `${name}`
+                ]
+            })
+        }
+        return res
+    }, [before])
+
+
+    const ref = useRef<HTMLDivElement>(null)
+
     return (
         <div id={"launch-sections"}>
             <p className={"text-(--subtitle) text-[10pt] font-[400]"}>{current_launch_template.title}</p>
@@ -308,18 +380,38 @@ function LaunchPageSections(props: SectionsProps) {
                     />
                 )
             }
-            <div className={""}>
+            <div className={"relative"}>
                 <p className={"text-(--subtitle)"}>Before Launch</p>
-                <Table rows={[
-                    {
-                        data: ["3", "4", "5"]
-                    }
-                ]} add_row={() => {
-                }} rem_row={(_i) => {
+                <Table
+                    ref={ref}
+                    rows={before_render}
+                    add_row={() => {
+                        console.log("ADD", context)
+                        setContext(prev => !prev)
+                    }}
+                    rem_row={(_i) => {
+                        launchService.rem_before_launch_by_index(_i)
+                    }}
+                    swap_rows={(_first, _second) => {
 
-                }} swap_rows={(_first, _second) => {
-
-                }} style={"select-none"}/>
+                    }}
+                    style={"select-none relative"}/>
+                {
+                    context &&
+                    <div className={"absolute top-[38%] left-[10px] w-[200px] bg-(--bg) border border-(--border3)"}
+                         style={{padding: "10px"}}>
+                        {
+                            contextButtons.map((el, i) =>
+                                <ContextMenuButton obj={el} key={i}/>
+                            )
+                        }
+                    </div>
+                }
+                {/*<ContextMenu buttons={contextButtons}
+                             auto absolute
+                             show={context}
+                             setShow={(e) => setContext(e)}
+                             near={ref}/>*/}
             </div>
         </div>
     )
