@@ -192,7 +192,7 @@ export default function MenuBar() {
             <div id={"menu-bar-logo"}>
                 <img src={logo}/>
             </div>
-            <div id={"menu-bar-buttons"}>
+            <div id={"menu-bar-buttons"} className={"select-none"}>
                 <div id={"menu-bar-show-buttons"} onClick={() => setShowButtons(prev => !prev)}>
                     <img src={list}/>
                 </div>
@@ -223,7 +223,7 @@ function MenuBarButton(props: Props) {
     const {obj} = props;
 
     return (
-        <div onMouseEnter={() => props.cb(props.index)} className={"menu-bar-button"}>
+        <div onMouseEnter={() => props.cb(props.index)} className={"menu-bar-button select-none"}>
             <p className={"menu-bar-button-p"}>
                 {obj.label}
             </p>

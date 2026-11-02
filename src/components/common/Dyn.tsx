@@ -4,6 +4,7 @@ import add from "@assets/plus.svg";
 import close from "@assets/title-close.svg";
 import List from "./List.tsx";
 import Check from "./Check.tsx";
+import Icon from "@common/Icon.tsx";
 
 
 type Typ = "text" | "input" | "list" | "check" | "base"
@@ -177,11 +178,12 @@ export default function Dyn(props: Props) {
                                     }
                                 </>
                             }
-                            <button className={""}
-                                    onClick={() => remove(i)}
-                            >
-                                <img src={close}/>
-                            </button>
+                            {/*<button className={""}*/}
+                            {/*        onClick={() => remove(i)}*/}
+                            {/*>*/}
+                            {/*    <img src={close}/>*/}
+                            {/*</button>*/}
+                            {props.dynamic && <Icon src={close} onClick={() => remove(i)}/>}
                         </div>
                     ))
                 }

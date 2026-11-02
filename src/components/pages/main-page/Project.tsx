@@ -2,7 +2,7 @@ import "./styles/project.css"
 import more from "@assets/more.svg"
 import {cacheStore} from "@stores/cache_store.ts";
 import {computeBP, themeStore} from "@stores/theme_store.ts";
-import React from "react";
+import React, {useMemo} from "react";
 
 type Props = {
     project: IRecentProject
@@ -40,6 +40,29 @@ export default function Project(props: Props) {
     })()
 
     let date = new Date(project.last_opened);
+
+
+    const date_ = useMemo(() => {
+        let year = date.getFullYear();
+        let month: number | string = date.getMonth() + 1;
+        let day: number | string = date.getDate()
+        let hour: number | string = date.getHours()
+        let min: number | string = date.getMinutes()
+        if (month < 10) {
+            month = `0${month}`
+        }
+        if (day < 10) {
+            day = `0${day}`
+        }
+        if (hour < 10) {
+            hour = `0${hour}`
+        }
+        if (min < 10) {
+            min = `0${min}`
+        }
+
+        return `${year}.${month}.${day} at ${hour}:${min}`
+    }, [date.getTime()])
 
     return (
         <div className={"main-page-project"} onClick={loadProject}
@@ -124,7 +147,9 @@ export default function Project(props: Props) {
                     {project.meta.authors.join(" ")}
                 </p>
                 <div className={"main-page-project-center-2"}>
-                    <p className={"main-page-project-p"}>{date.getFullYear()}.{date.getMonth() + 1}.{date.getDate()} at {date.getHours()}:{date.getMinutes()}</p>
+                    <p className={"main-page-project-p"}>
+                        {date_}
+                    </p>
                     <p className={"main-page-project-p"}>{project.meta.license}</p>
                 </div>
             </div>

@@ -208,6 +208,19 @@ export const projectStore = create<Type>((set, get) => ({
 
 
     open_project: async (proj) => {
+
+        let recents = cacheStore.getState().recent_projects;
+        let path = cacheStore.getState().make_path([proj.path, proj.name])
+        let needed = recents.findIndex(el => cacheStore.getState().make_path([el.path, el.name]) == path)
+        if (needed != -1) {
+            recents[needed].last_opened = new Date().getDate()
+            cacheStore.getState().set_recent_projects(recents)
+        } else {
+            cacheStore.getState().add_recent({
+                ...proj,
+                last_opened: new Date().getDate()
+            } satisfies IRecentProject)
+        }
         let packs = await loadPackages(proj.packages);
         const buttons = proj.workspace.buttons;
         let left_top = buttons.filter(el => el.pos == "LeftTop")
