@@ -1,11 +1,11 @@
 import "./styles/section-parameter.css"
-import {settingsStore} from "../../../stores/settings_store.ts";
+import {settingsStore} from "@stores/settings_store.ts";
 import {useEffect, useState} from "react";
-import Input from "../../common/Input.tsx";
-import Check from "../../common/Check.tsx";
-import FSContext from "../../common/FSContext.tsx";
-import List from "../../common/List.tsx";
-import Gen from "../../common/Gen.tsx";
+import Input from "@common/Input.tsx";
+import Check from "@common/Check.tsx";
+import FSContext from "@common/FSContext.tsx";
+import List from "@common/List.tsx";
+import Gen from "@common/Gen.tsx";
 
 type Props = {
     obj: ISettingsParameter

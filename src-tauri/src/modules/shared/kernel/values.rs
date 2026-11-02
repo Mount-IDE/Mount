@@ -97,6 +97,16 @@ impl Platform {
             Platform::SINGLE(v) => v.is_correct(),
         }
     }
+
+    pub fn current() -> Self {
+        if cfg!(target_os = "windows") {
+            return Self::windows();
+        }
+        if cfg!(target_os = "macos") {
+            return Self::macos();
+        }
+        Self::linux()
+    }
 }
 
 impl PlatformType {
@@ -114,6 +124,16 @@ impl PlatformType {
             return true;
         }
         false
+    }
+
+    pub fn current() -> Self {
+        if cfg!(target_os = "windows") {
+            return Self::WINDOWS;
+        }
+        if cfg!(target_os = "macos") {
+            return Self::MACOS;
+        }
+        Self::LINUX
     }
 }
 

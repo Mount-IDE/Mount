@@ -1,11 +1,11 @@
 import "./styles/project-meta.css"
 import Section from "./Section.tsx";
-import {cacheStore} from "../../../stores/cache_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
 import Tags from "./Tags.tsx";
-import {settingsStore} from "../../../stores/settings_store.ts";
+import {settingsStore} from "@stores/settings_store.ts";
 
-import img_ from "../../../assets/img.svg"
-import close_ from "../../../assets/title-close.svg"
+import img_ from "@assets/img.svg"
+import close_ from "@assets/title-close.svg"
 import {useEffect, useMemo, useState} from "react";
 
 import {SketchPicker} from 'react-color';
@@ -13,7 +13,7 @@ import {open} from "@tauri-apps/plugin-dialog";
 import {ToggleGroup} from "radix-ui"
 import {motion} from "motion/react";
 import {invoke} from "@tauri-apps/api/core";
-import {createProjectStore} from "../../../stores/create_project.ts";
+import {createProjectStore} from "@stores/create_project.ts";
 import PackageSection from "./PackageSection.tsx";
 
 

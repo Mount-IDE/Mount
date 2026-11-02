@@ -1,8 +1,8 @@
 import "./styles/aside.css"
 import React, {useEffect, useRef} from "react";
 import Header from "../../aside-widgets/Header.tsx";
-import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import {asideButtonsStore} from "@stores/aside_buttons_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 
 
 type Props = {

@@ -1,12 +1,12 @@
 import "./styles/parameter.css"
 
 import {useEffect} from "react";
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {createProjectStore} from "../../../stores/create_project.ts";
-import Input from "../../common/Input.tsx";
-import Check from "../../common/Check.tsx";
-import List from "../../common/List.tsx";
-import FSContext from "../../common/FSContext.tsx";
+import {cacheStore} from "@stores/cache_store.ts";
+import {createProjectStore} from "@stores/create_project.ts";
+import Input from "@common/Input.tsx";
+import Check from "@common/Check.tsx";
+import List from "@common/List.tsx";
+import FSContext from "@common/FSContext.tsx";
 
 type Props = {
     param: IPackageParameter

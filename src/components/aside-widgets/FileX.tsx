@@ -1,11 +1,11 @@
 import "./styles/file.css"
-import {fsExtStore} from "../../stores/fs_ext_store.ts";
-import {fileCacheStore} from "../../stores/file_cache_store.ts";
-import {codeSpaceStore} from "../../stores/code_space_store.ts";
+import {fsExtStore} from "@stores/fs_ext_store.ts";
+import {fileCacheStore} from "@stores/file_cache_store.ts";
+import {codeSpaceStore} from "@stores/code_space_store.ts";
 import {invoke} from "@tauri-apps/api/core";
 import React, {useEffect} from "react";
-import {asideStore} from "../../stores/aside_store.ts";
-import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
+import {asideStore} from "@stores/aside_store.ts";
+import {fsAsideTreeStore} from "@stores/fs_aside_tree_store.ts";
 
 type Props = {
     obj: FsFile

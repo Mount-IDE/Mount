@@ -4,11 +4,11 @@ use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::launch::domain::entities::{
     LaunchFunctionArgument, LaunchTemplateResult, LaunchVecType,
 };
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Path, Val};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-fn get_from(addr: Vec<LaunchVecType>, results: &LaunchTemplateResult) -> Option<String> {
+fn get_from(addr: Vec<LaunchVecType>, results: &LaunchTemplateResult) -> Option<Val> {
     if let LaunchVecType::NUMBER(num) = addr[0] {
         if let LaunchVecType::STRING(str) = addr[1].clone() {
             let sec = results.get(&(num as i8));
@@ -36,13 +36,15 @@ pub fn read_from(
             return None;
         }
         let val = val.unwrap();
-        let file = PFile::from_path_reg(Path(val));
-        let text = FS_READ_SERVICE.read_file(&file);
-        if let Err(_) = text {
-            return None;
+        if let Val::STRING(val) = val {
+            let file = PFile::from_path_reg(Path(val));
+            let text = FS_READ_SERVICE.read_file(&file);
+            if let Err(_) = text {
+                return None;
+            }
+            let text = text.unwrap();
+            return Some(FunctionResult::SCALAR(text));
         }
-        let text = text.unwrap();
-        return Some(FunctionResult::SCALAR(text));
     }
     None
 }

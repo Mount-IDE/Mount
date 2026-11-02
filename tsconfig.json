@@ -18,7 +18,10 @@
         "./src/stores/*"
       ],
       "@assets/*": [
-        "./public/*"
+          "./src/assets/*"
+      ],
+        "@services/* ": [
+            "./src/services/*"
       ]
     },
     "useDefineForClassFields": true,

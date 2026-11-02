@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {ModalProps} from "../components/common/Modal.tsx";
+import {ModalProps} from "@common/Modal.tsx";
 import pageStore from "./page_store.ts";
 
 

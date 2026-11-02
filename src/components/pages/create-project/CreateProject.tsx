@@ -1,16 +1,16 @@
 import "./styles/create-project.css"
-import Button from "../../common/Button.tsx";
-import {close_project} from "../../../services/create-project.ts";
+import Button from "@common/Button.tsx";
+import {close_project} from "@/src/services/create-project.ts";
 import ProjectTemplates from "./ProjectTemplates.tsx";
 import ProjectMeta from "./ProjectMeta.tsx";
 import ProjectPackages from "./ProjectPackages.tsx";
-import {createProjectStore} from "../../../stores/create_project.ts";
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
+import {createProjectStore} from "@stores/create_project.ts";
+import {cacheStore} from "@stores/cache_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 import {useEffect, useState} from "react";
-import Load from "../../common/Load.tsx";
+import Load from "@common/Load.tsx";
 import {listen} from "@tauri-apps/api/event";
-import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
 import {motion} from "motion/react";
 
 /**
@@ -55,7 +55,7 @@ export default function CreateProject() {
 
     useEffect(() => {
 
-        let clear: number;
+        let clear: NodeJS.Timeout;
         const unlisten = listen<string>("task-start", (d) => {
             let val = d.payload;
             setStartEvent(val)

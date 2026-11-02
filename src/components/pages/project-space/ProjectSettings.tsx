@@ -1,10 +1,10 @@
 import "./styles/project-settings.css"
 import {ReactElement, useEffect, useState} from "react";
 import MainProjectSettings from "./MainProjectSettings.tsx";
-import Button from "../../common/Button.tsx";
-import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
-import pageStore from "../../../stores/page_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
+import Button from "@common/Button.tsx";
+import {projectSettingsStore} from "@stores/project_settings_store.ts";
+import pageStore from "@stores/page_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 import ProjectSettingsVariables from "./ProjectSettingsVariables.tsx";
 import ProjectSettingsPackages from "./ProjectSettingsPackages.tsx";
 import {motion} from "motion/react";

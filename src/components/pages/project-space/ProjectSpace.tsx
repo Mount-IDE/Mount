@@ -2,28 +2,26 @@ import "./styles/project-space.css"
 import ProjectWorkSpace from "./ProjectWorkSpace.tsx";
 import Footer from "./Footer.tsx";
 import CreateEntity from "./CreateEntity.tsx";
-import {menuStore} from "../../../stores/menu_store.ts";
-import Modal from "../../common/Modal.tsx";
+import {menuStore} from "@stores/menu_store.ts";
+import Modal from "@common/Modal.tsx";
 import {useEffect} from "react";
-import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
-import {launchStore} from "../../../stores/launch_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import {launchStore} from "@stores/launch_store.ts";
 import LaunchPage from "./LaunchPage.tsx";
-import {themeStore} from "../../../stores/theme_store.ts";
+import {themeStore} from "@stores/theme_store.ts";
 import {AnimatePresence} from "motion/react";
 
 
 export default function ProjectSpace() {
     const show_file_creation_menu = menuStore(state => state.file_create_menu);
-    const show_modal = menuStore(state=>state.modal);
-    const modal_settings = menuStore(state=>state.modal_settings);
+    const show_modal = menuStore(state => state.modal);
+    const modal_settings = menuStore(state => state.modal_settings);
     const project = projectStore(state => state.current_project)
-    const set_project = projectSettingsStore(state => state.set_project)
     const launch_opened = launchStore(state => state.opened)
 
     useEffect(() => {
-        set_project(project)
-        launchStore.getState().add_references(project?.workspace.launch_references ?? [])
+        console.log("REFS1", project?.workspace.launch_references)
+        launchStore.setState({copy_references: project?.workspace.launch_references ?? []})
     }, [project])
 
 

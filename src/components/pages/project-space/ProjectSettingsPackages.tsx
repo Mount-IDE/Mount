@@ -1,6 +1,6 @@
 import "./styles/project-settings-packages.css"
 import {Fragment} from "react";
-import {projectStore} from "../../../stores/project_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 import ProjectSettingsPackage from "./ProjectSettingsPackage.tsx";
 
 

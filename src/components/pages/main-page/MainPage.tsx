@@ -1,26 +1,26 @@
 import "./styles/main-page.css"
 import Button from "../../common/Button.tsx";
 import Filters from "./Filters.tsx";
-import logo from "../../../assets/icon.svg"
+import logo from "@assets/icon.svg"
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
 import Project from "./Project.tsx";
-import {open_project} from "../../../services/create-project.ts";
-import {mainPageStore} from "../../../stores/main_page_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
-import {cacheStore} from "../../../stores/cache_store.ts";
-import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
-import Modal from "../../common/Modal.tsx";
-import {menuStore} from "../../../stores/menu_store.ts";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
-import {noteStore, NotificationType} from "../../../stores/note_store.ts";
+import {open_project} from "@/src/services/create-project.ts";
+import {mainPageStore} from "@stores/main_page_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
+import ContextMenu, {IContextMenuButton} from "@common/ContextMenu.tsx";
+import Modal from "@common/Modal.tsx";
+import {menuStore} from "@stores/menu_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
 import {AnimatePresence, motion} from "motion/react";
-import {filterStore} from "../../../stores/filter_store.ts";
-import {packageStore} from "../../../stores/package_store.ts";
-import Dyn, {ManyVal} from "../../common/Dyn.tsx";
-import return_ from "../../../assets/return.svg"
-import Load from "../../common/Load.tsx";
-import {settingsStore} from "../../../stores/settings_store.ts";
+import {filterStore} from "@stores/filter_store.ts";
+import {packageStore} from "@stores/package_store.ts";
+import Dyn, {ManyVal} from "@common/Dyn.tsx";
+import return_ from "@assets/return.svg"
+import Load from "@common/Load.tsx";
+import {settingsStore} from "@stores/settings_store.ts";
 
 /**
  * buttons for creating project

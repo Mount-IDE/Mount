@@ -3,10 +3,10 @@ import MiniAside from "./MiniAside.tsx";
 import Aside from "./Aside.tsx";
 import Central from "./Central.tsx";
 import React from "react";
-import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
-import {asideStore} from "../../../stores/aside_store.ts";
+import {asideButtonsStore} from "@stores/aside_buttons_store.ts";
+import {asideStore} from "@stores/aside_store.ts";
 import Bottom from "./Bottom.tsx";
-import {themeStore} from "../../../stores/theme_store.ts";
+import {themeStore} from "@stores/theme_store.ts";
 
 
 export default function ProjectWorkSpace() {

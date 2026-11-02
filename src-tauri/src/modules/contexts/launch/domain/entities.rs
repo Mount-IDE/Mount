@@ -1,4 +1,4 @@
-use crate::modules::shared::kernel::values::{IfStatementPart, Schema};
+use crate::modules::shared::kernel::values::{IfStatementPart, Schema, Val};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ts_rs::TS;
@@ -69,7 +69,7 @@ pub struct LaunchTemplateReference {
     #[serde(default)]
     pub results: LaunchTemplateResult,
     #[serde(default)]
-    pub before: Option<Vec<LaunchReferenceBefore>>
+    pub before: Option<Vec<LaunchReferenceBefore>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -89,10 +89,9 @@ pub enum LaunchReferenceBefore {
     },
     OTHER {
         #[serde(default)]
-        id: i8
+        id: i8,
     },
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct LaunchFunction {
@@ -101,7 +100,6 @@ pub struct LaunchFunction {
     #[serde(default)]
     pub actions: Vec<LaunchFunctionAction>,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct LaunchFunctionAction {
@@ -156,7 +154,7 @@ impl Default for LaunchOptionDefault {
     }
 }
 
-pub type LaunchTemplateResult = HashMap<i8, HashMap<String, String>>;
+pub type LaunchTemplateResult = HashMap<i8, HashMap<String, Val>>;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct LaunchOptionType {

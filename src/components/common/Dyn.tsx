@@ -1,7 +1,7 @@
 import "./styles/common-parameters.css"
-import {noteStore, NotificationType} from "../../stores/note_store.ts";
-import add from "../../assets/plus.svg";
-import close from "../../assets/title-close.svg";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
+import add from "@assets/plus.svg";
+import close from "@assets/title-close.svg";
 import List from "./List.tsx";
 import Check from "./Check.tsx";
 

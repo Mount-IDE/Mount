@@ -1,6 +1,6 @@
 import "./styles/project-settings-package.css"
-import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
-import Inner, {Props as InnerProps} from "../../common/Inner.tsx";
+import {projectSettingsStore} from "@stores/project_settings_store.ts";
+import Inner, {Props as InnerProps} from "@common/Inner.tsx";
 import {useMemo} from "react";
 
 

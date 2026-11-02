@@ -61,19 +61,22 @@ pub fn call_function(
 }
 
 #[tauri::command]
-pub fn create_objects(
-    references: Vec<LaunchTemplateReference>,
-    template: LaunchTemplate,
-    vars: Vec<Var>,
-    mut project: Project,
-) -> Result<(Project, Vec<LaunchObject>), ErrorDto> {
+pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject>), ErrorDto> {
     let mut res = Vec::<LaunchObject>::new();
-    for i in references.iter() {
-        let obj = LAUNCH_COMPILE_SERVICE.compile_object(&i, &vars, &template, &i.results);
+
+    let templates = project.workspace.launch_templates.clone();
+    let references = project.workspace.launch_references.clone();
+    let vars = project.vars.clone();
+    for ref_ in references.iter() {
+        let Some(needed_template) = templates.iter().find(|e| e.id == ref_.template.1) else {
+            continue;
+        };
+        let obj =
+            LAUNCH_COMPILE_SERVICE.compile_object(&ref_, &vars, &needed_template, &ref_.results);
         if let Some(obj) = obj {
             res.push(obj);
         } else {
-            return Err(LaunchError::NotAllObjects(i.clone()).into());
+            return Err(LaunchError::NotAllObjects(ref_.clone()).into());
         }
     }
     if res.len() == references.len() {

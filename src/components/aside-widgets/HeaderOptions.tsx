@@ -1,8 +1,8 @@
 import {HeaderOption} from "./Header.tsx";
 import {useEffect, useState} from "react";
-import arrow from "../../assets/arrow.svg"
-import check from "../../assets/check.svg"
-import {asideStore} from "../../stores/aside_store.ts";
+import arrow from "@assets/arrow.svg"
+import check from "@assets/check.svg"
+import {asideStore} from "@stores/aside_store.ts";
 import "./styles/header-options.css"
 
 type Props = {

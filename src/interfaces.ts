@@ -249,7 +249,7 @@ type LaunchReferenceBefore = {
     id: number
 }
 
-type LaunchTemplateResult = Record<number, Record<string, string>>
+type LaunchTemplateResult = Record<number, Record<string, IVal>>
 
 interface LaunchFunction {
     id: number,

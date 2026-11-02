@@ -3,16 +3,16 @@ import wrap from "../../assets/title-wrap.svg"
 import resize from "../../assets/title-resize.svg"
 import close from "../../assets/title-close.svg"
 import {getCurrentWindow} from "@tauri-apps/api/window"
-import pageStore, {Window} from "../../stores/page_store.ts";
+import pageStore, {Window} from "@stores/page_store.ts";
 import MenuBar from "./MenuBar.tsx";
 import Launch from "./Launch.tsx";
 import SettingsButton from "./SettingsButton.tsx";
-import {computeBP, themeStore} from "../../stores/theme_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 import {useMemo} from "react";
-import proj from "../../assets/project.svg"
-import {menuBarStore} from "../../stores/menubar_store.ts";
+import proj from "@assets/project.svg"
+import {menuBarStore} from "@stores/menubar_store.ts";
 import Icon from "./Icon.tsx";
-import pages from "../../assets/pages.svg"
+import pages from "@assets/pages.svg"
 
 export default function TitleBar() {
 

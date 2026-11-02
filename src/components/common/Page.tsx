@@ -1,6 +1,6 @@
 import {ReactElement, useEffect} from "react";
-import close from "../../assets/title-close.svg"
-import minus from "../../assets/title-wrap.svg"
+import close from "@assets/title-close.svg"
+import minus from "@assets/title-wrap.svg"
 import Icon from "./Icon.tsx";
 import {
     ModalApiExtended,
@@ -9,9 +9,9 @@ import {
     modalPageStore,
     RemoveEvent,
     WriteEvent
-} from "../../stores/modal_page_store.ts";
+} from "@stores/modal_page_store.ts";
 
-import {modalPageExtendedService, modalPageService} from "../../services/page_service.ts";
+import {modalPageExtendedService, modalPageService} from "@/src/services/page_service.ts";
 import Button from "./Button.tsx";
 
 export interface PageButton {

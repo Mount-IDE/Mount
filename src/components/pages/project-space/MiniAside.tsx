@@ -1,11 +1,11 @@
 import "./styles/mini-aside.css"
-import more2 from "../../../assets/more2.svg"
+import more2 from "@assets/more2.svg"
 import React, {useEffect, useState} from "react";
 import AsideButton from "./AsideButton.tsx";
-import {cacheStore} from "../../../stores/cache_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
 // import aside from "./Aside.tsx";
-import {asideStore, comp} from "../../../stores/aside_store.ts";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import {asideStore, comp} from "@stores/aside_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 import Icon from "../../common/Icon.tsx";
 
 

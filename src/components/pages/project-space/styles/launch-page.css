@@ -77,8 +77,10 @@
     width: 100%;
     height: 95%;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-top: 20px;
-    padding-left: 20%;
 }
 
 #launch-right {
@@ -146,7 +148,8 @@
 }
 
 .launch-left-ref {
-    width: 100%;
+    width: 90%;
+    height: 20px;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -155,6 +158,12 @@
     color: var(--subtitle);
     font: 9pt "JetBrains Mono";
     margin-bottom: 10px;
+    border: 1px solid transparent;
+    transition: all 0.1s;
+
+    &:hover {
+        color: var(--title)
+    }
 }
 
 .launch-left-ref-img {
@@ -175,4 +184,6 @@
 
 .launch-left-ref.selected {
     color: var(--title);
+
+    border-bottom: 1px solid var(--title);
 }

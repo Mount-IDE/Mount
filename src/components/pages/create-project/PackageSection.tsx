@@ -1,7 +1,7 @@
-import {createProjectStore} from "../../../stores/create_project.ts";
+import {createProjectStore} from "@stores/create_project.ts";
 import "./styles/section.css"
 import React, {Fragment, useEffect, useLayoutEffect, useRef, useState} from "react";
-import {packageStore} from "../../../stores/package_store.ts";
+import {packageStore} from "@stores/package_store.ts";
 import PackageParameter from "./PackageParameter.tsx";
 
 export default function PackageSection() {

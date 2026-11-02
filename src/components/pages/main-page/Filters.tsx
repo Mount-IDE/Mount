@@ -1,8 +1,8 @@
 import "./styles/filters.css"
-import search from "../../../assets/search.svg"
-import filters from "../../../assets/filters.svg"
-import {mainPageStore} from "../../../stores/main_page_store.ts";
-import {filterStore} from "../../../stores/filter_store.ts";
+import search from "@assets/search.svg"
+import filters from "@assets/filters.svg"
+import {mainPageStore} from "@stores/main_page_store.ts";
+import {filterStore} from "@stores/filter_store.ts";
 import {AnimatePresence, motion} from "motion/react";
 
 

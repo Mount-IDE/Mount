@@ -1,8 +1,8 @@
 import "./styles/section.css"
 import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import Parameter from "./Parameter.tsx";
-import {createProjectStore} from "../../../stores/create_project.ts";
-import {cacheStore} from "../../../stores/cache_store.ts";
+import {createProjectStore} from "@stores/create_project.ts";
+import {cacheStore} from "@stores/cache_store.ts";
 
 type Props = {
     section: ISection

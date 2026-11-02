@@ -1,13 +1,13 @@
 import "./styles/settings-page.css"
-import Button from "../../common/Button.tsx";
-import {settingsStore} from "../../../stores/settings_store.ts";
-import pageStore from "../../../stores/page_store.ts";
+import Button from "@common/Button.tsx";
+import {settingsStore} from "@stores/settings_store.ts";
+import pageStore from "@stores/page_store.ts";
 import {useMemo, useState} from "react";
 import SettingsSection from "./SettingsSection.tsx";
-import {noteStore, NotificationType} from "../../../stores/note_store.ts";
-import {themeStore} from "../../../stores/theme_store.ts";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
+import {themeStore} from "@stores/theme_store.ts";
 import {motion} from "motion/react";
-import {ModalApiShorted} from "../../../stores/modal_page_store.ts";
+import {ModalApiShorted} from "@stores/modal_page_store.ts";
 
 
 function useSettings(settings: Settings | null, themes: ITheme[]) {
@@ -161,7 +161,7 @@ export default function SettingsPage() {
                     <Button title={"Ok"} cb={ok}/>
                     <Button title={"APply"} cb={() => {
                         close()
-                        ok()
+                        ok().then()
                     }}/>
                 </div>
             </div>

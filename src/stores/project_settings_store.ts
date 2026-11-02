@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {launchStore} from "./launch_store.ts";
+import launchService from "@/src/services/launch_service.ts";
 
 
 interface Type {
@@ -133,7 +133,7 @@ export const projectSettingsStore = create<Type>((set, get) => ({
                 let found =
                     proj.workspace.launch_references.find(el => el.id == cur_launch)
                 if (found !== undefined) {
-                    launchStore.getState().set_current_launch(found!);
+                    launchService.set_current_launch(found!.id);
                 }
             }
         }

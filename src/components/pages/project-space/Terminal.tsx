@@ -5,10 +5,10 @@ import {Terminal as XTerm} from "@xterm/xterm";
 import {invoke} from "@tauri-apps/api/core";
 import {listen, type UnlistenFn} from "@tauri-apps/api/event";
 import {useCallback, useEffect, useRef, useState} from "react";
-import {projectStore} from "../../../stores/project_store.ts";
-import plus from "../../../assets/plus.svg";
-import cross from "../../../assets/title-close.svg";
-import {cacheStore} from "../../../stores/cache_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import plus from "@assets/plus.svg";
+import cross from "@assets/title-close.svg";
+import {cacheStore} from "@stores/cache_store.ts";
 
 type TerminalOutput = { id: string; data: string };
 type TerminalExit = { id: string };

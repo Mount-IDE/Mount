@@ -1,11 +1,11 @@
 import "./styles/code-files.css"
-import {fsExtStore} from "../../../stores/fs_ext_store.ts";
-import cross from "../../../assets/title-close.svg"
-import {codeSpaceStore} from "../../../stores/code_space_store.ts";
-import {fileCacheStore} from "../../../stores/file_cache_store.ts";
-import ContextMenu, {IContextMenuButton} from "../../common/ContextMenu.tsx";
+import {fsExtStore} from "@stores/fs_ext_store.ts";
+import cross from "@assets/title-close.svg"
+import {codeSpaceStore} from "@stores/code_space_store.ts";
+import {fileCacheStore} from "@stores/file_cache_store.ts";
+import ContextMenu, {IContextMenuButton} from "@common/ContextMenu.tsx";
 import React, {useEffect, useRef, useState} from "react";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 
 type Props = {
     files: Opened[]

@@ -23,7 +23,8 @@ export default defineConfig(async () => ({
             "@common": path.resolve(__dirname, "src", "components", "common"),
             "@pages": path.resolve(__dirname, "src", "components", "pages"),
             "@stores": path.resolve(__dirname, "src", "stores"),
-            "@assets": path.resolve(__dirname, "public")
+            "@assets": path.resolve(__dirname, "src", "assets"),
+            "@services": path.resolve(__dirname, "src", "services")
         }
     },
     // 2. tauri expects a fixed port, fail if that port is not available

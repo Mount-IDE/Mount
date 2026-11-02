@@ -1,8 +1,8 @@
 import "./styles/project-templates.css"
-import {cacheStore} from "../../../stores/cache_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
 import Template from "./Template.tsx";
-import settings from "../../../assets/settings.svg"
-import Icon from "../../common/Icon.tsx";
+import settings from "@assets/settings.svg"
+import Icon from "@common/Icon.tsx";
 
 
 export default function ProjectTemplates() {

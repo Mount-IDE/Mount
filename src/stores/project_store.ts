@@ -13,6 +13,7 @@ interface Type {
     path_to_current_project: string
     current_project: IProject | null,
     add_launch_reference: (temp: LaunchTemplate, temp2: ITemplate) => number
+    // update it only in project config
     update_launch_references: (refs: LaunchTemplateReference[]) => Promise<void>
     update_launch_objects: (template: LaunchTemplate) => Promise<[boolean, IProject | null]>
 
@@ -106,7 +107,8 @@ export const projectStore = create<Type>((set, get) => ({
         if (project) {
             let refs = project.workspace.launch_references;
             try {
-                let res = await invoke<[IProject, LaunchObject[]]>("create_objects", {
+                let res = await invoke<[IProject, LaunchObject[]]>(
+                    "create_objects", {
                     references: refs,
                     template: template,
                     vars: project.vars,
@@ -170,10 +172,11 @@ export const projectStore = create<Type>((set, get) => ({
             let proj = structuredClone(project!)
             proj.workspace.launch_references = refs;
             for (let i = 0; i < proj.workspace.launch_references.length; i++) {
+                // update name
                 if (Object.keys(proj.workspace.launch_references[i].results).includes("-1")) {
                     let found = proj.workspace.launch_references[i].results[-1]
                     if (Object.keys(found).includes("name")) {
-                        proj.workspace.launch_references[i].name = found["name"];
+                        proj.workspace.launch_references[i].name = found["name"].toString();
                     }
                 }
 

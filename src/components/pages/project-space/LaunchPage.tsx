@@ -1,17 +1,18 @@
 import "./styles/launch-page.css"
-import Button from "../../common/Button.tsx";
+import Button from "@common/Button.tsx";
 import {launchStore} from "@stores/launch_store.ts";
 import {projectStore} from "@stores/project_store.ts";
 
-import plus from "../../../assets/plus.svg"
-import minus from "../../../assets/title-wrap.svg"
+import plus from "@assets/plus.svg"
+import minus from "@assets/title-wrap.svg"
 import LaunchSection from "./LaunchSection.tsx";
-import {useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {noteStore, NotificationType} from "@stores/note_store.ts";
-import pageStore from "../../../stores/page_store.ts";
+import pageStore from "@stores/page_store.ts";
 import {motion} from "motion/react";
-import Icon from "../../common/Icon.tsx";
+import Icon from "@common/Icon.tsx";
 import Table from "@common/Table.tsx";
+import launchService from "@/src/services/launch_service.ts";
 
 
 export default function LaunchPage() {
@@ -19,30 +20,57 @@ export default function LaunchPage() {
     const current_launch_template = launchStore(state => state.current_template)
 
     const project = projectStore(state => state.current_project);
-    const template = project?.template;
+    const project_template = project?.template;
 
-    const [curRef, setCurRef] = useState<number | null>(null)
 
-    // fn
-    const set_current_template = launchStore(state => state.set_current_template)
-    const set_current_template_by_ref = launchStore(state => state.set_current_temp_by_ref)
-    const opened = launchStore(state => state.set_opened)
-    const setCurrentLaunchReference = launchStore(state => state.set_current_launch)
-    const setCurrentLaunchProject = projectStore(state => state.set_current_launch);
-    const find = launchStore(state => state.find_temp)
+    // const [curRef, setCurRef] = useState<number | null>(null)
+    const curRef = projectStore(state => state.current_project?.workspace.current_launch) ?? null
 
     const templates = project?.workspace.launch_templates ?? [];
-    const references = launchStore(state => state.references)
+
+
+    const changed_references = launchStore(state => state.changed_references)
+
+    /**
+     * copy
+     */
+    const references_copy = launchStore(state => state.copy_references)
+
+
+    useEffect(() => {
+        if (project?.workspace.launch_references) {
+            launchStore.setState({
+                copy_references: [...project.workspace.launch_references]
+            })
+        }
+    }, [project?.workspace.launch_references]);
+
+
+    useEffect(() => {
+        if (current_launch_template == null && curRef != null) {
+            let ref = projectStore.getState().current_project?.workspace.launch_references.find(el => el.id == curRef)
+            if (ref) {
+                let temp =
+                    projectStore.getState().current_project!.workspace.launch_templates.find(el => el.id == ref.template[1])
+                if (temp) {
+                    launchStore.setState({
+                        current_template: temp
+                    })
+                }
+            }
+        }
+    }, []);
 
 
     /**
-     * need to rewrite
+     * meta of current template
      */
     let meta = useMemo<LaunchSection>(() => {
 
-        let val = find(-1, "name", curRef ?? -1)
+        let val = references_copy[curRef ?? -1]?.results[-1]?.["name"] as string | undefined
         if (!val) {
-            let ref = references.find(el => el.id == curRef)
+            console.log("REFS", references_copy)
+            let ref = references_copy.find(el => el.id == curRef)
             if (ref) {
                 let needed_temp = templates.find(el => el.id == ref?.template[1])
                 if (needed_temp) {
@@ -55,25 +83,26 @@ export default function LaunchPage() {
             }
         }
         return ({
-        id: -1,
-        options: [
-            {
-                def: val,
-                id: "name",
-                title: "Name",
-                typ: {
-                    typ: "input"
+            id: -1,
+            options: [
+                {
+                    def: val,
+                    id: "name",
+                    title: "Name",
+                    typ: {
+                        typ: "input"
+                    }
                 }
-            }
-        ],
+            ],
 
         })
-    }, [curRef, references, templates])
+    }, [curRef, references_copy, templates])
 
     const [showContext, setShowContext] = useState(false)
 
     const updateReferences = projectStore(state => state.update_launch_references);
-    const updateObjects = projectStore(state => state.update_launch_objects)
+
+    //const updateObjects = projectStore(state => state.update_launch_objects)
 
 
     /**
@@ -81,18 +110,19 @@ export default function LaunchPage() {
      */
     async function apply(): Promise<boolean> {
         if (current_launch_template) {
-            await updateReferences(references);
+            launchStore.setState({
+                changed_references: new Set()
+            })
+            await updateReferences(references_copy);
             const found =
-                references.find(el => el.id == curRef)
+                references_copy.find(el => el.id == curRef)
             if (found) {
-                setCurrentLaunchReference(found!)
-                setCurrentLaunchProject(found!.id);
+                launchService.set_current_launch(found.id)
             }
-            let res = await updateObjects(current_launch_template);
+            let res = await launchService.update_launch_objects();
             if (!res) {
                 return false
             }
-
             if (res[1] != null) {
                 projectStore.getState().save_project(res[1])
             }
@@ -107,26 +137,41 @@ export default function LaunchPage() {
      * @param ref
      */
     function addReference(el: LaunchTemplate, ref: LaunchTemplateReference) {
-        launchStore.getState().add_reference(ref)
-        setCurRef(ref.id)
-        set_current_template(el)
+        // launchStore.getState().add_reference(ref)
+        launchService.add_ref(ref)
+        launchService.set_current_launch(ref.id)
+        launchStore.setState({
+            current_template: el
+        })
     }
 
     /**
      *
      */
     function removeReference() {
-        launchStore.getState().rem_reference(curRef ?? -1)
+        if (curRef !== null) {
+            launchService.remove_ref(curRef)
+            console.log(launchService.set_current_launch(null))
+        }
     }
 
 
+    /**
+     *
+     * @param ref
+     */
     function selectReference(ref: LaunchTemplateReference) {
-        set_current_template_by_ref(ref, templates)
-        setCurRef(ref.id)
+        let needed = references_copy.find(el => el.id == ref.id)
+        if (needed) {
+            let temp = templates.find(el => el.id == needed?.template[1])
+            if (temp) {
+                launchStore.setState({
+                    current_template: temp
+                })
+                launchService.set_current_launch(ref.id)
+            }
+        }
     }
-
-
-
 
     return (
         <motion.div
@@ -147,14 +192,14 @@ export default function LaunchPage() {
                         <Icon src={minus} size={"80%"} onClick={() => removeReference()}/>
                         {
                             showContext &&
-                            <div id={"launch-template-select"}>
+                            <div id={"launch-template-select"} className={"z-100"}>
                                 {templates.map((el, i) =>
-                                    <LaunchSelect references={references}
-                                                  add_ref={(r) => {
-                                                      addReference(el, r)
-                                                      setShowContext(false)
-                                                  }}
-                                                  obj={el} key={i} temp={template}
+                                    <LaunchSelectElements references={references_copy}
+                                                          add_ref={(r) => {
+                                                              addReference(el, r)
+                                                              setShowContext(false)
+                                                          }}
+                                                          obj={el} key={i} temp={project_template}
                                     />
                                 )}
                             </div>
@@ -162,18 +207,23 @@ export default function LaunchPage() {
                     </div>
                     <div id={"launch-left-list"}>
                         {
-                            references.map((el, key) =>
-                                <LaunchRef current={curRef == el.id} key={key} obj={el}
-                                           cb={selectReference}/>
+                            references_copy.map((el, key) =>
+                                <LaunchRefElement
+                                    selected={curRef == el.id}
+                                    key={key}
+                                    obj={el}
+                                    cb={selectReference}
+                                    changed={changed_references.has(el.id)}
+                                />
                             )
                         }
                     </div>
                 </div>
                 <div id={"launch-right"} className={"relative"}>
                     {
-                        (current_launch_template == null || curRef == null) &&
+                        (curRef == null) &&
                         <p style={{margin: "auto"}}
-                           className={"flex flex-col items-center justify-center text-(--subtitle) absolute inset-0"}>Create
+                           className={"flex select-none flex-col items-center justify-center text-(--subtitle) absolute inset-0"}>Create
                             or select exist launch configuration</p>
                     }
                     {
@@ -193,7 +243,8 @@ export default function LaunchPage() {
                     <Button width={100} title={"Ok"} cb={async () => {
                         let res = await apply()
                         if (res) {
-                            opened(false)
+                            //opened(false)
+                            launchStore.getState().set_opened(false)
                             pageStore.getState().setFilter(false)
                         } else {
                             noteStore.getState().add_note({
@@ -203,7 +254,8 @@ export default function LaunchPage() {
                         }
                     }}/>
                     <Button width={100} title={"Cancel"} cb={() => {
-                        opened(false)
+                        // opened(false)
+                        launchStore.getState().set_opened(false)
                         pageStore.getState().setFilter(false)
                     }}/>
                     <Button width={100} title={"Apply"} cb={async () => {
@@ -230,6 +282,11 @@ type SectionsProps = {
     meta: LaunchSection
 }
 
+/**
+ *
+ * @param props
+ * @constructor
+ */
 function LaunchPageSections(props: SectionsProps) {
     const {project, meta, curRef, current_launch_template} = props
 
@@ -252,14 +309,16 @@ function LaunchPageSections(props: SectionsProps) {
                 )
             }
             <div className={""}>
-                <p className={""}>Before Launch</p>
+                <p className={"text-(--subtitle)"}>Before Launch</p>
                 <Table rows={[
                     {
                         data: ["3", "4", "5"]
                     }
                 ]} add_row={() => {
-                }} rem_row={() => {
-                }} swap_rows={() => {
+                }} rem_row={(_i) => {
+
+                }} swap_rows={(_first, _second) => {
+
                 }} style={"select-none"}/>
             </div>
         </div>
@@ -269,7 +328,8 @@ function LaunchPageSections(props: SectionsProps) {
 type RefProps = {
     obj: LaunchTemplateReference
     cb: (obj: LaunchTemplateReference) => void
-    current: boolean
+    selected: boolean
+    changed: boolean
 }
 
 
@@ -278,16 +338,17 @@ type RefProps = {
  * @param props
  * @constructor
  */
-function LaunchRef(props: RefProps) {
+function LaunchRefElement(props: RefProps) {
     const path = props.obj.icon ? `/builtin/fs-icons/${props.obj.icon}` : "/builtin/fs-icons/any.svg"
     return (
         <div onClick={() => props.cb(props.obj)}
-             className={`launch-left-ref ${props.current ? "selected" : ""}`}
+             className={`select-none launch-left-ref ${props.selected ? "selected" : ""}`}
         >
-            <div className={"launch-left-ref-img"}>
-                <img src={path}/>
-            </div>
+            <Icon src={path} size={"15px"}/>
             {props.obj.name}
+            {props.changed && <span style={{
+                color: props.selected ? "var(--title)" : "var(--subtitle)"
+            }} className={"text-(--subtitle)"}>*</span>}
         </div>
     )
 }
@@ -305,7 +366,7 @@ type SelectProps = {
  * @param props
  * @constructor
  */
-function LaunchSelect(props: SelectProps) {
+function LaunchSelectElements(props: SelectProps) {
     const path = props.obj.icon ? `/builtin/fs-icons/${props.obj.icon}` : "/builtin/fs-icons/any.svg"
     return (
         <div className={"launch-template-select"}

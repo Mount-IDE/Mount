@@ -65,7 +65,7 @@ impl TLaunchCompileService for LaunchCompileService {
             icon: l_template.icon.clone(),
             name: l_template.title.clone(),
             results: HashMap::new(),
-            before: None
+            before: None,
         };
 
         Some(obj)
@@ -119,7 +119,7 @@ impl TLaunchCompileService for LaunchCompileService {
             if let Some(sect) = sect {
                 let param = sect.get(&parameter);
                 if let Some(param) = param {
-                    return Some(Val::STRING(param.clone()));
+                    return Some(param.clone());
                 }
             }
         }
@@ -362,7 +362,7 @@ impl TLaunchCompileService for LaunchCompileService {
         let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
         let mut seq = false;
 
-        let mut result: FunctionResult;
+        let result: FunctionResult;
         for act in function.actions.iter() {
             let res: Option<FunctionResult> = match act.function.as_str() {
                 "read_from" => {

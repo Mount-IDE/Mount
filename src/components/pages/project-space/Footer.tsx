@@ -1,13 +1,13 @@
 import "./styles/footer.css"
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
-import {codeSpaceStore} from "../../../stores/code_space_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import {codeSpaceStore} from "@stores/code_space_store.ts";
 import {Fragment, useEffect, useState} from "react";
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {fsAsideTreeStore} from "../../../stores/fs_aside_tree_store.ts";
-import {fsExtStore} from "../../../stores/fs_ext_store.ts";
-import Icon from "../../common/Icon.tsx";
-import arrow from "../../../assets/arrow.svg"
+import {cacheStore} from "@stores/cache_store.ts";
+import {fsAsideTreeStore} from "@stores/fs_aside_tree_store.ts";
+import {fsExtStore} from "@stores/fs_ext_store.ts";
+import Icon from "@common/Icon.tsx";
+import arrow from "@assets/arrow.svg"
 
 export default function Footer() {
 
@@ -41,7 +41,7 @@ export default function Footer() {
         }
 
         let os = cacheStore.getState().os;
-        let parts = [] as string[]
+        let parts: string[]
         if (os == "windows") {
             parts = path.split("\\")
         } else {

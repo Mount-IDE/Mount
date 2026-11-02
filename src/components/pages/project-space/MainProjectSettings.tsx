@@ -1,10 +1,10 @@
 import "./styles/main-project-settings.css"
-import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
+import {projectSettingsStore} from "@stores/project_settings_store.ts";
 import {useEffect, useRef} from "react";
-import Gen from "../../common/Gen.tsx";
-import Input from "../../common/Input.tsx";
-import List from "../../common/List.tsx";
-import {settingsStore} from "../../../stores/settings_store.ts";
+import Gen from "@common/Gen.tsx";
+import Input from "@common/Input.tsx";
+import List from "@common/List.tsx";
+import {settingsStore} from "@stores/settings_store.ts";
 
 
 interface Option {

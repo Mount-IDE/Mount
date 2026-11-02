@@ -1,5 +1,5 @@
 import "./styles/notifications.css"
-import {noteStore} from "../../stores/note_store.ts"
+import {noteStore} from "@stores/note_store.ts"
 
 export default function FsNotifications() {
 

@@ -1,10 +1,10 @@
 import "./styles/directory.css"
 import FileX from "./FileX.tsx";
-import arrow from "../../assets/arrow.svg"
+import arrow from "@assets/arrow.svg"
 import React, {useEffect, useRef, useState} from "react";
-import {fsExtStore} from "../../stores/fs_ext_store.ts";
-import {asideStore} from "../../stores/aside_store.ts";
-import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
+import {fsExtStore} from "@stores/fs_ext_store.ts";
+import {asideStore} from "@stores/aside_store.ts";
+import {fsAsideTreeStore} from "@stores/fs_aside_tree_store.ts";
 
 /**
  * @type Props

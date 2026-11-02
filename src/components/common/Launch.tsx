@@ -1,16 +1,18 @@
 import "./styles/launch.css"
-import launch from "../../assets/launch-term.svg"
-import play from "../../assets/play.svg"
-import arrow from "../../assets/arrow.svg"
-import more from "../../assets/more.svg"
+import launch from "@assets/launch-term.svg"
+import play from "@assets/play.svg"
+import arrow from "@assets/arrow.svg"
+import more from "@assets/more.svg"
 import ContextMenu, {IContextMenuButton} from "./ContextMenu.tsx";
 import {useRef, useState} from "react";
-import {launchStore} from "../../stores/launch_store.ts";
-import {projectStore} from "../../stores/project_store.ts";
-import {asideButtonsStore} from "../../stores/aside_buttons_store.ts";
-import {asideStore} from "../../stores/aside_store.ts";
-import pageStore from "../../stores/page_store.ts";
+import {launchStore} from "@stores/launch_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import {asideButtonsStore} from "@stores/aside_buttons_store.ts";
+import {asideStore} from "@stores/aside_store.ts";
+import pageStore from "@stores/page_store.ts";
 import Icon from "./Icon.tsx";
+import launchService from "@/src/services/launch_service.ts";
+import {noteStore, NotificationType} from "@stores/note_store.ts";
 
 export default function Launch() {
 
@@ -18,11 +20,14 @@ export default function Launch() {
     const [showContext, setShowContext] = useState(false)
     const [cords, setCords] = useState<[number, number]>([0, 0])
 
-    const currentLaunch = launchStore(state => state.current_launch)
-    const project = projectStore(state => state.current_project)
-    const runLaunch = launchStore(state => state.run_launch)
-    const compileToObj = launchStore(state => state.compile_to_obj)
 
+    const current_launch_id = projectStore(state => state.current_project?.workspace.current_launch)
+
+
+    const currentLaunch = projectStore(state =>
+        state.current_project?.workspace.launch_references.find(el => el.id == current_launch_id)) ?? null
+
+    const project = projectStore(state => state.current_project)
     const open_launch = launchStore(state => state.set_opened);
     const more_buttons: IContextMenuButton[] = [
         {
@@ -40,7 +45,7 @@ export default function Launch() {
         },
     ]
 
-    const refs = launchStore(state => state.references)
+    const refs = launchStore(state => state.copy_references)
 
 
     const ref = useRef<HTMLDivElement>(null)
@@ -75,7 +80,7 @@ export default function Launch() {
                     className={"absolute min-w-full top-full flex flex-col min-h-10 max-h-50 overflow-auto bg-(--bg) border border-(--border3) overflow-x-hidden"}>
                     {refs.map((el, i) =>
                         <div className={"w-full h-5 flex items-center hover:bg-(--hover) text-(--subtitle)"} key={i}
-                             onClick={() => launchStore.getState().set_current_launch(el)}
+                             onClick={() => launchService.set_current_launch(el.id)}
                         >
                             <p className={"whitespace-nowrap text-[8pt] font-[300]"}>{el.name}</p>
                         </div>
@@ -90,14 +95,17 @@ export default function Launch() {
                           project.workspace.launch_objects.find((obj) => obj.launch_reference === currentLaunch.id) ?? null;
 
                       if (!object) {
-                          const template = project.workspace.launch_templates.find((template) => template.id === currentLaunch.template[1]);
-                          if (!template) return;
-                          object = await compileToObj(currentLaunch, currentLaunch.results, template);
+                          /* const template = project.workspace.launch_templates.find((template) => template.id === currentLaunch.template[1]);
+                           if (!template) return;
+                           object = await compileToObj(currentLaunch, currentLaunch.results, template);*/
+
+                          noteStore.getState().add_note({
+                              type: NotificationType.ERR,
+                              text: "Launch object not found"
+                          }, 2000)
+                          return
                       }
-
-                      if (!object) return;
-                      runLaunch(object);
-
+                      launchService.run_launch(object);
                       openAsideLaunch();
                   }}/>
 

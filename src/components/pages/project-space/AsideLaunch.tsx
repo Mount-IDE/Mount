@@ -1,15 +1,16 @@
 import "./styles/aside-launch.css";
 import "@xterm/xterm/css/xterm.css";
-import {projectStore} from "../../../stores/project_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
-import cross from "../../../assets/title-close.svg"
+import cross from "@assets/title-close.svg"
 import {Terminal} from "@xterm/xterm";
 import {FitAddon} from "@xterm/addon-fit";
 import {listen, UnlistenFn} from "@tauri-apps/api/event";
 import {invoke} from "@tauri-apps/api/core";
-import {launchStore} from "../../../stores/launch_store.ts";
+import {launchStore} from "@stores/launch_store.ts";
 
-import restart_ from "../../../assets/return.svg"
+import restart_ from "@assets/return.svg"
+import launchService from "@/src/services/launch_service.ts";
 
 type Props = { active?: boolean };
 
@@ -61,7 +62,7 @@ export default function AsideLaunch(_: Props) {
                     processes.map((el, i) =>
                         <LaunchPos current={el.id == current} key={i} proc={el} ref={references[i]}
                                    onClose={(proc) => {
-                                       launchStore.getState().remove_active_object(proc.obj)
+                                       launchService.remove_active_object(proc.obj.id)
                                    }}
                                    onSelect={(proc) => setCurrent(proc.id)}
                                    selected={current == el.id}

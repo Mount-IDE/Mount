@@ -5,19 +5,15 @@ use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::domain::entities::{Package, Repair};
-use crate::modules::contexts::toolchains::domain::{
-    ComponentRepairRaw, Toolchain, ToolchainComponent,
-};
+use crate::modules::contexts::toolchains::domain::{Toolchain, ToolchainComponent};
 use crate::modules::contexts::toolchains::traits::{
     TToolchainComponentsService, TToolchainMakeService, TToolchainPackageComponent,
 };
 use crate::modules::services::traits::{TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::ToolchainError;
-use crate::modules::shared::kernel::utils::{get_os, get_platform, shell_default};
 use crate::modules::shared::kernel::values::Path;
 use crate::modules::shared::kernel::values::Platform;
 use crate::path_from;
-use which::which;
 
 pub struct ToolchainMakeService();
 
@@ -128,7 +124,7 @@ impl TToolchainComponentsService for ToolchainComponentService {
         cmp: String,
     ) -> Result<(), ToolchainError> {
         unimplemented!();
-        let comp = toolchain
+        /* let comp = toolchain
             .components
             .get(&cmp)
             .ok_or(ToolchainError::ComponentNotFound {
@@ -153,7 +149,7 @@ impl TToolchainComponentsService for ToolchainComponentService {
         };
 
         let discovery = repair.discovery.clone();
-        let plat = get_platform();
+        let plat = PlatformType::current();
         if let Some(discovery) = discovery {
             for i in discovery {
                 if let Some(platform) = i.platform {
@@ -182,7 +178,7 @@ impl TToolchainComponentsService for ToolchainComponentService {
                     } => {
                         let Ok(_) = which("curl") else { continue };
                         let shell = if shell.is_none() {
-                            shell_default()
+                            crate::modules::shared::kernel::utils::shell_default()
                         } else {
                             shell.unwrap()
                         };
@@ -203,7 +199,7 @@ impl TToolchainComponentsService for ToolchainComponentService {
                 }
             }
         }
-        todo!()
+        todo!()*/
     }
 
     fn check_platform(

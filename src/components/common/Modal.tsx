@@ -1,6 +1,6 @@
 import "./styles/modal.css"
 import {useEffect, useState} from "react";
-import {menuStore} from "../../stores/menu_store.ts";
+import {menuStore} from "@stores/menu_store.ts";
 
 
 type ModalType = "alert" |"confirm" | "prompt"

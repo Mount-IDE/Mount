@@ -1,13 +1,13 @@
 import "./styles/header.css"
-import minus from "../../assets/title-wrap.svg"
-import {asideStore, comp} from "../../stores/aside_store.ts";
+import minus from "@assets/title-wrap.svg"
+import {asideStore, comp} from "@stores/aside_store.ts";
 import {useEffect, useMemo, useRef, useState} from "react";
 import FsAside from "./FsAside.tsx";
-import more from "../../assets/more.svg"
+import more from "@assets/more.svg"
 import HeaderOptions from "./HeaderOptions.tsx";
-import RestrictedList from "../common/RestrictedList.tsx";
+import RestrictedList from "@common/RestrictedList.tsx";
 import HeaderButton from "./HeaderButton.tsx";
-import {signalStore} from "../../stores/signal_store.ts";
+import {signalStore} from "@stores/signal_store.ts";
 
 type Props = {
     label: string

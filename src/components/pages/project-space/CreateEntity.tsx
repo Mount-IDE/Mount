@@ -1,10 +1,10 @@
 import "./styles/create-entity.css"
 import {useEffect, useRef, useState} from "react";
 import {invoke} from "@tauri-apps/api/core";
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {contextStore} from "../../../stores/context_store.ts";
-import {menuStore} from "../../../stores/menu_store.ts";
-import Input from "../../common/Input.tsx";
+import {cacheStore} from "@stores/cache_store.ts";
+import {contextStore} from "@stores/context_store.ts";
+import {menuStore} from "@stores/menu_store.ts";
+import Input from "@common/Input.tsx";
 import {motion} from "motion/react";
 
 /**

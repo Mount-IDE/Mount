@@ -1,6 +1,6 @@
 import "./styles/notifications.css"
-import {noteStore, NotificationType} from "../../stores/note_store.ts";
-import image from "../../assets/title-close.svg"
+import {noteStore, NotificationType} from "@stores/note_store.ts";
+import image from "@assets/title-close.svg"
 import {AnimatePresence, motion} from "motion/react";
 import {useEffect} from "react";
 import {listen} from "@tauri-apps/api/event";

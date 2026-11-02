@@ -1,8 +1,8 @@
 import "./styles/central.css"
-import {codeSpaceStore} from "../../../stores/code_space_store.ts";
+import {codeSpaceStore} from "@stores/code_space_store.ts";
 import CodeSpace from "./CodeSpace.tsx";
-import logo from "../../../assets/logo_black_white.svg"
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import logo from "@assets/logo_black_white.svg"
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 
 
 export default function Central() {

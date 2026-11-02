@@ -1,8 +1,8 @@
 import "./styles/bottom.css"
-import {asideStore} from "../../../stores/aside_store.ts";
-import {asideButtonsStore} from "../../../stores/aside_buttons_store.ts";
+import {asideStore} from "@stores/aside_store.ts";
+import {asideButtonsStore} from "@stores/aside_buttons_store.ts";
 import {useEffect, useMemo, useRef} from "react";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 
 
 type Props = {

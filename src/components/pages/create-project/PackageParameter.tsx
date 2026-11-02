@@ -1,9 +1,9 @@
-import {createProjectStore} from "../../../stores/create_project.ts";
-import Input from "../../common/Input.tsx";
-import Check from "../../common/Check.tsx";
-import List from "../../common/List.tsx";
-import FSContext from "../../common/FSContext.tsx";
-import Gen from "../../common/Gen.tsx";
+import {createProjectStore} from "@stores/create_project.ts";
+import Input from "@common/Input.tsx";
+import Check from "@common/Check.tsx";
+import List from "@common/List.tsx";
+import FSContext from "@common/FSContext.tsx";
+import Gen from "@common/Gen.tsx";
 
 type Props = {
     param: IPackageParameter

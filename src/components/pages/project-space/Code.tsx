@@ -1,13 +1,10 @@
 import "./styles/code.css"
 import React, {RefObject, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
-import {fileCacheStore} from "../../../stores/file_cache_store.ts";
+import {fileCacheStore} from "@stores/file_cache_store.ts";
 
-import {themeStore} from "../../../stores/theme_store.ts";
-//import {treeStore} from "../../../stores/tree_store.ts";
-import {projectStore} from "../../../stores/project_store.ts";
+import {themeStore} from "@stores/theme_store.ts";
+import {projectStore} from "@stores/project_store.ts";
 import {get_last_entity_of_path} from "../../../utils/utils.ts";
-//import {LanguageInner, languageStore} from "../../../stores/language_store.ts";
-//import {QueryCapture} from "web-tree-sitter";
 import {highlightClient} from "../../../workers/highlight_client.ts";
 import {ExtToken, Token} from "../../../workers/highlight_shared.ts";
 

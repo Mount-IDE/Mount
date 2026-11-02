@@ -1,9 +1,9 @@
 import "./styles/project-settings-variables.css"
-import {projectSettingsStore} from "../../../stores/project_settings_store.ts";
-import cross from "../../../assets/title-close.svg"
-import plus from "../../../assets/plus.svg"
+import {projectSettingsStore} from "@stores/project_settings_store.ts";
+import cross from "@assets/title-close.svg"
+import plus from "@assets/plus.svg"
 import {useEffect, useRef, useState} from "react";
-import Gen from "../../common/Gen.tsx";
+import Gen from "@common/Gen.tsx";
 
 export default function ProjectSettingsVariables() {
 

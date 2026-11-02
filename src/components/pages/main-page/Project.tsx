@@ -1,7 +1,7 @@
 import "./styles/project.css"
-import more from "../../../assets/more.svg"
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {computeBP, themeStore} from "../../../stores/theme_store.ts";
+import more from "@assets/more.svg"
+import {cacheStore} from "@stores/cache_store.ts";
+import {computeBP, themeStore} from "@stores/theme_store.ts";
 import React from "react";
 
 type Props = {

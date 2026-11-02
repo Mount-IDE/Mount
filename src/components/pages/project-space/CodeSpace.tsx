@@ -1,7 +1,7 @@
 import "./styles/code-space.css"
 import CodeFiles from "./CodeFiles.tsx";
 import Code from "./Code.tsx";
-import {codeSpaceStore} from "../../../stores/code_space_store.ts";
+import {codeSpaceStore} from "@stores/code_space_store.ts";
 
 
 type Props={

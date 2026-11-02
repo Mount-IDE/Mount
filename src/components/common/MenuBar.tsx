@@ -1,11 +1,11 @@
 import "./styles/menu-bar.css"
-import logo from "../../assets/icon.svg"
+import logo from "@assets/icon.svg"
 import {useEffect, useRef, useState} from "react";
-import list from "../../assets/list.svg"
+import list from "@assets/list.svg"
 import MenuBarSection, {IMenuBarSection} from "./MenuBarSection.tsx";
-import {cacheStore} from "../../stores/cache_store.ts";
-import {projectStore} from "../../stores/project_store.ts";
-import {menuBarStore} from "../../stores/menubar_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
+import {projectStore} from "@stores/project_store.ts";
+import {menuBarStore} from "@stores/menubar_store.ts";
 
 
 interface IMenuButton {

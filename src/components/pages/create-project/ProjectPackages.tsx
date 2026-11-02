@@ -1,11 +1,11 @@
 import "./styles/project-packages.css"
-import {cacheStore} from "../../../stores/cache_store.ts";
-import {createProjectStore} from "../../../stores/create_project.ts";
+import {cacheStore} from "@stores/cache_store.ts";
+import {createProjectStore} from "@stores/create_project.ts";
 import {useEffect} from "react";
 import Package from "./Package.tsx";
-import {packageStore} from "../../../stores/package_store.ts";
-import Icon from "../../common/Icon.tsx";
-import settings from "../../../assets/settings.svg";
+import {packageStore} from "@stores/package_store.ts";
+import Icon from "@common/Icon.tsx";
+import settings from "@assets/settings.svg";
 
 
 export default function ProjectPackages(){
