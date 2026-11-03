@@ -13,7 +13,7 @@ type Props = {
     show?: boolean
     incorrect?: string
     required?: boolean
-    placeholder: string
+    placeholder?: string
 }
 
 export default function FSContext(props: Props) {

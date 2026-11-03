@@ -1,21 +1,26 @@
 use super::utils::{path_from, split_path};
-use crate::modules::app::{APP, FS_READ_SERVICE};
+use crate::modules::app::{APP, FORMAT_SERVICE, FS_READ_SERVICE};
+use crate::modules::contexts::config::entities::{ConfigFsEntity, ConfigFsTemplate};
 use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::app::traits::{
-    TFSReadService, TFSWriteService, TFWatchService,
+    TFSReadService, TFSWriteService, TFWatchService, TFsEntityService,
 };
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{FsMeta, PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{
     FileType, FileWriteAccess, WatchInstance,
 };
+use crate::modules::contexts::project::domain::entities::{ActionTask, Var};
+use crate::modules::contexts::project::domain::values::ActionOnError;
+use crate::modules::services::traits::TFormatService;
 use crate::modules::shared::kernel::errors::FileSystemError;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Path, Val};
 use notify::event::{ModifyKind, RenameMode};
 use notify::{
     Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher,
 };
 use serde::Serialize;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path as std_path, PathBuf};
@@ -513,6 +518,100 @@ impl TFWatchService for FileSystemWatchService {
         if let Some(instance) = instance {
             drop(instance.watcher);
             let _ = instance.thread.join();
+        }
+        Ok(())
+    }
+}
+
+pub struct FsEntityService;
+
+impl TFsEntityService for FsEntityService {
+    fn create(
+        &self,
+        results: HashMap<String, HashMap<String, Val>>,
+        template: ConfigFsTemplate,
+        vars: Vec<Var>,
+    ) -> Result<(), FileSystemError> {
+        let Some(needed) = results.get(&template.id) else {
+            return Err(FileSystemError::FsEntityResults(template.id.clone()));
+        };
+        let Some(path) = needed.get("meta.path") else {
+            return Err(FileSystemError::FsEntityResults("".to_string()));
+        };
+        println!("correct1");
+        let path = Path::new(path.to_str().as_str());
+        println!("PATH {path:?}");
+        if let Some(entities) = template.entities {
+            println!("entities start {entities:?}");
+            for ent in entities.iter() {
+                // formating
+                let ent = match ent {
+                    ConfigFsEntity::Dir { name, entities } => {
+                        let Ok(name) = FORMAT_SERVICE.format_string(name.clone(), &vars, &needed)
+                        else {
+                            println!("CONTINUE name dir");
+                            continue;
+                        };
+                        ConfigFsEntity::Dir {
+                            name,
+                            entities: entities.clone(),
+                        }
+                    }
+                    ConfigFsEntity::File { name, content } => {
+                        let Ok(name) = FORMAT_SERVICE.format_string(name.clone(), &vars, &needed)
+                        else {
+                            println!("CONTINUE name file");
+                            continue;
+                        };
+                        // not strict
+                        let content = if let Some(content) = content {
+                            if let Ok(res) =
+                                FORMAT_SERVICE.format_string(content.clone(), &vars, &needed)
+                            {
+                                Some(res)
+                            } else {
+                                Some(content.clone())
+                            }
+                        } else {
+                            content.clone()
+                        };
+                        ConfigFsEntity::File { name, content }
+                    }
+                };
+
+                ent.create(path.clone())?
+            }
+        }
+        println!("entities passed");
+        let actions = if let Some(actions) = template.actions {
+            actions
+                .iter()
+                .filter(|act| act.check_platform() && act.check_condition(&needed, &vars))
+                .cloned()
+                .collect()
+        } else {
+            vec![]
+        };
+
+        println!("actions filtered {actions:?}");
+
+        let tasks = actions
+            .iter()
+            .filter_map(|e| e.compile(&actions, &vars, &needed, &mut vec![], false).ok())
+            .flatten()
+            .collect::<Vec<ActionTask>>();
+        println!("tasks compiled {tasks:?}");
+
+        let mut last = ActionOnError::CONTINUE;
+        for i in tasks {
+            println!("\t {last:?} task: {i:?}");
+            if i.from_graph && last != ActionOnError::CONTINUE {
+                continue;
+            }
+            last = i.execute(path.clone());
+            if last == ActionOnError::StopAll {
+                break;
+            }
         }
         Ok(())
     }

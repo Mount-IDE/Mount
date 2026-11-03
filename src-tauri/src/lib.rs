@@ -16,8 +16,6 @@ use crate::modules::contexts::package::domain::LspManager;
 use crate::modules::contexts::project::domain::entities::Package;
 use crate::modules::contexts::terminal::app::managers::TerminalManager;
 use crate::modules::shared::kernel::values::Path as MPath;
-use std::fs;
-use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tauri::{generate_handler, Manager, WindowEvent};
 
@@ -26,8 +24,8 @@ mod modules;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let out_dir = Path::new("../src/types");
-    let _ = fs::create_dir_all(out_dir);
+    // let out_dir = Path::new("../src/types");
+    //let _ = fs::create_dir_all(out_dir);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -147,7 +145,8 @@ pub fn run() {
             save_packages,
             close_window_launches,
             has_processes,
-            write_files
+            write_files,
+            create_fs_entity
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

@@ -1,5 +1,14 @@
-use super::values::{FsIcon, FsType};
-use crate::modules::shared::kernel::values::Schema;
+use super::values::FsIcon;
+use crate::modules::app::FS_WRITE_SERVICE;
+use crate::modules::contexts::filesystem::app::traits::TFSWriteService;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
+use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
+use crate::modules::contexts::project::domain::entities::{
+    PackageAction, PackageOption, PackageOptionTyp, PackageOptionTypEnum,
+};
+use crate::modules::shared::kernel::errors::FileSystemError;
+use crate::modules::shared::kernel::values::{Path, Schema};
+use crate::path_from;
 use serde::{Deserialize, Serialize};
 
 ///
@@ -28,34 +37,104 @@ impl Default for FsConfigIcons {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigFsTemplate {
     #[serde(default)]
-    id: String,
+    pub id: String,
     #[serde(default)]
-    title: String,
+    pub title: String,
     #[serde(default)]
-    typ: FsType,
+    pub icon: Option<String>,
     #[serde(default)]
-    icon: Option<String>,
+    parameters: Option<ConfigFsParameters>,
     #[serde(default)]
-    ext: Option<String>,
+    pub options: Option<Vec<PackageOption>>,
     #[serde(default)]
-    default_content: Option<String>,
+    pub actions: Option<Vec<PackageAction>>,
     #[serde(default)]
-    inner: Option<Vec<ConfigFsTemplate>>,
+    pub entities: Option<Vec<ConfigFsEntity>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConfigFsParameters {
     #[serde(default)]
-    base_name: Option<String>,
+    pub default_name: Option<String>,
+    #[serde(default)]
+    pub const_path: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "typ", rename_all = "lowercase")]
+pub enum ConfigFsEntity {
+    Dir {
+        name: String,
+        entities: Option<Vec<ConfigFsEntity>>,
+    },
+    File {
+        name: String,
+        content: Option<String>,
+    },
+}
+
+impl ConfigFsEntity {
+    pub fn create(&self, path: Path) -> Result<(), FileSystemError> {
+        println!("| start");
+        match self {
+            ConfigFsEntity::Dir { name, entities } => {
+                println!("|\tDIR");
+                let path = path_from![path, name];
+                let dir = FS_WRITE_SERVICE.create_dir(&path.clone())?;
+                println!("\tDIR created");
+                if let Some(entities) = entities {
+                    for i in entities.iter() {
+                        println!("\t | \t entity {i:?}");
+                        i.create(path.clone())?
+                    }
+                }
+            }
+            ConfigFsEntity::File { name, content } => {
+                println!("|\tFILE");
+                let path = path_from![path, name];
+                println!("\t{path:?}");
+                let file = FS_WRITE_SERVICE.create_file(&path.clone())?;
+                println!("\tfile created");
+                if let Some(con) = content {
+                    FS_WRITE_SERVICE.write_file(&file, con.clone(), FileWriteAccess::WRITE)?;
+                    println!("\twrited");
+                }
+            }
+        };
+        Ok(())
+    }
 }
 
 impl ConfigFsTemplate {
     pub fn file() -> Self {
         Self {
-            id: "empty".to_string(),
-            title: "Empty File".to_string(),
-            typ: FsType::file,
+            id: "file".to_string(),
+            title: "File".to_string(),
             icon: Some("any.svg".to_string()),
-            ext: None,
-            default_content: None,
-            inner: None,
-            base_name: None,
+            parameters: None,
+            options: Some(vec![PackageOption {
+                id: "content".to_string(),
+                title: "Content".to_string(),
+                typ: PackageOptionTyp {
+                    typ: PackageOptionTypEnum::INPUT,
+                    fs_type: None,
+                    list_type: None,
+                    placeholder: None,
+                    required: None,
+                    readonly: None,
+                    validate: None,
+                    fs_filter: None,
+                    gen_min: None,
+                    gen_max: None,
+                },
+                def: None,
+                while_: None,
+            }]),
+            actions: None,
+            entities: Some(vec![ConfigFsEntity::File {
+                name: "#meta.name".to_string(),
+                content: Some("#content".to_string()),
+            }]),
         }
     }
 
@@ -63,12 +142,14 @@ impl ConfigFsTemplate {
         Self {
             id: "dir".to_string(),
             title: "Directory".to_string(),
-            typ: FsType::dir,
             icon: Some("dir.svg".to_string()),
-            ext: None,
-            default_content: None,
-            inner: None,
-            base_name: None,
+            parameters: None,
+            options: None,
+            actions: None,
+            entities: Some(vec![ConfigFsEntity::Dir {
+                name: "#meta.name".to_string(),
+                entities: None,
+            }]),
         }
     }
 }

@@ -24,7 +24,6 @@ pub fn get_platform() -> PlatformType {
     PlatformType::MACOS
 }
 
-#[deprecated]
 pub fn shell_default() -> String {
     if cfg!(windows) {
         return "cmd".__get();

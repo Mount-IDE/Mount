@@ -4,9 +4,9 @@ use crate::modules::shared::kernel::values::Val;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Debug;
-use ts_rs::TS;
+//use ts_rs::TS;
 
-#[derive(Clone, TS, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub enum ActionOnError {
     #[serde(rename = "continue")]
     CONTINUE,
@@ -22,7 +22,7 @@ impl Default for ActionOnError {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectMeta {
     pub(crate) authors: Vec<String>,
     pub(crate) description: String,
@@ -58,7 +58,7 @@ impl ProjectMeta {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TemplateMeta {
     #[serde(default)]
     pub authors: Vec<String>,
@@ -78,7 +78,7 @@ impl Default for TemplateMeta {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ParameterLabel {
     STR(String),
@@ -91,7 +91,7 @@ impl Default for ParameterLabel {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ActionCommand {
     #[serde(default = "t_platform_def")]
     pub platform: String,
@@ -114,9 +114,9 @@ impl Default for ActionCommand {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ActionCommandArgs(pub String, pub Vec<String>);
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ActionCommandIn {
     Single(String),
@@ -129,7 +129,7 @@ impl Default for ActionCommandIn {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ButtonPos {
     LeftTop,
     LeftBottom,

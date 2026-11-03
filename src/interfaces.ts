@@ -86,7 +86,7 @@ interface ISection {
 
 interface IfStatementPart {
     from: string,
-    oper: string,
+    oper: "==" | "!=" | ">" | "<" | ">=" | "<=" | "empty" | "!empty" | "in" | "!in" | "regex" | "!regex" | "!already" | "stopped" | "!stopped" | "installed" | "!installed",
     value: IVal
 }
 
@@ -182,15 +182,34 @@ interface FileCache extends FileCacheLight {
 }
 
 
-interface configFsTemplate {
+interface ConfigFsTemplate {
     id: string,
-    title: string,
-    typ: "file" | "dir",
-    icon?: string,
-    ext?: string,
-    default_content?: string,
-    inner?: configFsTemplate[],
-    base_name?: string
+    title: string
+    // title: string,
+    // typ: "file" | "dir",
+    // icon?: string,
+    // ext?: string,
+    // default_content?: string,
+    // inner?: configFsTemplate[],
+    // base_name?: string
+    icon?: string
+    parameters?: {
+        default_name?: string // meta.name don`t display
+        const_path?: boolean // meta.path don`t display
+    }
+    options?: IPackageParameter[]
+    actions?: IPackageAction[]
+    entities?: FsEntity[]
+}
+
+type FsEntity = {
+    typ: "dir"
+    name: string
+    files?: FsEntity[]
+} | {
+    typ: "file"
+    name: string
+    content?: string
 }
 
 interface PackageInner {
@@ -209,7 +228,7 @@ interface Cache {
     projects_dir: string,
     os: string,
     file_icons: FsConfigIcons[],
-    file_templates: configFsTemplate[]
+    file_templates: ConfigFsTemplate[]
     shells: string[]
     themes: string[]
 

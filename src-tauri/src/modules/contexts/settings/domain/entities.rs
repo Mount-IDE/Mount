@@ -3,13 +3,12 @@ use crate::modules::contexts::project::domain::values::ProjectMeta;
 use crate::modules::shared::kernel::values::Path;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use ts_rs::TS;
+//use ts_rs::TS;
 
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Settings {
     #[serde(default)]
     pub doctype: String,
@@ -25,8 +24,7 @@ pub struct Settings {
     pub licenses: HashMap<String, SettingsLicenseEntry>,
 }
 
-#[derive(Serialize, Default, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Default, Deserialize, Clone, Debug)]
 pub struct SettingsLicenseEntry {
     pub filename: String,
     pub entries_input: Option<HashMap<String, Vec<String>>>, // UI params -> text in license
@@ -104,7 +102,7 @@ impl Settings {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Debug, Clone, TS)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Run {
     pub shells: Vec<String>,
 }
@@ -127,7 +125,7 @@ impl Default for Run {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GeneralSettings {
     pub path_to_projects: Path,
     pub project_groups: Vec<String>,
@@ -155,7 +153,7 @@ impl GeneralSettings {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Appearance {
     pub theme: String,
     pub lang: String,
@@ -189,8 +187,7 @@ impl Appearance {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RecentProject {
     pub name: String,
     pub path: Path,

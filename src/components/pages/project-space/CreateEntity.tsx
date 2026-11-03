@@ -1,18 +1,17 @@
 import "./styles/create-entity.css"
-import {useEffect, useRef, useState} from "react";
-import {invoke} from "@tauri-apps/api/core";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {cacheStore} from "@stores/cache_store.ts";
 import {contextStore} from "@stores/context_store.ts";
 import {menuStore} from "@stores/menu_store.ts";
 import Input from "@common/Input.tsx";
 import {motion} from "motion/react";
+import Check from "@common/Check.tsx";
+import FSContext from "@common/FSContext.tsx";
+import List from "@common/List.tsx";
+import Gen from "@common/Gen.tsx";
+import {invoke} from "@tauri-apps/api/core";
+import {projectStore} from "@stores/project_store.ts";
 
-/**
- *
- */
-type FieldValue = {
-    [key: string]: string
-}
 
 /**
  *
@@ -24,62 +23,111 @@ export default function CreateEntity() {
 
     const close_window = menuStore(state => state.close_file_create_menu)
     const path_to = contextStore(state => state.path_to_creation)
-    const [fields, setFields] = useState<FieldValue>({})
     const current = current_template != null ? templates[current_template] : null
 
-    useEffect(() => {
-        setFields(prev => {
-            const copy = {...prev}
-            if (current?.base_name !== undefined) {
-                copy["name"] = current.base_name
-            }
-            if (current?.ext !== undefined) {
-                copy["ext"] = current.ext
-            }
-            if (current?.default_content !== undefined) {
-                copy["content"] = current.default_content
-            }
-            copy["path"] = path_to
+    const [results, setResults] = useState<Record<string, Record<string, IVal>>>({})
 
-            return copy
-        })
-    }, [current]);
+    function write(val: IVal, id: string) {
+        if (current?.id) {
+            setResults(prev => {
+                return {
+                    ...prev,
+                    [current.id]: {
+                        ...prev[current.id],
+                        [id]: val
+                    }
+                }
+            })
+        }
+    }
+
+    const meta = useMemo(() => {
+        if (!current) {
+            return []
+        }
+        let res: (false | ParProps)[] = [
+            typeof current?.parameters?.default_name != "string" && {
+                obj: {
+                    id: "meta.name",
+                    title: "Name",
+                    typ: {
+                        typ: "input",
+                    }
+                }, val: results[current!.id]?.["meta.name"] ?? "",
+                write: (val: IVal) => write(val, "meta.name")
+            },
+            current?.parameters?.const_path != false && {
+                obj: {
+                    id: "meta.path",
+                    title: "Path",
+                    typ: {
+                        typ: "file",
+                        fs_type: "fs"
+                    }
+                },
+                write: val => write(val, "meta.path"),
+                val: results[current!.id]?.["meta.path"] ?? path_to
+            }
+        ]
+
+        return res.filter(el => el != false)
+    }, [current, path_to, results])
+
+
+    useEffect(() => {
+        if (current?.parameters?.default_name) {
+            setResults(prev => {
+                return {
+                    ...prev,
+                    [current.id]: {
+                        ...prev[current.id],
+                        "meta.name": current.parameters?.default_name ?? ""
+                    }
+                }
+            })
+        }
+        if (current?.parameters?.const_path == true) {
+            setResults(prev => {
+                return {
+                    ...prev,
+                    [current.id]: {
+                        ...prev[current.id],
+                        "meta.path": path_to
+                    }
+                }
+            })
+        }
+    }, [current?.parameters, path_to]);
+
+    useEffect(() => {
+        if (current?.id) {
+            setResults(prev => {
+                return {
+                    ...prev,
+                    [current.id]: {
+                        ...prev[current.id],
+                        "meta.path": path_to
+                    }
+                }
+            })
+        }
+    }, [path_to, current]);
+
+
 
     async function create_fs() {
         if (current == null) {
             return;
         }
-        if ("name" in Object.keys(fields)) {
-            return;
-        }
-        const name = fields["name"];
-        const ext = fields["ext"] ?? "";
-        const path = fields["path"] ?? "";
-
         try {
-            const os = await invoke<string>("get_os");
-            const sep = os == "windows" ? "\\" : "/";
-            let extension = ext.length > 0 ? ext : ""
-            extension = extension.length > 0 && extension[0] == "." ? extension.slice(1) : extension;
-            const path_ = `${path}${sep}${name}.${extension}`;
-            if (current!.typ == "file") {
-                if (current.default_content !== undefined) {
-                    await invoke(
-                        "create_file", {
-                            path: path_,
-                            content: current.default_content!
-                        })
-                } else {
-                    await invoke("create_file", {path: path_})
-                }
-
-            } else {
-                await invoke("create_dir", {path: path_})
-            }
+            await invoke("create_fs_entity", {
+                results: results,
+                template: current,
+                vars: projectStore.getState().current_project!.vars
+            })
+            menuStore.getState().close_file_create_menu();
         } catch (e) {
             console.error(e)
-        } finally {
-            close_window()
         }
     }
 
@@ -91,85 +139,50 @@ export default function CreateEntity() {
             transition={{duration: 0.2}}
 
             id={"create-entity"}>
-                <div id={"create-entity-header"}>
-                    <p id={"create-entity-path"}>{path_to}</p>
-                    <p id={"create-entity-label"}>Create file</p>
+            <div id={"create-entity-header"}>
+                <p id={"create-entity-path"}>{path_to}</p>
+                <p id={"create-entity-label"}>Create file</p>
+            </div>
+            <div id={"create-entity-body"}>
+                <div id={"create-entity-templates"}>
+                    {templates.map((el, i) =>
+                        <FileTemplate obj={el}
+                                      key={el.id}
+                                      selected={current_template != null && i == current_template}
+                                      cb={() => setCurrentTemplate(prev => {
+                                          if (prev == i) {
+                                              return null
+                                          }
+                                          return i
+                                      })}
+                        />
+                    )}
                 </div>
-                <div id={"create-entity-body"}>
-                    <div id={"create-entity-templates"}>
-                        {templates.map((el, i) =>
-                            <FileTemplate obj={el}
-                                          key={el.id}
-                                          selected={current_template != null && i == current_template}
-                                          cb={() => setCurrentTemplate(prev => {
-                                              if (prev == i) {
-                                                  return null
-                                              }
-                                              return i
-                                          })}
-                            />
-                        )}
-                    </div>
-                    <div id={"create-entity-fields"}>
-                        {current != null &&
-                            <>
-                                <Field id={"name"} val={fields["name"] ?? ""}
-                                       cb={(val: string) => setFields(prev => {
-                                           const copy = {...prev};
-                                           copy["name"] = val;
-                                           return copy
-                                       })} placeholder={"Name"}/>
-                                {current.typ == "file" &&
-                                    <Field id={"ext"} val={fields["ext"] ?? ""} cb={(val: string) => setFields(prev => {
-                                        const copy = {...prev};
-                                        copy["ext"] = val;
-                                        return copy
-                                    })} placeholder={"Extension"}/>
-                                }
-                                <Field id={"path"} val={fields["path"] ?? ""}
-                                       cb={(val: string) => setFields(prev => {
-                                           const copy = {...prev};
-                                           copy["path"] = val;
-                                           return copy
-                                       })} placeholder={"Path"}/>
-                                {
-                                    current.default_content !== undefined && current.default_content != null &&
-                                    <Field area id={"content"} val={fields["content"]}
-                                           placeholder={"Content"}
-                                           cb={(val: string) => setFields(prev => {
-                                               const copy = {...prev}
-                                               copy["content"] = val;
-                                               return copy
-                                           })}/>
-                                }
-                            </>
-                        }
-                        {
-                            current == null &&
+                <div id={"create-entity-fields"}>
+                    {
+                        meta.map((el, i) =>
+                            <EntityParameter {...el} key={i}/>
+                        )
+                    }
+                    {
+                        current?.options?.map((el, i) =>
+                            <EntityParameter obj={el} write={(val) => write(val, el.id)} key={i}
+                                             val={results[current?.id ?? "__none__"]?.[el.id] ?? el.def ?? ""}/>
+                        )
+                    }
 
-                            <p style={{
-                                color: "var(--subtitle)",
-                                width: "50%",
-                                height: "100%",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center"
-                            }}>Nothing to show</p>
-                        }
-
-                    </div>
                 </div>
-                <div id={"create-entity-footer"}>
-                    <div>
-                        <button className={"create-entity-button"}
-                                onClick={close_window}
-                        >Cancel
-                        </button>
-                        <button onClick={create_fs} className={"create-entity-button"}>Create</button>
+            </div>
+            <div id={"create-entity-footer"}>
+                <div>
+                    <button className={"create-entity-button"}
+                            onClick={close_window}
+                    >Cancel
+                    </button>
+                    <button onClick={create_fs} className={"create-entity-button"}>Create</button>
 
-                    </div>
                 </div>
+            </div>
         </motion.div>
 
     )
@@ -177,7 +190,7 @@ export default function CreateEntity() {
 
 
 type TempProps = {
-    obj: configFsTemplate
+    obj: ConfigFsTemplate
     selected: boolean
     cb: () => void,
 }
@@ -237,3 +250,45 @@ function Field(props: FieldProps) {
         </div>
     )
 }
+
+
+type ParProps = {
+    obj: IPackageParameter
+    write: (val: IVal) => void
+    val: IVal
+}
+
+function EntityParameter(props: ParProps) {
+
+    const {obj} = props
+    const typ = obj.typ.typ
+    return (
+        <>
+            {
+                (typ == "input" || typ == "area") &&
+                <Input typ={typ} value={props.val.toString()} title={obj.title} write={props.write}
+                       placeholder={obj.typ.placeholder}/>
+            }
+            {
+                typ == "check" &&
+                <Check value={!!props.val} title={obj.title} write={props.write}/>
+            }
+            {
+                typ == "file" &&
+                <FSContext typ={obj.typ.fs_type == "file" ? "file" : "dir"} title={obj.title}
+                           value={props.val.toString()} write={props.write} placeholder={obj.typ.placeholder}/>
+            }
+            {
+                typ == "list" &&
+                <List variants={obj.typ.list_type ?? []} title={obj.title} value={props.val.toString()}
+                      write={props.write}/>
+            }
+            {
+                typ == "gen" &&
+                <Gen value={Array.isArray(props.val) ? props.val : []} title={obj.title} write={props.write}
+                     required={obj.typ.required}/>
+            }
+        </>
+    )
+}
+

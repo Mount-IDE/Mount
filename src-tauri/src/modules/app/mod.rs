@@ -4,7 +4,7 @@ pub mod macroses;
 pub mod stores;
 pub mod utils;
 use super::contexts::filesystem::app::services::{
-    FileSystemReadService, FileSystemWatchService, FileSystemWriteService,
+    FileSystemReadService, FileSystemWatchService, FileSystemWriteService, FsEntityService,
 };
 use crate::modules::contexts::events::services::EventService;
 use crate::modules::contexts::launch::app::services::{LaunchCompileService, LaunchRunService};
@@ -18,7 +18,9 @@ use crate::modules::contexts::terminal::app::services::TerminalService;
 use crate::modules::contexts::toolchains::services::{
     ToolchainComponentService, ToolchainMakeService, ToolchainPackageService,
 };
-use crate::modules::services::config::{ConfigRecoveryService, ConfigService, ParsingService};
+use crate::modules::services::config::{
+    ConfigRecoveryService, ConfigService, FormatService, ParsingService,
+};
 use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
 
@@ -53,3 +55,7 @@ pub const LSP_SERVICE: LspService = LspService();
 pub const TOOLCHAIN_MAKE_SERVICE: ToolchainMakeService = ToolchainMakeService();
 pub const TOOLCHAIN_COMPONENT_SERVICE: ToolchainComponentService = ToolchainComponentService();
 pub const TOOLCHAIN_PACKAGE_SERVICE: ToolchainPackageService = ToolchainPackageService();
+
+pub const FORMAT_SERVICE: FormatService = FormatService;
+
+pub const FS_ENTITY_SERVICE: FsEntityService = FsEntityService;

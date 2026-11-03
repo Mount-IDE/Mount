@@ -1,9 +1,9 @@
 use crate::modules::shared::kernel::values::{IfStatementPart, Schema, Val};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use ts_rs::TS;
+//use ts_rs::TS;
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchTemplate {
     #[serde(default)]
     pub id: i8,
@@ -54,7 +54,7 @@ impl Default for LaunchTemplate {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchTemplateReference {
     #[serde(default)]
     pub id: i8,
@@ -72,7 +72,7 @@ pub struct LaunchTemplateReference {
     pub before: Option<Vec<LaunchReferenceBefore>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "typ", rename_all = "lowercase")]
 pub enum LaunchReferenceBefore {
     CUSTOM {
@@ -93,7 +93,7 @@ pub enum LaunchReferenceBefore {
     },
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchFunction {
     #[serde(default)]
     pub id: i8,
@@ -101,25 +101,25 @@ pub struct LaunchFunction {
     pub actions: Vec<LaunchFunctionAction>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchFunctionAction {
     pub function: String,
     pub args: Option<Vec<LaunchFunctionArgument>>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LaunchFunctionArgument {
     STRING(String),
     VEC(Vec<LaunchVecType>),
 }
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LaunchVecType {
     STRING(String),
     NUMBER(i32),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchSection {
     #[serde(default)]
     pub id: i8,
@@ -130,7 +130,7 @@ pub struct LaunchSection {
 }
 // -1 - meta (name etc)
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchOption {
     #[serde(default)]
     pub id: String,
@@ -141,7 +141,7 @@ pub struct LaunchOption {
     #[serde(default)]
     pub def: LaunchOptionDefault,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LaunchOptionDefault {
     SINGLE(String),
@@ -156,7 +156,7 @@ impl Default for LaunchOptionDefault {
 
 pub type LaunchTemplateResult = HashMap<i8, HashMap<String, Val>>;
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchOptionType {
     #[serde(default)]
     pub typ: LaunchOptionTyp,
@@ -166,7 +166,7 @@ pub struct LaunchOptionType {
     pub restriction: Option<i8>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchOptionTyp {
     #[allow(non_camel_case_types)]
     input,
@@ -178,7 +178,7 @@ pub enum LaunchOptionTyp {
     list,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchAction {
     #[serde(default)]
     pub id: i32,
@@ -190,7 +190,7 @@ pub struct LaunchAction {
     pub command: Option<LaunchActionCommand>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchActionCommand {
     #[serde(default)]
     pub command: String,
@@ -202,7 +202,7 @@ pub struct LaunchActionCommand {
     pub env: Option<Vec<(String, String)>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 #[allow(unused)]
 pub enum LaunchFunctionOutType {
@@ -254,7 +254,7 @@ impl Default for LaunchOptionType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchObject {
     pub id: i32,
     pub launch_reference: i8,
@@ -262,7 +262,7 @@ pub struct LaunchObject {
     pub tasks: Vec<LaunchTask>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchTask {
     SINGLE {
         command: String,

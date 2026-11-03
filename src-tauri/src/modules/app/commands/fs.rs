@@ -1,13 +1,16 @@
-use crate::modules::app::{FS_READ_SERVICE, FS_WATCH_SERVICE, FS_WRITE_SERVICE};
+use crate::modules::app::{FS_ENTITY_SERVICE, FS_READ_SERVICE, FS_WATCH_SERVICE, FS_WRITE_SERVICE};
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::app::traits::{
-    TFSReadService, TFSWriteService, TFWatchService,
+    TFSReadService, TFSWriteService, TFWatchService, TFsEntityService,
 };
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
+use crate::modules::contexts::project::domain::entities::Var;
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Path, Val};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use tauri::{State, WebviewWindow};
 
 #[tauri::command]
@@ -119,4 +122,15 @@ pub fn read_binary(path: Path) -> Result<Vec<u8>, ErrorDto> {
     let file = PFile::from_path_reg(path);
     let arr = FS_READ_SERVICE.read_bytes(&file)?;
     Ok(arr)
+}
+
+#[tauri::command]
+pub fn create_fs_entity(
+    results: HashMap<String, HashMap<String, Val>>,
+    template: ConfigFsTemplate,
+    vars: Vec<Var>,
+) -> Result<(), ErrorDto> {
+    FS_ENTITY_SERVICE
+        .create(results, template, vars)
+        .map_err(|e| e.into())
 }

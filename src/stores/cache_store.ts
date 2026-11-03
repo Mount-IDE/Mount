@@ -38,8 +38,8 @@ interface Type {
     set_projects_path: (path: string) => void
     load_groups: (groups: string[]) => void
     set_data_dir: (str: string) => void,
-    file_templates: configFsTemplate[],
-    set_file_templates: (temp: configFsTemplate[]) => void
+    file_templates: ConfigFsTemplate[],
+    set_file_templates: (temp: ConfigFsTemplate[]) => void
 
 
     remove_from_recents: (path: string) => void
@@ -191,7 +191,7 @@ export const cacheStore = create<Type>((set, get) => ({
             data_dir: str
         })
     },
-    set_file_templates: async (temp: configFsTemplate[]) => {
+    set_file_templates: async (temp: ConfigFsTemplate[]) => {
         set({
             file_templates: temp
         })

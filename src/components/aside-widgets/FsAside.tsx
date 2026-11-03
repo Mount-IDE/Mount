@@ -1,14 +1,14 @@
 import "./styles/fs-aside.css"
-import {fsAsideTreeStore} from "../../stores/fs_aside_tree_store.ts";
+import {fsAsideTreeStore} from "@stores/fs_aside_tree_store.ts";
 import React, {useEffect, useRef, useState} from "react";
 import DirectoryX from "./DirectoryX.tsx";
-import ContextMenu, {IContextMenuButton} from "../common/ContextMenu.tsx";
-import {menuStore} from "../../stores/menu_store.ts";
-import {fileCacheStore} from "../../stores/file_cache_store.ts";
-import {contextStore} from "../../stores/context_store.ts";
-import {ModalButton} from "../common/Modal.tsx";
+import ContextMenu, {IContextMenuButton} from "@common/ContextMenu.tsx";
+import {menuStore} from "@stores/menu_store.ts";
+import {fileCacheStore} from "@stores/file_cache_store.ts";
+import {contextStore} from "@stores/context_store.ts";
+import {ModalButton} from "@common/Modal.tsx";
 import {invoke} from "@tauri-apps/api/core"
-import {cacheStore} from "../../stores/cache_store.ts";
+import {cacheStore} from "@stores/cache_store.ts";
 
 /**
  * Component of project-hierarchy tree
@@ -76,7 +76,10 @@ export default function FsAside() {
             setButtons(
                 [
                     {
-                        cb: () => open_window(),
+                        cb: () => {
+                            open_window();
+                            setShowContext(false)
+                        },
                         hotkeys: "",
                         icon: "plus.svg",
                         title: "New"
@@ -183,7 +186,10 @@ export default function FsAside() {
             setButtons(
                 [
                     {
-                        cb: () => open_window(),
+                        cb: () => {
+                            open_window();
+                            setShowContext(false)
+                        },
                         hotkeys: "",
                         icon: "plus.svg",
                         title: "New"

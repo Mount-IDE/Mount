@@ -6,7 +6,7 @@ type Props = {
     value: string,
     title: string
     write: (val: string) => void
-    placeholder: string
+    placeholder?: string
     show?: boolean
     incorrect?: string
     required?: boolean

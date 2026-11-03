@@ -30,7 +30,7 @@ use tauri::Emitter;
 use which::which;
 
 #[allow(unused)]
-fn get_key(sh: String) -> String {
+pub fn get_key(sh: String) -> String {
     match sh.as_str() {
         "bash" => "-c".to_string(),
         "sh" => "-c".to_string(),

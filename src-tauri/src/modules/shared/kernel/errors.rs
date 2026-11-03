@@ -48,6 +48,16 @@ pub enum ProjectError {
 
 #[derive(Error, Debug)]
 #[allow(unused)]
+pub enum FormatError {
+    #[error("Invalid declarator `{0}` of section")]
+    InvalidDeclarator(char),
+    #[error("Needed variable not found ({0})")]
+    NeededVarNotFound(String),
+    #[error("Needed result not found ({0})")]
+    NeededResNotFound(String),
+}
+#[derive(Error, Debug)]
+#[allow(unused)]
 pub enum FileSystemError {
     #[error("failed to create directory: {path}")]
     DirCreation {
@@ -119,6 +129,9 @@ pub enum FileSystemError {
         to: Path,
         e: std::io::Error,
     },
+
+    #[error("results ddon't have any record with id {0}")]
+    FsEntityResults(String),
 }
 
 #[derive(Error, Debug)]

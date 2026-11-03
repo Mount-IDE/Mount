@@ -11,6 +11,7 @@ import {launchStore} from "@stores/launch_store.ts";
 
 import restart_ from "@assets/return.svg"
 import launchService from "@/src/services/launch_service.ts";
+import Icon from "@common/Icon.tsx";
 
 type Props = { active?: boolean };
 
@@ -71,11 +72,8 @@ export default function AsideLaunch(_: Props) {
                 }
             </div>
             <div id={"aside-launch-manage"}>
-                <button className={"aside-launch-manage-button"}
-                        onClick={restart}
-                >
-                    <img src={restart_}/>
-                </button>
+
+                <Icon src={restart_} onClick={restart}/>
                 <button className={"aside-launch-manage-button undo"}
                         onClick={stop}
                 >

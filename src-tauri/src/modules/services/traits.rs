@@ -1,10 +1,13 @@
-use crate::modules::contexts::config::entities::ConfigFsTemplate;
-use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
+use crate::modules::contexts::config::entities::{ConfigFsEntity, ConfigFsTemplate};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate, Var};
 use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::shared::kernel::errors::{ConfigError, ParsingError};
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::errors::{
+    ConfigError, FileSystemError, FormatError, ParsingError,
+};
+use crate::modules::shared::kernel::values::{Path, Val};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::collections::HashMap;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
 
@@ -51,4 +54,19 @@ pub trait TParsingService {
     fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError>;
 
     fn _from_string<T: DeserializeOwned>(&self, obj: &String) -> Result<T, ParsingError>;
+}
+
+pub trait TFormatService {
+    fn format_string(
+        &self,
+        string: String,
+        vars: &Vec<Var>,
+        results: &HashMap<String, Val>,
+    ) -> Result<String, FormatError>;
+}
+
+pub trait TCreateFsService {
+    fn create(&self, path: &Path, config: ConfigFsTemplate) -> Result<(), FileSystemError>;
+
+    fn create_entity(&self, path: &Path, entity: ConfigFsEntity) -> Result<(), FileSystemError>;
 }

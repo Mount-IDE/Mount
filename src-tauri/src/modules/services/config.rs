@@ -8,13 +8,18 @@ use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
-use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate};
+use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate, Var};
 use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
-use crate::modules::shared::kernel::errors::{ConfigError, FileSystemError, ParsingError};
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::services::traits::{
+    TConfigRecoveryService, TConfigService, TFormatService, TParsingService,
+};
+use crate::modules::shared::kernel::errors::{
+    ConfigError, FileSystemError, FormatError, ParsingError,
+};
+use crate::modules::shared::kernel::values::{Path, Val};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::string::ToString;
 use std::sync::Mutex;
@@ -648,5 +653,204 @@ impl TParsingService for ParsingService {
             return Err(v);
         }
         Ok(res.unwrap())
+    }
+}
+
+pub struct FormatService;
+
+impl TFormatService for FormatService {
+    fn format_string(
+        &self,
+        string: String,
+        vars: &Vec<Var>,
+        results: &HashMap<String, Val>,
+    ) -> Result<String, FormatError> {
+        #[derive(Clone, Copy, Debug)]
+        pub enum Type {
+            Braces,
+            Short,
+        }
+
+        const VAR: char = '@';
+        const RES: char = '#';
+        if !string.contains(VAR) && !string.contains(RES) {
+            return Ok(string);
+        }
+
+        let mut str = String::with_capacity(string.capacity());
+
+        let mut iter = string.chars().peekable();
+
+        let mut captured = false;
+        let mut temp = String::new();
+
+        let mut typ: Option<Type> = None;
+
+        let cb_var = |typ: Type,
+                      temp: &mut String,
+                      str: &mut String,
+                      vars: &Vec<Var>|
+         -> Result<(), FormatError> {
+            let slice = if let Type::Braces = typ {
+                temp[2..temp.len() - 1].to_string().clone()
+            } else {
+                temp[1..].to_string().clone()
+            };
+            #[cfg(test)]
+            println!("VAR {slice} {temp} {typ:?}");
+            let found = vars.iter().find(|e| e.name == slice);
+            if let Some(found) = found {
+                str.push_str(found.value.to_str().as_str());
+                temp.clear()
+            } else {
+                return Err(FormatError::NeededVarNotFound(slice));
+            };
+            Ok(())
+        };
+        let cb_res = |typ: Type,
+                      temp: &mut String,
+                      str: &mut String,
+                      results: &HashMap<String, Val>|
+         -> Result<(), FormatError> {
+            let slice = if let Type::Braces = typ {
+                temp[2..temp.len() - 1].to_string().clone()
+            } else {
+                temp[1..].to_string().clone()
+            };
+            #[cfg(test)]
+            println!("RES {slice} {temp} {typ:?}");
+            let found = results.iter().find(|e| *e.0 == slice);
+            if let Some(found) = found {
+                str.push_str(found.1.to_str().as_str());
+                temp.clear()
+            } else {
+                return Err(FormatError::NeededResNotFound(slice));
+            };
+            Ok(())
+        };
+
+        while let Some(ch) = iter.next() {
+            if ch == VAR && !captured {
+                captured = true;
+                temp.clear()
+            }
+            if ch == RES && !captured {
+                captured = true;
+                temp.clear()
+            }
+
+            if captured {
+                temp.push(ch)
+            } else {
+                str.push(ch)
+            }
+
+            if captured {
+                if ch != VAR && ch != RES {
+                    if ch == '{' && typ.is_none() {
+                        typ = Some(Type::Braces);
+                        #[cfg(test)]
+                        println!("{{");
+                    } else if ch != '{' && typ.is_none() {
+                        typ = Some(Type::Short);
+                        #[cfg(test)]
+                        println!("not {{")
+                    }
+                    if ch == '}' {
+                        if let Some(Type::Braces) = typ {
+                            if temp.starts_with(VAR) {
+                                cb_var(Type::Braces, &mut temp, &mut str, &vars)?;
+                            } else if temp.starts_with(RES) {
+                                cb_res(Type::Braces, &mut temp, &mut str, &results)?;
+                            } else {
+                                return Err(FormatError::InvalidDeclarator(
+                                    temp.chars().take(0).next().unwrap_or(ch),
+                                ));
+                            }
+                            typ = None;
+                            captured = false;
+                        }
+                    }
+                    if ch == ' ' {
+                        if let Some(Type::Short) = typ {
+                            if temp.starts_with(VAR) {
+                                cb_var(Type::Short, &mut temp, &mut str, &vars)?;
+                            } else if temp.starts_with(RES) {
+                                cb_res(Type::Short, &mut temp, &mut str, &results)?;
+                            } else {
+                                return Err(FormatError::InvalidDeclarator(
+                                    temp.chars().take(0).next().unwrap_or(ch),
+                                ));
+                            }
+                            typ = None;
+                            captured = false;
+                        }
+                    }
+                }
+            }
+        }
+        if captured {
+            if let Some(v) = typ {
+                match v {
+                    Type::Braces => {
+                        if temp.starts_with(VAR) {
+                            cb_var(Type::Braces, &mut temp, &mut str, &vars)?;
+                        } else if temp.starts_with(RES) {
+                            cb_res(Type::Braces, &mut temp, &mut str, &results)?;
+                        } else {
+                            return Err(FormatError::InvalidDeclarator(
+                                temp.chars().take(0).next().unwrap_or(' '),
+                            ));
+                        }
+                    }
+                    Type::Short => {
+                        if temp.starts_with(VAR) {
+                            cb_var(Type::Short, &mut temp, &mut str, &vars)?;
+                        } else if temp.starts_with(RES) {
+                            cb_res(Type::Short, &mut temp, &mut str, &results)?;
+                        } else {
+                            return Err(FormatError::InvalidDeclarator(
+                                temp.chars().take(0).next().unwrap_or(' '),
+                            ));
+                        }
+                    }
+                }
+            } else {
+                return Err(FormatError::InvalidDeclarator(' '));
+            }
+        }
+
+        Ok(str)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::modules::shared::kernel::values::Val;
+    const FMT: FormatService = FormatService;
+
+    #[test]
+    pub fn format() {
+        let str = "str".to_string();
+        let string = FMT.format_string(str.clone(), &vec![], &HashMap::new());
+        assert_eq!(string.unwrap(), str);
+    }
+
+    #[test]
+    pub fn format_results() {
+        let str1 = "str --- #{0.56} ".to_string();
+        let mut map = HashMap::<String, Val>::new();
+        map.insert("0.56".__get(), Val::STRING("some".__get()));
+        let string = FMT.format_string(str1.clone(), &vec![], &map);
+        assert_eq!(string.unwrap(), "str --- some ".to_string())
+    }
+
+    #[test]
+    pub fn format_vars() {
+        let str1 = "str --- @{0.56} @0.56".to_string();
+        let vec = vec![Var::new("0.56".__get(), Val::STRING("some".__get()))];
+        let string = FMT.format_string(str1.clone(), &vec, &HashMap::new());
+        assert_eq!(string.unwrap(), "str --- some some".to_string())
     }
 }

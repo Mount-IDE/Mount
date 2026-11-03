@@ -3,9 +3,9 @@ use crate::modules::contexts::filesystem::domain::values::FsPath;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Display;
-use ts_rs::TS;
+//use ts_rs::TS;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename = "lowercase")]
 pub enum PlatformType {
     WINDOWS,
@@ -25,7 +25,7 @@ impl Into<String> for PlatformType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Platform {
     ARRAY(Vec<PlatformType>),
@@ -137,7 +137,7 @@ impl PlatformType {
     }
 }
 
-#[derive(Clone, Serialize, Debug, Deserialize, TS)]
+#[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Path(pub String);
 impl Path {
     pub fn new(name: &str) -> Self {
@@ -178,7 +178,7 @@ impl Display for Path {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug, TS)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Schema(pub u8);
 
 impl Default for Schema {
@@ -187,7 +187,7 @@ impl Default for Schema {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS, PartialEq, PartialOrd)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd)]
 #[serde(untagged)]
 pub enum Val {
     NUMBER(f64),
@@ -215,7 +215,7 @@ impl Default for Val {
     }
 }
 
-#[derive(Clone, Debug, TS)]
+#[derive(Clone, Debug)]
 pub enum ParameterTyp {
     INPUT(String),
     CHECK,
@@ -275,14 +275,14 @@ impl Serialize for ParameterTyp {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct IfStatementPart {
     pub from: Option<String>,
     pub oper: IfStatementOperation,
     pub value: Option<Val>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, TS)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum IfStatementOperation {
     #[serde(rename = "==")]
@@ -319,6 +319,15 @@ pub enum IfStatementOperation {
     Installed,
     #[serde(rename = "!installed")]
     NonInstalled,
+
+    #[serde(rename = "starts")]
+    Starts,
+    #[serde(rename = "!starts")]
+    NonStarts,
+    #[serde(rename = "ends")]
+    Ends,
+    #[serde(rename = "!ends")]
+    NonEnds,
 }
 
 impl IfStatementOperation {
@@ -385,18 +394,22 @@ impl IfStatementOperation {
             IfStatementOperation::NonStopped => |_, _| true,
             IfStatementOperation::Installed => |_, _| true,
             IfStatementOperation::NonInstalled => |_, _| true,
+            IfStatementOperation::Starts => |a, b| a.to_str().starts_with(b.to_str().as_str()),
+            IfStatementOperation::NonStarts => |a, b| !a.to_str().starts_with(b.to_str().as_str()),
+            IfStatementOperation::Ends => |a, b| a.to_str().ends_with(b.to_str().as_str()),
+            IfStatementOperation::NonEnds => |a, b| !a.to_str().ends_with(b.to_str().as_str()),
         }
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub program: String,
     pub platform: Option<String>,
     pub level: DependencyLevel,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, TS, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub enum DependencyLevel {
     CRITICAL,
     CONFLICTS,

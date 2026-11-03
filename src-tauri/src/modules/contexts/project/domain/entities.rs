@@ -2,30 +2,33 @@ use super::default::action::*;
 use super::default::section::*;
 use super::default::template::*;
 use super::default::workspace::*;
-use crate::modules::app::CONFIG_SERVICE;
+use crate::modules::app::{CONFIG_SERVICE, FORMAT_SERVICE};
 use crate::modules::contexts::filesystem::app::utils::{path_from, PathPart};
 use crate::modules::contexts::launch::domain::entities::{
     LaunchObject, LaunchTemplate, LaunchTemplateReference,
 };
+//use ts_rs::TS;
+use crate::modules::contexts::project::app::services::get_key;
 use crate::modules::contexts::project::domain::values::{
     ActionCommand, ActionOnError, ButtonPos, ParameterLabel, ProjectMeta, TemplateMeta,
 };
-use crate::modules::services::traits::TConfigService;
+use crate::modules::services::config::FormatService;
+use crate::modules::services::traits::{TConfigService, TFormatService};
 use crate::modules::shared::kernel::errors::ProjectError;
+use crate::modules::shared::kernel::utils::shell_default;
 use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, ParameterTyp, Path,
     Platform, PlatformType, Schema, Val,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
-use ts_rs::TS;
 
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Project {
     #[serde(default)]
     pub name: String,
@@ -69,7 +72,7 @@ impl Project {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WorkSpace {
     pub widgets: Vec<Widget>,
     pub buttons: Vec<Button>,
@@ -111,13 +114,13 @@ impl WorkSpace {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Widget {}
 
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct OpenedFile {
     #[serde(default)]
     name: String,
@@ -128,7 +131,7 @@ pub struct OpenedFile {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Button {
     pub pos: ButtonPos,
     pub widget: String,
@@ -143,7 +146,7 @@ pub struct Button {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, Default, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub enum ButtonComponentType {
     #[default]
     Light,
@@ -153,13 +156,13 @@ pub enum ButtonComponentType {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Task {
     id: i32,
     // action: TaskAction
 }
 
-#[derive(Clone, Debug, TS)]
+#[derive(Clone, Debug)]
 pub enum _Task {
     GRAPH {
         next: Box<_Task>,
@@ -172,7 +175,51 @@ pub enum _Task {
     },
 }
 
-#[derive(Debug, Clone, TS)]
+impl _Task {
+    pub fn empty() -> Self {
+        Self::SINGLE {
+            commands: vec![],
+            on_error: ActionOnError::CONTINUE,
+        }
+    }
+}
+#[derive(Debug, Clone)]
+pub struct ActionTask {
+    pub commands: Vec<TaskCommand>,
+    pub on_error: ActionOnError,
+    pub from_graph: bool,
+}
+
+impl ActionTask {
+    pub fn execute(&self, path: Path) -> ActionOnError {
+        for i in &self.commands {
+            let key = get_key(i.shell.clone());
+            let mut process = Command::new(&i.shell);
+            process
+                .current_dir(path.get().clone())
+                .arg(&key)
+                .arg(&i.command)
+                .stdin(Stdio::null());
+            if let Some(env) = &i.env {
+                process.envs(env);
+            }
+            let code = process.status();
+            if let Err(_) = code {
+                if self.on_error != ActionOnError::CONTINUE {
+                    return self.on_error.clone();
+                }
+            }
+            if let Ok(code) = code {
+                if !code.success() {
+                    return self.on_error.clone();
+                }
+            }
+        }
+        ActionOnError::CONTINUE
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct TaskCommand {
     pub command: String,
     pub shell: String,
@@ -182,7 +229,7 @@ pub struct TaskCommand {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Var {
     #[serde(default)]
     pub name: String,
@@ -213,8 +260,7 @@ impl Var {
 ///
 ///
 ///
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectTemplate {
     #[serde(default = "t_id")]
     pub id: String,
@@ -262,7 +308,7 @@ impl ProjectTemplate {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TemplateStartup {
     #[serde(default)]
     pub sections: Vec<Section>,
@@ -282,8 +328,7 @@ impl TemplateStartup {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Section {
     #[serde(default)]
     pub id: i32,
@@ -307,8 +352,7 @@ impl Section {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Action {
     #[serde(default)]
     pub id: i32,
@@ -353,8 +397,7 @@ impl Action {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
-#[ts(export)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Parameter {
     #[serde(default)]
     pub out: String,
@@ -381,7 +424,7 @@ impl Parameter {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectTag {
     #[serde(default)]
     pub id: u32,
@@ -594,7 +637,7 @@ pub struct PackageStartup {
     pub(crate) actions: Option<Vec<PackageAction>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageAction {
     pub id: i8,
     pub next: Option<Vec<i8>>,
@@ -602,6 +645,153 @@ pub struct PackageAction {
     pub on_error: ActionOnError,
     pub platform: Option<Platform>,
     pub command: Option<Vec<PackageActionCommand>>,
+}
+
+impl PackageAction {
+    pub fn check_condition(&self, results: &HashMap<String, Val>, vars: &Vec<Var>) -> bool {
+        if let Some(if_) = &self.if_ {
+            let mut counter = 0;
+            'or: for or in if_.iter() {
+                for and in or.iter() {
+                    let first = if let Some(v) = and.from.clone() {
+                        let Ok(res) = FORMAT_SERVICE.format_string(v, vars, results) else {
+                            continue 'or;
+                        };
+                        Val::STRING(res)
+                    } else {
+                        Val::STRING("".__get())
+                    };
+                    let second = if let Some(v) = and.value.clone() {
+                        if let Val::STRING(v) = v {
+                            let Ok(v) = FORMAT_SERVICE.format_string(v, vars, results) else {
+                                continue 'or;
+                            };
+                            Val::STRING(v)
+                        } else {
+                            v
+                        }
+                    } else {
+                        Val::STRING("".__get())
+                    };
+                    let op = and.oper.get_fn();
+                    let res = op(first, second);
+                    if !res {
+                        continue 'or;
+                    }
+                }
+                counter += 1;
+            }
+            return counter > 0;
+        }
+        true
+    }
+
+    pub fn check_platform(&self) -> bool {
+        let cur = Platform::current();
+        match (cur, self.platform.clone()) {
+            (Platform::SINGLE(v), Some(Platform::ARRAY(v2))) => {
+                for i in v2.iter() {
+                    if *i == PlatformType::ALL {
+                        return true;
+                    }
+                    if *i == v {
+                        return true;
+                    }
+                }
+                false
+            }
+            (Platform::SINGLE(v), Some(Platform::SINGLE(v2))) => v == v2 || v2 == PlatformType::ALL,
+            (_, None) => true,
+            _ => false,
+        }
+    }
+
+    pub fn compile(
+        &self,
+        actions: &Vec<PackageAction>,
+        vars: &Vec<Var>,
+        filtered_results: &HashMap<String, Val>,
+        used_ids: &mut Vec<i8>,
+        is_graph: bool,
+    ) -> Result<Vec<ActionTask>, ()> {
+        if used_ids.contains(&self.id) {
+            return Err(());
+        }
+        let mut tasks = Vec::<TaskCommand>::new();
+        if let Some(cmd) = &self.command {
+            for i in cmd.iter() {
+                // check platform
+                if let Some(p) = &i.platform {
+                    if !p.is_correct() {
+                        continue;
+                    }
+                }
+                let fmt = FormatService::format_string;
+                let Ok(command) = fmt(&FORMAT_SERVICE, i.command.clone(), &vars, &filtered_results)
+                else {
+                    continue;
+                };
+                let env = if let Some(env) = &i.env {
+                    let mut map = HashMap::new();
+                    for j in env.iter() {
+                        let f = if let Ok(r) =
+                            fmt(&FORMAT_SERVICE, j.0.clone(), &vars, &filtered_results)
+                        {
+                            r
+                        } else {
+                            j.0.clone()
+                        };
+                        let s = if let Ok(r) =
+                            fmt(&FORMAT_SERVICE, j.1.clone(), &vars, &filtered_results)
+                        {
+                            r
+                        } else {
+                            j.1.clone()
+                        };
+                        map.insert(f, s);
+                    }
+                    map
+                } else {
+                    HashMap::new()
+                };
+                tasks.push(TaskCommand {
+                    command,
+                    shell: shell_default(),
+                    env: Some(env),
+                })
+            }
+        }
+
+        let mut act_tasks = vec![ActionTask {
+            commands: tasks,
+            on_error: self.on_error.clone(),
+            from_graph: is_graph,
+        }];
+
+        used_ids.push(self.id.clone());
+        if let Some(next) = &self.next {
+            for i in next.iter() {
+                if used_ids.contains(&i) {
+                    continue;
+                }
+                let Some(act) = actions.iter().find(|e| e.id.eq(i)) else {
+                    continue;
+                };
+                if used_ids.contains(&act.id) {
+                    continue;
+                }
+                let Ok(tasks) = act.compile(&actions, &vars, &filtered_results, used_ids, true)
+                else {
+                    continue;
+                };
+                for j in tasks.into_iter() {
+                    act_tasks.push(j)
+                }
+            }
+        }
+
+        Ok(act_tasks)
+    }
 }
 
 impl Default for PackageAction {
@@ -617,7 +807,7 @@ impl Default for PackageAction {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageActionCommand {
     pub(crate) platform: Option<Platform>,
     pub(crate) cwd: Option<String>,
@@ -627,30 +817,64 @@ pub struct PackageActionCommand {
     pub(crate) command: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageOption {
-    id: String,
-    title: String,
-    typ: PackageOptionTyp,
-    def: Option<Val>,
-    while_: Option<String>,
+    pub id: String,
+    pub title: String,
+    pub typ: PackageOptionTyp,
+    pub def: Option<Val>,
+    pub while_: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+pub type ParameterId = String;
+
+impl PackageOption {
+    pub fn filter_by_while(
+        results: &HashMap<ParameterId, Val>,
+        parameters: Vec<Self>,
+    ) -> Vec<Self> {
+        let mut res = Vec::<Self>::new();
+        for i in parameters.iter() {
+            if let Some(w) = i.while_.clone() {
+                let Some(found) = parameters.iter().find(|e| e.id == w) else {
+                    res.push(i.clone());
+                    continue;
+                };
+                let Some(found2) = results.get(&i.id) else {
+                    res.push(i.clone());
+                    continue;
+                };
+                if let Some(def) = &found.def {
+                    if *def != *found2 {
+                        //
+                        res.push(i.clone())
+                    }
+                } else {
+                    res.push(i.clone())
+                }
+            } else {
+                res.push(i.clone())
+            }
+        }
+        res
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageOptionTyp {
-    typ: PackageOptionTypEnum,
-    fs_type: Option<PackageOptionFsType>,
-    list_type: Option<Vec<String>>,
-    placeholder: Option<String>,
-    required: Option<bool>,
-    readonly: Option<bool>,
-    validate: Option<String>,
-    fs_filter: Option<Vec<String>>,
-    gen_min: Option<u8>,
-    gen_max: Option<u8>,
+    pub typ: PackageOptionTypEnum,
+    pub fs_type: Option<PackageOptionFsType>,
+    pub list_type: Option<Vec<String>>,
+    pub placeholder: Option<String>,
+    pub required: Option<bool>,
+    pub readonly: Option<bool>,
+    pub validate: Option<String>,
+    pub fs_filter: Option<Vec<String>>,
+    pub gen_min: Option<u8>,
+    pub gen_max: Option<u8>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PackageOptionFsType {
     FILE,
@@ -658,7 +882,7 @@ pub enum PackageOptionFsType {
     FS,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PackageOptionTypEnum {
     INPUT,

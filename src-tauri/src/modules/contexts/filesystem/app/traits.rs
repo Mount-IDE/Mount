@@ -1,8 +1,11 @@
+use crate::modules::contexts::config::entities::ConfigFsTemplate;
 use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
+use crate::modules::contexts::project::domain::entities::Var;
 use crate::modules::shared::kernel::errors::FileSystemError;
-use crate::modules::shared::kernel::values::Path;
+use crate::modules::shared::kernel::values::{Path, Val};
+use std::collections::HashMap;
 
 pub trait TFSReadService {
     fn read_file(&self, file: &PFile) -> Result<String, FileSystemError>;
@@ -59,5 +62,14 @@ pub trait TFWatchService {
         &self,
         label: String,
         state: tauri::State<SharedWatcherManager>,
+    ) -> Result<(), FileSystemError>;
+}
+
+pub trait TFsEntityService {
+    fn create(
+        &self,
+        results: HashMap<String, HashMap<String, Val>>,
+        template: ConfigFsTemplate,
+        vars: Vec<Var>,
     ) -> Result<(), FileSystemError>;
 }
