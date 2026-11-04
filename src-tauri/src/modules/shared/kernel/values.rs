@@ -405,7 +405,7 @@ impl IfStatementOperation {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Dependency {
     pub program: String,
-    pub platform: Option<String>,
+    pub platform: Option<Platform>,
     pub level: DependencyLevel,
 }
 

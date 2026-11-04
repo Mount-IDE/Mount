@@ -10,7 +10,7 @@ use crate::modules::contexts::events::services::EventService;
 use crate::modules::contexts::launch::app::services::{LaunchCompileService, LaunchRunService};
 use crate::modules::contexts::package::services::LspService;
 use crate::modules::contexts::project::app::services::{
-    ActionProjectService, /*PackageCompileService,*/ PackageService, ProjectService,
+    ActionProjectService, CreateProjectService, PackageService, ProjectService,
 };
 use crate::modules::contexts::settings::app::services::SettingsService;
 use crate::modules::contexts::settings::domain::entities::Settings;
@@ -28,6 +28,7 @@ pub const FS_READ_SERVICE: FileSystemReadService = FileSystemReadService {};
 pub const FS_WRITE_SERVICE: FileSystemWriteService = FileSystemWriteService {};
 pub const FS_WATCH_SERVICE: FileSystemWatchService = FileSystemWatchService {};
 pub const PROJECT_SERVICE: ProjectService = ProjectService {};
+pub const CREATE_PROJECT_SERVICE: CreateProjectService = CreateProjectService;
 pub const CONFIG_SERVICE: ConfigService = ConfigService();
 pub const CONFIG_RECOVERY_SERVICE: ConfigRecoveryService = ConfigRecoveryService();
 

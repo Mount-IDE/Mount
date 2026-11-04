@@ -1,5 +1,5 @@
 import "./styles/create-entity.css"
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {cacheStore} from "@stores/cache_store.ts";
 import {contextStore} from "@stores/context_store.ts";
 import {menuStore} from "@stores/menu_store.ts";
@@ -214,43 +214,6 @@ function FileTemplate({obj, selected, cb}: TempProps) {
 }
 
 
-type FieldProps = {
-    id: string
-    val: string,
-    cb: (val: string) => void
-    placeholder?: string;
-    area?: boolean
-}
-
-
-/**
- *
- * @param props
- * @constructor
- */
-function Field(props: FieldProps) {
-
-
-    const ref = useRef<HTMLTextAreaElement>(null)
-
-    useEffect(() => {
-        const cur = ref.current;
-        if (!cur) return;
-        cur.style.height = `${cur.scrollHeight + 50}px`
-    }, [props.val, props.area]);
-
-    return (
-        <div className={"create-entity-field"}>
-            <Input typ={props.area ? "area" : "input"}
-                   value={props.val}
-                   title={props.placeholder ?? ""}
-                   write={props.cb}
-
-                   placeholder={props.placeholder ?? ""}/>
-        </div>
-    )
-}
-
 
 type ParProps = {
     obj: IPackageParameter
@@ -258,6 +221,11 @@ type ParProps = {
     val: IVal
 }
 
+/**
+ *
+ * @param props
+ * @constructor
+ */
 function EntityParameter(props: ParProps) {
 
     const {obj} = props

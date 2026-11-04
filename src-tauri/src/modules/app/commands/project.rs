@@ -1,35 +1,25 @@
-use crate::modules::app::utils::project::make_buttons;
 use crate::modules::app::{
-    ACTION_PROJECT_SERVICE, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, EVENT_SERVICE,
-    FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE, SETTINGS,
+    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, CREATE_PROJECT_SERVICE, FS_READ_SERVICE,
+    FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE,
 };
-use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::path_from;
 use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
-use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
-use crate::modules::contexts::project::app::traits::{TActionProjectService, TProjectService};
+use crate::modules::contexts::project::app::traits::{TCreateProjectService, TProjectService};
 use crate::modules::contexts::project::domain::entities::{
-    Package, PackageAction, PackageActionCommand, Project, ProjectTag, ProjectTemplate,
-    SharedPackages, Var,
+    Package, Project, ProjectTag, ProjectTemplate, SharedPackages,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionOnError, CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
+    CreateProjectPackageResults, CreateProjectResult,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::contexts::terminal::app::managers::SharedTerminalManager;
 use crate::modules::services::traits::{TConfigRecoveryService, TConfigService, TParsingService};
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::errors::ProjectError;
-use crate::modules::shared::kernel::values::{
-    Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, Path, Platform,
-    PlatformType, Val,
-};
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use crate::modules::shared::kernel::values::Path;
 use tauri::{State, Window};
 
 #[tauri::command]
@@ -70,7 +60,7 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
 
 #[tauri::command]
 pub async fn create_project(
-    mut template: ProjectTemplate,
+    template: ProjectTemplate,
     results: CreateProjectResult,
     packages: Vec<String>,
     tags: Vec<ProjectTag>,
@@ -78,412 +68,17 @@ pub async fn create_project(
     window: Window,
     pack_state: State<'_, SharedPackages>,
 ) -> Result<Project, ErrorDto> {
-    EVENT_SERVICE.send(
-        window.label().to_string(),
-        "task-start",
-        "Check Dependencies".to_string(),
-    );
-
-    let dependencies = template.dependencies.clone();
-
-    let error_dependency = PROJECT_SERVICE.check_dependencies(dependencies);
-    if error_dependency.len() > 0 {
-        let critical: Vec<Dependency> = error_dependency
-            .iter()
-            .cloned()
-            .filter(|e| e.level == DependencyLevel::CRITICAL)
-            .collect();
-        let conflicts: Vec<Dependency> = error_dependency
-            .iter()
-            .cloned()
-            .filter(|e| e.level == DependencyLevel::CONFLICTS)
-            .collect();
-
-        let json = PARSING_SERVICE.to_string(error_dependency.clone());
-        if let Err(_) = json {
-            return Err(ProjectError::NotAllDependenciesSuplied(error_dependency.clone()).into());
-        }
-
-        EVENT_SERVICE.send(window.label().to_string(), "project", json.unwrap());
-        EVENT_SERVICE.send(
+    CREATE_PROJECT_SERVICE
+        .create_project(
+            template,
+            results,
+            packages,
+            tags,
+            pack_results,
             window.label().to_string(),
-            "ERROR",
-            "Invalid dependencies".to_string(),
-        );
-
-        if conflicts.len() > 0 || critical.len() > 0 {
-            return Err(ProjectError::NotAllDependenciesSuplied(error_dependency.clone()).into());
-        }
-    }
-    EVENT_SERVICE.send(
-        window.label().to_string(),
-        "task-end",
-        "All dependencies correct".to_string(),
-    );
-
-    // getting meta info about project
-    let meta = results.get("__meta__").ok_or(ProjectError::MetaNotFound)?;
-    let name = meta
-        .get(&-4i8)
-        .ok_or(ProjectError::MainMetaNotFound)?
-        .get("project-name")
-        .ok_or(ProjectError::NameNotFound)?;
-
-    let path = meta
-        .get(&-4i8)
-        .ok_or(ProjectError::MainMetaNotFound)?
-        .get("project-path")
-        .ok_or(ProjectError::NameNotFound)?;
-
-    let name = match name {
-        Val::STRING(val) => val.clone(),
-        _ => return Err(ProjectError::NameNotFound.into()),
-    };
-
-    let path = match path {
-        Val::STRING(val) => val.clone(),
-        _ => return Err(ProjectError::PathNotFound.into()),
-    };
-
-    let path_ = path_from![path, name];
-    let ext = FS_READ_SERVICE.exists(path_.clone());
-    if ext {
-        // if project already exists
-        return Err(ProjectError::AlreadyExists.into());
-    }
-
-    let additions = make_meta(meta.get(&-3i8), &tags);
-
-    let mut vars = template.clone().startup.var;
-
-    // adding required variables
-    vars.push(Var::readonly(
-        "project-name".to_string(),
-        Val::STRING(name.clone()),
-    ));
-
-    vars.push(Var::readonly(
-        "project-path".to_string(),
-        Val::STRING(path.clone()),
-    ));
-    vars.push(Var::new(
-        "project-description".__get(),
-        Val::STRING(additions.description.clone()),
-    ));
-    vars.push(Var::new(
-        "project-license".__get(),
-        Val::STRING(additions.license.clone().unwrap_or("NonLicense".__get())),
-    ));
-    vars.push(Var::new(
-        "project-authors".__get(),
-        Val::ARRAY(additions.authors.clone()),
-    ));
-    vars.push(Var::new(
-        "project-tags".__get(),
-        Val::ARRAY(additions.tags.clone()),
-    ));
-
-    vars.push(Var::new(
-        "project-group".__get(),
-        Val::STRING(additions.group.clone()),
-    ));
-
-    vars.push(Var::readonly(
-        "project-template".__get(),
-        Val::STRING(template.id.clone()),
-    ));
-
-    // creating project object
-    let mut project = Project::new();
-    project.name = name;
-    project.path = Path(path.clone());
-    project.meta = additions.clone();
-    project.vars = vars.clone();
-
-    // adding git actions
-    template.startup.actions.insert(
-        0,
-        PackageAction {
-            id: -1,
-            if_: Some(vec![vec![IfStatementPart {
-                from: Some("#-2.project-git".to_string()),
-                oper: IfStatementOperation::EQ,
-                value: Some(Val::BOOL(true)),
-            }]]),
-            on_error: ActionOnError::CONTINUE,
-            next: None,
-            command: Some(vec![PackageActionCommand {
-                platform: None,
-                shell: Some("@".to_string()),
-                env: None,
-                cwd: None,
-                needed_exit_code: None,
-                command: "git init".to_string(),
-            }]),
-            platform: None,
-        },
-    );
-    template.startup.actions.insert(
-        1,
-        PackageAction {
-            id: -1,
-            if_: Some(vec![vec![IfStatementPart {
-                from: Some("#-2.project-git-gitignore".to_string()),
-                oper: IfStatementOperation::EQ,
-                value: Some(Val::BOOL(true)),
-            }]]),
-            on_error: ActionOnError::CONTINUE,
-            next: None,
-            command: Some(vec![
-                PackageActionCommand {
-                    platform: Some(Platform::windows()),
-                    cwd: None,
-                    shell: None,
-                    env: None,
-                    needed_exit_code: None,
-                    command: "echo > .gitignore".to_string(),
-                },
-                PackageActionCommand {
-                    platform: Some(Platform::arr(vec![
-                        PlatformType::LINUX,
-                        PlatformType::MACOS,
-                    ])),
-                    cwd: None,
-                    shell: None,
-                    env: None,
-                    needed_exit_code: None,
-                    command: "touch .gitignore".to_string(),
-                },
-            ]),
-            platform: None,
-        },
-    );
-    template.startup.actions.insert(
-        2,
-        PackageAction {
-            id: -2,
-            if_: Some(vec![vec![IfStatementPart {
-                from: Some("#-2.project-git-remote".to_string()),
-                oper: IfStatementOperation::NonEmpty,
-                value: None,
-            }]]),
-            on_error: ActionOnError::CONTINUE,
-            next: None,
-            command: Some(vec![PackageActionCommand {
-                platform: None,
-                cwd: None,
-                shell: None,
-                env: None,
-                needed_exit_code: None,
-                command: "git remote add origin #{-2.project-git-remote}".to_string()
-                /*ActionCommandIn::WithArgs(ActionCommandArgs(
-                    "git remote add origin".to_string(),
-                    vec!["#-2.project-git-remote".to_string()],*/
-            }]),
-            platform: None,
-        },
-    );
-
-    let buttons = make_buttons();
-
-    project.workspace.buttons = buttons;
-    let packages = {
-        let res = pack_state.lock().unwrap();
-        res.iter()
-            .filter(|e| packages.contains(&e.id))
-            .map(|e| e.clone())
-            .collect::<Vec<Package>>()
-    };
-
-    project.packages = packages.iter().map(|e| e.id.clone()).collect();
-    // making tasks
-    let tasks =
-        ACTION_PROJECT_SERVICE.compile(&template, &results, &vars, &packages, &pack_results);
-
-    // println!("TASKS completed {:?}", tasks.clone().is_some());
-    // if tasks running completely
-    if let Some(val) = tasks {
-        let _ = FS_WRITE_SERVICE.create_dir(&path_)?;
-        // println!("dir created");
-        let path_to_mount = path_from![path_, ".mount"];
-
-        let _ = FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
-
-        // println!("mount created");
-        let path_to_settings = path_from![path_to_mount, "project.json"];
-
-        let settings = FS_WRITE_SERVICE.create_file(&path_to_settings)?;
-        // println!("config created");
-
-        let path_to_packages = path_from![path_to_mount, "packages.json"];
-        let packages_file = FS_WRITE_SERVICE.create_file(&path_to_packages)?;
-
-        // println!("packages created");
-
-        project.vars = val.0.clone();
-        project.template = template.clone();
-        project.workspace.launch_templates = template.launches.clone();
-        let contains = project
-            .workspace
-            .launch_templates
-            .iter()
-            .find(|e| e.id == -1);
-        if contains.is_none() {
-            project
-                .workspace
-                .launch_templates
-                .insert(0, LaunchTemplate::default());
-        }
-
-        let json = PARSING_SERVICE.to_string(&project.clone())?;
-
-        let packages_str = PARSING_SERVICE.to_string(&packages.clone())?;
-
-        FS_WRITE_SERVICE.write_file(&packages_file, packages_str, FileWriteAccess::WRITE)?;
-        // println!("packages writed");
-        FS_WRITE_SERVICE.write_file(&settings, json, FileWriteAccess::WRITE)?;
-        // println!("settings writed");
-        PROJECT_SERVICE.add_to_recents(&project)?;
-        // println!("add to recents");
-
-        ACTION_PROJECT_SERVICE.run_tasks(&project, &val.1, window.label().to_string());
-        // println!("tasks runned");
-
-        let license = additions.license.clone();
-        if let Some(license) = license {
-            //   println!("license");
-            // if project has license
-            let settings = { SETTINGS.get().unwrap().lock().unwrap().clone() };
-            let licenses = settings.licenses;
-            let needed = licenses.get(&license);
-            if let Some(needed) = needed {
-                //    println!("has needed license");
-                // if settings has needed license
-                if let Ok(dir) = CONFIG_SERVICE.get_data_dir() {
-                    //println!("has dir");
-                    // if app dir exists
-                    let lic = path_from![dir, "licenses", needed.filename];
-                    let file = PFile::from_path_reg(lic);
-                    let read = FS_READ_SERVICE.read_file(&file);
-                    if let Ok(mut read) = read {
-                        //  println!("read correct");
-                        // if file was read correctly
-                        let entries_var = needed.entries_var.clone();
-                        let entries_input = needed.entries_input.clone();
-                        if let Some(entry) = entries_input {
-                            //println!("input");
-                            for i in entry.iter() {
-                                let key = format!("{license}-{}", i.0);
-                                let Some(result) = results.get("__meta__") else {
-                                    continue;
-                                };
-                                let Some(result) = result.get(&-3) else {
-                                    continue;
-                                };
-                                let Some(result) = result.get(&key) else {
-                                    continue;
-                                };
-                                let result = result.to_str();
-                                for j in i.1.iter() {
-                                    read = read.replace(j, &result);
-                                }
-                            }
-                        } // replacing from ui inputs
-                        if let Some(entry) = entries_var {
-                            // println!("var");
-                            for i in entry.iter() {
-                                let Some(var) = vars.iter().find(|e| e.name.eq(i.0)) else {
-                                    continue;
-                                };
-                                for j in i.1.iter() {
-                                    read = read.replace(j, &var.value.to_str());
-                                }
-                            }
-                        } // replacing from vars
-
-                        let lic_path = path_from![path_, "LICENSE"];
-                        let file = PFile::from_path_reg(lic_path);
-                        let _ = FS_WRITE_SERVICE.write_file(&file, read, FileWriteAccess::WRITE);
-                    }
-                }
-            }
-        }
-    }
-    Ok(project)
-}
-
-fn make_meta(additions: Option<&HashMap<String, Val>>, tags: &Vec<ProjectTag>) -> ProjectMeta {
-    if additions.is_none() {
-        return ProjectMeta::default();
-    }
-    let mut meta_ = ProjectMeta::new();
-    let add = additions.unwrap();
-    let authors = add
-        .get("project-authors")
-        .unwrap_or(&Val::STRING("".to_string()))
-        .clone();
-    let desc = add
-        .get("project-description")
-        .unwrap_or(&Val::STRING("".to_string()))
-        .clone();
-    let license = add
-        .get("project-license")
-        .unwrap_or(&Val::STRING("".to_string()))
-        .clone();
-    let group = add
-        .get("project-group")
-        .unwrap_or(&Val::STRING("".to_string()))
-        .clone();
-
-    let image = add
-        .get("image")
-        .unwrap_or(&Val::STRING("".to_string()))
-        .clone();
-
-    if let Val::STRING(val) = authors {
-        let splited = val.split(":").collect::<Vec<&str>>();
-        meta_.authors = splited.iter().map(|s| s.to_string()).collect();
-    }
-
-    if let Val::STRING(val) = desc {
-        meta_.description = val.to_string();
-    }
-    if let Val::STRING(val) = license {
-        meta_.license = Some(val);
-    }
-    if let Val::STRING(val) = group {
-        meta_.group = val;
-    } else {
-        meta_.group = "general".to_string();
-    }
-
-    if let Val::STRING(val) = image {
-        #[derive(Serialize, Deserialize, Clone, Debug)]
-        struct Image {
-            typ: String,
-            image: Option<String>,
-            color: String,
-        }
-
-        let json = PARSING_SERVICE._from_string::<Image>(&val);
-        if let Ok(json) = json {
-            meta_.icon = match json.typ.as_str() {
-                "color" => Some(json.color),
-                _ => json.image,
-            }
-        } else {
-            meta_.icon = None;
-        }
-    } else {
-        meta_.icon = None
-    }
-
-    let _tags_ = tags
-        .iter()
-        .map(|el| el.name.clone())
-        .collect::<Vec<String>>();
-    meta_.tags = _tags_.clone();
-    meta_
+            pack_state,
+        )
+        .map_err(|e| e.into())
 }
 
 #[tauri::command]
