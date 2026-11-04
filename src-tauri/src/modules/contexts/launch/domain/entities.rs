@@ -1,3 +1,8 @@
+use crate::modules::contexts::project::domain::entities::{
+    ActionTask, PackageAction, PackageActionCommand, PackageOption, PackageOptionTyp,
+    PackageOptionTypEnum, Section,
+};
+use crate::modules::contexts::project::domain::values::ActionOnError;
 use crate::modules::shared::kernel::values::{IfStatementPart, Schema, Val};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -14,9 +19,9 @@ pub struct LaunchTemplate {
     #[serde(default)]
     pub icon: Option<String>,
     #[serde(default)]
-    pub sections: Vec<LaunchSection>,
+    pub sections: Vec<Section>,
     #[serde(default)]
-    pub actions: Vec<LaunchAction>,
+    pub actions: Vec<PackageAction>,
     #[serde(default)]
     pub functions: Vec<LaunchFunction>,
 }
@@ -28,27 +33,69 @@ impl Default for LaunchTemplate {
             title: String::from("Basic Configuration"),
             scheme: Default::default(),
             icon: None,
-            sections: vec![LaunchSection {
-                id: 0,
-                title: None,
-                options: vec![LaunchOption {
-                    id: "command".to_string(),
-                    title: "Command".to_string(),
-                    typ: Default::default(),
-                    def: Default::default(),
-                }],
-            }],
-            actions: vec![LaunchAction {
-                id: 0,
-                next: None,
-                if_: vec![],
-                command: Some(LaunchActionCommand {
-                    command: "".to_string(),
-                    args: Some(vec!["#0.command".to_string()]),
-                    cwd: None,
-                    env: None,
-                }),
-            }],
+            sections: vec![
+                /*LaunchSection {
+                    id: 0,
+                    title: None,
+                    options: vec![LaunchOption {
+                        id: "command".to_string(),
+                        title: "Command".to_string(),
+                        typ: Default::default(),
+                        def: Default::default(),
+                    }],
+                }*/
+                Section {
+                    id: 0,
+                    label: "".to_string(),
+                    list: (false, false),
+                    params: vec![PackageOption {
+                        id: "command".to_string(),
+                        title: "Command".to_string(),
+                        typ: PackageOptionTyp {
+                            typ: PackageOptionTypEnum::INPUT,
+                            fs_type: None,
+                            list_type: None,
+                            placeholder: None,
+                            required: Some(true),
+                            readonly: None,
+                            validate: None,
+                            fs_filter: None,
+                            gen_min: None,
+                            gen_max: None,
+                        },
+                        def: None,
+                        while_: None,
+                    }],
+                },
+            ],
+            actions: vec![
+                /*LaunchAction {
+                    id: 0,
+                    next: None,
+                    if_: vec![],
+                    command: Some(LaunchActionCommand {
+                        command: "".to_string(),
+                        args: Some(vec!["#0.command".to_string()]),
+                        cwd: None,
+                        env: None,
+                    }),
+                }*/
+                PackageAction {
+                    id: 0,
+                    next: None,
+                    if_: None,
+                    on_error: ActionOnError::StopAll,
+                    platform: None,
+                    command: Some(vec![PackageActionCommand {
+                        platform: None,
+                        cwd: None,
+                        shell: None,
+                        env: None,
+                        needed_exit_code: None,
+                        command: "#command".to_string(),
+                    }]),
+                },
+            ],
             functions: vec![],
         }
     }
@@ -259,7 +306,7 @@ pub struct LaunchObject {
     pub id: i32,
     pub launch_reference: i8,
     pub scheme: Schema,
-    pub tasks: Vec<LaunchTask>,
+    pub tasks: Vec<ActionTask>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

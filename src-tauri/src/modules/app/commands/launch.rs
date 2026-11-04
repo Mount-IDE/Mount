@@ -8,7 +8,9 @@ use crate::modules::contexts::launch::domain::entities::{
     LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::app::traits::TProjectService;
-use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
+use crate::modules::contexts::project::domain::entities::{
+    ActionTask, Project, ProjectTemplate, Var,
+};
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::LaunchError;
 use tauri::{State, Window};
@@ -132,6 +134,19 @@ pub fn create_references(
 }
 
 #[tauri::command]
+pub async fn lauch_tasks(
+    tasks: Vec<ActionTask>,
+    project: Project,
+    window: Window,
+    state: State<'_, SharedLaunchManager>,
+) -> Result<(), ErrorDto> {
+    println!("start tasks");
+    let id = window.label();
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn launch_task(
     task: LaunchFlatTask,
     project: Project,
@@ -141,7 +156,6 @@ pub async fn launch_task(
     println!("start task");
     let id = window.label();
     let app = APP.get();
-    //println!("APP {}", app.is_some());
     if let Some(app) = app {
         LAUNCH_RUN_SERVICE
             .launch_task(task, id.to_string(), project, app.clone(), state)

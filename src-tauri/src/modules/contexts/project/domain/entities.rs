@@ -183,11 +183,12 @@ impl _Task {
         }
     }
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ActionTask {
     pub commands: Vec<TaskCommand>,
     pub on_error: ActionOnError,
     pub from_graph: bool,
+    pub cwd: String,
 }
 
 impl ActionTask {
@@ -219,7 +220,7 @@ impl ActionTask {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskCommand {
     pub command: String,
     pub shell: String,
@@ -766,6 +767,7 @@ impl PackageAction {
             commands: tasks,
             on_error: self.on_error.clone(),
             from_graph: is_graph,
+            cwd: "".to_string(),
         }];
 
         used_ids.push(self.id.clone());

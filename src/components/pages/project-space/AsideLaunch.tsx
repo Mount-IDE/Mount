@@ -231,7 +231,7 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
             }
             let task = tasks[index];
             try {
-                let id = await invoke<string>("launch_task", {
+                let id = await invoke<string>("launch_tasks", {
                     task,
                     project
                 });

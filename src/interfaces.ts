@@ -314,7 +314,19 @@ interface LaunchObject {
     id: number,
     launch_reference: number,
     scheme: number,
-    tasks: LaunchTask[]
+    tasks: ActionTask[]
+}
+
+
+interface ActionTask {
+    commands: {
+        command: string
+        shell: string
+        env?: Record<string, string>
+    }[]
+    on_error: "continue" | "stop_graph" | "stop_all",
+    cwd: string
+    from_graph: boolean
 }
 
 

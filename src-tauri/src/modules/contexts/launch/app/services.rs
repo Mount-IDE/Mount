@@ -1,13 +1,15 @@
 use crate::modules::app::{ACTION_PROJECT_SERVICE, APP};
-use crate::modules::contexts::launch::app::functions::{read_fields, read_from, FunctionResult};
+use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::{LaunchSession, SharedLaunchManager};
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchFunctionArgument, LaunchObject, LaunchTask,
-    LaunchTemplate, LaunchTemplateReference, LaunchTemplateResult,
+    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate,
+    LaunchTemplateReference, LaunchTemplateResult,
 };
 use crate::modules::contexts::project::app::traits::TActionProjectService;
-use crate::modules::contexts::project::domain::entities::{Action, Project, ProjectTemplate, Var};
+use crate::modules::contexts::project::domain::entities::{
+    Action, ActionTask, PackageAction, Project, ProjectTemplate, Var,
+};
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 use rand::RngExt;
@@ -21,7 +23,8 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-use crate::modules::contexts::filesystem::app::utils::PathPart;
+use crate::modules::contexts::project::app::services::get_key;
+use crate::modules::shared::kernel::utils::shell_default;
 use process_wrap::tokio::*;
 #[cfg(windows)]
 use windows::Win32::System::Threading::CREATE_NO_WINDOW;
@@ -78,25 +81,27 @@ impl TLaunchCompileService for LaunchCompileService {
         template: &LaunchTemplate,
         results: &LaunchTemplateResult,
     ) -> Option<LaunchObject> {
+        let Some(needed) = results.get(&template.id) else {
+            return None;
+        };
         let passed = self.compile_condition(&vars, &template, &results);
         if passed.len() == 0 {
             return None;
         }
         let mut rng = rand::rng();
         let num: i32 = rng.random();
-        let mut obj = LaunchObject {
+
+        let actions = passed
+            .iter()
+            .filter_map(|e| e.compile(&passed, &vars, &needed, &mut vec![], false).ok())
+            .flatten()
+            .collect::<Vec<ActionTask>>();
+        let obj = LaunchObject {
             id: num,
             launch_reference: reference.id,
             scheme: Default::default(),
-            tasks: vec![],
+            tasks: actions,
         };
-
-        for act in passed.iter() {
-            let res = self.compile_task(&vars, &passed, &act, &results);
-            if let Some(val) = res {
-                obj.tasks.push(val);
-            }
-        }
         Some(obj)
     }
 
@@ -123,7 +128,7 @@ impl TLaunchCompileService for LaunchCompileService {
                 }
             }
         }
-        None
+        unreachable!()
     }
 
     fn compile_condition(
@@ -131,74 +136,16 @@ impl TLaunchCompileService for LaunchCompileService {
         vars: &Vec<Var>,
         template: &LaunchTemplate,
         results: &LaunchTemplateResult,
-    ) -> Vec<LaunchAction> {
-        let mut actions = Vec::<LaunchAction>::new();
-        for action in template.actions.iter() {
-            let mut passed_ = true;
-            'cond: for cond in action.if_.iter() {
-                //and
-                let mut passed = 0;
-                'part: for obj in cond.iter() {
-                    //or
-                    // let from = obj.from;
-                    let mut from = Val::STRING(obj.from.clone().unwrap_or("".__get()));
-                    if obj
-                        .from
-                        .clone()
-                        .unwrap_or("".__get())
-                        .starts_with(VAR_PREFIX)
-                    {
-                        let res = ACTION_PROJECT_SERVICE
-                            .get_from_vars(vars, obj.from.clone().unwrap_or("".__get()));
-                        if let Some(val) = res {
-                            from = val;
-                        } else {
-                            continue 'part;
-                        }
-                    } else if obj
-                        .from
-                        .clone()
-                        .unwrap_or("".__get())
-                        .starts_with(PARAM_PREFIX)
-                    {
-                        let res =
-                            self.get_from_results(&results, obj.from.clone().unwrap_or("".__get()));
-                        if let Some(res) = res {
-                            from = res;
-                        } else {
-                            continue 'part;
-                        }
-                    }
-
-                    let op = obj.oper.get_fn();
-
-                    let mut val = obj.value.clone().unwrap_or(Val::STRING("".__get())).clone();
-                    if let Val::STRING(val_) = val.clone() {
-                        if val_.starts_with(PARAM_PREFIX) {
-                            val = self.get_from_results(&results, val_.clone()).unwrap();
-                        }
-                        if val_.starts_with(VAR_PREFIX) {
-                            val = ACTION_PROJECT_SERVICE
-                                .get_from_vars(&vars, val_.clone())
-                                .unwrap();
-                        }
-                    }
-                    let res = op(from, val);
-                    if res {
-                        passed += 1;
-                        break 'part;
-                    }
-                }
-                if passed == 0 {
-                    passed_ = false;
-                    break 'cond;
-                }
-            }
-            if passed_ {
-                actions.push(action.clone());
-            }
-        }
+    ) -> Vec<PackageAction> {
+        let Some(needed) = results.get(&template.id) else {
+            return vec![];
+        };
+        let actions = Vec::<PackageAction>::new();
         actions
+            .iter()
+            .filter(|e| e.check_condition(&needed, &vars) && e.check_platform())
+            .cloned()
+            .collect()
     }
 
     fn compile_task(
@@ -207,11 +154,11 @@ impl TLaunchCompileService for LaunchCompileService {
         actions: &Vec<LaunchAction>,
         action: &LaunchAction,
         results: &LaunchTemplateResult,
-    ) -> Option<LaunchTask> {
+    ) -> Option<ActionTask> {
         if let None = action.command.clone() {
             return None;
         }
-        let act = action.command.clone();
+        /*let act = action.command.clone();
         if let None = act.clone() {
             return None;
         }
@@ -246,8 +193,8 @@ impl TLaunchCompileService for LaunchCompileService {
             command,
             env: act.env.clone(),
             cwd: act.cwd.clone(),
-        };
-        Some(obj)
+        };*/
+        unreachable!()
     }
 
     fn format_string(
@@ -350,16 +297,17 @@ impl TLaunchCompileService for LaunchCompileService {
             }
         }
 
-        Some(result)
+        unreachable!()
     }
 
     fn run_function(
         &self,
-        function: &LaunchFunction,
+        _function: &LaunchFunction,
         _template: &LaunchTemplate,
-        results: &LaunchTemplateResult,
+        _results: &LaunchTemplateResult,
     ) -> Option<FunctionResult> {
-        let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
+        unimplemented!()
+        /*let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
         let mut seq = false;
 
         let result: FunctionResult;
@@ -418,7 +366,7 @@ impl TLaunchCompileService for LaunchCompileService {
                 }
             }
         }
-        None
+        None*/
     }
 }
 
@@ -441,15 +389,15 @@ impl TLaunchRunService for LaunchRunService {
         if let Some(val) = task.cwd {
             path.push(val);
         }
-        let shell = if cfg!(target_os = "windows") {
-            "cmd"
-        } else {
-            "sh"
-        };
-        let key = if shell == "cmd" { "/C" } else { "-c" };
+        let shell = shell_default(); /* if cfg!(target_os = "windows") {
+                                         "cmd"
+                                     } else {
+                                         "sh"
+                                     };*/
+        let key = get_key(shell.clone()); /*if shell == "cmd" { "/C" } else { "-c" };*/
         // let mut command = Command::new(shell);
 
-        let mut command = CommandWrap::with_new(shell, |command| {
+        let mut command = CommandWrap::with_new(shell.as_str(), |command| {
             command
                 .arg(key)
                 .arg(cmd)

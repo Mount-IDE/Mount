@@ -1,10 +1,12 @@
 use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTask, LaunchTemplate,
+    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate,
     LaunchTemplateReference, LaunchTemplateResult,
 };
-use crate::modules::contexts::project::domain::entities::{Project, ProjectTemplate, Var};
+use crate::modules::contexts::project::domain::entities::{
+    ActionTask, PackageAction, Project, ProjectTemplate, Var,
+};
 use crate::modules::shared::kernel::errors::LaunchError;
 use crate::modules::shared::kernel::values::Val;
 use tauri::{AppHandle, State};
@@ -29,7 +31,7 @@ pub trait TLaunchCompileService {
         vars: &Vec<Var>,
         template: &LaunchTemplate,
         results: &LaunchTemplateResult,
-    ) -> Vec<LaunchAction>;
+    ) -> Vec<PackageAction>;
 
     fn compile_task(
         &self,
@@ -37,7 +39,7 @@ pub trait TLaunchCompileService {
         actions: &Vec<LaunchAction>,
         action: &LaunchAction,
         results: &LaunchTemplateResult,
-    ) -> Option<LaunchTask>;
+    ) -> Option<ActionTask>;
 
     fn format_string(
         &self,
