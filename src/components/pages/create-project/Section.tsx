@@ -7,6 +7,8 @@ import {cacheStore} from "@stores/cache_store.ts";
 type Props = {
     section: ISection
     is_main?: boolean
+
+    write?: (val: IVal, pid: string) => void
 }
 
 
@@ -56,6 +58,18 @@ export default function Section(props: Props) {
         setIsOpened(prev => !prev);
     }
 
+    function write(val: IVal, el: IPackageParameter) {
+        if (props.write) {
+            props.write(val, el.id)
+        } else {
+            if (is_main) {
+                set_value("__meta__", props.section.id, el?.id ?? "", val);
+            } else {
+                set_value(current_template.id, props.section.id, el?.id ?? "", val);
+            }
+        }
+    }
+
     return (
         <div className={"project-section"}>
             <div className={"project-section-head"}
@@ -91,13 +105,7 @@ export default function Section(props: Props) {
                  >
                 {props.section.params.map(el =>
                     <Parameter
-                        set={(val) => {
-                            if (is_main){
-                                set_value("__meta__", props.section.id, el?.id ?? "", val);
-                            }else {
-                                set_value(current_template.id, props.section.id, el?.id ?? "", val);
-                            }
-                        }}
+                        set={(val) => write(val, el)}
                         param={el}
                         key={`${props.section.id}${el.id}`}
                         section={props.section.id}

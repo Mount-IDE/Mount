@@ -1,17 +1,15 @@
-use crate::modules::app::{ACTION_PROJECT_SERVICE, APP};
+use crate::modules::app::APP;
 use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::{LaunchSession, SharedLaunchManager};
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
 use crate::modules::contexts::launch::domain::entities::{
-    LaunchAction, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate,
-    LaunchTemplateReference, LaunchTemplateResult,
+    LaunchFlatTask, LaunchFunction, LaunchObject, LaunchTemplate, LaunchTemplateReference,
+    LaunchTemplateResult,
 };
-use crate::modules::contexts::project::app::traits::TActionProjectService;
 use crate::modules::contexts::project::domain::entities::{
-    Action, ActionTask, PackageAction, Project, ProjectTemplate, Var,
+    ActionTask, PackageAction, Project, ProjectTemplate, Var,
 };
 use crate::modules::shared::kernel::errors::LaunchError;
-use crate::modules::shared::kernel::values::Val;
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -25,17 +23,21 @@ use uuid::Uuid;
 
 use crate::modules::contexts::project::app::services::get_key;
 use crate::modules::shared::kernel::utils::shell_default;
+use crate::modules::shared::kernel::values::Val;
+use crate::path_from;
+use macroses::log;
 use process_wrap::tokio::*;
 #[cfg(windows)]
 use windows::Win32::System::Threading::CREATE_NO_WINDOW;
 
 #[allow(unused)]
-pub struct LaunchCompileService();
+pub struct LaunchCompileService;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum LaunchOutputType {
     READ,
     ERROR,
+    START,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchTaskOutput {
@@ -81,11 +83,22 @@ impl TLaunchCompileService for LaunchCompileService {
         template: &LaunchTemplate,
         results: &LaunchTemplateResult,
     ) -> Option<LaunchObject> {
+        let mut flat_results = HashMap::<String, Val>::new();
+        for i in results.iter() {
+            for j in i.1.iter() {
+                flat_results.insert(format!("{}.{}", i.0, j.0.clone()), j.1.clone());
+            }
+        }
+
+        log!("RESULTS {results:?} {template:?}");
         let Some(needed) = results.get(&template.id) else {
+            log!("NONE1");
             return None;
         };
-        let passed = self.compile_condition(&vars, &template, &results);
+        let passed = self.compile_condition(&vars, &template, &flat_results);
+        log!("{passed:?}");
         if passed.len() == 0 {
+            log!("NONE2");
             return None;
         }
         let mut rng = rand::rng();
@@ -93,7 +106,10 @@ impl TLaunchCompileService for LaunchCompileService {
 
         let actions = passed
             .iter()
-            .filter_map(|e| e.compile(&passed, &vars, &needed, &mut vec![], false).ok())
+            .filter_map(|e| {
+                e.compile(&passed, &vars, &flat_results, &mut vec![], false)
+                    .ok()
+            })
             .flatten()
             .collect::<Vec<ActionTask>>();
         let obj = LaunchObject {
@@ -102,209 +118,35 @@ impl TLaunchCompileService for LaunchCompileService {
             scheme: Default::default(),
             tasks: actions,
         };
+        log!("COMPILED :: {reference:?}\n :: {obj:?}");
         Some(obj)
-    }
-
-    fn get_from_results(&self, results: &LaunchTemplateResult, addr: String) -> Option<Val> {
-        let mut address = addr.clone();
-        if addr.starts_with(PARAM_PREFIX) {
-            address = addr
-                .chars()
-                .skip(PARAM_PREFIX.chars().count())
-                .collect::<String>();
-        }
-        let address = Action::getaddr(address);
-        if let Ok((section, parameter)) = address {
-            let parameter = parameter.chars().skip(1).collect::<String>();
-
-            // for sect in results {
-            //
-            // }
-            let sect = results.get(&section);
-            if let Some(sect) = sect {
-                let param = sect.get(&parameter);
-                if let Some(param) = param {
-                    return Some(param.clone());
-                }
-            }
-        }
-        unreachable!()
     }
 
     fn compile_condition(
         &self,
         vars: &Vec<Var>,
         template: &LaunchTemplate,
-        results: &LaunchTemplateResult,
+        results: &HashMap<String, Val>,
     ) -> Vec<PackageAction> {
-        let Some(needed) = results.get(&template.id) else {
-            return vec![];
-        };
-        let actions = Vec::<PackageAction>::new();
+        println!("\n\n\t{results:?} {template:?}");
+
+        let actions = &template.actions;
         actions
             .iter()
-            .filter(|e| e.check_condition(&needed, &vars) && e.check_platform())
+            .filter(|e| {
+                let a = e.check_condition(&results, &vars) && e.check_platform();
+                println!("\t {a}");
+                return a;
+            })
             .cloned()
             .collect()
-    }
-
-    fn compile_task(
-        &self,
-        vars: &Vec<Var>,
-        actions: &Vec<LaunchAction>,
-        action: &LaunchAction,
-        results: &LaunchTemplateResult,
-    ) -> Option<ActionTask> {
-        if let None = action.command.clone() {
-            return None;
-        }
-        /*let act = action.command.clone();
-        if let None = act.clone() {
-            return None;
-        }
-
-        let act = act.unwrap();
-        let mut command = act.command.clone();
-        if let Some(args) = act.args {
-            for arg in args.iter() {
-                let res = self.format_string(arg.clone(), &vars, &results);
-                if let None = res {
-                    return None;
-                }
-                command = format!("{command} {}", res.unwrap());
-            }
-        }
-        if let Some(val) = action.next {
-            let act_ = actions.iter().find(|e| e.id == val);
-            if let Some(act_) = act_ {
-                let task = self.compile_task(&vars, &actions, act_, &results);
-                if let Some(task) = task {
-                    let obj = LaunchTask::GRAPH {
-                        command,
-                        next: Box::new(task),
-                        env: act.env.clone(),
-                        cwd: act.cwd.clone(),
-                    };
-                    return Some(obj);
-                }
-            }
-        }
-        let obj = LaunchTask::SINGLE {
-            command,
-            env: act.env.clone(),
-            cwd: act.cwd.clone(),
-        };*/
-        unreachable!()
-    }
-
-    fn format_string(
-        &self,
-        input: String,
-        vars: &Vec<Var>,
-        params: &LaunchTemplateResult,
-    ) -> Option<String> {
-        #[derive(Debug, Clone, Copy)]
-        enum State {
-            Normal,
-            Var,
-            Param,
-        }
-
-        let mut result = String::new();
-        let mut state = State::Normal;
-
-        let mut buf = String::new();
-        let mut brace_mode = false;
-
-        let mut chars = input.chars().peekable();
-
-        while let Some(ch) = chars.next() {
-            match state {
-                State::Normal => {
-                    if ch == VAR_PREFIX.chars().next().unwrap() {
-                        state = State::Var;
-                        buf.clear();
-                        brace_mode = false;
-                    } else if ch == PARAM_PREFIX.chars().next().unwrap() {
-                        state = State::Param;
-                        buf.clear();
-                        brace_mode = false;
-                    } else {
-                        result.push(ch);
-                    }
-                }
-
-                State::Var | State::Param => {
-                    // вход в {token}
-                    if ch == '{' && buf.is_empty() {
-                        brace_mode = true;
-                        continue;
-                    }
-
-                    if brace_mode {
-                        if ch == '}' {
-                            let value = if let State::Var = state {
-                                ACTION_PROJECT_SERVICE.get_from_vars(vars, format!("@{}", buf))?
-                            } else {
-                                self.get_from_results(params, format!("#{}", buf))?
-                            };
-
-                            result.push_str(&value.to_str());
-
-                            state = State::Normal;
-                            buf.clear();
-                            brace_mode = false;
-                            continue;
-                        } else {
-                            buf.push(ch);
-                        }
-                    } else {
-                        // без {} — читаем до разделителя
-                        if ch.is_whitespace() {
-                            let value = if let State::Var = state {
-                                ACTION_PROJECT_SERVICE.get_from_vars(vars, format!("@{}", buf))?
-                            } else {
-                                self.get_from_results(params, format!("#{}", buf))?
-                            };
-
-                            result.push_str(&value.to_str());
-                            result.push(' ');
-
-                            state = State::Normal;
-                            buf.clear();
-                        } else {
-                            buf.push(ch);
-                        }
-                    }
-                }
-            }
-        }
-
-        // flush tail
-        match state {
-            State::Normal => {}
-            State::Var => {
-                if !buf.is_empty() {
-                    let value = ACTION_PROJECT_SERVICE.get_from_vars(vars, format!("@{}", buf))?;
-                    result.push_str(&value.to_str());
-                }
-            }
-            State::Param => {
-                if !buf.is_empty() {
-                    let value = self.get_from_results(params, format!("#{}", buf))?;
-                    result.push_str(&value.to_str());
-                }
-            }
-        }
-
-        unreachable!()
     }
 
     fn run_function(
         &self,
         _function: &LaunchFunction,
         _template: &LaunchTemplate,
-        _results: &LaunchTemplateResult,
+        _results: &HashMap<String, Val>,
     ) -> Option<FunctionResult> {
         unimplemented!()
         /*let mut first: LaunchFunctionArgument = LaunchFunctionArgument::STRING(Default::default());
@@ -371,31 +213,28 @@ impl TLaunchCompileService for LaunchCompileService {
 }
 
 #[allow(unused)]
-pub struct LaunchRunService();
+pub struct LaunchRunService;
 
 impl TLaunchRunService for LaunchRunService {
     async fn launch_task(
         &self,
-        task: LaunchFlatTask,
-        window_id: String,
-        project: Project,
-        app: AppHandle,
-        state: State<'_, SharedLaunchManager>,
+        task: &LaunchFlatTask,
+        window_id: &str,
+        project: &Project,
+        app: &AppHandle,
+        state: &State<'_, SharedLaunchManager>,
     ) -> Result<String, LaunchError> {
-        let cmd = task.command;
+        log!("START TASK{}", task.command);
+        let cmd = &task.command;
 
-        let mut path = PathBuf::from(project.path.get());
-        path.push(project.name);
-        if let Some(val) = task.cwd {
-            path.push(val);
+        let path = path_from![project.path, project.name];
+        let mut path = PathBuf::from(path.get());
+        if let Some(val) = &task.cwd {
+            path.push(val.clone());
         }
-        let shell = shell_default(); /* if cfg!(target_os = "windows") {
-                                         "cmd"
-                                     } else {
-                                         "sh"
-                                     };*/
-        let key = get_key(shell.clone()); /*if shell == "cmd" { "/C" } else { "-c" };*/
-        // let mut command = Command::new(shell);
+
+        let shell = shell_default();
+        let key = get_key(shell.clone());
 
         let mut command = CommandWrap::with_new(shell.as_str(), |command| {
             command
@@ -435,13 +274,23 @@ impl TLaunchRunService for LaunchRunService {
 
         let id = Uuid::new_v4().to_string();
 
+        let _ = app.emit_to(
+            window_id,
+            "launch-start",
+            LaunchTaskOutput {
+                id: id.clone(),
+                typ: LaunchOutputType::START,
+                data: "".to_string(),
+            },
+        );
+
         let id_out = id.clone();
         let id_err = id.clone();
         let id_exit = id.clone();
 
-        let window_id_out = window_id.clone();
-        let window_id_err = window_id.clone();
-        let window_id_exit = window_id.clone();
+        let window_id_out = window_id.to_string();
+        let window_id_err = window_id.to_string();
+        let window_id_exit = window_id.to_string();
 
         let _ = tokio::spawn(async move {
             let mut stdout = stdout;
@@ -531,7 +380,7 @@ impl TLaunchRunService for LaunchRunService {
             ex.launches.insert(
                 id.clone(),
                 LaunchSession {
-                    window_id,
+                    window_id: window_id.to_string(),
                     child,
                     writer: Arc::new(Mutex::new(stdin.into())),
                 },
@@ -565,7 +414,7 @@ impl TLaunchRunService for LaunchRunService {
         &self,
         id: String,
         state: State<'_, SharedLaunchManager>,
-        label: &str,
+        _label: &str,
     ) -> Result<(), ()> {
         let app = APP.get();
         if let None = app {
@@ -628,5 +477,45 @@ impl TLaunchRunService for LaunchRunService {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::modules::app::LAUNCH_COMPILE_SERVICE;
+    use crate::modules::contexts::filesystem::app::utils::PathPart;
+    use macroses::log;
+
+    #[test]
+    pub fn compile_() {
+        let tmp: LaunchTemplate = LaunchTemplate::default();
+        let ref_: LaunchTemplateReference = LaunchTemplateReference {
+            id: 0,
+            template: ("".to_string(), -1),
+            icon: None,
+            scheme: Default::default(),
+            name: "".to_string(),
+            results: HashMap::<i8, HashMap<String, Val>>::from([
+                (
+                    -1i8,
+                    HashMap::from([("name".__get(), Val::STRING("name".__get()))]),
+                ),
+                (
+                    0i8,
+                    HashMap::from([("command".__get(), Val::STRING("rustc main.rs".__get()))]),
+                ),
+            ]),
+            before: None,
+        };
+
+        let vars = vec![Var::readonly(
+            "project_name".__get(),
+            Val::STRING("45".__get()),
+        )];
+
+        let compile = LAUNCH_COMPILE_SERVICE.compile_object(&ref_, &vars, &tmp, &ref_.results);
+        assert!(compile.is_some());
+        log!("{compile:?}")
     }
 }

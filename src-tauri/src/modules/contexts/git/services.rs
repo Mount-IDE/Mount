@@ -1,14 +1,16 @@
 use crate::modules::app::FS_READ_SERVICE;
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::path_from;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::git::traits::{EmptyType, TGitService};
 use crate::modules::shared::kernel::values::Path;
 use std::process::Command;
 use which::which;
 
+#[allow(dead_code, unused)]
 pub struct GitService();
+#[allow(dead_code, unused)]
 pub struct GitCommitService();
+#[allow(dead_code, unused)]
 pub struct GitBranchService();
 
 impl TGitService for GitService {

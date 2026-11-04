@@ -87,17 +87,17 @@ macro_rules! path_from {
     };
     ( $($x:expr), * $(,)?)=>{
        {
-           let a= vec![$($x.__get() ),*];
+           let a= vec![$($crate::modules::contexts::filesystem::app::utils::PathPart::__get(&$x)),*];
             if cfg!(target_os = "windows") {
-               Path(a.join("\\"))
+               $crate::modules::shared::kernel::values::Path(a.join("\\"))
             } else {
-                Path(a.join("/"))
+                $crate::modules::shared::kernel::values::Path(a.join("/"))
             }
 
        }
     };
     ($x:expr)=>{
-        Path($x.__get())
+        $crate::modules::shared::kernel::values::Path($crate::modules::contexts::filesystem::app::utils::PathPart::__get(&$x))
     }
 }
 

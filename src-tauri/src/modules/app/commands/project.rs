@@ -4,7 +4,6 @@ use crate::modules::app::{
 };
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::path_from;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::launch::app::managers::SharedLaunchManager;
@@ -59,7 +58,7 @@ pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, 
 }
 
 #[tauri::command]
-pub async fn create_project(
+pub fn create_project(
     template: ProjectTemplate,
     results: CreateProjectResult,
     packages: Vec<String>,

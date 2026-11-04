@@ -140,8 +140,11 @@ export class LaunchService implements Type {
             current_obj: launch
         })
         let objs = [...launchStore.getState().active_objects]
+        console.log("OBJECTS1", objs)
         if (!objs.find(el => el.id == launch.id)) {
+            console.log("NOT FOUND")
             objs.push(launch)
+            console.log(objs);
             launchStore.setState({
                 active_objects: new Set(objs)
             })

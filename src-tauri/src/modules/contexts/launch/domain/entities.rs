@@ -92,7 +92,7 @@ impl Default for LaunchTemplate {
                         shell: None,
                         env: None,
                         needed_exit_code: None,
-                        command: "#command".to_string(),
+                        command: "#0.command".to_string(),
                     }]),
                 },
             ],
@@ -166,6 +166,8 @@ pub enum LaunchVecType {
     NUMBER(i32),
 }
 
+#[deprecated]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchSection {
     #[serde(default)]
@@ -177,6 +179,8 @@ pub struct LaunchSection {
 }
 // -1 - meta (name etc)
 
+#[deprecated]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchOption {
     #[serde(default)]
@@ -185,9 +189,11 @@ pub struct LaunchOption {
     pub title: String,
     #[serde(default)]
     pub typ: LaunchOptionType,
-    #[serde(default)]
     pub def: LaunchOptionDefault,
 }
+
+#[deprecated]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum LaunchOptionDefault {
@@ -195,14 +201,10 @@ pub enum LaunchOptionDefault {
     Function(i8),
 }
 
-impl Default for LaunchOptionDefault {
-    fn default() -> Self {
-        Self::SINGLE(Default::default())
-    }
-}
-
 pub type LaunchTemplateResult = HashMap<i8, HashMap<String, Val>>;
 
+#[deprecated]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchOptionType {
     #[serde(default)]
@@ -213,6 +215,8 @@ pub struct LaunchOptionType {
     pub restriction: Option<i8>,
 }
 
+#[deprecated]
+#[allow(dead_code, unused)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchOptionTyp {
     #[allow(non_camel_case_types)]
@@ -225,6 +229,8 @@ pub enum LaunchOptionTyp {
     list,
 }
 
+#[deprecated]
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchAction {
     #[serde(default)]
@@ -237,6 +243,8 @@ pub struct LaunchAction {
     pub command: Option<LaunchActionCommand>,
 }
 
+#[deprecated]
+#[allow(dead_code, unused)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchActionCommand {
     #[serde(default)]
@@ -285,7 +293,7 @@ impl Default for LaunchOption {
             id: "".to_string(),
             title: "".to_string(),
             typ: Default::default(),
-            def: Default::default(),
+            def: LaunchOptionDefault::SINGLE("".to_string()),
         }
     }
 }
@@ -309,6 +317,8 @@ pub struct LaunchObject {
     pub tasks: Vec<ActionTask>,
 }
 
+#[deprecated]
+#[allow(dead_code, unused)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchTask {
     SINGLE {
@@ -327,6 +337,6 @@ pub enum LaunchTask {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LaunchFlatTask {
     pub command: String,
-    pub env: Option<Vec<(String, String)>>,
+    pub env: Option<HashMap<String, String>>,
     pub cwd: Option<String>,
 }

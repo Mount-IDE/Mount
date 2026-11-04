@@ -3,6 +3,7 @@ use crate::modules::contexts::toolchains::domain::{Toolchain, ToolchainComponent
 use crate::modules::shared::kernel::errors::ToolchainError;
 use crate::modules::shared::kernel::values::Platform;
 
+#[allow(dead_code, unused)]
 pub trait TToolchainMakeService {
     fn create_toolchain(&self, tool: &Toolchain) -> Result<(), ToolchainError>;
 
@@ -13,6 +14,7 @@ pub trait TToolchainMakeService {
     fn check_platform(&self, toolchain: &Toolchain, plat: Platform) -> bool;
 }
 
+#[allow(dead_code, unused)]
 pub trait TToolchainComponentsService {
     fn add_compoonent(
         &self,
@@ -41,6 +43,7 @@ pub trait TToolchainComponentsService {
     ) -> Result<bool, ToolchainError>;
 }
 
+#[allow(dead_code, unused)]
 pub trait TToolchainPackageComponent {
     fn start_repairing(&self, package: Package) -> Result<Toolchain, ToolchainError>;
 

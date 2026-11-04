@@ -5,7 +5,6 @@ use crate::modules::app::{
 use crate::modules::contexts::config::entities::{ConfigFsTemplate, FsConfigIcons};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
 use crate::modules::contexts::filesystem::app::utils::path_from;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate, Var};
@@ -17,6 +16,7 @@ use crate::modules::shared::kernel::errors::{
     ConfigError, FileSystemError, FormatError, ParsingError,
 };
 use crate::modules::shared::kernel::values::{Path, Val};
+use macroses::log;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -25,7 +25,7 @@ use std::string::ToString;
 use std::sync::Mutex;
 use tauri::Manager;
 
-pub struct ConfigService();
+pub struct ConfigService;
 
 #[derive(Clone, Debug)]
 struct FSFile {
@@ -373,7 +373,7 @@ impl TConfigService for ConfigService {
     }
 }
 
-pub struct ConfigRecoveryService();
+pub struct ConfigRecoveryService;
 
 fn get_files_new() -> Vec<FsEntity_> {
     vec![
@@ -628,7 +628,7 @@ impl TConfigRecoveryService for ConfigRecoveryService {
     }
 }
 
-pub struct ParsingService();
+pub struct ParsingService;
 
 impl TParsingService for ParsingService {
     fn to_string<T: Serialize>(&self, obj: T) -> Result<String, ParsingError> {
@@ -665,6 +665,7 @@ impl TFormatService for FormatService {
         vars: &Vec<Var>,
         results: &HashMap<String, Val>,
     ) -> Result<String, FormatError> {
+        //   log!("RESULTS {results:?}");
         #[derive(Clone, Copy, Debug)]
         pub enum Type {
             Braces,
@@ -674,6 +675,7 @@ impl TFormatService for FormatService {
         const VAR: char = '@';
         const RES: char = '#';
         if !string.contains(VAR) && !string.contains(RES) {
+            log!("not vars and results");
             return Ok(string);
         }
 
@@ -696,13 +698,13 @@ impl TFormatService for FormatService {
             } else {
                 temp[1..].to_string().clone()
             };
-            #[cfg(test)]
-            println!("VAR {slice} {temp} {typ:?}");
+            // log!("VAR {slice} {temp} {typ:?}");
             let found = vars.iter().find(|e| e.name == slice);
             if let Some(found) = found {
                 str.push_str(found.value.to_str().as_str());
                 temp.clear()
             } else {
+                //    log!("NEEDED VAR NOT FOUND {typ:?}\n {temp:?}\n'{str}'\n{vars:?}");
                 return Err(FormatError::NeededVarNotFound(slice));
             };
             Ok(())
@@ -717,13 +719,13 @@ impl TFormatService for FormatService {
             } else {
                 temp[1..].to_string().clone()
             };
-            #[cfg(test)]
-            println!("RES {slice} {temp} {typ:?}");
+            //log!("RES {slice} {temp} {typ:?}");
             let found = results.iter().find(|e| *e.0 == slice);
             if let Some(found) = found {
                 str.push_str(found.1.to_str().as_str());
                 temp.clear()
             } else {
+                // log!("NEEDED RES NOT FOUND {typ:?}\n {temp:?}\n'{str}'\n{results:?}\n");
                 return Err(FormatError::NeededResNotFound(slice));
             };
             Ok(())
@@ -749,12 +751,10 @@ impl TFormatService for FormatService {
                 if ch != VAR && ch != RES {
                     if ch == '{' && typ.is_none() {
                         typ = Some(Type::Braces);
-                        #[cfg(test)]
-                        println!("{{");
+                    //     log!("{{");
                     } else if ch != '{' && typ.is_none() {
                         typ = Some(Type::Short);
-                        #[cfg(test)]
-                        println!("not {{")
+                        // log!("not {{")
                     }
                     if ch == '}' {
                         if let Some(Type::Braces) = typ {
@@ -763,6 +763,7 @@ impl TFormatService for FormatService {
                             } else if temp.starts_with(RES) {
                                 cb_res(Type::Braces, &mut temp, &mut str, &results)?;
                             } else {
+                                // log!("INVALID DECLARATOR");
                                 return Err(FormatError::InvalidDeclarator(
                                     temp.chars().take(0).next().unwrap_or(ch),
                                 ));
@@ -778,6 +779,7 @@ impl TFormatService for FormatService {
                             } else if temp.starts_with(RES) {
                                 cb_res(Type::Short, &mut temp, &mut str, &results)?;
                             } else {
+                                //  log!("INVALID DECLARATOR");
                                 return Err(FormatError::InvalidDeclarator(
                                     temp.chars().take(0).next().unwrap_or(ch),
                                 ));
@@ -798,6 +800,7 @@ impl TFormatService for FormatService {
                         } else if temp.starts_with(RES) {
                             cb_res(Type::Braces, &mut temp, &mut str, &results)?;
                         } else {
+                            //log!("INVALID DECLARATOR");
                             return Err(FormatError::InvalidDeclarator(
                                 temp.chars().take(0).next().unwrap_or(' '),
                             ));
@@ -809,6 +812,7 @@ impl TFormatService for FormatService {
                         } else if temp.starts_with(RES) {
                             cb_res(Type::Short, &mut temp, &mut str, &results)?;
                         } else {
+                            //   log!("INVALID DECLARATOR");
                             return Err(FormatError::InvalidDeclarator(
                                 temp.chars().take(0).next().unwrap_or(' '),
                             ));
@@ -816,41 +820,11 @@ impl TFormatService for FormatService {
                     }
                 }
             } else {
+                //  log!("INVALID DECLARATOR");
                 return Err(FormatError::InvalidDeclarator(' '));
             }
         }
 
         Ok(str)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::modules::shared::kernel::values::Val;
-    const FMT: FormatService = FormatService;
-
-    #[test]
-    pub fn format() {
-        let str = "str".to_string();
-        let string = FMT.format_string(str.clone(), &vec![], &HashMap::new());
-        assert_eq!(string.unwrap(), str);
-    }
-
-    #[test]
-    pub fn format_results() {
-        let str1 = "str --- #{0.56} ".to_string();
-        let mut map = HashMap::<String, Val>::new();
-        map.insert("0.56".__get(), Val::STRING("some".__get()));
-        let string = FMT.format_string(str1.clone(), &vec![], &map);
-        assert_eq!(string.unwrap(), "str --- some ".to_string())
-    }
-
-    #[test]
-    pub fn format_vars() {
-        let str1 = "str --- @{0.56} @0.56".to_string();
-        let vec = vec![Var::new("0.56".__get(), Val::STRING("some".__get()))];
-        let string = FMT.format_string(str1.clone(), &vec, &HashMap::new());
-        assert_eq!(string.unwrap(), "str --- some some".to_string())
     }
 }

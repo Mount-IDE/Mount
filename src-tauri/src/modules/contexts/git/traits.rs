@@ -1,7 +1,9 @@
 use crate::modules::shared::kernel::values::Path;
 
+#[allow(dead_code, unused)]
 pub type EmptyType = Result<(), ()>;
 
+#[allow(dead_code, unused)]
 pub trait TGitService {
     fn has_git(&self, path: Path) -> bool;
 
@@ -14,6 +16,7 @@ pub trait TGitService {
     fn log(&self, path: Path) -> ();
 }
 
+#[allow(dead_code, unused)]
 pub trait TGitCommitService {
     fn index_add(&self, files: Vec<Path>, path: Path) -> EmptyType;
 
@@ -22,6 +25,7 @@ pub trait TGitCommitService {
     fn commit(&self, path: Path, amend: bool) -> EmptyType;
 }
 
+#[allow(dead_code, unused)]
 pub trait TGitBranchService {
     fn branch_create(&self, name: String, path: Path) -> EmptyType;
 

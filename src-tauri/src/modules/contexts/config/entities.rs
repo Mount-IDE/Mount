@@ -1,7 +1,6 @@
 use super::values::FsIcon;
 use crate::modules::app::FS_WRITE_SERVICE;
 use crate::modules::contexts::filesystem::app::traits::TFSWriteService;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::domain::entities::{
     PackageAction, PackageOption, PackageOptionTyp, PackageOptionTypEnum,
@@ -79,8 +78,8 @@ impl ConfigFsEntity {
         match self {
             ConfigFsEntity::Dir { name, entities } => {
                 println!("|\tDIR");
-                let path = path_from![path, name];
-                let dir = FS_WRITE_SERVICE.create_dir(&path.clone())?;
+                let path = path_from![path, *name];
+                let _ = FS_WRITE_SERVICE.create_dir(&path.clone())?;
                 println!("\tDIR created");
                 if let Some(entities) = entities {
                     for i in entities.iter() {
@@ -91,7 +90,7 @@ impl ConfigFsEntity {
             }
             ConfigFsEntity::File { name, content } => {
                 println!("|\tFILE");
-                let path = path_from![path, name];
+                let path = path_from![path, *name];
                 println!("\t{path:?}");
                 let file = FS_WRITE_SERVICE.create_file(&path.clone())?;
                 println!("\tfile created");

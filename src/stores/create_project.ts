@@ -11,7 +11,7 @@ interface Type {
     results: Result,
     tags: { id: number, name: string }[]
     packages: Set<string>
-    add_result: (tid: string, sid: number, pid: string, value: string | boolean | string[]) => void,
+    add_result: (tid: string, sid: number, pid: string, value: IVal) => void,
     add_package: (id: string) => void
     add_packages: (pack: string[]) => void
     remove_package: (pack: string) => void
@@ -35,7 +35,7 @@ interface Type {
 export interface Result {
     [template: string]: {
         [section: number]: {
-            [parameter: string]: string | boolean | string[]
+            [parameter: string]: IVal
         }
     }
 }

@@ -1,14 +1,12 @@
 use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE, LSP_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::TFSReadService;
 use crate::modules::contexts::filesystem::app::utils::path_from;
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::PFile;
 use crate::modules::contexts::package::domain::SharedLspManager;
 use crate::modules::contexts::package::traits::TLspService;
 use crate::modules::contexts::project::domain::entities::{Package, PackageComponent};
 use crate::modules::services::traits::TConfigService;
 use crate::modules::shared::kernel::entities::ErrorDto;
-use crate::modules::shared::kernel::values::Path;
 use serde_json::Value;
 use tauri::{AppHandle, State, Window};
 

@@ -78,6 +78,7 @@ impl Default for TemplateMeta {
     }
 }
 
+#[allow(dead_code, unused)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ParameterLabel {
@@ -91,6 +92,7 @@ impl Default for ParameterLabel {
     }
 }
 
+#[allow(dead_code, unused)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ActionCommand {
     #[serde(default = "t_platform_def")]
@@ -114,8 +116,11 @@ impl Default for ActionCommand {
     }
 }
 
+#[allow(dead_code, unused)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ActionCommandArgs(pub String, pub Vec<String>);
+
+#[allow(dead_code, unused)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(untagged)]
 pub enum ActionCommandIn {

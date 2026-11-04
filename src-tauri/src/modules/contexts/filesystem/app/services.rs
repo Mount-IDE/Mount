@@ -5,7 +5,6 @@ use crate::modules::contexts::filesystem::app::managers::SharedWatcherManager;
 use crate::modules::contexts::filesystem::app::traits::{
     TFSReadService, TFSWriteService, TFWatchService, TFsEntityService,
 };
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{FsMeta, PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::{
     FileType, FileWriteAccess, WatchInstance,
@@ -29,7 +28,7 @@ use std::time::Duration;
 use std::{fs, thread};
 use tauri::{Emitter, Manager};
 
-pub struct FileSystemReadService();
+pub struct FileSystemReadService;
 
 impl TFSReadService for FileSystemReadService {
     ///
@@ -163,7 +162,7 @@ impl TFSReadService for FileSystemReadService {
     }
 }
 
-pub struct FileSystemWriteService();
+pub struct FileSystemWriteService;
 
 impl TFSWriteService for FileSystemWriteService {
     ///
@@ -274,7 +273,7 @@ impl TFSWriteService for FileSystemWriteService {
     }
 }
 
-pub struct FileSystemWatchService();
+pub struct FileSystemWatchService;
 
 #[derive(Clone, Serialize)]
 #[serde(untagged)]

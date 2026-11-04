@@ -126,6 +126,7 @@ impl PlatformType {
         false
     }
 
+    #[allow(unused)]
     pub fn current() -> Self {
         if cfg!(target_os = "windows") {
             return Self::WINDOWS;
@@ -216,6 +217,7 @@ impl Default for Val {
 }
 
 #[derive(Clone, Debug)]
+#[allow(dead_code, unused)]
 pub enum ParameterTyp {
     INPUT(String),
     CHECK,

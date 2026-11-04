@@ -20,6 +20,7 @@ use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, ParameterTyp, Path,
     Platform, PlatformType, Schema, Val,
 };
+use macroses::log;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::process::{Command, Stdio};
@@ -176,6 +177,7 @@ pub enum _Task {
 }
 
 impl _Task {
+    #[allow(unused)]
     pub fn empty() -> Self {
         Self::SINGLE {
             commands: vec![],
@@ -353,6 +355,7 @@ impl Section {
     }
 }
 
+#[deprecated]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Action {
     #[serde(default)]
@@ -366,38 +369,8 @@ pub struct Action {
     #[serde(default)]
     pub command: Vec<ActionCommand>,
 }
-impl Action {
-    #[allow(unused)]
-    pub fn new() -> Action {
-        Self {
-            id: 0,
-            // for_: None,
-            // callable: None,
-            if_: None,
-            on_error: String::new(),
-            next: None,
-            command: Vec::new(),
-        }
-    }
 
-    pub fn getaddr(addr: String) -> Result<(i8, String), ProjectError> {
-        let point = addr.find(".");
-        if let None = point {
-            return Err(ProjectError::IncorrectAddress { address: addr });
-        }
-        let point = point.unwrap();
-        if point == addr.len() {
-            return Err(ProjectError::IncorrectAddress { address: addr });
-        }
-        let section = addr[..point].to_string().clone();
-        let parameter = addr[point..].to_string().clone();
-        let section = section
-            .parse::<i8>()
-            .map_err(|_| ProjectError::IncorrectAddress { address: addr })?;
-        Ok((section, parameter))
-    }
-}
-
+#[deprecated]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Parameter {
     #[serde(default)]
@@ -410,19 +383,6 @@ pub struct Parameter {
     pub def: Val,
     #[serde(default)]
     pub while_: Option<String>,
-}
-
-impl Parameter {
-    #[allow(unused)]
-    pub fn new() -> Parameter {
-        Self {
-            out: String::new(),
-            label: ParameterLabel::STR(String::new()),
-            def: Val::NUMBER(0.0),
-            while_: None,
-            typ: ParameterTyp::CHECK,
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -650,6 +610,7 @@ pub struct PackageAction {
 
 impl PackageAction {
     pub fn check_condition(&self, results: &HashMap<String, Val>, vars: &Vec<Var>) -> bool {
+        macroses::log!("\t\t{:?}", self.if_);
         if let Some(if_) = &self.if_ {
             let mut counter = 0;
             'or: for or in if_.iter() {
@@ -716,20 +677,24 @@ impl PackageAction {
         is_graph: bool,
     ) -> Result<Vec<ActionTask>, ()> {
         if used_ids.contains(&self.id) {
+            log!("ID IN LOG");
             return Err(());
         }
         let mut tasks = Vec::<TaskCommand>::new();
         if let Some(cmd) = &self.command {
             for i in cmd.iter() {
+                log!("\t iteration {i:?}");
                 // check platform
                 if let Some(p) = &i.platform {
                     if !p.is_correct() {
+                        log!("INCORRECT PLATFORM {p:?}");
                         continue;
                     }
                 }
                 let fmt = FormatService::format_string;
                 let Ok(command) = fmt(&FORMAT_SERVICE, i.command.clone(), &vars, &filtered_results)
                 else {
+                    log!("INCORRECT FORMATTING1");
                     continue;
                 };
                 let env = if let Some(env) = &i.env {
@@ -828,9 +793,11 @@ pub struct PackageOption {
     pub while_: Option<String>,
 }
 
+#[allow(unused)]
 pub type ParameterId = String;
 
 impl PackageOption {
+    #[allow(unused)]
     pub fn filter_by_while(
         results: &HashMap<ParameterId, Val>,
         parameters: Vec<Self>,

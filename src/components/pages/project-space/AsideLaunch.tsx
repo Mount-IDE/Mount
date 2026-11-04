@@ -15,11 +15,13 @@ import Icon from "@common/Icon.tsx";
 
 type Props = { active?: boolean };
 
+/*
 type FlatLaunchTask = {
     command: string;
     env?: [string, string][];
     cwd?: string;
 };
+*/
 
 /*
 type TerminalOutput = { id: string; data: string };
@@ -41,6 +43,10 @@ export default function AsideLaunch(_: Props) {
 
     let processes: LaunchProcess[] = [...objects].map((el, i) => ({id: i, obj: el}))
 
+
+    useEffect(() => {
+        console.log("OBJECTS", objects)
+    }, [objects]);
 
     let [current, setCurrent] = useState(0)
 
@@ -179,11 +185,10 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
                     backendId.current = null
                     console.log("RESTART2")
                     allowRef.current = true;
-                    let tasks = flatTasks(props.proc.obj.tasks)
                     currenTask.current = 0;
                     // termRef.current?.clear()
                     console.log("RESTART3")
-                    await runTask(0, tasks)
+                    await runTask()
                 } catch (e) {
                     console.warn(e)
                 }
@@ -217,26 +222,19 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
         const project = projectStore(state => state.current_project);
 
         const expectedCloseId = useRef<string | null>(null);
-        /*  const lastSizeRef = useRef({
-              rows: 0,
-              cols: 0
-          })*/
-
         const currenTask = useRef(0)
 
-        async function runTask(index: number, tasks: FlatLaunchTask[]) {
-            console.log("RUN TASK", index)
-            if (index >= tasks.length || !allowRef.current) {
-                return;
-            }
-            let task = tasks[index];
+        async function runTask() {
+            let tasks = props.proc.obj.tasks
+            console.log("RUN TASKs", tasks)
+            //let task = tasks[index];
             try {
-                let id = await invoke<string>("launch_tasks", {
-                    task,
+                await invoke<string>("launch_tasks", {
+                    tasks,
                     project
                 });
                 //  fitAndResize();
-                backendId.current = id;
+                //  backendId.current = id;
             } catch (e) {
                 console.error(e)
             }
@@ -292,6 +290,7 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
 
             let outputUnlisten: UnlistenFn | null = null;
             let exitUnlisten: UnlistenFn | null = null;
+            let startUnlisten: UnlistenFn | null = null;
             const resizeObserver = new ResizeObserver(() => {
                 if (!backendId.current) return;
                 fitAndResize();
@@ -321,9 +320,9 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
                 };
             })();
 
-
-            let tasks = flatTasks(props.proc.obj.tasks);
-
+            listen<{ id: string }>("launch-start", (val) => {
+                backendId.current = val.payload.id;
+            }).then(e => startUnlisten = e)
 
             listen<{ id: string, data: string }>("launch-read", (val) => {
                 if (val.payload.id == backendId.current && allowRef.current) {
@@ -343,18 +342,20 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
                 if (backendId.current !== id) return;
 
                 backendId.current = null;
-                if (allowRef.current) {
-                    currenTask.current += 1;
-                    runTask(currenTask.current, tasks).then();
-                }
+                /* if (allowRef.current) {
+                     currenTask.current += 1;
+                     runTask(tasks).then();
+                 }*/
             }).then((unlisten) => exitUnlisten = unlisten)
 
-            runTask(0, tasks).then();
+            runTask().then();
             return () => {
                 term.dispose()
                 resizeObserver.disconnect()
                 outputUnlisten?.()
                 exitUnlisten?.()
+                startUnlisten?.()
+
                 if (backendId.current) {
                     invoke("close_launch", {
                         id: backendId.current
@@ -378,6 +379,7 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
     })
 
 
+/*
 function flatTasks(tasks: LaunchTask[]) {
     let res: FlatLaunchTask[] = []
     for (let task of tasks) {
@@ -394,4 +396,4 @@ function flatTasks(tasks: LaunchTask[]) {
     }
 
     return res;
-}
+}*/

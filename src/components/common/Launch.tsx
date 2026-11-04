@@ -52,7 +52,6 @@ export default function Launch() {
 
     const [clicked, setClicked] = useState(false)
 
-    console.log(refs)
     return (
         <div id={"launch"}>
 
@@ -90,7 +89,7 @@ export default function Launch() {
             <Icon src={play} in_size={"65%"} styles={"hover:bg-(--hover) rounded-[5px]"} disabled={!currentLaunch}
                   onClick={async () => {
                       if (!currentLaunch || !project) return;
-
+                      console.log(project.workspace.launch_references, project.workspace.launch_objects)
                       let object =
                           project.workspace.launch_objects.find((obj) => obj.launch_reference === currentLaunch.id) ?? null;
 

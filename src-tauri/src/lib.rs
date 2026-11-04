@@ -146,7 +146,8 @@ pub fn run() {
             close_window_launches,
             has_processes,
             write_files,
-            create_fs_entity
+            create_fs_entity,
+            launch_tasks
         ])
         .manage(Arc::new(Mutex::new(FileSystemWatchManager::new())))
         .manage(Arc::new(Mutex::new(TerminalManager::new())))

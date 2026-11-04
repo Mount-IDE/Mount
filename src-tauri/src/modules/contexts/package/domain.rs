@@ -7,6 +7,7 @@ use tokio::sync::{mpsc, Mutex};
 pub struct LspEntity {
     #[allow(unused)]
     pub window_id: String,
+    #[allow(unused)]
     pub child: Child,
     pub writter: mpsc::UnboundedSender<Value>,
 }

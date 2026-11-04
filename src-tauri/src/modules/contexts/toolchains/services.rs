@@ -1,7 +1,6 @@
 use crate::modules::app::stores::TOOLCHAINS;
 use crate::modules::app::{CONFIG_SERVICE, FS_READ_SERVICE, FS_WRITE_SERVICE, PARSING_SERVICE};
 use crate::modules::contexts::filesystem::app::traits::{TFSReadService, TFSWriteService};
-use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::domain::entities::{Package, Repair};
@@ -11,11 +10,11 @@ use crate::modules::contexts::toolchains::traits::{
 };
 use crate::modules::services::traits::{TConfigService, TParsingService};
 use crate::modules::shared::kernel::errors::ToolchainError;
-use crate::modules::shared::kernel::values::Path;
 use crate::modules::shared::kernel::values::Platform;
 use crate::path_from;
 
-pub struct ToolchainMakeService();
+#[allow(unused)]
+pub struct ToolchainMakeService;
 
 impl TToolchainMakeService for ToolchainMakeService {
     fn create_toolchain(&self, tool: &Toolchain) -> Result<(), ToolchainError> {
@@ -88,7 +87,7 @@ impl TToolchainMakeService for ToolchainMakeService {
     }
 }
 
-pub struct ToolchainComponentService();
+pub struct ToolchainComponentService;
 
 impl TToolchainComponentsService for ToolchainComponentService {
     fn add_compoonent(
@@ -225,7 +224,7 @@ impl TToolchainComponentsService for ToolchainComponentService {
     }
 }
 
-pub struct ToolchainPackageService();
+pub struct ToolchainPackageService;
 
 impl TToolchainPackageComponent for ToolchainPackageService {
     fn start_repairing(&self, package: Package) -> Result<Toolchain, ToolchainError> {

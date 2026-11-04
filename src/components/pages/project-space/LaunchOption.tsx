@@ -4,9 +4,10 @@ import Input from "@common/Input.tsx";
 import FSContext from "@common/FSContext.tsx";
 import launchService from "@/src/services/launch_service.ts";
 import List from "@common/List.tsx";
+import Gen from "@common/Gen.tsx";
 
 type Props = {
-    obj: LaunchOption,
+    obj: IPackageParameter,
     section: number,
     functions: LaunchFunction[]
     cur_ref: number
@@ -23,7 +24,7 @@ export default function LaunchOption(props: Props) {
         props.cur_ref,
         props.section,
         obj.id)
-    let val = find() ?? props.obj.def
+    let val = find() ?? props.obj.def ?? ""
 
     function write_(val_: IVal) {
         launchService.write_ref_result(props.cur_ref, props.section, obj.id, val_)
@@ -36,16 +37,22 @@ export default function LaunchOption(props: Props) {
                 <Check title={obj.title} write={write_} value={!!val}/>
             }
             {
-                typ == "input" &&
-                <Input title={obj.title} placeholder={""} typ={"input"} write={write_} value={val.toString()}/>
+                (typ == "input" || typ == "area") &&
+                <Input title={obj.title} placeholder={obj.typ.placeholder} typ={"input"} write={write_}
+                       value={val.toString()}/>
             }
             {
                 typ == "list" &&
-                <List title={obj.title} variants={obj.typ.list_types ?? []} write={write_} value={val.toString()}/>
+                <List title={obj.title} variants={obj.typ.list_type ?? []} write={write_} value={val.toString()}/>
             }
             {
-                typ == "path" &&
-                <FSContext title={obj.title} typ={"file"} write={write_} placeholder={""} value={val.toString()}/>
+                typ == "file" &&
+                <FSContext title={obj.title} typ={"file"} write={write_} placeholder={obj.typ.placeholder}
+                           value={val.toString()}/>
+            }
+            {
+                typ == "gen" &&
+                <Gen value={Array.isArray(val) ? val : []} write={write_} title={obj.title}/>
             }
         </div>
     )

@@ -37,6 +37,7 @@ pub trait TConfigService {
     #[allow(unused)]
     fn get_license(&self, name: String) -> Result<String, ConfigError>;
 
+    #[allow(dead_code, unused)]
     fn get_shell(&self) -> String;
 }
 
@@ -65,6 +66,7 @@ pub trait TFormatService {
     ) -> Result<String, FormatError>;
 }
 
+#[allow(dead_code, unused)]
 pub trait TCreateFsService {
     fn create(&self, path: &Path, config: ConfigFsTemplate) -> Result<(), FileSystemError>;
 

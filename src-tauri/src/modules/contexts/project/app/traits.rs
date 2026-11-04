@@ -1,10 +1,8 @@
 use crate::modules::contexts::project::domain::entities::{
-    Button, Package, PackageAction, Project, ProjectTag, ProjectTemplate, SharedPackages, Var,
-    _Task,
+    Button, Package, Project, ProjectTag, ProjectTemplate, SharedPackages, Var,
 };
 use crate::modules::contexts::project::domain::values::{
-    CreateProjectPackageResults, CreateProjectResult, CreateProjectTemplate, ProjectMeta,
-    ResultsRecord,
+    CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::shared::kernel::errors::ProjectError;
@@ -80,67 +78,6 @@ pub trait TProjectService {
 
     fn remove_from_recents(&self, proj: &Project) -> Result<(), ProjectError>;
     fn add_to_recents(&self, project: &Project) -> Result<(), ProjectError>;
-}
-
-pub trait TActionProjectService {
-    fn compile(
-        &self,
-        template: &ProjectTemplate,
-        values: &CreateProjectResult,
-        vars: &Vec<Var>,
-        packages: &Vec<Package>,
-        pack_results: &CreateProjectPackageResults,
-    ) -> Option<(Vec<Var>, Vec<_Task>)>;
-    fn precompile_condition(
-        &self,
-        sections: &Vec<CreateProjectTemplate>,
-        vars: &Vec<Var>,
-        action: &PackageAction,
-        is_pack: bool,
-        pack_params: &ResultsRecord,
-    ) -> bool;
-
-    #[deprecated]
-    fn format(
-        &self,
-        string: String,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-        is_pack: bool,
-        pack_params: &ResultsRecord,
-    ) -> Option<String>;
-
-    #[deprecated]
-    fn get_from_vars(&self, vars: &Vec<Var>, addr: String) -> Option<Val>;
-
-    #[deprecated]
-    fn get_from_params(&self, params: &Vec<CreateProjectTemplate>, addr: String) -> Option<Val>;
-
-    #[deprecated]
-    fn get_from_pack_params(&self, params: &ResultsRecord, addr: String) -> Option<Val>;
-
-    fn compile_vars(
-        &self,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-    ) -> Option<Vec<Var>>;
-
-    #[deprecated]
-    fn make_task(
-        &self,
-        action: &PackageAction,
-        actions: &Vec<PackageAction>,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-        is_pack: bool,
-        pack_params: &ResultsRecord,
-    ) -> Option<_Task>;
-
-    #[deprecated]
-    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String);
-
-    #[deprecated]
-    fn run_task(&self, task: &_Task, path: &Path) -> i8;
 }
 
 pub trait TPackageService {

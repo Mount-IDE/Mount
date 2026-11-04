@@ -4,7 +4,7 @@ use crate::modules::contexts::events::traits::TEventService;
 use crate::modules::services::traits::TParsingService;
 use tauri::Emitter;
 
-pub struct EventService();
+pub struct EventService;
 
 impl TEventService for EventService {
     fn write(&self, window: String, chan: &str, data: Option<String>, typ: EventType) -> bool {

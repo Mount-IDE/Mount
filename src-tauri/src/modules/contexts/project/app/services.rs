@@ -1,5 +1,5 @@
 use crate::modules::app::{
-    APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, EVENT_SERVICE, FORMAT_SERVICE, FS_READ_SERVICE,
+    CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, EVENT_SERVICE, FORMAT_SERVICE, FS_READ_SERVICE,
     FS_WRITE_SERVICE, PARSING_SERVICE, PROJECT_SERVICE, SETTINGS,
 };
 use crate::modules::contexts::events::traits::TEventService;
@@ -10,15 +10,14 @@ use crate::modules::contexts::filesystem::domain::entities::{PDirectory, PFile};
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::launch::domain::entities::LaunchTemplate;
 use crate::modules::contexts::project::app::traits::{
-    TActionProjectService, TCreateProjectService, TPackageService, TProjectService,
+    TCreateProjectService, TPackageService, TProjectService,
 };
 use crate::modules::contexts::project::domain::entities::{
-    Action, ActionTask, Button, ButtonComponentType, Package, PackageAction, PackageActionCommand,
-    Project, ProjectTag, ProjectTemplate, SharedPackages, TaskCommand, Var, _Task,
+    ActionTask, Button, ButtonComponentType, Package, PackageAction, PackageActionCommand, Project,
+    ProjectTag, ProjectTemplate, SharedPackages, Var,
 };
 use crate::modules::contexts::project::domain::values::{
-    ActionOnError, ButtonPos, CreateProjectPackageResults, CreateProjectResult,
-    CreateProjectTemplate, ProjectMeta, ResultsRecord,
+    ActionOnError, ButtonPos, CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
 };
 use crate::modules::contexts::settings::domain::entities::RecentProject;
 use crate::modules::services::traits::{
@@ -29,12 +28,11 @@ use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, Path, Platform,
     PlatformType, Val,
 };
+use macroses::log;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::ops::Deref;
-use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{Emitter, State};
+use tauri::State;
 
 #[allow(unused)]
 pub fn get_key(sh: String) -> String {
@@ -51,7 +49,7 @@ pub fn get_key(sh: String) -> String {
     }
 }
 
-pub struct ProjectService();
+pub struct ProjectService;
 
 pub struct CreateProjectService;
 
@@ -170,29 +168,35 @@ impl TCreateProjectService for CreateProjectService {
                 flat_results.insert(format!("{}.{}", i.0, j.0), j.1.clone());
             }
         }
+        self.compile_vars(&mut vars, &flat_results);
 
         let path_to_mount = path_from![path_, ".mount"];
         let path_to_config = path_from![path_to_mount, "project.json"];
         let path_to_packages = path_from![path_to_mount, "packages.json"];
+
+        log!("START PARSING");
+        let config_str = PARSING_SERVICE.to_string(&project.clone())?;
+        log!("PARSING1 {config_str}");
+        let packages_str = PARSING_SERVICE.to_string(&packages_.clone())?;
+        log!("PARSING2 {packages_str}");
 
         FS_WRITE_SERVICE.create_dir(&path_.clone())?;
         FS_WRITE_SERVICE.create_dir(&path_to_mount)?;
         let config = FS_WRITE_SERVICE.create_file(&path_to_config)?;
         let packages_file = FS_WRITE_SERVICE.create_file(&path_to_packages)?;
 
-        let config_str = PARSING_SERVICE.to_string(&project.clone())?;
-        let packages_str = PARSING_SERVICE.to_string(&packages_.clone())?;
-
         FS_WRITE_SERVICE.write_file(&config, config_str, FileWriteAccess::WRITE)?;
         FS_WRITE_SERVICE.write_file(&packages_file, packages_str, FileWriteAccess::WRITE)?;
         PROJECT_SERVICE.add_to_recents(&project)?;
-
+        log!("RECENTS ADD");
         self.exec_tasks(&template, &vars, &flat_results, path_);
+        log!("ENDED TASKS");
 
         let license = additions.license.clone();
         if let Some(license) = license {
             self.add_license(&project, license, &results)?;
         }
+        log!("END");
 
         Ok(project)
     }
@@ -626,6 +630,7 @@ impl TCreateProjectService for CreateProjectService {
             })
             .flatten()
             .collect::<Vec<ActionTask>>();
+        log!("COMPILED {tasks:?}");
 
         let mut last = ActionOnError::CONTINUE;
         for i in tasks {
@@ -636,6 +641,7 @@ impl TCreateProjectService for CreateProjectService {
                 continue;
             }
             last = i.execute(path.clone());
+            log!("EXEC LAST {last:?} {:?}", i.commands);
         }
     }
 }
@@ -645,7 +651,7 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn open_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        let path = path_from![project_path, ".mount", "project.json",];
+        let path = path_from![*project_path, ".mount", "project.json",];
         let config = PFile::from_path_reg(path);
 
         let json = FS_READ_SERVICE.read_file(&config)?;
@@ -657,7 +663,7 @@ impl TProjectService for ProjectService {
     ///
     ///
     fn delete_project(&self, project_path: &Path) -> Result<Project, ProjectError> {
-        let path_ = path_from![project_path, ".mount", "project.json",];
+        let path_ = path_from![*project_path, ".mount", "project.json",];
         let file = PFile::from_path_reg(path_.clone());
         let text = FS_READ_SERVICE.read_file(&file)?;
         let json = PARSING_SERVICE._from_string::<Project>(&text)?;
@@ -809,598 +815,7 @@ impl TProjectService for ProjectService {
     }
 }
 
-#[allow(unused)]
-pub struct ActionProjectService();
-
-#[allow(unused)]
-const VAR_PREFIX: &str = "@";
-
-#[allow(unused)]
-const PARAM_PREFIX: &str = "#";
-
-impl TActionProjectService for ActionProjectService {
-    fn compile(
-        &self,
-        template: &ProjectTemplate,
-        values: &CreateProjectResult,
-        vars: &Vec<Var>,
-        packages: &Vec<Package>,
-        pack_results: &CreateProjectPackageResults,
-    ) -> Option<(Vec<Var>, Vec<_Task>)> {
-        let meta = values.get("__meta__").unwrap();
-        let mut sections = vec![meta.to_owned()];
-        let current_values = values.get(template.id.clone().as_str());
-        if let Some(cur) = current_values {
-            sections.push(cur.clone());
-        }
-        let vars = self.compile_vars(vars, &sections);
-        if let None = vars.clone() {
-            return None;
-        }
-        let mut vars = vars.unwrap();
-
-        let actions = template.startup.actions.clone();
-        let mut tasks = Vec::<_Task>::new();
-
-        for action in actions.iter() {
-            if let Some(_) = action.if_ {
-                let cond = self.precompile_condition(
-                    &sections,
-                    &vars,
-                    &action,
-                    false,
-                    &(HashMap::new() as ResultsRecord),
-                );
-                if !cond {
-                    continue;
-                }
-            }
-            let task__ = self.make_task(
-                &action,
-                &actions,
-                &vars,
-                &sections,
-                false,
-                &(HashMap::new() as ResultsRecord),
-            );
-            if let Some(task_) = task__ {
-                tasks.push(task_);
-            }
-        }
-
-        for package in packages {
-            if let None = package.startup.actions.clone() {
-                continue;
-            }
-            let actions = package.startup.actions.clone().unwrap();
-            let vars_ = package.var.clone();
-            if let Some(var) = vars_ {
-                for i in var {
-                    vars.push(i);
-                }
-            }
-            let Some(results) = pack_results.get(&package.id) else {
-                continue;
-            };
-            for action in actions.iter() {
-                let cond = self.precompile_condition(&sections, &vars, &action, true, &results);
-                if !cond {
-                    continue;
-                }
-                let task__ = self.make_task(&action, &actions, &vars, &sections, false, &results);
-                if let Some(task) = task__ {
-                    tasks.push(task);
-                }
-            }
-        }
-
-        Some((vars, tasks))
-    }
-
-    ///
-    ///
-    ///
-    fn precompile_condition(
-        &self,
-        sections: &Vec<CreateProjectTemplate>,
-        vars: &Vec<Var>,
-        action: &PackageAction,
-        is_pack: bool,
-        pack_params: &ResultsRecord,
-    ) -> bool {
-        let condition = action.if_.clone().unwrap();
-        let mut pass_conditions = true; // check conditions
-        'cond: for cond in condition {
-            let mut passed = 0;
-            'part: for part in cond {
-                let mut from = Val::NONE;
-                if let Some(from_) = part.from {
-                    if from_.starts_with(VAR_PREFIX) {
-                        let res = self.get_from_vars(&vars, from_);
-                        if let Some(val) = res {
-                            from = val;
-                        } else {
-                            continue 'part;
-                        }
-                    } else if from_.starts_with(PARAM_PREFIX) {
-                        if is_pack {
-                            let res = self.get_from_pack_params(pack_params, from_.clone());
-                            if let Some(v) = res {
-                                from = v;
-                            } else {
-                                let Some(val) = self.get_from_params(&sections, from_.clone())
-                                else {
-                                    continue 'part;
-                                };
-                                from = val;
-                            }
-                        } else {
-                            let Some(val) = self.get_from_params(&sections, from_) else {
-                                continue 'part;
-                            };
-                            from = val;
-                        }
-                    } else {
-                        from = Val::STRING(from_);
-                    }
-                }
-                let op = part.oper.get_fn();
-
-                let mut val = Val::NONE;
-                if let Some(value) = part.value {
-                    if let Val::STRING(val_) = value.clone() {
-                        if val_.starts_with(PARAM_PREFIX) {
-                            if is_pack {
-                                let res = self.get_from_pack_params(pack_params, val_.clone());
-                                if let Some(res) = res {
-                                    val = res;
-                                } else {
-                                    let Some(_) = self.get_from_params(&sections, val_.clone())
-                                    else {
-                                        continue 'part;
-                                    };
-                                }
-                            } else {
-                                let Some(res) = self.get_from_params(&sections, val_.clone())
-                                else {
-                                    continue 'part;
-                                };
-                                val = res
-                            }
-                        }
-                        if val_.starts_with(VAR_PREFIX) {
-                            val = self.get_from_vars(&vars, val_.clone()).unwrap();
-                        }
-                    } else {
-                        val = value;
-                    }
-                }
-                let res = op(from, val);
-                if res {
-                    passed += 1;
-                    break 'part;
-                }
-            }
-            if passed == 0 {
-                pass_conditions = false;
-                break 'cond;
-            }
-        }
-        pass_conditions // if conditions not passed, then action truncates
-    }
-
-    fn format(
-        &self,
-        string: String,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-        is_pack: bool,
-        pack_param: &ResultsRecord,
-    ) -> Option<String> {
-        #[derive(Debug)]
-        enum Token {
-            Str(String),
-            Var(String),
-            Param(String),
-        }
-
-        let mut tokens = Vec::<Token>::new();
-
-        let mut is_str = true;
-        let mut is_brace = false;
-        let mut is_slash = false;
-        let mut buff = String::new();
-        for i in string.chars().peekable() {
-            if is_str {
-                if i.to_string() == PARAM_PREFIX || i.to_string() == VAR_PREFIX {
-                    is_str = false;
-                    tokens.push(Token::Str(buff.clone()));
-                    buff.clear();
-                    buff.push(i)
-                } else {
-                    buff.push(i)
-                }
-            } else {
-                if !is_slash && is_brace && i.to_string() == "}" {
-                    if buff.starts_with(PARAM_PREFIX) {
-                        tokens.push(Token::Param(buff.clone()));
-                    } else if buff.starts_with(VAR_PREFIX) {
-                        tokens.push(Token::Var(buff.clone()))
-                    } else {
-                        return None;
-                    }
-                    buff.clear();
-                    is_slash = false;
-                    is_brace = false;
-                    continue;
-                }
-                if !is_brace && i.to_string() == " " {
-                    if buff.starts_with(PARAM_PREFIX) {
-                        tokens.push(Token::Param(buff.clone()));
-                    } else if buff.starts_with(VAR_PREFIX) {
-                        tokens.push(Token::Var(buff.clone()))
-                    } else {
-                        return None;
-                    }
-                    buff.clear();
-                    is_brace = false;
-                    is_slash = false;
-                    buff.push(i);
-                    continue;
-                }
-                if is_slash {
-                    is_slash = false;
-                }
-                if !is_brace && i.to_string() == "{" {
-                    is_brace = true;
-                    continue;
-                }
-                if i.to_string() == "\\" && !is_slash {
-                    is_slash = true
-                }
-
-                buff.push(i)
-            }
-        }
-        if buff.len() > 0 {
-            if is_brace {
-                if buff.starts_with(PARAM_PREFIX) {
-                    tokens.push(Token::Param(buff))
-                } else {
-                    tokens.push(Token::Var(buff));
-                }
-            } else {
-                tokens.push(Token::Str(buff))
-            }
-        }
-
-        println!("TOKENS {tokens:?}");
-        let mut string = String::new();
-
-        for i in tokens {
-            println!("TOKEN {i:?}");
-            if let Token::Str(v) = i {
-                string += &v;
-                continue;
-            }
-            if let Token::Var(v) = i {
-                let Some(val) = self.get_from_vars(vars, v) else {
-                    return None;
-                };
-
-                string += val.to_str().as_str();
-            } else if let Token::Param(v) = i {
-                if is_pack {
-                    let val = self.get_from_pack_params(pack_param, v.clone());
-                    if let Some(v) = val {
-                        string += v.to_str().as_str();
-                    } else {
-                        let Some(v) = self.get_from_params(params, v) else {
-                            return None;
-                        };
-                        string += v.to_str().as_str();
-                    }
-                } else {
-                    let Some(val) = self.get_from_params(params, v) else {
-                        return None;
-                    };
-                    string += val.to_str().as_str();
-                }
-            }
-        }
-        println!("RESULT {string}");
-        Some(string)
-    }
-
-    ///
-    ///
-    ///
-    fn get_from_vars(&self, vars: &Vec<Var>, addr: String) -> Option<Val> {
-        let mut address = addr.clone();
-        if addr.starts_with(VAR_PREFIX) {
-            address = addr
-                .chars()
-                .skip(VAR_PREFIX.chars().count())
-                .collect::<String>();
-        }
-        for var in vars {
-            if var.name == address {
-                return Some(var.value.clone());
-            }
-        }
-        None
-    }
-
-    ///
-    ///
-    ///
-    fn get_from_params(&self, params: &Vec<CreateProjectTemplate>, addr: String) -> Option<Val> {
-        let mut address = addr.clone();
-        if addr.starts_with(PARAM_PREFIX) {
-            address = addr
-                .chars()
-                .skip(PARAM_PREFIX.chars().count())
-                .collect::<String>();
-        }
-        // println!("PARAM FROM {address}");
-        let address = Action::getaddr(address);
-        // println!("PARAM GET {address:?}");
-        if let Ok((section, parameter)) = address {
-            let parameter = parameter.chars().skip(1).collect::<String>();
-            // println!("SEC PAR {section} {parameter}");
-            for sect in params {
-                let section_res = sect.get(&section);
-                // println!("SECTION RES {section_res:?}");
-                if let Some(section) = section_res {
-                    let param = section.get(&parameter);
-                    // println!("PARAM RES {param:?}");
-                    if let Some(par) = param {
-                        return Some(par.clone());
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    fn get_from_pack_params(&self, params: &ResultsRecord, addr: String) -> Option<Val> {
-        let addr = if addr.starts_with(PARAM_PREFIX) {
-            addr.chars().skip(PARAM_PREFIX.chars().count()).collect()
-        } else {
-            addr
-        };
-
-        let got = params.get(&addr)?;
-        Some(got.clone())
-    }
-
-    ///
-    ///
-    ///
-    fn compile_vars(
-        &self,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-    ) -> Option<Vec<Var>> {
-        let mut res = Vec::<Var>::new();
-        for i in vars {
-            let mut param = false;
-            if let Val::STRING(val) = i.value.clone() {
-                if val.starts_with(PARAM_PREFIX) {
-                    let res_ = self.get_from_params(&params, val.clone());
-                    if let None = res_ {
-                        return None;
-                    }
-                    param = true;
-                    res.push(Var::new(i.name.clone(), res_.unwrap()));
-                }
-            }
-            if !param {
-                res.push(i.clone());
-            }
-        }
-        Some(res)
-    }
-
-    ///
-    ///
-    ///
-    fn make_task(
-        &self,
-        action: &PackageAction,
-        actions: &Vec<PackageAction>,
-        vars: &Vec<Var>,
-        params: &Vec<CreateProjectTemplate>,
-        is_pack: bool,
-        pack_params: &ResultsRecord,
-    ) -> Option<_Task> {
-        /*let def_ = || {
-            if cfg!(target_os = "linux") {
-                std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string())
-            } else if cfg!(target_os = "windows") {
-                "powershell".to_string()
-            } else {
-                "zsh".to_string()
-            }
-        };*/
-
-        let mut commands = Vec::<TaskCommand>::new();
-        let commands_ = action.command.clone()?;
-
-        if let Some(plat) = action.platform.clone() {
-            if !plat.is_correct() {
-                return None;
-            }
-        }
-
-        for command in commands_ {
-            if let Some(plat) = command.platform {
-                if !plat.is_correct() {
-                    continue;
-                }
-            }
-
-            let command_ = self.format(command.command, vars, params, is_pack, pack_params);
-            if let None = command_ {
-                continue;
-            }
-            let shell = if let Some(v) = command.shell {
-                v
-            } else {
-                if cfg!(windows) {
-                    "cmd".to_string()
-                } else {
-                    "sh".to_string()
-                }
-            };
-
-            let task_command = TaskCommand {
-                shell,
-                command: command_.unwrap(),
-                env: command.env.clone(),
-            };
-            commands.push(task_command);
-        }
-
-        if let Some(next) = action.next.clone() {
-            let act = actions.iter().find(|el| {
-                if let Some(val) = el.next.clone() {
-                    return next == val;
-                }
-                false
-            });
-            if let Some(val) = act {
-                let inner = self.make_task(&val, &actions, &vars, &params, is_pack, &pack_params);
-                if let Some(inner) = inner {
-                    let res = _Task::GRAPH {
-                        commands,
-                        on_error: val.on_error.clone(),
-                        next: Box::new(inner),
-                    };
-                    return Some(res);
-                }
-            }
-        }
-        let task = _Task::SINGLE {
-            commands,
-            on_error: action.on_error.clone(),
-        };
-        Some(task)
-    }
-
-    fn run_tasks(&self, project: &Project, tasks: &Vec<_Task>, window: String) {
-        let app = { APP.get().unwrap() };
-        let _ = app.emit_to(
-            window.clone(),
-            "task-run",
-            format!("Compiled tasks: {}", tasks.len()),
-        );
-        let path_to = path_from![project.path, project.name,];
-        //let proj = project.clone();
-        let mut n = 1;
-        for task in tasks {
-            let _ = app.emit_to(window.clone(), "task-start", format!("{n}"));
-            let err = self.run_task(&task, &path_to);
-            let _ = app.emit_to(window.clone(), "task-end", format!("{n}"));
-            println!("ERR? {err}");
-            if err >= 0 {
-                println!("ERRR!");
-                let _ = app.emit_to(window.clone(), "task-error", format!("{n}"));
-            }
-            if err == 2 {
-                break;
-            }
-            n += 1;
-        }
-    }
-    fn run_task(&self, task: &_Task, path: &Path) -> i8 {
-        // println!("TYPE TASK {:?}", task);
-        match task.clone() {
-            _Task::GRAPH {
-                next,
-                commands,
-                on_error,
-            } => {
-                let mut res_ = -1i8;
-                for command in commands {
-                    let key = get_key(command.shell.clone());
-                    let mut process = Command::new(&command.shell);
-                    process.arg(&key).arg(&command.command).stdin(Stdio::null());
-
-                    if let Some(env) = command.env.clone() {
-                        let mut map = HashMap::<String, String>::new();
-                        for (first, sec) in env {
-                            map.insert(first, sec);
-                        }
-                        process.envs(map.iter());
-                    }
-                    process.current_dir(path.get().clone());
-                    let code = process.status();
-                    if let Err(_) = code {
-                        res_ = match on_error {
-                            ActionOnError::CONTINUE => 0,
-                            ActionOnError::StopAll => 2,
-                            ActionOnError::StopGraph => 1,
-                        }
-                    } else {
-                        let code = code.unwrap();
-                        if !code.success() {
-                            res_ = match on_error {
-                                ActionOnError::CONTINUE => 0,
-                                ActionOnError::StopAll => 2,
-                                ActionOnError::StopGraph => 1,
-                            }
-                        }
-                    }
-                    if res_ > 0 {
-                        return res_;
-                    }
-                }
-                let new_task = next.deref();
-                res_ = self.run_task(new_task, path);
-                res_
-            }
-            _Task::SINGLE { commands, on_error } => {
-                let mut res_ = -1i8;
-                for command in commands {
-                    let key = get_key(command.shell.clone());
-                    let mut process = Command::new(&command.shell);
-                    process.arg(&key).arg(&command.command);
-
-                    if let Some(env) = command.env.clone() {
-                        let mut map = HashMap::<String, String>::new();
-                        for (first, sec) in env {
-                            map.insert(first, sec);
-                        }
-                        process.envs(map.iter());
-                    }
-                    process.current_dir(path.get().clone());
-                    let code = process.status();
-                    if let Err(_) = code {
-                        res_ = match on_error {
-                            ActionOnError::CONTINUE => 0,
-                            ActionOnError::StopAll => 2,
-                            ActionOnError::StopGraph => 1,
-                        }
-                    } else {
-                        let code = code.unwrap();
-                        if !code.success() {
-                            res_ = match on_error {
-                                ActionOnError::CONTINUE => 0,
-                                ActionOnError::StopAll => 2,
-                                ActionOnError::StopGraph => 1,
-                            }
-                        }
-                    }
-                }
-                res_
-            }
-        }
-    }
-}
-
-pub struct PackageService();
-//pub struct PackageCompileService();
+pub struct PackageService;
 
 impl TPackageService for PackageService {
     fn read_packages(&self) -> Result<Vec<Package>, ProjectError> {

@@ -2,6 +2,8 @@ use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::shared::kernel::values::PlatformType;
 
 #[inline]
+#[deprecated]
+#[allow(dead_code, unused)]
 pub fn get_os() -> String {
     if cfg!(target_os = "windows") {
         return "windows".to_string();
@@ -14,6 +16,7 @@ pub fn get_os() -> String {
 
 #[inline]
 #[deprecated]
+#[allow(dead_code, unused)]
 pub fn get_platform() -> PlatformType {
     if cfg!(windows) {
         return PlatformType::WINDOWS;

@@ -13,6 +13,9 @@ use crate::modules::contexts::project::domain::entities::{
 };
 use crate::modules::shared::kernel::entities::ErrorDto;
 use crate::modules::shared::kernel::errors::LaunchError;
+use crate::modules::shared::kernel::values::Val;
+use macroses::log;
+use std::collections::HashMap;
 use tauri::{State, Window};
 
 #[tauri::command]
@@ -55,7 +58,13 @@ pub fn call_function(
     temp: LaunchTemplate,
     results: LaunchTemplateResult,
 ) -> Result<FunctionResult, ErrorDto> {
-    let res = LAUNCH_COMPILE_SERVICE.run_function(&func, &temp, &results);
+    let mut flat_results = HashMap::<String, Val>::new();
+    for i in results.iter() {
+        for j in i.1.iter() {
+            flat_results.insert(format!("{}.{}", i.0, j.0.clone()), j.1.clone());
+        }
+    }
+    let res = LAUNCH_COMPILE_SERVICE.run_function(&func, &temp, &flat_results);
     if let None = res {
         return Err(LaunchError::RunFn(func.clone()).into());
     }
@@ -66,14 +75,19 @@ pub fn call_function(
 pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject>), ErrorDto> {
     let mut res = Vec::<LaunchObject>::new();
 
+    log!("PROJECT:\n{:?}", project.workspace.launch_references);
+
     let templates = project.workspace.launch_templates.clone();
     let references = project.workspace.launch_references.clone();
     let vars = project.vars.clone();
+    let mut tasks = Vec::<ActionTask>::new();
     for ref_ in references.iter() {
         let Some(needed_template) = templates.iter().find(|e| e.id == ref_.template.1) else {
             continue;
         };
+        log!("CURENT REF :\n{ref_:?}");
         if let Some(before) = ref_.before.clone() {
+            log!("BEFORE ::\n{before:?}");
             let r = before
                 .iter()
                 .filter_map(|e| {
@@ -94,14 +108,21 @@ pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject
                     }
                     return None;
                 })
-                .collect::<Vec<LaunchObject>>();
-
-            r.iter().for_each(|e| res.push(e.clone()))
+                .map(|e| e.tasks)
+                .flatten()
+                .collect::<Vec<ActionTask>>();
+            log!("AFTER:\n {r:?}");
+            r.iter().for_each(|e| tasks.push(e.clone()))
         }
 
         let obj =
             LAUNCH_COMPILE_SERVICE.compile_object(&ref_, &vars, &needed_template, &ref_.results);
-        if let Some(obj) = obj {
+        if let Some(mut obj) = obj {
+            if tasks.len() > 0 {
+                for j in 0..tasks.len() {
+                    obj.tasks.insert(j, tasks[j].clone());
+                }
+            }
             res.push(obj);
         } else {
             return Err(LaunchError::NotAllObjects(ref_.clone()).into());
@@ -112,6 +133,7 @@ pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject
         // println!("{project:?}");
         PROJECT_SERVICE.save_project(&project)?;
     }
+    log!("OBJECT CREATED \n::{res:?}\n\n::{references:?}");
     Ok((project, res))
 }
 
@@ -134,7 +156,7 @@ pub fn create_references(
 }
 
 #[tauri::command]
-pub async fn lauch_tasks(
+pub async fn launch_tasks(
     tasks: Vec<ActionTask>,
     project: Project,
     window: Window,
@@ -142,8 +164,37 @@ pub async fn lauch_tasks(
 ) -> Result<(), ErrorDto> {
     println!("start tasks");
     let id = window.label();
+    let app = APP.get();
+    if let Some(app) = app {
+        log!("TASKS1 {tasks:?}");
 
-    Ok(())
+        let tasks = tasks
+            .into_iter()
+            .map(|e| {
+                let cwd = e.cwd;
+                return e.commands.into_iter().map(move |e2| {
+                    return LaunchFlatTask {
+                        command: e2.command,
+                        env: e2.env,
+                        cwd: Some(cwd.clone()),
+                    };
+                });
+            })
+            .flatten()
+            .collect::<Vec<LaunchFlatTask>>();
+
+        log!("TASKS {tasks:?}");
+        for i in tasks.iter() {
+            let _ = LAUNCH_RUN_SERVICE
+                .launch_task(i, id, &project, &app, &state)
+                .await;
+        }
+        Ok(())
+    } else {
+        Err(ErrorDto {
+            message: "app not found".to_string(),
+        })
+    }
 }
 
 #[tauri::command]
@@ -158,7 +209,7 @@ pub async fn launch_task(
     let app = APP.get();
     if let Some(app) = app {
         LAUNCH_RUN_SERVICE
-            .launch_task(task, id.to_string(), project, app.clone(), state)
+            .launch_task(&task, id, &project, &app, &state)
             .await
             .map_err(|e| e.into())
     } else {

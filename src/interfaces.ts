@@ -240,8 +240,8 @@ interface LaunchTemplate {
     title: string,
     scheme: number,
     icon?: string,
-    sections: LaunchSection[],
-    actions: LaunchAction[],
+    sections: ISection[],
+    actions: IPackageAction[],
     functions: LaunchFunction[]
 }
 

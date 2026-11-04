@@ -66,7 +66,7 @@ export default function LaunchPage() {
     /**
      * meta of current template
      */
-    let meta = useMemo<LaunchSection>(() => {
+    let meta = useMemo<ISection>(() => {
 
         let val = references_copy[curRef ?? -1]?.results[-1]?.["name"] as string | undefined
         if (!val) {
@@ -85,7 +85,9 @@ export default function LaunchPage() {
         }
         return ({
             id: -1,
-            options: [
+            label: "",
+            list: [false, false],
+            params: [
                 {
                     def: val,
                     id: "name",
@@ -280,7 +282,7 @@ type SectionsProps = {
     current_launch_template: LaunchTemplate
     curRef: number
     project: IProject | null
-    meta: LaunchSection
+    meta: ISection
 }
 
 /**
@@ -362,6 +364,7 @@ function LaunchPageSections(props: SectionsProps) {
 
     const ref = useRef<HTMLDivElement>(null)
 
+
     return (
         <div id={"launch-sections"}>
             <p className={"text-(--subtitle) text-[10pt] font-[400]"}>{current_launch_template.title}</p>
@@ -369,14 +372,17 @@ function LaunchPageSections(props: SectionsProps) {
                            obj={meta}
                            functions={current_launch_template?.functions ?? []}
                            project={project}
+                //write={(v, e)=>write(v,e,meta)}
             />
             {
                 current_launch_template?.sections.map((el, i) =>
-                    <LaunchSection cur_ref={curRef}
+                    <LaunchSection
+                        cur_ref={curRef}
                                    key={i}
                                    obj={el}
-                                   functions={current_launch_template?.functions ?? []}
+                        functions={current_launch_template?.functions ?? []}
                                    project={project}
+                        // write={(v, e)=>write(v,e,el)}
                     />
                 )
             }

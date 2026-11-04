@@ -87,7 +87,8 @@ pub enum FunctionResult {
     SCALAR(String),
     VEC(Vec<LaunchVecType>),
 }
-
+#[deprecated]
+#[allow(dead_code, unused)]
 pub fn read_fields(
     option: LaunchFunctionArgument,
     fields: Vec<LaunchVecType>,

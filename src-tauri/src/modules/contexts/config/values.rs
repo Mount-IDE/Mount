@@ -23,6 +23,7 @@ pub struct FsIcon {
 ///
 ///
 ///
+#[allow(dead_code, unused)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum FsType {
     #[allow(non_camel_case_types)]
