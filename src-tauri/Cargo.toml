@@ -1,9 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["OPIE <opie.github@proton.me>"]
+
 [package]
 name = "mount-ide"
 version = "0.1.0"
 description = "Mount ide"
-authors = ["Opie"]
-edition = "2021"
+authors = ["OPIE <opie.github@proton.me>"]
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -28,14 +37,42 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 macroses = { path = "./crates/macroses" }
+mount_core = { path = "./crates/mount_core" }
+modules = { path = "./crates/modules" }
+api = { path = "./crates/api" }
+config = { path = "./crates/config" }
+project = { path = "./crates/project" }
 
+
+tauri.workspace = true
+tauri-plugin-opener.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+base64.workspace = true
+#ts-rs = { version = "12.0.1", features = ["serde-compat"] }
+tauri-plugin-dialog.workspace = true
+notify.workspace = true
+portable-pty.workspace = true
+uuid.workspace = true
+which.workspace = true
+async-trait.workspace = true
+regex.workspace = true
+tokio.workspace = true
+rand.workspace = true
+process-wrap.workspace = true
+[target.'cfg(target_os="windows")'.dependencies]
+windows.workspace = true
+
+
+[workspace.dependencies]
 tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.18"
 base64 = "0.22.1"
-ts-rs = { version = "12.0.1", features = ["serde-compat"] }
+#ts-rs = { version = "12.0.1", features = ["serde-compat"] }
 tauri-plugin-dialog = "2.7.0"
 notify = "8.2.0"
 portable-pty = "0.9.0"
@@ -46,5 +83,4 @@ regex = "1.12.3"
 tokio = { version = "1.52.1", features = ["full"] }
 rand = "0.10.2"
 process-wrap = { version = "9.1.0", features = ["tokio1"] }
-[target.'cfg(target_os="windows")'.dependencies]
 windows = "=0.62.2"

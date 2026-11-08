@@ -1,0 +1,10 @@
+[package]
+name = "format"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+mount_core = { path = "../mount_core" }
+thiserror.workspace = true
+macroses = { path = "../macroses" }

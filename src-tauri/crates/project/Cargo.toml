@@ -1,0 +1,18 @@
+[package]
+name = "project"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+mount_core = { path = "../mount_core" }
+serde.workspace = true
+serde_json.workspace = true
+macroses = { path = "../macroses" }
+services = { path = "../services" }
+declarative = { path = "../declarative" }
+tauri.workspace = true
+filesystem = { path = "../filesystem" }
+parsing = { path = "../parsing" }
+format = { path = "../format" }

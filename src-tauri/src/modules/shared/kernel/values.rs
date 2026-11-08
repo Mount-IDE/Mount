@@ -109,34 +109,6 @@ impl Platform {
     }
 }
 
-impl PlatformType {
-    pub fn is_correct(&self) -> bool {
-        if *self == Self::LINUX && cfg!(target_os = "linux") {
-            return true;
-        }
-        if *self == Self::MACOS && cfg!(target_os = "macos") {
-            return true;
-        }
-        if *self == Self::WINDOWS && cfg!(target_os = "windows") {
-            return true;
-        }
-        if *self == Self::ALL {
-            return true;
-        }
-        false
-    }
-
-    #[allow(unused)]
-    pub fn current() -> Self {
-        if cfg!(target_os = "windows") {
-            return Self::WINDOWS;
-        }
-        if cfg!(target_os = "macos") {
-            return Self::MACOS;
-        }
-        Self::LINUX
-    }
-}
 
 #[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Path(pub String);

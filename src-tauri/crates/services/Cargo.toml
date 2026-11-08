@@ -1,0 +1,9 @@
+[package]
+name = "services"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+format = { path = "../format" }
+parsing = { path = "../parsing" }
