@@ -1,4 +1,4 @@
-use crate::modules::app::APP;
+use crate::modules::app::{APP, LAUNCH_RUN_SERVICE};
 use crate::modules::contexts::launch::app::functions::FunctionResult;
 use crate::modules::contexts::launch::app::managers::{LaunchSession, SharedLaunchManager};
 use crate::modules::contexts::launch::app::traits::{TLaunchCompileService, TLaunchRunService};
@@ -112,11 +112,17 @@ impl TLaunchCompileService for LaunchCompileService {
             })
             .flatten()
             .collect::<Vec<ActionTask>>();
+        let before = if let Some(_) = reference.before.clone() {
+            Some(Vec::<i32>::new())
+        } else {
+            None
+        };
         let obj = LaunchObject {
             id: num,
             launch_reference: reference.id,
             scheme: Default::default(),
             tasks: actions,
+            before,
         };
         log!("COMPILED :: {reference:?}\n :: {obj:?}");
         Some(obj)
@@ -389,6 +395,52 @@ impl TLaunchRunService for LaunchRunService {
         }
 
         Ok(id)
+    }
+
+    async fn launch_object(
+        &self,
+        object: &LaunchObject,
+        objects: &Vec<LaunchObject>,
+        current: &LaunchTemplateReference,
+        project: &Project,
+        window: &String,
+        app: &AppHandle,
+        state: &State<'_, SharedLaunchManager>,
+    ) -> Result<(), LaunchError> {
+        if let Some(b) = &object.before {
+            for i in b.iter() {
+                let Some(found) = objects.iter().find(|e| e.id == *i) else {
+                    return Err(LaunchError::InvalidObject(object.clone()));
+                };
+                Box::pin(
+                    self.launch_object(&found, &objects, &current, &project, &window, &app, &state),
+                )
+                .await?;
+            }
+        }
+        let tasks = object.tasks.clone();
+        let tasks = tasks
+            .into_iter()
+            .map(|e| {
+                let cwd = e.cwd;
+                return e.commands.into_iter().map(move |e2| {
+                    return LaunchFlatTask {
+                        command: e2.command,
+                        env: e2.env,
+                        cwd: Some(cwd.clone()),
+                    };
+                });
+            })
+            .flatten()
+            .collect::<Vec<LaunchFlatTask>>();
+
+        log!("TASKS {tasks:?}");
+        for i in tasks.iter() {
+            let _ = LAUNCH_RUN_SERVICE
+                .launch_task(i, window.clone().as_str(), &project, &app, &state)
+                .await;
+        }
+        Ok(())
     }
 
     async fn write_to_launch(

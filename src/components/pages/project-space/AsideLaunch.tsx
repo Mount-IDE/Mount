@@ -39,8 +39,11 @@ export default function AsideLaunch(_: Props) {
     //   let objects = project?.workspace.launch_objects ?? [];
     let references = project?.workspace.launch_references ?? [];
 
-    let objects = launchStore(state => state.active_objects);
+    let current_i = project?.workspace.current_launch;
+    let current_ref = references.find(el => el.id == current_i) ?? null
 
+    let objects = launchStore(state => state.active_objects);
+    let all_objects = project?.workspace.launch_objects ?? [];
     let processes: LaunchProcess[] = [...objects].map((el, i) => ({id: i, obj: el}))
 
 
@@ -87,11 +90,18 @@ export default function AsideLaunch(_: Props) {
             </div>
             <div id={"aside-launch-terminal"}>
                 {
+                    !current_ref &&
+                    <p>Launch not selected</p>
+                }
+                {
+                    current_ref &&
                     //objects.length == references.length &&
                     processes.map((el, i) =>
                         <LaunchTerminal
                             proc={el}
+                            objects={all_objects}
                             key={i}
+                            ref_={current_ref}
                             selected={current == el.id}
                             ref={(instance) => {
                                 if (instance) {
@@ -155,7 +165,8 @@ function LaunchPos(props: PosProps) {
 type TermProps = {
     proc: LaunchProcess
     selected: boolean,
-
+    objects: LaunchObject[]
+    ref_: LaunchTemplateReference
     // setRestart: Dispatch<SetStateAction<number|null>>
     // setStop: Dispatch<SetStateAction<number|null>>
 }
@@ -225,12 +236,14 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
         const currenTask = useRef(0)
 
         async function runTask() {
-            let tasks = props.proc.obj.tasks
-            console.log("RUN TASKs", tasks)
+            //let tasks = props.proc.obj.tasks
+            console.log("RUN TASKs", props.proc.obj)
             //let task = tasks[index];
             try {
                 await invoke<string>("launch_tasks", {
-                    tasks,
+                    objects: props.objects,
+                    reference: props.ref_,
+                    object: props.proc.obj,
                     project
                 });
                 //  fitAndResize();

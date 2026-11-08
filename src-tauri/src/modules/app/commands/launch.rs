@@ -73,68 +73,82 @@ pub fn call_function(
 
 #[tauri::command]
 pub fn create_objects(mut project: Project) -> Result<(Project, Vec<LaunchObject>), ErrorDto> {
-    let mut res = Vec::<LaunchObject>::new();
+    let mut objects = Vec::<LaunchObject>::new();
 
     log!("PROJECT:\n{:?}", project.workspace.launch_references);
 
     let templates = project.workspace.launch_templates.clone();
     let references = project.workspace.launch_references.clone();
     let vars = project.vars.clone();
-    let mut tasks = Vec::<ActionTask>::new();
+    //let mut tasks = Vec::<ActionTask>::new();
     for ref_ in references.iter() {
         let Some(needed_template) = templates.iter().find(|e| e.id == ref_.template.1) else {
             continue;
         };
         log!("CURENT REF :\n{ref_:?}");
-        if let Some(before) = ref_.before.clone() {
-            log!("BEFORE ::\n{before:?}");
-            let r = before
-                .iter()
-                .filter_map(|e| {
-                    if let LaunchReferenceBefore::OTHER { id } = e {
-                        let Some(ref__) = references.iter().find(|e2| e2.id.eq(id)) else {
-                            return None;
+
+        let before: Vec<i32> = if let Some(before) = ref_.before.clone() {
+            let mut ids = Vec::<i32>::new();
+            for i in before.iter() {
+                if let LaunchReferenceBefore::OTHER { id } = &i {
+                    let obj = objects.iter().find(|e| e.launch_reference == *id);
+                    if let None = obj {
+                        let Some(ref__) = references.iter().find(|e| e.id == *id) else {
+                            return Err(ErrorDto {
+                                message: "cannot find before".__get(),
+                            });
                         };
-                        let Some(tmp) = templates.iter().find(|e2| e2.id == ref__.template.1)
+                        let Some(needed_template) =
+                            templates.iter().find(|e| e.id == ref__.template.1)
                         else {
-                            return None;
+                            return Err(ErrorDto {
+                                message: "cannot find before template".__get(),
+                            });
                         };
-                        return LAUNCH_COMPILE_SERVICE.compile_object(
+                        let Some(obj) = LAUNCH_COMPILE_SERVICE.compile_object(
                             &ref__,
                             &vars,
-                            &tmp,
+                            &needed_template,
                             &ref__.results,
-                        );
+                        ) else {
+                            return Err(ErrorDto {
+                                message: "cannot compile before".__get(),
+                            });
+                        };
+                        ids.push(obj.id);
+                        objects.push(obj);
+                    } else if let Some(o) = obj {
+                        ids.push(o.id)
                     }
-                    return None;
-                })
-                .map(|e| e.tasks)
-                .flatten()
-                .collect::<Vec<ActionTask>>();
-            log!("AFTER:\n {r:?}");
-            r.iter().for_each(|e| tasks.push(e.clone()))
-        }
-
+                }
+            }
+            ids
+        } else {
+            vec![]
+        };
         let obj =
             LAUNCH_COMPILE_SERVICE.compile_object(&ref_, &vars, &needed_template, &ref_.results);
         if let Some(mut obj) = obj {
-            if tasks.len() > 0 {
+            /*if tasks.len() > 0 {
                 for j in 0..tasks.len() {
                     obj.tasks.insert(j, tasks[j].clone());
                 }
+            }*/
+            if let Some(_) = obj.before {
+                obj.before = Some(before)
             }
-            res.push(obj);
+            objects.push(obj);
         } else {
             return Err(LaunchError::NotAllObjects(ref_.clone()).into());
         }
     }
-    if res.len() == references.len() {
-        project.workspace.launch_objects = res.clone();
+    if objects.len() == references.len() {
+        project.workspace.launch_objects = objects.clone();
         // println!("{project:?}");
         PROJECT_SERVICE.save_project(&project)?;
     }
-    log!("OBJECT CREATED \n::{res:?}\n\n::{references:?}");
-    Ok((project, res))
+    log!("OBJECT CREATED \n::{objects:?}\n\n::{references:?}");
+    Ok((project, objects))
 }
 
 #[tauri::command]
@@ -157,7 +171,10 @@ pub fn create_references(
 
 #[tauri::command]
 pub async fn launch_tasks(
-    tasks: Vec<ActionTask>,
+    //tasks: Vec<ActionTask>,
+    objects: Vec<LaunchObject>,
+    object: LaunchObject,
+    reference: LaunchTemplateReference,
     project: Project,
     window: Window,
     state: State<'_, SharedLaunchManager>,
@@ -166,30 +183,18 @@ pub async fn launch_tasks(
     let id = window.label();
     let app = APP.get();
     if let Some(app) = app {
-        log!("TASKS1 {tasks:?}");
-
-        let tasks = tasks
-            .into_iter()
-            .map(|e| {
-                let cwd = e.cwd;
-                return e.commands.into_iter().map(move |e2| {
-                    return LaunchFlatTask {
-                        command: e2.command,
-                        env: e2.env,
-                        cwd: Some(cwd.clone()),
-                    };
-                });
-            })
-            .flatten()
-            .collect::<Vec<LaunchFlatTask>>();
-
-        log!("TASKS {tasks:?}");
-        for i in tasks.iter() {
-            let _ = LAUNCH_RUN_SERVICE
-                .launch_task(i, id, &project, &app, &state)
-                .await;
-        }
-        Ok(())
+        LAUNCH_RUN_SERVICE
+            .launch_object(
+                &object,
+                &objects,
+                &reference,
+                &project,
+                &window.label().__get(),
+                &app,
+                &state,
+            )
+            .await
+            .map_err(|e| e.into())
     } else {
         Err(ErrorDto {
             message: "app not found".to_string(),

@@ -50,6 +50,17 @@ pub trait TLaunchRunService {
         state: &State<'_, SharedLaunchManager>,
     ) -> Result<String, LaunchError>;
 
+    async fn launch_object(
+        &self,
+        object: &LaunchObject,
+        objects: &Vec<LaunchObject>,
+        current: &LaunchTemplateReference,
+        project: &Project,
+        window: &String,
+        app: &AppHandle,
+        state: &State<'_, SharedLaunchManager>,
+    ) -> Result<(), LaunchError>;
+
     async fn write_to_launch(
         &self,
         id: String,

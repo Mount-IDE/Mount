@@ -315,6 +315,7 @@ pub struct LaunchObject {
     pub launch_reference: i8,
     pub scheme: Schema,
     pub tasks: Vec<ActionTask>,
+    pub before: Option<Vec<i32>>,
 }
 
 #[deprecated]
