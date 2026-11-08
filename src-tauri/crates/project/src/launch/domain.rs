@@ -1,9 +1,34 @@
+use crate::project::domain::Section;
+use declarative::domain::{
+    ActionOnError, ActionTask, PackageAction, PackageActionCommand, PackageActionCommandType,
+    PackageOptionTyp, PackageOptionTypEnum, Parameter,
+};
+use mount_core::domain::{Schema, Val};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use declarative::domain::{ActionOnError, ActionTask, PackageAction, PackageActionCommand, PackageActionCommandType, PackageOptionTyp, PackageOptionTypEnum, Parameter};
-use mount_core::domain::{Schema, Val};
-use crate::project::domain::Section;
+use thiserror::Error;
 //use ts_rs::TS;
+
+#[derive(Debug, Error)]
+#[allow(unused)]
+pub enum LaunchError {
+    #[error("Invalid object of launch configuration {0:?}")]
+    InvalidObject(LaunchObject),
+    #[error("Error while launch {0:?}")]
+    ErrorWhileLaunch(LaunchObject),
+    #[error("error while compile template {0:?}")]
+    InvalidTemplate(LaunchTemplate),
+    #[error("error while compile reference {0:?}")]
+    RefFailed(LaunchTemplate),
+    #[error("error while compile object {0:?}")]
+    ObjFailed(LaunchTemplate),
+    #[error("error while running function {0:?}")]
+    RunFn(LaunchFunction),
+    #[error("not all objects compiled {0:?}")]
+    NotAllObjects(LaunchTemplateReference),
+    #[error("error while spawn command")]
+    Spawn,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchTemplate {
@@ -65,23 +90,21 @@ impl Default for LaunchTemplate {
                     }],
                 },
             ],
-            actions: vec![
-                PackageAction {
-                    id: 0,
-                    next: None,
-                    if_: None,
-                    on_error: ActionOnError::StopAll,
+            actions: vec![PackageAction {
+                id: 0,
+                next: None,
+                if_: None,
+                on_error: ActionOnError::StopAll,
+                platform: None,
+                command: Some(vec![PackageActionCommand {
                     platform: None,
-                    command: Some(vec![PackageActionCommand {
-                        platform: None,
-                        cwd: None,
-                        shell: None,
-                        env: None,
-                        needed_exit_code: None,
-                        command: PackageActionCommandType::Single("#0.command".to_string()),
-                    }]),
-                },
-            ],
+                    cwd: None,
+                    shell: None,
+                    env: None,
+                    needed_exit_code: None,
+                    command: PackageActionCommandType::Single("#0.command".to_string()),
+                }]),
+            }],
             functions: vec![],
         }
     }
@@ -152,9 +175,7 @@ pub enum LaunchVecType {
     NUMBER(i32),
 }
 
-
 pub type LaunchTemplateResult = HashMap<i8, HashMap<String, Val>>;
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -178,7 +199,6 @@ pub struct LaunchObject {
     pub tasks: Vec<ActionTask>,
     pub before: Option<Vec<i32>>,
 }
-
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LaunchFlatTask {

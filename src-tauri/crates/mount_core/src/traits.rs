@@ -22,6 +22,13 @@ impl PathPart for Path {
     }
 }
 
+impl PathPart for Vec<String> {
+    fn __get(&self) -> String {
+        const SEP: &str = if cfg!(windows) { "\\" } else { "/" };
+        self.join(SEP)
+    }
+}
+
 #[macro_export]
 macro_rules! make_path {
     () => {$crate::domain::Path::empty()};
@@ -34,4 +41,5 @@ macro_rules! make_path {
         }
     }};
     ($x: expr)=>{$crate::domain::Path::new($x)};
+
 }

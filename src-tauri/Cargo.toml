@@ -38,11 +38,11 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 macroses = { path = "./crates/macroses" }
 mount_core = { path = "./crates/mount_core" }
-modules = { path = "./crates/modules" }
 api = { path = "./crates/api" }
 config = { path = "./crates/config" }
 project = { path = "./crates/project" }
-
+filesystem = { path = "./crates/filesystem" }
+recovery = { path = "./crates/recovery" }
 
 tauri.workspace = true
 tauri-plugin-opener.workspace = true

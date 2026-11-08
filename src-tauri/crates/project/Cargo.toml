@@ -22,3 +22,8 @@ events = { path = "../events" }
 portable-pty.workspace = true
 async-trait.workspace = true
 uuid.workspace = true
+tokio.workspace = true
+process-wrap.workspace = true
+rand.workspace = true
+[target.'cfg(target_os="windows")'.dependencies]
+windows.workspace = true

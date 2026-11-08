@@ -1,25 +1,40 @@
-use crate::modules::app::cmd::{get_projects, show_win};
-use crate::modules::app::commands::cache::*;
-use crate::modules::app::commands::config::*;
-use crate::modules::app::commands::fs::*;
-use crate::modules::app::commands::launch::*;
-use crate::modules::app::commands::package::*;
-use crate::modules::app::commands::project::*;
-use crate::modules::app::commands::terminal::*;
-use crate::modules::app::commands::utils::*;
-use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS};
-use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
-use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
-
-use crate::modules::contexts::launch::app::managers::LaunchManager;
-use crate::modules::contexts::package::domain::LspManager;
-use crate::modules::contexts::project::domain::entities::Package;
-use crate::modules::contexts::terminal::app::managers::TerminalManager;
-use crate::modules::shared::kernel::values::Path as MPath;
+use config::CONFIG_SERVICE;
+use config::domain::SETTINGS;
+use config::traits::TConfigService;
+use filesystem::managers::FileSystemWatchManager;
+use mount_core::APP;
+use recovery::CONFIG_RECOVERY_SERVICE;
+// use crate::modules::app::cmd::{get_projects, show_win};
+// use crate::modules::app::commands::cache::*;
+// use crate::modules::app::commands::config::*;
+// use crate::modules::app::commands::fs::*;
+// use crate::modules::app::commands::launch::*;
+// use crate::modules::app::commands::package::*;
+// use crate::modules::app::commands::project::*;
+// use crate::modules::app::commands::terminal::*;
+// use crate::modules::app::commands::utils::*;
+// use crate::modules::app::{APP, CONFIG_RECOVERY_SERVICE, CONFIG_SERVICE, SETTINGS};
+// use crate::modules::contexts::filesystem::app::managers::FileSystemWatchManager;
+// use crate::modules::services::traits::{TConfigRecoveryService, TConfigService};
+//
+// use crate::modules::contexts::launch::app::managers::LaunchManager;
+// use crate::modules::contexts::package::domain::LspManager;
+// use crate::modules::contexts::project::domain::entities::Package;
+// use crate::modules::contexts::terminal::app::managers::TerminalManager;
+// use crate::modules::shared::kernel::values::Path as MPath;
 use std::sync::{Arc, Mutex};
-use tauri::{generate_handler, Manager, WindowEvent};
+use tauri::{Manager, WindowEvent, generate_handler};
 
-mod modules;
+use mount_core::domain::Path as MPath;
+use project::launch::managers::LaunchManager;
+use project::project::domain::Package;
+use project::terminal::managers::TerminalManager;
+
+use api::commands::{
+    cache::*, config::*, fs::*, launch::*, package::*, project::*, terminal::*, utils::*,
+};
+use recovery::traits::TConfigRecoveryService;
+// mod modules;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -126,7 +141,7 @@ pub fn run() {
             save_project,
             create_ref,
             create_object,
-            call_function,
+            // call_function,
             create_objects,
             create_references,
             launch_task,
@@ -134,9 +149,9 @@ pub fn run() {
             close_launch,
             read_themes,
             save_settings,
-            start_lsp,
-            stop_lsp,
-            send_to_lsp,
+            // start_lsp,
+            // stop_lsp,
+            // send_to_lsp,
             get_meta_of_selected_packages,
             read_scm,
             read_scms,
@@ -153,7 +168,7 @@ pub fn run() {
         .manage(Arc::new(Mutex::new(TerminalManager::new())))
         .manage(Arc::new(Mutex::new(LaunchManager::new())))
         .manage(Arc::new(Mutex::new(Vec::<Package>::new())))
-        .manage(Arc::new(Mutex::new(LspManager::new())))
+        //  .manage(Arc::new(Mutex::new(LspManager::new())))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

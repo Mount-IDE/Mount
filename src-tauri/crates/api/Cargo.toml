@@ -5,3 +5,20 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+tauri.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+mount_core = { path = "../mount_core" }
+project = { path = "../project" }
+recovery = { path = "../recovery" }
+services = { path = "../services" }
+parsing = { path = "../parsing" }
+format = { path = "../format" }
+macroses = { path = "../macroses" }
+filesystem = { path = "../filesystem" }
+declarative = { path = "../declarative" }
+config = { path = "../config" }
+cache = { path = "../cache" }
+events = { path = "../events" }
+base64.workspace = true
+which.workspace = true

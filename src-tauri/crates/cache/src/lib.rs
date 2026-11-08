@@ -16,7 +16,7 @@ pub struct PackageInner {
 ///
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Cache {
-    pub(crate) recent_projects: Vec<RecentProject>,
+    pub recent_projects: Vec<RecentProject>,
     pub settings: Settings,
     pub templates: Vec<ProjectTemplate>,
     pub packages: Vec<Package>,

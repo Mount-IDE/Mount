@@ -1,12 +1,11 @@
-pub mod platform;
 pub mod decl;
+pub mod platform;
 
-use std::fmt::Display;
-use regex::Regex;
-use serde::{Deserialize, Serialize};
 use crate::domain::platform::{Platform, PlatformType};
 use crate::traits::PathPart;
-
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 ///
 ///
@@ -39,10 +38,8 @@ impl Var {
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Path(pub String);
-
 
 impl Path {
     pub fn get(&self) -> String {
@@ -63,9 +60,19 @@ impl Path {
 
     pub fn split(&self) -> Vec<String> {
         #[cfg(windows)]
-        return self.0.clone().split("\\").map(|e| e.to_string()).collect::<Vec<String>>();
+        return self
+            .0
+            .clone()
+            .split("\\")
+            .map(|e| e.to_string())
+            .collect::<Vec<String>>();
         #[cfg(not(windows))]
-        return self.0.clone().split("/").map(|e| e.to_string()).collect::<Vec<String>>();
+        return self
+            .0
+            .clone()
+            .split("/")
+            .map(|e| e.to_string())
+            .collect::<Vec<String>>();
     }
 }
 
@@ -81,11 +88,6 @@ impl Display for Path {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ErrorDto {
-    pub(crate) message: String,
-}
-
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Schema(pub u8);
 
@@ -94,7 +96,6 @@ impl Default for Schema {
         Self(1)
     }
 }
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd)]
 #[serde(untagged)]
@@ -105,7 +106,6 @@ pub enum Val {
     ARRAY(Vec<String>),
     NONE,
 }
-
 
 impl Val {
     pub fn to_str(&self) -> String {
@@ -124,7 +124,6 @@ impl Default for Val {
         Val::NUMBER(0.0)
     }
 }
-
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct IfStatementPart {
@@ -267,7 +266,6 @@ pub enum DependencyLevel {
     OPTIONAL,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Shell(pub String);
 
@@ -275,9 +273,9 @@ impl Default for Shell {
     fn default() -> Self {
         let plat = PlatformType::current();
         match plat {
-            PlatformType::WINDOWS => { Self("cmd".__get()) }
-            PlatformType::MACOS => { Self("zsh".__get()) }
-            _ => Self("sh".__get())
+            PlatformType::WINDOWS => Self("cmd".__get()),
+            PlatformType::MACOS => Self("zsh".__get()),
+            _ => Self("sh".__get()),
         }
     }
 }
@@ -296,23 +294,3 @@ impl Shell {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

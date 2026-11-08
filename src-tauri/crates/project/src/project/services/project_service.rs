@@ -1,7 +1,8 @@
 use crate::errors::ProjectError;
-use crate::project::domain::{Package, Project, RecentProject};
+use crate::project::domain::{Package, Project, ProjectTemplate, RecentProject};
 use crate::project::traits::TProjectService;
 use config::CONFIG_SERVICE;
+use config::errors::ConfigError;
 use config::traits::TConfigService;
 use filesystem::domain::{PDirectory, PFile};
 use filesystem::traits::{TFSReadService, TFSWriteService};
@@ -182,5 +183,16 @@ impl TProjectService for ProjectService {
         let text = PARSING_SERVICE.to_string(&data)?;
         FS_WRITE_SERVICE.write_file(&file, text, FileWriteAccess::WRITE)?;
         Ok(())
+    }
+
+    fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError> {
+        let dir = CONFIG_SERVICE.get_data_dir()?;
+        let path_ = make_path![dir, "templates.json"];
+        let file = PFile::from_path_reg(path_.clone());
+
+        let content = FS_READ_SERVICE.read_file(&file)?;
+
+        let json = PARSING_SERVICE._from_string::<Vec<ProjectTemplate>>(&content)?;
+        Ok(json)
     }
 }

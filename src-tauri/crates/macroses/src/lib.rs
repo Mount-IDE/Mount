@@ -1,4 +1,3 @@
-
 #[macro_export]
 macro_rules! log {
     ($($x:tt) *) => {
@@ -28,4 +27,13 @@ macro_rules! on_debug {
             ()
         }
     }
+}
+
+#[macro_export]
+macro_rules! join {
+    () => {String::new()};
+    ($sep:literal, $($x: expr), * $(,)?)=>{{
+        let vec = vec![$(String::from($x)), *];
+        vec.join($sep)
+    }};
 }

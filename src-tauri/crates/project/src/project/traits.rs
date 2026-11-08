@@ -3,6 +3,7 @@ use crate::project::domain::{
     Button, Package, Project, ProjectTag, ProjectTemplate, RecentProject, SharedPackages,
 };
 use crate::project::values::{CreateProjectPackageResults, CreateProjectResult, ProjectMeta};
+use config::errors::ConfigError;
 use mount_core::domain::{Dependency, Path, Val, Var};
 use std::collections::HashMap;
 use tauri::State;
@@ -75,6 +76,8 @@ pub trait TProjectService {
 
     fn remove_from_recents(&self, proj: &Project) -> Result<(), ProjectError>;
     fn add_to_recents(&self, project: &Project) -> Result<(), ProjectError>;
+
+    fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError>;
 }
 
 pub trait TPackageService {

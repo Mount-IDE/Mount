@@ -1,10 +1,9 @@
+use mount_core::domain::platform::Platform;
+use mount_core::domain::{Shell, Val};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Debug;
-use mount_core::domain::platform::Platform;
-use mount_core::domain::{Shell, Val};
 //use ts_rs::TS;
-
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectMeta {
@@ -125,7 +124,7 @@ pub enum ButtonPos {
     RightTop,
 }
 
-pub(crate) type CreateProjectResult = HashMap<String, CreateProjectTemplate>; // template -> sections
+pub type CreateProjectResult = HashMap<String, CreateProjectTemplate>; // template -> sections
 pub type CreateProjectTemplate = HashMap<i8, HashMap<String, Val>>; // section id -> paramerer id -> value
 
 pub type CreateProjectPackageResults = HashMap<String, HashMap<String, Val>>; // package_id -> option id -> value
