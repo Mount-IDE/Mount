@@ -14,7 +14,6 @@ use crate::modules::contexts::project::domain::values::{
 };
 use crate::modules::services::config::FormatService;
 use crate::modules::services::traits::{TConfigService, TFormatService};
-use crate::modules::shared::kernel::errors::ProjectError;
 use crate::modules::shared::kernel::utils::shell_default;
 use crate::modules::shared::kernel::values::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, ParameterTyp, Path,
@@ -201,8 +200,12 @@ impl ActionTask {
             process
                 .current_dir(path.get().clone())
                 .arg(&key)
-                .arg(&i.command)
+                //.arg(&i.command)
                 .stdin(Stdio::null());
+            for j in i.command.iter() {
+                process.arg(j.clone().as_str());
+            }
+            log!("PROCESS {process:?}");
             if let Some(env) = &i.env {
                 process.envs(env);
             }
@@ -224,7 +227,7 @@ impl ActionTask {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskCommand {
-    pub command: String,
+    pub command: Vec<String>,
     pub shell: String,
     pub env: Option<HashMap<String, String>>,
 }
@@ -610,7 +613,7 @@ pub struct PackageAction {
 
 impl PackageAction {
     pub fn check_condition(&self, results: &HashMap<String, Val>, vars: &Vec<Var>) -> bool {
-        macroses::log!("\t\t{:?}", self.if_);
+        log!("\t\t{:?}", self.if_);
         if let Some(if_) = &self.if_ {
             let mut counter = 0;
             'or: for or in if_.iter() {
@@ -692,10 +695,44 @@ impl PackageAction {
                     }
                 }
                 let fmt = FormatService::format_string;
-                let Ok(command) = fmt(&FORMAT_SERVICE, i.command.clone(), &vars, &filtered_results)
+                let command = match i.command.clone() {
+                    PackageActionCommandType::Single(c) => {
+                        let Ok(cmd) = fmt(&FORMAT_SERVICE, c, &vars, &filtered_results) else {
+                            log!("INCORRECT FORMATTING1");
+                            continue;
+                        };
+                        PackageActionCommandType::Single(cmd)
+                    }
+                    PackageActionCommandType::WithArgs { command, args } => {
+                        let Ok(cmd) = fmt(&FORMAT_SERVICE, command, &vars, &filtered_results)
+                        else {
+                            log!("INCORRECT FORMATTING1");
+                            continue;
+                        };
+                        let args = args
+                            .iter()
+                            .filter_map(|e| {
+                                fmt(&FORMAT_SERVICE, e.clone(), &vars, &filtered_results).ok()
+                            })
+                            .collect::<Vec<_>>();
+                        PackageActionCommandType::WithArgs { command: cmd, args }
+                    }
+                };
+                /*let Ok(command) = fmt(&FORMAT_SERVICE, i.command.clone(), &vars, &filtered_results)
                 else {
                     log!("INCORRECT FORMATTING1");
                     continue;
+                };*/
+
+                let command = match command {
+                    PackageActionCommandType::Single(c) => {
+                        vec![c]
+                    }
+                    PackageActionCommandType::WithArgs { command, args } => {
+                        let mut vec = vec![command];
+                        args.iter().for_each(|e| vec.push(e.clone()));
+                        vec
+                    }
                 };
                 let env = if let Some(env) = &i.env {
                     let mut map = HashMap::new();
@@ -781,7 +818,13 @@ pub struct PackageActionCommand {
     pub(crate) shell: Option<String>,
     pub(crate) env: Option<HashMap<String, String>>,
     pub(crate) needed_exit_code: Option<Vec<i64>>,
-    pub(crate) command: String,
+    pub(crate) command: PackageActionCommandType,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PackageActionCommandType {
+    Single(String),
+    WithArgs { command: String, args: Vec<String> },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -973,7 +1016,7 @@ impl Package {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "echo > main.py".to_string(),
+                            command: PackageActionCommandType::Single("echo > main.py".to_string()),
                         },
                         PackageActionCommand {
                             platform: Some(Platform::unix_like()),
@@ -981,7 +1024,7 @@ impl Package {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "touch main.py".to_string(),
+                            command: PackageActionCommandType::Single("touch main.py".to_string()),
                         },
                     ]),
                 }]),
@@ -1127,7 +1170,9 @@ impl ProjectTemplate {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "cargo init --lib".to_string(),
+                            command: PackageActionCommandType::Single(
+                                "cargo new --lib".to_string(),
+                            ),
                         }]),
                     },
                     PackageAction {
@@ -1146,7 +1191,7 @@ impl ProjectTemplate {
                             shell: None,
                             env: None,
                             needed_exit_code: None,
-                            command: "cargo init".to_string(),
+                            command: PackageActionCommandType::Single("cargo new".to_string()),
                         }]),
                     },
                 ],

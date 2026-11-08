@@ -16,7 +16,7 @@ use crate::modules::shared::kernel::errors::{
     ConfigError, FileSystemError, FormatError, ParsingError,
 };
 use crate::modules::shared::kernel::values::{Path, Val};
-use macroses::log;
+use macroses::{log, on_debug};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -376,6 +376,9 @@ impl TConfigService for ConfigService {
 pub struct ConfigRecoveryService;
 
 fn get_files_new() -> Vec<FsEntity_> {
+    let mut templates = vec![ConfigFsTemplate::file(), ConfigFsTemplate::dir()];
+
+    on_debug!(templates.push(ConfigFsTemplate::cargo()));
     vec![
         FsEntity_::file_s_content(
             "settings.json",
@@ -401,10 +404,7 @@ fn get_files_new() -> Vec<FsEntity_> {
         ),
         FsEntity_::file_s_content(
             "file_templates.json",
-            PARSING_SERVICE
-                .to_string(&vec![ConfigFsTemplate::file(), ConfigFsTemplate::dir()])
-                .unwrap()
-                .as_str(),
+            PARSING_SERVICE.to_string(&templates).unwrap().as_str(),
         ),
         FsEntity_::dir("icons"),
         FsEntity_::dir("aside_icons"),

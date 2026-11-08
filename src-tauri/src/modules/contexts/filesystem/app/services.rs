@@ -14,6 +14,7 @@ use crate::modules::contexts::project::domain::values::ActionOnError;
 use crate::modules::services::traits::TFormatService;
 use crate::modules::shared::kernel::errors::FileSystemError;
 use crate::modules::shared::kernel::values::{Path, Val};
+use macroses::log;
 use notify::event::{ModifyKind, RenameMode};
 use notify::{
     Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher,
@@ -540,10 +541,13 @@ impl TFsEntityService for FsEntityService {
         println!("correct1");
         let path = Path::new(path.to_str().as_str());
         println!("PATH {path:?}");
+        log!("Template {template:?}");
+        log!("RESULTS {needed:?}");
         if let Some(entities) = template.entities {
             println!("entities start {entities:?}");
             for ent in entities.iter() {
                 // formating
+                log!("NOT PARSED ENTITY {ent:?}");
                 let ent = match ent {
                     ConfigFsEntity::Dir { name, entities } => {
                         let Ok(name) = FORMAT_SERVICE.format_string(name.clone(), &vars, &needed)
@@ -577,7 +581,8 @@ impl TFsEntityService for FsEntityService {
                         ConfigFsEntity::File { name, content }
                     }
                 };
-
+                log!("PARSED ENTITY {ent:?}");
+                #[cfg(not(test))]
                 ent.create(path.clone())?
             }
         }
@@ -607,11 +612,65 @@ impl TFsEntityService for FsEntityService {
             if i.from_graph && last != ActionOnError::CONTINUE {
                 continue;
             }
-            last = i.execute(path.clone());
-            if last == ActionOnError::StopAll {
-                break;
+
+            #[cfg(not(test))]
+            {
+                last = i.execute(path.clone());
+                if last == ActionOnError::StopAll {
+                    break;
+                }
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::modules::contexts::filesystem::app::utils::PathPart;
+    use crate::modules::shared::kernel::values::Val;
+    use std::collections::HashMap;
+
+    use super::*;
+    #[test]
+    pub fn create_fs_entity() {
+        let results = HashMap::<String, HashMap<String, Val>>::from([(
+            "cargo".__get(),
+            HashMap::from([
+                ("meta.name".__get(), Val::STRING("name".__get())),
+                ("meta.path".__get(), Val::STRING("path".__get())),
+                ("typ".__get(), Val::STRING("binary".__get())),
+            ])
+            .into(),
+        )]);
+
+        let template = ConfigFsTemplate::cargo();
+        let vars = Vec::<Var>::new();
+
+        let service = FsEntityService;
+        let res = service.create(results, template, vars);
+        log!("{res:?}");
+        assert!(res.is_ok());
+    }
+
+    #[test]
+    pub fn empty() {
+        let results = HashMap::<String, HashMap<String, Val>>::from([(
+            "cargo".__get(),
+            HashMap::from([
+                ("meta.name".__get(), Val::STRING("".__get())),
+                ("meta.path".__get(), Val::STRING("".__get())),
+                ("typ".__get(), Val::STRING("binary".__get())),
+            ])
+            .into(),
+        )]);
+
+        let template = ConfigFsTemplate::cargo();
+        let vars = Vec::<Var>::new();
+
+        let service = FsEntityService;
+        let res = service.create(results, template, vars);
+        log!("{res:?}");
+        assert!(res.is_ok());
     }
 }

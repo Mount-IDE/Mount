@@ -1,6 +1,6 @@
 use crate::modules::contexts::project::domain::entities::{
-    ActionTask, PackageAction, PackageActionCommand, PackageOption, PackageOptionTyp,
-    PackageOptionTypEnum, Section,
+    ActionTask, PackageAction, PackageActionCommand, PackageActionCommandType, PackageOption,
+    PackageOptionTyp, PackageOptionTypEnum, Section,
 };
 use crate::modules::contexts::project::domain::values::ActionOnError;
 use crate::modules::shared::kernel::values::{IfStatementPart, Schema, Val};
@@ -92,7 +92,7 @@ impl Default for LaunchTemplate {
                         shell: None,
                         env: None,
                         needed_exit_code: None,
-                        command: "#0.command".to_string(),
+                        command: PackageActionCommandType::Single("#0.command".to_string()),
                     }]),
                 },
             ],
@@ -336,7 +336,7 @@ pub enum LaunchTask {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LaunchFlatTask {
-    pub command: String,
+    pub command: Vec<String>,
     pub env: Option<HashMap<String, String>>,
     pub cwd: Option<String>,
 }

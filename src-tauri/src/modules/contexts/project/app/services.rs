@@ -13,8 +13,8 @@ use crate::modules::contexts::project::app::traits::{
     TCreateProjectService, TPackageService, TProjectService,
 };
 use crate::modules::contexts::project::domain::entities::{
-    ActionTask, Button, ButtonComponentType, Package, PackageAction, PackageActionCommand, Project,
-    ProjectTag, ProjectTemplate, SharedPackages, Var,
+    ActionTask, Button, ButtonComponentType, Package, PackageAction, PackageActionCommand,
+    PackageActionCommandType, Project, ProjectTag, ProjectTemplate, SharedPackages, Var,
 };
 use crate::modules::contexts::project::domain::values::{
     ActionOnError, ButtonPos, CreateProjectPackageResults, CreateProjectResult, ProjectMeta,
@@ -393,7 +393,7 @@ impl TCreateProjectService for CreateProjectService {
                     env: None,
                     cwd: None,
                     needed_exit_code: None,
-                    command: "git init".to_string(),
+                    command: PackageActionCommandType::Single("git init".to_string()),
                 }]),
                 platform: None,
             },
@@ -416,7 +416,9 @@ impl TCreateProjectService for CreateProjectService {
                         shell: None,
                         env: None,
                         needed_exit_code: None,
-                        command: "echo > .gitignore".to_string(),
+                        command: PackageActionCommandType::Single(
+                            "echo .mount > .gitignore".to_string(),
+                        ),
                     },
                     PackageActionCommand {
                         platform: Some(Platform::arr(vec![
@@ -427,7 +429,7 @@ impl TCreateProjectService for CreateProjectService {
                         shell: None,
                         env: None,
                         needed_exit_code: None,
-                        command: "touch .gitignore".to_string(),
+                        command: PackageActionCommandType::Single("touch .gitignore".to_string()),
                     },
                 ]),
                 platform: None,
@@ -450,7 +452,9 @@ impl TCreateProjectService for CreateProjectService {
                     shell: None,
                     env: None,
                     needed_exit_code: None,
-                    command: "git remote add origin #{-2.project-git-remote}".to_string(),
+                    command: PackageActionCommandType::Single(
+                        "git remote add origin #{-2.project-git-remote}".to_string(),
+                    ),
                 }]),
                 platform: None,
             },

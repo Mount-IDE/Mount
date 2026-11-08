@@ -13,3 +13,18 @@ macro_rules! log {
 
     };
 }
+
+#[macro_export]
+macro_rules! on_debug {
+    () => {};
+    ($($x: tt)*)=> {
+        #[cfg(any(debug_assertions, test))]
+        {
+            $($x) *
+        }
+        #[cfg(not(any(debug_assertions, test)))]
+        {
+            ()
+        }
+    }
+}

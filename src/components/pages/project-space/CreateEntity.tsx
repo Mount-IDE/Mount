@@ -230,6 +230,11 @@ function EntityParameter(props: ParProps) {
 
     const {obj} = props
     const typ = obj.typ.typ
+
+
+    useEffect(() => {
+        props.write(props.val)
+    }, []);
     return (
         <>
             {

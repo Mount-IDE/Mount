@@ -224,7 +224,7 @@ impl TLaunchRunService for LaunchRunService {
         app: &AppHandle,
         state: &State<'_, SharedLaunchManager>,
     ) -> Result<String, LaunchError> {
-        log!("START TASK{}", task.command);
+        log!("START TASK{:?}", task.command);
         let cmd = &task.command;
 
         let path = path_from![project.path, project.name];
@@ -239,7 +239,8 @@ impl TLaunchRunService for LaunchRunService {
         let mut command = CommandWrap::with_new(shell.as_str(), |command| {
             command
                 .arg(key)
-                .arg(cmd)
+                //.arg(cmd)
+                .args(cmd)
                 .current_dir(path)
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())

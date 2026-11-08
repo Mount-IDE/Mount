@@ -1,12 +1,16 @@
 use super::values::FsIcon;
 use crate::modules::app::FS_WRITE_SERVICE;
 use crate::modules::contexts::filesystem::app::traits::TFSWriteService;
+use crate::modules::contexts::filesystem::app::utils::PathPart;
 use crate::modules::contexts::filesystem::domain::values::FileWriteAccess;
 use crate::modules::contexts::project::domain::entities::{
-    PackageAction, PackageOption, PackageOptionTyp, PackageOptionTypEnum,
+    PackageAction, PackageActionCommand, PackageActionCommandType, PackageOption, PackageOptionTyp,
+    PackageOptionTypEnum,
 };
 use crate::modules::shared::kernel::errors::FileSystemError;
-use crate::modules::shared::kernel::values::{Path, Schema};
+use crate::modules::shared::kernel::values::{
+    IfStatementOperation, IfStatementPart, Path, Platform, Schema, Val,
+};
 use crate::path_from;
 use serde::{Deserialize, Serialize};
 
@@ -149,6 +153,87 @@ impl ConfigFsTemplate {
                 name: "#meta.name".to_string(),
                 entities: None,
             }]),
+        }
+    }
+
+    #[cfg(any(test, debug_assertions))]
+    pub fn cargo() -> Self {
+        Self {
+            id: "cargo".to_string(),
+            title: "Cargo Crate".to_string(),
+            icon: Some("cargo.svg".__get()),
+            parameters: None,
+            options: Some(vec![PackageOption {
+                id: "typ".to_string(),
+                title: "".to_string(),
+                typ: PackageOptionTyp {
+                    typ: PackageOptionTypEnum::LIST,
+                    fs_type: None,
+                    list_type: Some(vec![
+                        "binary".__get(),
+                        "library".__get(),
+                        "proc_macro".__get(),
+                        "workspace".__get(),
+                    ]),
+                    placeholder: None,
+                    required: None,
+                    readonly: None,
+                    validate: None,
+                    fs_filter: None,
+                    gen_min: None,
+                    gen_max: None,
+                },
+                def: Some(Val::STRING("binary".__get())),
+                while_: None,
+            }]),
+            actions: Some(vec![PackageAction {
+                id: 0,
+                next: None,
+                if_: Some(vec![vec![
+                    IfStatementPart {
+                        from: Some("#typ".__get()),
+                        oper: IfStatementOperation::EQ,
+                        value: Some(Val::STRING("binary".__get())),
+                    },
+                    IfStatementPart {
+                        from: Some("#meta.name".__get()),
+                        oper: IfStatementOperation::NonEmpty,
+                        value: None,
+                    },
+                    IfStatementPart {
+                        from: Some("#meta.path".__get()),
+                        oper: IfStatementOperation::NonEmpty,
+                        value: None,
+                    },
+                ]]),
+                on_error: Default::default(),
+                platform: None,
+                command: Some(vec![
+                    PackageActionCommand {
+                        platform: Some(Platform::unix_like()),
+                        cwd: None,
+                        shell: None,
+                        env: None,
+                        needed_exit_code: None,
+                        command: PackageActionCommandType::WithArgs {
+                            command: "cargo new".to_string(),
+                            args: vec!["#{meta.path}/#{meta.name}".__get()],
+                        },
+                    },
+                    PackageActionCommand {
+                        platform: Some(Platform::windows()),
+                        cwd: None,
+                        shell: None,
+                        env: None,
+                        needed_exit_code: None,
+                        command: PackageActionCommandType::WithArgs {
+                            command: "cargo new".to_string(),
+                            args: vec!["#{meta.path}\\#{meta.name}".__get()],
+                        },
+                    },
+                ]),
+            }]),
+            entities: None,
         }
     }
 }
