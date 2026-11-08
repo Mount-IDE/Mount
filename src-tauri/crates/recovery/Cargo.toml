@@ -1,0 +1,15 @@
+[package]
+name = "recovery"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+project = { path = "../project" }
+mount_core = { path = "../mount_core" }
+parsing = { path = "../parsing" }
+services = { path = "../services" }
+macroses = { path = "../macroses" }
+config = { path = "../config" }
+filesystem = { path = "../filesystem" }
+tauri.workspace = true

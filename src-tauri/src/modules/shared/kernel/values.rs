@@ -1,7 +1,7 @@
-use crate::modules::contexts::filesystem::app::utils::{path_from, PathPart};
+use crate::modules::contexts::filesystem::app::utils::{PathPart, path_from};
 use crate::modules::contexts::filesystem::domain::values::FsPath;
 use regex::Regex;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::fmt::Display;
 //use ts_rs::TS;
 
@@ -22,6 +22,35 @@ impl Into<String> for PlatformType {
             PlatformType::LINUX => "linux".__get(),
             PlatformType::ALL => "all".__get(),
         }
+    }
+}
+
+impl PlatformType {
+    pub fn is_correct(&self) -> bool {
+        if *self == Self::LINUX && cfg!(target_os = "linux") {
+            return true;
+        }
+        if *self == Self::MACOS && cfg!(target_os = "macos") {
+            return true;
+        }
+        if *self == Self::WINDOWS && cfg!(target_os = "windows") {
+            return true;
+        }
+        if *self == Self::ALL {
+            return true;
+        }
+        false
+    }
+
+    #[allow(unused)]
+    pub fn current() -> Self {
+        if cfg!(target_os = "windows") {
+            return Self::WINDOWS;
+        }
+        if cfg!(target_os = "macos") {
+            return Self::MACOS;
+        }
+        Self::LINUX
     }
 }
 
@@ -108,7 +137,6 @@ impl Platform {
         Self::linux()
     }
 }
-
 
 #[derive(Clone, Serialize, Debug, Deserialize)]
 pub struct Path(pub String);

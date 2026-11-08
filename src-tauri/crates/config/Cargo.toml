@@ -9,3 +9,9 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 mount_core = { path = "../mount_core" }
+filesystem = { path = "../filesystem" }
+parsing = { path = "../parsing" }
+tauri.workspace = true
+declarative = { path = "../declarative" }
+macroses = { path = "../macroses" }
+services = { path = "../services" }

@@ -16,3 +16,9 @@ tauri.workspace = true
 filesystem = { path = "../filesystem" }
 parsing = { path = "../parsing" }
 format = { path = "../format" }
+config = { path = "../config" }
+which.workspace = true
+events = { path = "../events" }
+portable-pty.workspace = true
+async-trait.workspace = true
+uuid.workspace = true

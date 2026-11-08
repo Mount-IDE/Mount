@@ -1,19 +1,10 @@
-pub mod project;
-pub mod launch;
-pub mod terminal;
+use crate::project::services::create_project_service::CreateProjectService;
+use crate::project::services::project_service::ProjectService;
+
 mod errors;
+pub mod launch;
+pub mod project;
+pub mod terminal;
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub const CREATE_PROJECT_SERVICE: CreateProjectService = CreateProjectService;
+pub const PROJECT_SERVICE: ProjectService = ProjectService;

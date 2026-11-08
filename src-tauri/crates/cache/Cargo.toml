@@ -1,0 +1,12 @@
+[package]
+name = "cache"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+project = { path = "../project" }
+mount_core = { path = "../mount_core" }
+serde.workspace = true
+config = { path = "../config" }
+filesystem = { path = "../filesystem" }

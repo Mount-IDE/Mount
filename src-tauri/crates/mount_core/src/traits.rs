@@ -4,7 +4,6 @@ pub trait PathPart {
     fn __get(&self) -> String;
 }
 
-
 impl PathPart for String {
     fn __get(&self) -> String {
         self.clone()
@@ -23,16 +22,16 @@ impl PathPart for Path {
     }
 }
 
-
-
 #[macro_export]
 macro_rules! make_path {
-    () => {Path::empty()};
+    () => {$crate::domain::Path::empty()};
     ($($x:expr),* $(,)?)=>{{
         let vec = vec![$($crate::traits::PathPart::__get(&$x)), *];
-        #[cfg(windows)]
-        Path::new(vec.join("\\"))
-        #[cfg(not(windows))]
-        Path::new(vec.join("/"))
+        if cfg!(windows){
+            $crate::domain::Path::new(vec.join("\\"))
+        }else{
+            $crate::domain::Path::new(vec.join("/"))
+        }
     }};
+    ($x: expr)=>{$crate::domain::Path::new($x)};
 }

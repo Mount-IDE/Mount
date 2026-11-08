@@ -1,0 +1,8 @@
+use crate::domain::EventType;
+
+pub trait TEventService {
+    #[allow(unused)]
+    fn write(&self, window: String, chan: &str, data: Option<String>, typ: EventType) -> bool;
+
+    fn send(&self, window: String, chan: &str, data: String) -> bool;
+}

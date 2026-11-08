@@ -9,3 +9,4 @@ serde.workspace = true
 serde_json.workspace = true
 regex.workspace = true
 macroses = { path = "../macroses" }
+tauri.workspace = true

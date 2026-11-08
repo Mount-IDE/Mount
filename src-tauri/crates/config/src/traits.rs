@@ -1,18 +1,12 @@
+use crate::domain::settings::Settings;
+use crate::errors::{ConfigError, SettingsError};
+use filesystem::domain::{ConfigFsEntity, ConfigFsTemplate, FileSystemError};
+use mount_core::domain::Path;
+
 pub trait TSettingsService {
     fn read_themes(&self) -> Result<Vec<String>, SettingsError>;
 }
 
-
-use crate::modules::contexts::config::entities::{ConfigFsEntity, ConfigFsTemplate};
-use crate::modules::contexts::project::domain::entities::{Package, ProjectTemplate, Var};
-use crate::modules::contexts::settings::domain::entities::Settings;
-use crate::modules::shared::kernel::errors::{
-    ConfigError, FileSystemError, FormatError, ParsingError,
-};
-use crate::modules::shared::kernel::values::{Path, Val};
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use std::collections::HashMap;
 pub trait TConfigService {
     fn read_settings(&self) -> Result<Settings, ConfigError>;
 
@@ -22,11 +16,6 @@ pub trait TConfigService {
 
     #[allow(unused)]
     fn make_data_dir(&self) -> Result<(), ConfigError>;
-
-    #[allow(unused)]
-    fn read_packages(&self) -> Result<Vec<Package>, ConfigError>;
-    #[allow(unused)]
-    fn read_templates(&self) -> Result<Vec<ProjectTemplate>, ConfigError>;
 
     fn get_home_dir(&self) -> Result<Path, ConfigError>;
     fn make_projects_dir(&self) -> Result<(), ConfigError>;
@@ -46,22 +35,9 @@ pub trait TConfigService {
     fn get_shell(&self) -> String;
 }
 
-pub trait TConfigRecoveryService {
-    fn check_data_dir(&self) -> Result<(), ConfigError>;
-    fn repair_data_dir(&self) -> Result<(), ConfigError>;
-    #[allow(unused)]
-    fn add_settings_by_default(&self) -> Result<(), ConfigError>;
-
-    #[allow(unused)]
-    fn add_recents_by_default(&self) -> Result<(), ConfigError>;
-}
-
-
 #[allow(dead_code, unused)]
 pub trait TCreateFsService {
     fn create(&self, path: &Path, config: ConfigFsTemplate) -> Result<(), FileSystemError>;
 
     fn create_entity(&self, path: &Path, entity: ConfigFsEntity) -> Result<(), FileSystemError>;
 }
-
-

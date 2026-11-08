@@ -348,6 +348,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "cache"
+version = "0.1.0"
+dependencies = [
+ "config",
+ "filesystem",
+ "mount_core",
+ "project",
+ "serde",
+]
+
+[[package]]
 name = "cairo-rs"
 version = "0.18.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -515,10 +526,16 @@ dependencies = [
 name = "config"
 version = "0.1.0"
 dependencies = [
-    "mount_core",
-    "serde",
-    "serde_json",
-    "thiserror 2.0.19",
+ "declarative",
+ "filesystem",
+ "macroses",
+ "mount_core",
+ "parsing",
+ "serde",
+ "serde_json",
+ "services",
+ "tauri",
+ "thiserror 2.0.19",
 ]
 
 [[package]]
@@ -711,12 +728,12 @@ dependencies = [
 name = "declarative"
 version = "0.1.0"
 dependencies = [
-    "format",
-    "macroses",
-    "mount_core",
-    "serde",
-    "serde_json",
-    "services",
+ "format",
+ "macroses",
+ "mount_core",
+ "serde",
+ "serde_json",
+ "services",
 ]
 
 [[package]]
@@ -993,6 +1010,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "events"
+version = "0.1.0"
+dependencies = [
+ "mount_core",
+ "parsing",
+ "serde",
+ "serde_json",
+ "services",
+ "tauri",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1032,11 +1061,17 @@ dependencies = [
 name = "filesystem"
 version = "0.1.0"
 dependencies = [
-    "mount_core",
-    "notify",
-    "serde",
-    "serde_json",
-    "thiserror 2.0.19",
+ "declarative",
+ "format",
+ "macroses",
+ "mount_core",
+ "notify",
+ "parsing",
+ "serde",
+ "serde_json",
+ "services",
+ "tauri",
+ "thiserror 2.0.19",
 ]
 
 [[package]]
@@ -1107,9 +1142,9 @@ dependencies = [
 name = "format"
 version = "0.1.0"
 dependencies = [
-    "macroses",
-    "mount_core",
-    "thiserror 2.0.19",
+ "macroses",
+ "mount_core",
+ "thiserror 2.0.19",
 ]
 
 [[package]]
@@ -2094,7 +2129,7 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 name = "macroses"
 version = "0.1.0"
 dependencies = [
-    "thiserror 2.0.19",
+ "thiserror 2.0.19",
 ]
 
 [[package]]
@@ -2159,17 +2194,17 @@ version = "0.1.0"
 name = "mount-ide"
 version = "0.1.0"
 dependencies = [
-    "api",
+ "api",
  "async-trait",
  "base64 0.22.1",
-    "config",
+ "config",
  "macroses",
-    "modules",
-    "mount_core",
+ "modules",
+ "mount_core",
  "notify",
  "portable-pty",
  "process-wrap",
-    "project",
+ "project",
  "rand",
  "regex",
  "serde",
@@ -2189,10 +2224,11 @@ dependencies = [
 name = "mount_core"
 version = "0.1.0"
 dependencies = [
-    "macroses",
-    "regex",
-    "serde",
-    "serde_json",
+ "macroses",
+ "regex",
+ "serde",
+ "serde_json",
+ "tauri",
 ]
 
 [[package]]
@@ -2621,10 +2657,10 @@ dependencies = [
 name = "parsing"
 version = "0.1.0"
 dependencies = [
-    "mount_core",
-    "serde",
-    "serde_json",
-    "thiserror 2.0.19",
+ "mount_core",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.19",
 ]
 
 [[package]]
@@ -2884,17 +2920,23 @@ dependencies = [
 name = "project"
 version = "0.1.0"
 dependencies = [
-    "declarative",
-    "filesystem",
-    "format",
-    "macroses",
-    "mount_core",
-    "parsing",
-    "serde",
-    "serde_json",
-    "services",
-    "tauri",
-    "thiserror 2.0.19",
+ "async-trait",
+ "config",
+ "declarative",
+ "events",
+ "filesystem",
+ "format",
+ "macroses",
+ "mount_core",
+ "parsing",
+ "portable-pty",
+ "serde",
+ "serde_json",
+ "services",
+ "tauri",
+ "thiserror 2.0.19",
+ "uuid",
+ "which",
 ]
 
 [[package]]
@@ -2949,6 +2991,20 @@ name = "raw-window-handle"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
+
+[[package]]
+name = "recovery"
+version = "0.1.0"
+dependencies = [
+ "config",
+ "filesystem",
+ "macroses",
+ "mount_core",
+ "parsing",
+ "project",
+ "services",
+ "tauri",
+]
 
 [[package]]
 name = "redox_syscall"
@@ -3370,8 +3426,8 @@ dependencies = [
 name = "services"
 version = "0.1.0"
 dependencies = [
-    "format",
-    "parsing",
+ "format",
+ "parsing",
 ]
 
 [[package]]

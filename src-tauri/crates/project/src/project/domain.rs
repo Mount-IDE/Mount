@@ -1,6 +1,12 @@
 use crate::launch::domain::{LaunchObject, LaunchTemplate, LaunchTemplateReference};
 use crate::project::values::{ButtonPos, ProjectMeta, TemplateMeta};
 
+use config::CONFIG_SERVICE;
+use config::traits::TConfigService;
+use declarative::domain::{
+    ActionOnError, PackageAction, PackageActionCommand, PackageActionCommandType, PackageOptionTyp,
+    PackageOptionTypEnum, Parameter, TaskCommand,
+};
 use mount_core::domain::platform::{Platform, PlatformType};
 use mount_core::domain::{
     Dependency, DependencyLevel, IfStatementOperation, IfStatementPart, Path, Schema, Val, Var,
@@ -10,7 +16,6 @@ use mount_core::traits::PathPart;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use declarative::domain::{ActionOnError, PackageAction, PackageActionCommand, PackageActionCommandType, PackageOptionTyp, PackageOptionTypEnum, Parameter, TaskCommand};
 
 ///
 ///
@@ -385,19 +390,19 @@ impl Default for ProjectTag {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Package {
     #[serde(default)]
-    pub(crate) id: String,
+    pub id: String,
     #[serde(default)]
-    pub(crate) name: String,
+    pub name: String,
     #[serde(default)]
-    meta: Option<PackageMeta>,
+    pub meta: Option<PackageMeta>,
     #[serde(default)]
-    scheme: Schema,
+    pub scheme: Schema,
     #[serde(default)]
-    dependencies: Vec<PackageDependency>,
+    pub dependencies: Vec<PackageDependency>,
     #[serde(default)]
-    pub(crate) startup: PackageStartup,
+    pub startup: PackageStartup,
     #[serde(default)]
-    pub(crate) var: Option<Vec<Var>>,
+    pub var: Option<Vec<Var>>,
     #[serde(default)]
     pub files: PackageFiles,
     #[serde(default)]
@@ -624,7 +629,7 @@ pub enum PackageTyp {
 }
 
 impl Package {
-    pub(crate) fn python() -> Self {
+    pub fn python() -> Self {
         Self {
             id: "opie.python".to_string(),
             highlight: vec![PackageParser {

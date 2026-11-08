@@ -1,8 +1,11 @@
+use crate::errors::ProjectError;
+use crate::project::domain::{
+    Button, Package, Project, ProjectTag, ProjectTemplate, RecentProject, SharedPackages,
+};
+use crate::project::values::{CreateProjectPackageResults, CreateProjectResult, ProjectMeta};
+use mount_core::domain::{Dependency, Path, Val, Var};
 use std::collections::HashMap;
 use tauri::State;
-use mount_core::domain::{Dependency, Path, Val, Var};
-use crate::project::domain::{Button, Package, Project, ProjectTag, ProjectTemplate, RecentProject, SharedPackages};
-use crate::project::values::{CreateProjectPackageResults, CreateProjectResult, ProjectMeta};
 
 pub trait TCreateProjectService {
     fn compile_vars(&self, vars: &mut Vec<Var>, results: &HashMap<String, Val>);
