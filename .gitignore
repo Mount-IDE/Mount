@@ -26,3 +26,4 @@ dist-ssr
 
 *yml
 *.txt
+src-tauri/src/modules/

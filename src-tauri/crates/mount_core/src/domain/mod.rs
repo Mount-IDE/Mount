@@ -15,16 +15,60 @@ pub struct Var {
     #[serde(default)]
     pub name: String,
     #[serde(default)]
-    pub value: Val,
+    pub value: Option<Val>,
     #[serde(default)]
     pub readonly: Option<bool>,
 }
 
 impl Var {
-    pub fn new(name: String, value: Val) -> Var {
+    pub fn new(name: impl Into<String>, value: Val) -> Var {
         Self {
-            name,
-            value,
+            name: name.into(),
+            value: if let Val::NONE = value {
+                None
+            } else {
+                Some(value)
+            },
+            readonly: None,
+        }
+    }
+
+    pub fn new_string(name: impl Into<String>, value: impl Into<String>) -> Var {
+        Self {
+            name: name.into(),
+            value: Some(Val::STRING(value.into())),
+            readonly: None,
+        }
+    }
+
+    pub fn new_num(name: impl Into<String>, value: impl Into<f64>) -> Var {
+        Self {
+            name: name.into(),
+            value: Some(Val::NUMBER(value.into())),
+            readonly: None,
+        }
+    }
+
+    pub fn new_bool(name: impl Into<String>, value: impl Into<bool>) -> Var {
+        Self {
+            name: name.into(),
+            value: Some(Val::BOOL(value.into())),
+            readonly: None,
+        }
+    }
+
+    pub fn new_arr(name: impl Into<String>, value: impl Into<Vec<String>>) -> Var {
+        Self {
+            name: name.into(),
+            value: Some(Val::ARRAY(value.into())),
+            readonly: None,
+        }
+    }
+
+    pub fn new_none(name: impl Into<String>) -> Var {
+        Self {
+            name: name.into(),
+            value: None,
             readonly: None,
         }
     }
@@ -32,7 +76,11 @@ impl Var {
     pub fn readonly(name: String, value: Val) -> Var {
         Self {
             name,
-            value,
+            value: if let Val::NONE = value {
+                None
+            } else {
+                Some(value)
+            },
             readonly: Some(true),
         }
     }

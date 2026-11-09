@@ -12,3 +12,5 @@ filesystem = { path = "../filesystem" }
 parsing = { path = "../parsing" }
 tauri.workspace = true
 
+[dev-dependencies]
+macroses = { path = "../macroses" }

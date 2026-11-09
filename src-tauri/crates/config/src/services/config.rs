@@ -10,6 +10,7 @@ use mount_core::domain::Path;
 use mount_core::{APP, make_path};
 use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
+use std::path::PathBuf;
 use std::string::ToString;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -58,8 +59,15 @@ impl TConfigService for ConfigService {
     }
 
     fn get_data_dir(&self) -> Result<Path, ConfigError> {
+        let app = APP.get();
+        #[cfg(not(test))]
+        if let None = app {
+            return Err(ConfigError::App);
+        }
+        #[cfg(not(test))]
         let dir = APP.get().unwrap().path().app_data_dir();
-
+        #[cfg(test)]
+        let dir = Ok(PathBuf::new());
         match dir {
             Ok(dir) => {
                 //println!("{:?}", dir);
@@ -154,13 +162,15 @@ impl TConfigService for ConfigService {
     }
 
     fn get_projects_dir(&self) -> Result<Path, ConfigError> {
+        #[cfg(not(test))]
         let mut path = APP
             .get()
             .unwrap()
             .path()
             .home_dir()
             .map_err(|e| ConfigError::HomeDir { err: e })?;
-
+        #[cfg(test)]
+        let mut path = PathBuf::new();
         path.push("MountProjects");
         let path_ = path.as_path().to_str().unwrap().to_string();
         Ok(Path(path_))

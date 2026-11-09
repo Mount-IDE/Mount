@@ -45,11 +45,11 @@ impl TCreateProjectService for CreateProjectService {
                 continue;
             };
 
-            let val = if let Val::STRING(val) = vars[i].value.clone() {
+            let val = if let Some(Val::STRING(val)) = vars[i].value.clone() {
                 let Ok(res) = FORMAT_SERVICE.format_string(val, &vars, &results) else {
                     continue;
                 };
-                Val::STRING(res)
+                Some(Val::STRING(res))
             } else {
                 vars[i].value.clone()
             };
@@ -235,7 +235,13 @@ impl TCreateProjectService for CreateProjectService {
                                 continue;
                             };
                             for j in i.1.iter() {
-                                read = read.replace(j, &var.value.to_str());
+                                read = read.replace(
+                                    j,
+                                    &var.value
+                                        .clone()
+                                        .unwrap_or(Val::STRING("".__get()))
+                                        .to_str(),
+                                );
                             }
                         }
                     } // replacing from vars

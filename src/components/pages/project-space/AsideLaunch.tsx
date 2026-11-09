@@ -189,7 +189,7 @@ const LaunchTerminal = forwardRef<LaunchType, TermProps>(
                 try {
                     if (old) {
                         //    restarted.current=true
-                        expectedCloseId.current
+                        expectedCloseId.current = old
                         allowRef.current = false
                         await invoke("close_launch", {id: old});
                     }

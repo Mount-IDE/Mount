@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use crate::traits::{FormatError, TFormatService};
 use macroses::log;
 use mount_core::domain::Val;
 use mount_core::domain::Var;
-
-use crate::traits::{FormatError, TFormatService};
+use mount_core::traits::PathPart;
+use std::collections::HashMap;
 
 pub struct FormatService;
 
@@ -41,16 +41,23 @@ impl TFormatService for FormatService {
                       temp: &mut String,
                       str: &mut String,
                       vars: &Vec<Var>|
-                      -> Result<(), FormatError> {
+         -> Result<(), FormatError> {
             let slice = if let Type::Braces = typ {
                 temp[2..temp.len() - 1].to_string().clone()
             } else {
                 temp[1..].to_string().clone()
             };
-            // log!("VAR {slice} {temp} {typ:?}");
+            log!("VAR '{slice}' {temp} {typ:?}");
             let found = vars.iter().find(|e| e.name == slice);
             if let Some(found) = found {
-                str.push_str(found.value.to_str().as_str());
+                str.push_str(
+                    found
+                        .value
+                        .clone()
+                        .unwrap_or(Val::STRING("".__get()))
+                        .to_str()
+                        .as_str(),
+                );
                 temp.clear()
             } else {
                 //    log!("NEEDED VAR NOT FOUND {typ:?}\n {temp:?}\n'{str}'\n{vars:?}");
@@ -62,13 +69,13 @@ impl TFormatService for FormatService {
                       temp: &mut String,
                       str: &mut String,
                       results: &HashMap<String, Val>|
-                      -> Result<(), FormatError> {
+         -> Result<(), FormatError> {
             let slice = if let Type::Braces = typ {
                 temp[2..temp.len() - 1].to_string().clone()
             } else {
                 temp[1..].to_string().clone()
             };
-            //log!("RES {slice} {temp} {typ:?}");
+            log!("RES '{slice}' {temp} {typ:?}");
             let found = results.iter().find(|e| *e.0 == slice);
             if let Some(found) = found {
                 str.push_str(found.1.to_str().as_str());
@@ -124,9 +131,13 @@ impl TFormatService for FormatService {
                     if ch == ' ' {
                         if let Some(Type::Short) = typ {
                             if temp.starts_with(VAR) {
+                                temp = temp.chars().take(temp.len() - 1).collect();
                                 cb_var(Type::Short, &mut temp, &mut str, &vars)?;
+                                str += " ";
                             } else if temp.starts_with(RES) {
+                                temp = temp.chars().take(temp.len() - 1).collect();
                                 cb_res(Type::Short, &mut temp, &mut str, &results)?;
+                                str += " ";
                             } else {
                                 //  log!("INVALID DECLARATOR");
                                 return Err(FormatError::InvalidDeclarator(

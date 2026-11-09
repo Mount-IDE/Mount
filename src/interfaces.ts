@@ -69,7 +69,7 @@ interface Dependency {
 
 interface IVar {
     name: string
-    value: IVal
+    value: IVal | null
     readonly?: boolean
 }
 
