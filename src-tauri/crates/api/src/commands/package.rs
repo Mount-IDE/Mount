@@ -1,12 +1,10 @@
 use crate::domain::ErrorDto;
-use config::CONFIG_SERVICE;
-use config::traits::TConfigService;
+use crate::get_data_dir;
 use filesystem::FS_READ_SERVICE;
 use filesystem::domain::PFile;
 use filesystem::traits::TFSReadService;
 use mount_core::make_path;
 use project::project::domain::Package;
-
 /*#[tauri::command]
 pub async fn start_lsp(
     app: AppHandle,
@@ -43,7 +41,7 @@ pub async fn send_to_lsp(
 
 #[tauri::command]
 pub fn read_scm(pack: String, highlight: String) -> Result<String, ErrorDto> {
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
     let path = make_path![
         dir,
         "packages",
@@ -59,7 +57,7 @@ pub fn read_scm(pack: String, highlight: String) -> Result<String, ErrorDto> {
 
 #[tauri::command]
 pub fn read_scms(pack: Package) -> Result<Vec<String>, ErrorDto> {
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
 
     let path = make_path![dir, "packages", pack.id.clone(), "highlights"];
 

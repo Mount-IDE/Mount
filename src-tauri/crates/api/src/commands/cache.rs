@@ -1,6 +1,7 @@
 use crate::commands::config::{get_file_templates, get_fs_ext_icons};
 use crate::commands::project::get_recent_projects;
 use crate::domain::ErrorDto;
+use crate::get_data_dir;
 use base64::Engine;
 use base64::engine::general_purpose;
 use cache::{Cache, PackageInner};
@@ -33,7 +34,7 @@ pub fn read_packages(state: State<'_, SharedPackages>) -> Result<Vec<Package>, E
 #[tauri::command]
 pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
     let mut templates = PROJECT_SERVICE.read_templates()?;
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
     let path_ = make_path![dir, "icons"];
     if !FS_READ_SERVICE.exists(path_.clone()) {
         CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
@@ -71,7 +72,8 @@ pub fn read_templates() -> Result<Vec<ProjectTemplate>, ErrorDto> {
 
 #[tauri::command]
 pub fn get_data_dir() -> Result<Path, ErrorDto> {
-    CONFIG_SERVICE.get_data_dir().map_err(|e| e.into())
+    let dir = get_data_dir!();
+    Ok(dir)
 }
 
 #[tauri::command]
@@ -83,8 +85,15 @@ pub fn read_themes() -> Result<Vec<String>, ErrorDto> {
 pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
     let templates = read_templates().unwrap_or(vec![ProjectTemplate::new()]);
     let data_dir_path = get_data_dir()?;
-    let settings = CONFIG_SERVICE.get_settings()?;
-
+    let mut settings = CONFIG_SERVICE.get_settings();
+    if let Err(_) = settings {
+        CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
+        settings = CONFIG_SERVICE.get_settings();
+        if let Err(e) = settings {
+            return Err(e.into());
+        }
+    }
+    let settings = settings.unwrap();
     let groups = settings.general.project_groups.clone();
     //println!("SETTINGS {settings:?}");
     // println!("GROUPS {groups:?}");

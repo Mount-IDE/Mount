@@ -1,8 +1,8 @@
 use crate::domain::{Event, EventType};
 use crate::traits::TEventService;
 use mount_core::APP;
+use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
-use services::PARSING_SERVICE;
 use tauri::Emitter;
 
 pub struct EventService;

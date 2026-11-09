@@ -1,8 +1,7 @@
 use crate::domain::ErrorDto;
+use crate::get_data_dir;
 use base64::Engine;
 use base64::engine::general_purpose;
-use config::CONFIG_SERVICE;
-use config::traits::TConfigService;
 use filesystem::FS_READ_SERVICE;
 use filesystem::domain::PFile;
 use filesystem::traits::TFSReadService;
@@ -30,7 +29,7 @@ pub fn make_path_from_icon(
         let path = join!["/", "/builtin/aside-icons/aside", components];
         return Ok(path);
     }
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
     let path = make_path![dir, path, components];
     if code {
         return make_base64(path.get());

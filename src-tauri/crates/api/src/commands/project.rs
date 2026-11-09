@@ -1,12 +1,12 @@
 use crate::domain::ErrorDto;
-use config::CONFIG_SERVICE;
-use config::traits::TConfigService;
+use crate::get_data_dir;
 use filesystem::domain::PFile;
 use filesystem::traits::{TFSReadService, TFSWriteService};
 use filesystem::values::FileWriteAccess;
 use filesystem::{FS_READ_SERVICE, FS_WRITE_SERVICE};
 use mount_core::domain::Path;
 use mount_core::make_path;
+use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
 use project::launch::managers::SharedLaunchManager;
 use project::project::domain::{
@@ -18,12 +18,11 @@ use project::terminal::managers::SharedTerminalManager;
 use project::{CREATE_PROJECT_SERVICE, PROJECT_SERVICE};
 use recovery::CONFIG_RECOVERY_SERVICE;
 use recovery::traits::TConfigRecoveryService;
-use services::PARSING_SERVICE;
 use tauri::{State, Window};
 
 #[tauri::command]
 pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
     let file = PFile::from_path_reg(dir);
 
     let ext = FS_READ_SERVICE.exist_file(&file);
@@ -106,7 +105,7 @@ pub fn save_packages(packs: Vec<Package>, path: Path) -> Result<(), ErrorDto> {
 
 #[tauri::command]
 pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
-    let dir = CONFIG_SERVICE.get_data_dir()?;
+    let dir = get_data_dir!();
     let path = make_path![dir, "recent-projects.json"];
     let file = PFile::from_path_reg(path);
 

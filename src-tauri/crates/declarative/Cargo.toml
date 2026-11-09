@@ -7,7 +7,5 @@ authors.workspace = true
 [dependencies]
 mount_core = { path = "../mount_core" }
 serde.workspace = true
-serde_json.workspace = true
 macroses = { path = "../macroses" }
-services = { path = "../services" }
 format = { path = "../format" }

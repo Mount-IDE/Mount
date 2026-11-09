@@ -4,6 +4,7 @@ use crate::managers::SharedWatcherManager;
 use crate::traits::{TFSReadService, TFSWriteService, TFWatchService, TFsEntityService};
 use crate::values::{FileType, FileWriteAccess, WatchInstance};
 use declarative::domain::{ActionOnError, ActionTask};
+use format::FORMAT_SERVICE;
 use format::traits::TFormatService;
 use macroses::log;
 use mount_core::domain::{Path, Val, Var};
@@ -13,7 +14,6 @@ use notify::{
     Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Result as NResult, Watcher,
 };
 use serde::Serialize;
-use services::FORMAT_SERVICE;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;

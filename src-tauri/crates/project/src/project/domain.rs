@@ -531,19 +531,21 @@ pub struct PackageComponent {
 }
 
 impl PackageComponent {
-    pub fn get_command(&self, package: String) -> String {
+    pub fn get_command(&self, package: String) -> Option<String> {
         if let Some(true) = self.builtin_params.in_path {
             if self.builtin_params.is_builtin {
-                return self.program.clone();
+                return Some(self.program.clone());
             }
         } else {
             if let Some(p) = self.builtin_params.path.clone() {
-                let dir = CONFIG_SERVICE.get_data_dir().unwrap_or(Path::new(""));
+                let Ok(dir) = CONFIG_SERVICE.get_data_dir() else {
+                    return None;
+                };
                 let path = make_path![dir, "packages", package, p, self.program];
-                return path.get();
+                return Some(path.get());
             }
         }
-        String::new()
+        Some(String::new())
     }
 }
 

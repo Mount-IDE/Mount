@@ -12,9 +12,9 @@ use filesystem::{FS_READ_SERVICE, FS_WRITE_SERVICE};
 use macroses::on_debug;
 use mount_core::domain::Path;
 use mount_core::{APP, make_path};
+use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
 use project::project::domain::{Package, ProjectTemplate};
-use services::PARSING_SERVICE;
 use tauri::Manager;
 
 pub struct ConfigRecoveryService;

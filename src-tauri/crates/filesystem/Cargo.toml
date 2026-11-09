@@ -6,13 +6,10 @@ authors.workspace = true
 
 [dependencies]
 serde.workspace = true
-serde_json.workspace = true
 mount_core = { path = "../mount_core" }
 notify.workspace = true
 thiserror.workspace = true
 tauri = "2.11.5"
 declarative = { path = "../declarative" }
 macroses = { path = "../macroses" }
-services = { path = "../services" }
 format = { path = "../format" }
-parsing = { path = "../parsing" }

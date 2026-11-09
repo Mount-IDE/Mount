@@ -10,8 +10,8 @@ use filesystem::values::FileWriteAccess;
 use filesystem::{FS_READ_SERVICE, FS_WRITE_SERVICE};
 use mount_core::domain::Path;
 use mount_core::make_path;
+use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
-use services::PARSING_SERVICE;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct ProjectService;
@@ -155,7 +155,7 @@ impl TProjectService for ProjectService {
             meta,
             packages,
         };
-        let mut dir = CONFIG_SERVICE.get_data_dir()?;
+        let dir = CONFIG_SERVICE.get_data_dir()?;
         // if dir.is_err() {
         //    /* //CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
         //     dir = CONFIG_SERVICE.get_data_dir();
@@ -167,7 +167,7 @@ impl TProjectService for ProjectService {
         // let dir = dir.unwrap();
         let path_ = make_path![dir, "recent-projects.json"];
         let file = PFile::from_path_reg(path_.clone());
-        let mut text = FS_READ_SERVICE.read_file(&file)?;
+        let text = FS_READ_SERVICE.read_file(&file)?;
         /*if text.is_err() {
             CONFIG_RECOVERY_SERVICE.repair_data_dir()?;
             text = FS_READ_SERVICE.read_file(&file);

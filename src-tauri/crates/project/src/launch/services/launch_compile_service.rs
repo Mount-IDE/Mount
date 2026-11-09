@@ -50,6 +50,7 @@ impl TLaunchCompileService for LaunchCompileService {
             log!("NONE1");
             return None;
         };
+        log!("NEEDED LAUNHC {needed:?}");
         let passed = self.compile_condition(&vars, &template, &flat_results);
         log!("{passed:?}");
         if passed.len() == 0 {

@@ -28,7 +28,7 @@ Mount was created to address these issues.
 
 # Technologies
 
-<div align="center" style="display: flex; justify-content: center">
+<div align="center" style="display: flex;flex-direction: row; gap: 10px; justify-content: center">
     <div >
         <img src="https://skillicons.dev/icons?i=tauri">
         <p style="font-weight: 500;">Tauri</p>

@@ -4,15 +4,14 @@ use mount_core::APP;
 use mount_core::domain::Var;
 use mount_core::traits::PathPart;
 use project::launch::domain::{
-    LaunchError, LaunchFlatTask, LaunchFunction, LaunchObject, LaunchReferenceBefore,
-    LaunchTemplate, LaunchTemplateReference, LaunchTemplateResult,
+    LaunchError, LaunchFlatTask, LaunchObject, LaunchReferenceBefore, LaunchTemplate,
+    LaunchTemplateReference, LaunchTemplateResult,
 };
 use project::launch::managers::SharedLaunchManager;
 use project::launch::traits::{TLaunchCompileService, TLaunchRunService};
 use project::project::domain::{Project, ProjectTemplate};
 use project::project::traits::TProjectService;
 use project::{LAUNCH_COMPILE_SERVICE, LAUNCH_RUN_SERVICE, PROJECT_SERVICE};
-use std::collections::HashMap;
 use tauri::{State, Window};
 
 #[tauri::command]
@@ -186,7 +185,7 @@ pub async fn launch_tasks(
                 &objects,
                 &reference,
                 &project,
-                &window.label().__get(),
+                &id.__get(),
                 &app,
                 &state,
             )

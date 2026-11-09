@@ -1,4 +1,5 @@
 use crate::domain::ErrorDto;
+use crate::get_data_dir;
 use config::CONFIG_SERVICE;
 use config::domain::config::FsConfigIcons;
 use config::domain::settings::Settings;
@@ -36,7 +37,7 @@ pub fn get_groups() -> Result<Vec<String>, ErrorDto> {
 
 #[tauri::command]
 pub fn get_fs_ext_icons() -> Result<Vec<FsConfigIcons>, ErrorDto> {
-    let path = CONFIG_SERVICE.get_data_dir()?;
+    let path = get_data_dir!();
     let path = make_path![path, "file_ext_icons.json"];
     if !FS_READ_SERVICE.exists(path.clone()) {
         CONFIG_RECOVERY_SERVICE.check_data_dir()?;

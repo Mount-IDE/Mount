@@ -1,12 +1,13 @@
-use std::collections::HashMap;
-use std::process::{Command, Stdio};
-use serde::{Deserialize, Serialize};
+use format::FORMAT_SERVICE;
+use format::services::FormatService;
 use format::traits::TFormatService;
 use macroses::log;
-use mount_core::domain::{IfStatementPart, Path, Shell, Val, Var};
 use mount_core::domain::platform::{Platform, PlatformType};
+use mount_core::domain::{IfStatementPart, Path, Shell, Val, Var};
 use mount_core::traits::PathPart;
-use services::{FormatService, FORMAT_SERVICE, PARSING_SERVICE};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::process::{Command, Stdio};
 #[derive(Clone, Debug, Serialize, Deserialize, PartialOrd, PartialEq)]
 pub enum ActionOnError {
     #[serde(rename = "continue")]
@@ -22,7 +23,6 @@ impl Default for ActionOnError {
         Self::StopAll
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageAction {
@@ -295,7 +295,6 @@ impl Parameter {
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageOptionTyp {
     pub typ: PackageOptionTypEnum,
@@ -328,7 +327,6 @@ pub enum PackageOptionTypEnum {
     FILE,
     CHECK,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ActionTask {
@@ -377,4 +375,3 @@ pub struct TaskCommand {
     pub shell: Shell,
     pub env: Option<HashMap<String, String>>,
 }
-

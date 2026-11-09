@@ -51,23 +51,19 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 name = "api"
 version = "0.1.0"
 dependencies = [
-    "base64 0.22.1",
-    "cache",
-    "config",
-    "declarative",
-    "events",
-    "filesystem",
-    "format",
-    "macroses",
-    "mount_core",
-    "parsing",
-    "project",
-    "recovery",
-    "serde",
-    "serde_json",
-    "services",
-    "tauri",
-    "which",
+ "base64 0.22.1",
+ "cache",
+ "config",
+ "filesystem",
+ "macroses",
+ "mount_core",
+ "parsing",
+ "project",
+ "recovery",
+ "serde",
+ "serde_json",
+ "tauri",
+ "which",
 ]
 
 [[package]]
@@ -545,14 +541,10 @@ dependencies = [
 name = "config"
 version = "0.1.0"
 dependencies = [
- "declarative",
  "filesystem",
- "macroses",
  "mount_core",
  "parsing",
  "serde",
- "serde_json",
- "services",
  "tauri",
  "thiserror 2.0.19",
 ]
@@ -751,8 +743,6 @@ dependencies = [
  "macroses",
  "mount_core",
  "serde",
- "serde_json",
- "services",
 ]
 
 [[package]]
@@ -1035,8 +1025,6 @@ dependencies = [
  "mount_core",
  "parsing",
  "serde",
- "serde_json",
- "services",
  "tauri",
 ]
 
@@ -1085,10 +1073,7 @@ dependencies = [
  "macroses",
  "mount_core",
  "notify",
- "parsing",
  "serde",
- "serde_json",
- "services",
  "tauri",
  "thiserror 2.0.19",
 ]
@@ -2147,9 +2132,6 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 [[package]]
 name = "macroses"
 version = "0.1.0"
-dependencies = [
- "thiserror 2.0.19",
-]
 
 [[package]]
 name = "markup5ever"
@@ -2214,29 +2196,16 @@ name = "mount-ide"
 version = "0.1.0"
 dependencies = [
  "api",
- "async-trait",
- "base64 0.22.1",
  "config",
-    "filesystem",
+ "filesystem",
  "macroses",
  "mount_core",
- "notify",
- "portable-pty",
- "process-wrap",
  "project",
- "rand",
-    "recovery",
- "regex",
- "serde",
- "serde_json",
+ "recovery",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
- "thiserror 2.0.19",
- "tokio",
- "uuid",
- "which",
  "windows 0.62.2",
 ]
 
@@ -2244,10 +2213,8 @@ dependencies = [
 name = "mount_core"
 version = "0.1.0"
 dependencies = [
- "macroses",
  "regex",
  "serde",
- "serde_json",
  "tauri",
 ]
 
@@ -2950,17 +2917,15 @@ dependencies = [
  "mount_core",
  "parsing",
  "portable-pty",
-    "process-wrap",
-    "rand",
+ "process-wrap",
+ "rand",
  "serde",
- "serde_json",
- "services",
  "tauri",
  "thiserror 2.0.19",
-    "tokio",
+ "tokio",
  "uuid",
  "which",
-    "windows 0.62.2",
+ "windows 0.62.2",
 ]
 
 [[package]]
@@ -3026,7 +2991,6 @@ dependencies = [
  "mount_core",
  "parsing",
  "project",
- "services",
  "tauri",
 ]
 
@@ -3444,14 +3408,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
-]
-
-[[package]]
-name = "services"
-version = "0.1.0"
-dependencies = [
- "format",
- "parsing",
 ]
 
 [[package]]

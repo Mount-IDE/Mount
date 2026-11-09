@@ -7,8 +7,8 @@ use filesystem::FS_READ_SERVICE;
 use filesystem::domain::{PDirectory, PFile};
 use filesystem::traits::TFSReadService;
 use mount_core::make_path;
+use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
-use services::PARSING_SERVICE;
 
 pub struct PackageService;
 
