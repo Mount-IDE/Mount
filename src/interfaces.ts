@@ -219,6 +219,7 @@ interface PackageInner {
 }
 
 interface Cache {
+    max_untitled: number,
     recent_projects: IRecentProject[]
     settings: Settings,
     templates: ITemplate[],

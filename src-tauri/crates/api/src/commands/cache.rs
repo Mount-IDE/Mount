@@ -127,11 +127,12 @@ pub fn get_cache(state: State<'_, SharedPackages>) -> Result<Cache, ErrorDto> {
 
     let themes = read_themes()?;
 
-    let recent = get_recent_projects().unwrap_or(vec![]);
+    let recent = get_recent_projects().unwrap_or((vec![], 1));
 
     let packages = read_packages(state).unwrap_or(Vec::new());
     let res = Cache {
-        recent_projects: recent,
+        max_untitled: recent.1,
+        recent_projects: recent.0,
         settings,
         templates,
         packages,

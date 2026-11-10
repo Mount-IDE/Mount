@@ -19,9 +19,36 @@ use project::{CREATE_PROJECT_SERVICE, PROJECT_SERVICE};
 use recovery::CONFIG_RECOVERY_SERVICE;
 use recovery::traits::TConfigRecoveryService;
 use tauri::{State, Window};
+use macroses::log;
+
+pub fn calculate_untitled_max(recent: &Vec<RecentProject>) -> i32 {
+    let names = recent.iter().filter_map(|e| {
+        if e.name.trim().to_lowercase().starts_with("untitled") {
+            return Some(e.name.chars().filter(|e| e.is_ascii_digit() || *e == '.').collect::<String>())
+        } else {
+            return None
+        }
+    }).collect::<Vec<String>>();
+    log!("NAMES {names:?}");
+    let mut names = names.iter().filter_map(|e| {
+        if e.contains(".") {
+            let p = e.chars().position(|e| e == '.');
+            if let None = p {
+                return None;
+            }
+            let slice = e[0..p.unwrap()].to_string();
+            return slice.parse::<i32>().ok()
+        } else {
+            return e.parse::<i32>().ok()
+        }
+    }).collect::<Vec<i32>>();
+    names.sort();
+    log!("NAMES2 {names:?}");
+    names.last().unwrap_or(&0).clone() + 1
+}
 
 #[tauri::command]
-pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
+pub fn get_recent_projects() -> Result<(Vec<RecentProject>, i32), ErrorDto> {
     let dir = get_data_dir!();
     let file = PFile::from_path_reg(dir);
 
@@ -30,7 +57,9 @@ pub fn get_recent_projects() -> Result<Vec<RecentProject>, ErrorDto> {
         let _ = CONFIG_RECOVERY_SERVICE.check_data_dir()?;
     }
     let recent = PROJECT_SERVICE.get_recent_projects()?;
-    Ok(recent)
+
+    let max = calculate_untitled_max(&recent);
+    Ok((recent, max))
 }
 #[tauri::command]
 pub fn read_recent_projects(recent: Vec<RecentProject>) -> Result<Vec<Project>, ErrorDto> {
@@ -104,15 +133,16 @@ pub fn save_packages(packs: Vec<Package>, path: Path) -> Result<(), ErrorDto> {
 }
 
 #[tauri::command]
-pub fn update_recents(projects: Vec<RecentProject>) -> Result<(), ErrorDto> {
+pub fn update_recents(projects: Vec<RecentProject>) -> Result<i32, ErrorDto> {
     let dir = get_data_dir!();
     let path = make_path![dir, "recent-projects.json"];
     let file = PFile::from_path_reg(path);
 
+    let max = calculate_untitled_max(&projects);
+
     let parsed = PARSING_SERVICE.to_string(projects)?;
     FS_WRITE_SERVICE.write_file(&file, parsed, FileWriteAccess::WRITE)?;
-
-    Ok(())
+    Ok(max)
 }
 
 #[tauri::command]

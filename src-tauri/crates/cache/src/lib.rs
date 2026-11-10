@@ -16,6 +16,7 @@ pub struct PackageInner {
 ///
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Cache {
+    pub max_untitled: i32,
     pub recent_projects: Vec<RecentProject>,
     pub settings: Settings,
     pub templates: Vec<ProjectTemplate>,

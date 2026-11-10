@@ -40,6 +40,7 @@ function useLicense(current: string, settings: Settings | null): IPackageParamet
             },
         } satisfies IPackageParameter)
     }
+
     return res
 }
 
@@ -48,6 +49,9 @@ export default function ProjectMeta() {
 
     const project_path = cacheStore(state => state.projects_path);
     const settings = settingsStore(state => state.settings)
+
+
+    const maxUntitled = cacheStore(state => state.max_untitled)
 
 
     const license = createProjectStore(state =>
@@ -61,7 +65,7 @@ export default function ProjectMeta() {
             list: [false, false],
             params: [
                 {
-                    def: "Untitled",
+                    def: `Untitled${maxUntitled}`,
                     title: "Project Name",
                     id: "project-name",
                     typ: {
@@ -159,7 +163,7 @@ export default function ProjectMeta() {
                 }
             ]
         }
-    ]), [license])
+    ]), [license, maxUntitled])
     const template = cacheStore(state => state.currentTemplate);
     const other_sections = template ? template.startup.sections : []
 

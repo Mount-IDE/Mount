@@ -34,6 +34,19 @@ export default function CreateProject() {
             let res = await create_project(current_template!);
             console.log(res)
             if (res[0] == 0) {
+
+                let proj = res[2]!;
+                if (proj.name.trim().toLocaleLowerCase().startsWith("untitled")) {
+                    let numbers = proj.name.split("").filter(el => "0123456789.".includes(el))
+                    let found = numbers.findIndex(e => e == ".");
+                    if (found != -1) {
+                        numbers = numbers.slice(0, found);
+                    }
+                    cacheStore.setState({
+                        max_untitled: Number(numbers.join())
+                    })
+                }
+
                 createProjectStore.getState().close();
                 noteStore.getState().add_note({
                     type: NotificationType.NOTE,

@@ -16,6 +16,7 @@ interface Type {
     data_dir: string,
     os: string,
 
+    max_untitled: number,
 
     recent_projects: IRecentProject[]
     set_recent_projects: (rec: IRecentProject[]) => void
@@ -62,14 +63,16 @@ export const cacheStore = create<Type>((set, get) => ({
     templates: [],
     file_templates: [],
     data_dir: "",
+    max_untitled: 1,
     projects_path: "",
     groups: [],
     async reload_recents() {
         try {
-            let res = await invoke<IRecentProject[]>("get_recent_projects")
-            res.sort((a, b) => b.last_opened - a.last_opened)
+            let res = await invoke<[IRecentProject[], number]>("get_recent_projects")
+            res[0].sort((a, b) => b.last_opened - a.last_opened)
             set({
-                recent_projects: res
+                recent_projects: res[0],
+                max_untitled: res[1]
             })
             return true
         } catch (e) {
@@ -96,7 +99,11 @@ export const cacheStore = create<Type>((set, get) => ({
             recent_projects: recents
         })
 
-        invoke("update_recents", {projects: recents}).then()
+        invoke<number>("update_recents", {projects: recents}).then(el => {
+            set({
+                max_untitled: el
+            })
+        })
 
 
     },
@@ -233,6 +240,7 @@ export const cacheStore = create<Type>((set, get) => ({
             settingsStore.getState().set_settings(cache.settings)
 
             set({
+                max_untitled: cache.max_untitled,
                 data_dir: cache.data_dir_path,
                 file_templates: cache.file_templates,
                 os: cache.os,
