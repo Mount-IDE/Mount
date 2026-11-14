@@ -1,6 +1,6 @@
-import plus from "@/public/builtin/icons/plus.svg"
-import minus from "@/public/builtin/icons/title-wrap.svg"
-import arrow_line from "@/public/builtin/icons/arrow-line.svg"
+import plus from "@assets/plus.svg"
+import minus from "@assets/title-wrap.svg"
+import arrow_line from "@assets/arrow-line.svg"
 import Icon from "@common/Icon.tsx";
 import {Fragment, RefObject, useState} from "react";
 
