@@ -4,6 +4,7 @@
     display: flex;
     align-items: center;
     position: relative;
+    border-top: 1px solid var(--border3);
     /*border-top: 1px    solid var(--border3);*/
 }
 

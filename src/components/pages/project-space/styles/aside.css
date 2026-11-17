@@ -57,7 +57,7 @@
     /*    border: 3px solid #304bd0;*/
     /*}*/
     position: relative;
-
+    border: 1px solid var(--border3);
 
     /*&ma*/
 }

@@ -56,7 +56,7 @@ export default function Bottom(_: Props) {
                 const next = base_height.current - delta;
                 const MIN = 50;
                 const MAX = window.innerHeight * 0.8;
-
+                console.log(window.innerHright, window.innerHeight * 0.8)
                 const clamped = Math.max(MIN, Math.min(MAX, next));
                 current.style.height = `${clamped}px`
             })

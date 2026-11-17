@@ -1,4 +1,4 @@
-import {Language, Parser, Query, Tree} from "web-tree-sitter";
+import {Language, Parser, Query, QueryCapture, Tree} from "web-tree-sitter";
 
 import {order_types, type Token} from "./highlight_shared";
 
@@ -96,7 +96,7 @@ function diffToEdit(a: string, b: string) {
 }
 
 
-function buildTokens(text: string, captures: any[], dict: Record<string, string>): Token[] {
+function buildTokens(text: string, captures: QueryCapture[], dict: Record<string, string>): Token[] {
     const map = new Map<string, Token>();
     for (const c of captures) {
         const start = c.node.startIndex, end = c.node.endIndex;

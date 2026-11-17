@@ -88,12 +88,15 @@ function MiniAside(props: Props) {
         }
     }
 
+  useEffect(() => { 
+    console.log(current)
+  }, [current])
 
     return (
         <div className={"project-mini-aside"}
              style={{
                  background: current?.background,
-                 ...computeBP(current?.border, "border")
+                 ...computeBP(current?.hr?.border, "border")
              }}
         >
             <div className={"project-mini-aside-top"}>

@@ -67,7 +67,7 @@ export default function Footer() {
 
     return (
         <div id={"project-footer"}
-             style={{
+            style={{
                  background: theme?.background,
                  borderRadius: theme?.rounded,
                  ...computeBP(theme?.border, "border"),

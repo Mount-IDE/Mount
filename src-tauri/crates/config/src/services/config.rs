@@ -10,6 +10,7 @@ use mount_core::domain::Path;
 use mount_core::{APP, make_path};
 use parsing::PARSING_SERVICE;
 use parsing::traits::TParsingService;
+#[cfg(test)]
 use std::path::PathBuf;
 use std::string::ToString;
 use std::sync::Mutex;

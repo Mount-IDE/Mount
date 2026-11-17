@@ -413,6 +413,7 @@ pub struct Package {
     pub toolchains: HashMap<String, PackageToolchain>,
 }
 
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackageToolchain {
     id: String,
@@ -484,10 +485,21 @@ pub struct PackageParser {
     #[serde(default)]
     pub files: Option<Vec<String>>,
     #[serde(default)]
-    pub nodes: HashMap<String, String>,
+    pub nodes: Option<HashMap<String, String>>,
     #[serde(default)]
     pub syntax: Option<Syntax>,
+    #[serde(default)]
+    pub resolutions: Option<Vec<TokenOrderResolution>>
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TokenOrderResolution {
+    #[serde(default)]
+    conflict_tokens: Vec<String>,
+    #[serde(default)]
+    correct: String
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Syntax {
@@ -640,8 +652,9 @@ impl Package {
                 extentions: vec![".py".__get(), ".cpy".__get()],
                 ignore_files: None,
                 files: None,
-                nodes: HashMap::from([]),
+                nodes: None,
                 syntax: None,
+                resolutions: None
             }],
             files: PackageFiles {
                 extentions: vec![".py".__get(), ".cpy".__get()],
@@ -861,27 +874,31 @@ impl Package {
                 extentions: vec![".rs".__get()],
                 ignore_files: None,
                 files: None,
-                nodes: HashMap::from([
-                    ("keyword".__get(), "other_kw_decl".__get()),
-                    ("comment".__get(), "comment".__get()),
-                    ("constructor".__get(), "spec_fn".__get()),
-                    ("constant.builtin".__get(), "number".__get()),
-                    ("funciton".__get(), "fn_decl".__get()),
-                    ("type.builtin".__get(), "type_builtin".__get()),
-                    ("comment.documentation".__get(), "doc_comment".__get()),
-                    ("attribute".__get(), "attribute".__get()),
-                    ("type".__get(), "type".__get()),
-                    ("label".__get(), "label".__get()),
-                    ("property".__get(), "property".__get()),
-                    ("string".__get(), "string".__get()),
-                    ("variable.builtin".__get(), "identificator".__get()),
-                    ("funciton.macro".__get(), "macro".__get()),
-                ]),
+                nodes: None,
                 syntax: Some(Syntax {
                     base_color: Some("#bcbec4".__get()),
-                    colors: None,
-                    tokens: Some(HashMap::from([
-                        ("other_kw_decl".__get(), "#cf8e6d".__get()),
+                    colors: Some(
+                        HashMap::from(
+                            [
+                                ("keyword".__get(), "#cf8e6d".__get()),
+                                ("other".__get(), "#bcbec4".__get()),
+                                ("number".__get(), "#2aacb8".__get()),
+                                ("attribute".__get(), "#A5AA36".__get()),
+                                ("func".__get(), "#6aa2d7".__get()),
+                                ("type_decl".__get(), "#86985d".__get()),
+                                ("type_use".__get(), "".__get()),
+                                ("string_literal".__get(), "#6aab73".__get()),
+                                ("char_literal".__get(), "".__get()),
+                                ("macro".__get(), "#d5a563".__get()),
+                                ("builtin".__get(), "#cf8e6d".__get()),
+                                ("label".__get(), "#20999D".__get()),
+                                ("fn_macro".__get(), "#4EADE5".__get()),
+                            ]
+                        )
+                    ),
+                    tokens: Some(HashMap::from(
+                        [
+                      /*  ("other_kw_decl".__get(), "#cf8e6d".__get()),
                         ("comment".__get(), "#7a7e85".__get()),
                         ("doc_comment".__get(), "#5f826b".__get()),
                         ("spec_fn".__get(), "#8d91dc".__get()),
@@ -894,9 +911,34 @@ impl Package {
                         ("property".__get(), "#c77dbb".__get()),
                         ("string".__get(), "#6aab73".__get()),
                         ("identifier".__get(), "#bcbec4".__get()),
-                        ("macro".__get(), "#d5a563".__get()),
+                        ("macro".__get(), "#d5a563".__get()),*/
+                            ("keyword".__get(), "keyword".__get()),
+                            ("attribute".__get(), "attribute".__get()),
+                            ("constructor".__get(), "type_decl".__get()),
+                            ("function".__get(), "func".__get()),
+                            ("type.builtin".__get(), "type_decl".__get()),
+                            ("label".__get(), "label".__get()),
+                            ("function.macro".__get(), "fn_macro".__get()),
+                            ("string".__get(), "string_literal".__get()),
+                            ("variable.parameter".__get(), "".__get()),
+                            ("type".__get(), "type_decl".__get()),
+                            ("variable.builtin".__get(), "".__get()),
+                            ("function.method".__get(), "".__get()),
+                            ("constant.builtin".__get(), "".__get()),
+                            ("property".__get(), "".__get()),
+                            ("type".__get(), "".__get()),
+                            ("".__get(), "".__get()),
                     ])),
                 }),
+                resolutions: Some(
+                    vec![
+                        TokenOrderResolution {
+                            conflict_tokens: vec!["__all__".__get(), "attribute".__get()],
+                            correct: "attribute".to_string(),
+                        }
+                    ]
+                )
+
             }],
             components: None,
             toolchains: Default::default(),

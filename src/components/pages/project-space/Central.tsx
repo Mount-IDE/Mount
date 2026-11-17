@@ -46,7 +46,7 @@ function Command(props: CommandProps) {
 
 
     return (
-        <div className={"text-(--subtitle) font-[250] flex gap-[5px] justify-between w-1/4 text-[9pt] h-[20pt]"}>
+        <div className={"whitespace-nowrap text-(--subtitle) font-[250] flex gap-[5px] justify-between w-[400px] text-[9pt] h-[20pt]"}>
             {props.text}
             <div className={"flex gap-[10px] "}>
                 {
@@ -82,10 +82,10 @@ function Logo() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center"
-            }}
+        }}
         >
             <Icon src={logo} size={"300px"} in_size={"200px"}/>
-            <div className={"w-full flex flex-col items-center gap-4"}
+            <div className={"w-auto flex flex-col items-center gap-4"}
                  style={{
                      marginTop: "35px"
                  }}
